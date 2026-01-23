@@ -2,9 +2,9 @@ import { Metadata } from 'next';
 import { getProducts } from '@/lib/db';
 import Header from '@/components/Header';
 import Image from 'next/image';
-import { ShoppingCart } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import ShareButton from '@/components/ShareButton';
+import ProductActions from '@/components/ProductActions';
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -89,10 +89,7 @@ export default async function ProductPage(props: Props) {
                             à vista no PIX com <strong>15% de desconto</strong>
                          </div>
 
-                         <button className="w-full bg-[#E60012] text-white py-4 rounded-md font-bold text-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all">
-                            <ShoppingCart size={24} />
-                            COMPRAR AGORA
-                         </button>
+                         <ProductActions product={product} />
                     </div>
 
                     <div className="mt-6 flex justify-end">

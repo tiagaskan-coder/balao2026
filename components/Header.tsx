@@ -4,9 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, ShoppingCart, User } from "lucide-react";
 import Link from "next/link";
+import { useCart } from "@/context/CartContext";
 
 export default function Header() {
   const router = useRouter();
+  const { cartCount } = useCart();
   const [logoClicks, setLogoClicks] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -85,6 +87,11 @@ export default function Header() {
           </Link>
           <Link href="/cart" className="relative hover:text-[#E60012] transition-colors">
             <ShoppingCart size={24} />
+            {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-[#E60012] text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full">
+                    {cartCount}
+                </span>
+            )}
           </Link>
         </div>
       </div>
