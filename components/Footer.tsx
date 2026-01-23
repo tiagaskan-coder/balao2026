@@ -19,8 +19,7 @@ export default function Footer() {
                 />
             </div>
             <p className="text-sm leading-relaxed mb-6">
-              Sua loja de confiança para hardware, PCs gamer, notebooks e periféricos. 
-              Qualidade, garantia e os melhores preços do mercado você encontra aqui.
+              Comércio e assistência técnica em informática. Tudo o que sua empresa e sua casa precisa em tecnologia.
             </p>
             <div className="flex gap-4">
               <a href="#" className="hover:text-[#E60012] transition-colors"><Facebook size={20} /></a>
@@ -34,6 +33,7 @@ export default function Footer() {
           <div>
             <h3 className="text-white font-bold text-lg mb-6">Institucional</h3>
             <ul className="space-y-3 text-sm">
+              <li><Link href="#" className="hover:text-[#E60012] transition-colors">Sobre Nós</Link></li>
               <li><Link href="#" className="hover:text-[#E60012] transition-colors">Sobre a Empresa</Link></li>
               <li><Link href="#" className="hover:text-[#E60012] transition-colors">Como Comprar</Link></li>
               <li><Link href="#" className="hover:text-[#E60012] transition-colors">Segurança e Privacidade</Link></li>
@@ -63,19 +63,19 @@ export default function Footer() {
               <li className="flex items-start gap-3">
                 <Phone size={18} className="text-[#E60012] mt-0.5" />
                 <div>
-                    <span className="block font-bold text-white">(11) 4444-5555</span>
+                    <span className="block font-bold text-white">(19) 3255-1661</span>
                     <span className="text-xs">Seg. a Sex. das 9h às 18h</span>
                 </div>
               </li>
               <li className="flex items-center gap-3">
                 <Mail size={18} className="text-[#E60012]" />
-                <a href="mailto:sac@balaodainformatica.com.br" className="hover:text-white transition-colors">sac@balaodainformatica.com.br</a>
+                <a href="mailto:balaocastelo@balaodainformatica.com.br" className="hover:text-white transition-colors">balaocastelo@balaodainformatica.com.br</a>
               </li>
               <li className="flex items-start gap-3">
                 <MapPin size={18} className="text-[#E60012] mt-0.5" />
                 <span>
-                    Av. Paulista, 1000 - Bela Vista<br />
-                    São Paulo - SP, 01310-100
+                    Avenida Anchieta, 789, Cambuí<br />
+                    Campinas — SP
                 </span>
               </li>
             </ul>
@@ -102,7 +102,8 @@ export default function Footer() {
 
         {/* Copyright */}
         <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
-          <p>&copy; 2026 Balão da Informática. Todos os direitos reservados. <a href="http://www.balao.info" target="_blank" className="hover:text-[#E60012]">www.balao.info</a></p>
+          <p className="mb-2">&copy; 2026 Balão da Informática. Todos os direitos reservados. <a href="http://www.balao.info" target="_blank" className="hover:text-[#E60012]">www.balao.info</a></p>
+          <p className="text-xs opacity-60">Razão Social: Balão da Informática Ltda | CNPJ: [Inserir CNPJ]</p>
         </div>
       </div>
     </footer>
