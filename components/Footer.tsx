@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Facebook, Instagram, Twitter, Youtube, Mail, Phone, MapPin } from "lucide-react";
+import { Facebook, Instagram, Youtube, Mail, Phone, MapPin } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -22,10 +22,9 @@ export default function Footer() {
               Comércio e assistência técnica em informática. Tudo o que sua empresa e sua casa precisa em tecnologia.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="hover:text-[#E60012] transition-colors"><Facebook size={20} /></a>
-              <a href="#" className="hover:text-[#E60012] transition-colors"><Instagram size={20} /></a>
-              <a href="#" className="hover:text-[#E60012] transition-colors"><Twitter size={20} /></a>
-              <a href="#" className="hover:text-[#E60012] transition-colors"><Youtube size={20} /></a>
+              <a href="https://www.facebook.com/Balaocastelo/" target="_blank" rel="noopener noreferrer" className="hover:text-[#E60012] transition-colors"><Facebook size={20} /></a>
+              <a href="https://www.instagram.com/balaodainformatica_castelo/" target="_blank" rel="noopener noreferrer" className="hover:text-[#E60012] transition-colors"><Instagram size={20} /></a>
+              <a href="https://www.youtube.com/@balaodainformaticacastelo9463" target="_blank" rel="noopener noreferrer" className="hover:text-[#E60012] transition-colors"><Youtube size={20} /></a>
             </div>
           </div>
 
