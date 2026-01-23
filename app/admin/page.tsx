@@ -26,7 +26,8 @@ export default function AdminPage() {
   // Preview Logic
   const getPreviewProducts = () => {
     return parsedProducts.map(p => {
-        let priceNum = parseFloat(p.price.replace("R$", "").replace(".", "").replace(",", ".").trim());
+        // Fix: Use global regex for replace all dots, then replace comma with dot
+        let priceNum = parseFloat(p.price.replace("R$", "").replace(/\./g, "").replace(",", ".").trim());
         if (isNaN(priceNum)) priceNum = 0;
 
         let applyAdjustment = false;
