@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     if (serviceRoleKey) {
         try {
             const { data: buckets } = await storageClient.storage.listBuckets();
-            const bucketExists = buckets?.some(b => b.name === BUCKET_NAME);
+            const bucketExists = buckets?.some((b: any) => b.name === BUCKET_NAME);
             
             if (!bucketExists) {
                 console.log(`Bucket ${BUCKET_NAME} not found. Creating...`);
