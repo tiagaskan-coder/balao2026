@@ -25,7 +25,7 @@ export default function ProductCard({ product }: { product: Product }) {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       });
-    } catch (e) {
+    } catch {
       return "---";
     }
   };
@@ -41,7 +41,7 @@ export default function ProductCard({ product }: { product: Product }) {
       );
       if (isNaN(numeric)) return "";
       return (numeric * 1.2).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-     } catch (e) {
+     } catch {
          return "";
      }
   }

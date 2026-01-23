@@ -11,7 +11,7 @@ export default function ShareButton({ title, text }: { title: string, text: stri
           text,
           url: window.location.href,
         });
-      } catch (err) {
+      } catch {
         console.log('Share canceled');
       }
     } else {

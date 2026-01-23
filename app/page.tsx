@@ -2,7 +2,6 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import ProductCard from "@/components/ProductCard";
 import { getProducts } from "@/lib/db";
-import { Product } from "@/lib/utils";
 
 export const dynamic = 'force-dynamic';
 

@@ -38,7 +38,7 @@ export function parseProducts(text: string): Product[] {
   let match;
   while ((match = regex.exec(text)) !== null) {
     const image = match[1];
-    let name = match[2].trim();
+    const name = match[2].trim();
     const price = match[3];
 
     // Clean up the image URL if it has extra garbage (though regex [^\s]+ should handle it)
