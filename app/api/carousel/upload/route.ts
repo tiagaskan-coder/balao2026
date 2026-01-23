@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
+import { createClient } from '@supabase/supabase-js';
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,10 +14,38 @@ export async function POST(req: NextRequest) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const filename = `carousel-${Date.now()}-${Math.random().toString(36).substring(7)}.${file.name.split('.').pop()}`;
+    const BUCKET_NAME = 'carousel';
+
+    // Try to use service role key for storage operations if available (allows bucket creation)
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://ptqqvezawobgnheesgvh.supabase.co";
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    
+    const storageClient = serviceRoleKey 
+        ? createClient(supabaseUrl, serviceRoleKey)
+        : supabase;
+
+    // Attempt to ensure bucket exists (only works with service role)
+    if (serviceRoleKey) {
+        try {
+            const { data: buckets } = await storageClient.storage.listBuckets();
+            const bucketExists = buckets?.some(b => b.name === BUCKET_NAME);
+            
+            if (!bucketExists) {
+                console.log(`Bucket ${BUCKET_NAME} not found. Creating...`);
+                await storageClient.storage.createBucket(BUCKET_NAME, {
+                    public: true,
+                    fileSizeLimit: 10485760, // 10MB
+                    allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/gif']
+                });
+            }
+        } catch (e) {
+            console.warn("Failed to check/create bucket:", e);
+        }
+    }
 
     // Upload to Supabase Storage
-    const { error: uploadError } = await supabase.storage
-      .from('carousel')
+    const { error: uploadError } = await storageClient.storage
+      .from(BUCKET_NAME)
       .upload(filename, buffer, {
         contentType: file.type,
         upsert: false
@@ -24,12 +53,18 @@ export async function POST(req: NextRequest) {
 
     if (uploadError) {
       console.error("Storage upload error:", uploadError);
+      // Provide a helpful error if it's the bucket missing error and we couldn't create it
+      if (uploadError.message.includes("Bucket not found")) {
+          return NextResponse.json({ 
+              error: `Erro: O bucket '${BUCKET_NAME}' não existe no Supabase. Crie-o manualmente no painel do Supabase (Storage -> New Bucket -> 'carousel' -> Public).` 
+          }, { status: 500 });
+      }
       return NextResponse.json({ error: "Storage upload failed: " + uploadError.message }, { status: 500 });
     }
 
     // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('carousel')
+    const { data: { publicUrl } } = storageClient.storage
+      .from(BUCKET_NAME)
       .getPublicUrl(filename);
 
     // Get next order
