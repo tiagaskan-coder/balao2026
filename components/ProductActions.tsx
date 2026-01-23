@@ -19,7 +19,7 @@ export default function ProductActions({ product }: { product: Product }) {
     <button 
         onClick={handleBuy}
         className={`w-full py-4 rounded-md font-bold text-lg transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${
-            added ? "bg-green-600 text-white" : "bg-[#0033C6] text-white hover:bg-blue-800"
+            added ? "bg-green-600 text-white" : "bg-[#E60012] text-white hover:bg-[#cc0010]"
         }`}
     >
         <ShoppingCart size={24} />

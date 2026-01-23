@@ -52,7 +52,7 @@ export default function ProductCard({ product }: { product: Product }) {
       <div className="p-4 pt-0 mt-auto">
         <button 
             onClick={handleAddToCart}
-            className="w-full bg-[#0033C6] hover:bg-blue-800 text-white font-bold py-2 px-4 rounded transition-colors flex items-center justify-center gap-2"
+            className="w-full bg-[#E60012] hover:bg-[#cc0010] text-white font-bold py-2 px-4 rounded transition-colors flex items-center justify-center gap-2"
         >
             <ShoppingCart size={18} />
             Comprar
