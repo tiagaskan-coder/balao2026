@@ -14,6 +14,13 @@ export interface CarouselImage {
   display_order: number;
   active: boolean;
   created_at: string;
+  metadata?: {
+    width?: number;
+    height?: number;
+    size?: number;
+    format?: string;
+    device_origin?: string;
+  };
 }
 
 export const CATEGORIES = [

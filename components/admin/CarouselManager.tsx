@@ -2,8 +2,88 @@
 
 import { useState, useEffect } from "react";
 import { CarouselImage } from "@/lib/utils";
-import { Trash2, Eye, EyeOff, ArrowUp, ArrowDown, Plus, Image as ImageIcon } from "lucide-react";
-import Image from "next/image";
+import { Trash2, Eye, EyeOff, GripVertical, Image as ImageIcon, AlertCircle } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+// Sortable Item Component
+function SortableItem({ image, onDelete, onToggle }: { image: CarouselImage; onDelete: (id: string) => void; onToggle: (img: CarouselImage) => void }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: image.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center gap-4 p-4 bg-white border rounded-lg shadow-sm ${!image.active ? 'opacity-60 bg-gray-50' : ''}`}
+    >
+      <div {...attributes} {...listeners} className="cursor-grab hover:text-gray-600 text-gray-400">
+        <GripVertical size={20} />
+      </div>
+      
+      <div className="relative w-24 h-16 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={image.image_url}
+          alt={image.title || "Carousel"}
+          className="w-full h-full object-cover"
+        />
+      </div>
+
+      <div className="flex-1">
+        <p className="font-medium text-gray-800">{image.title || "Sem título"}</p>
+        <p className="text-xs text-gray-500 truncate max-w-[200px]">{image.image_url}</p>
+        {image.metadata && (
+             <p className="text-xs text-blue-500 mt-1">
+                {image.metadata.width}x{image.metadata.height} • {image.metadata.format}
+             </p>
+        )}
+      </div>
+
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => onToggle(image)}
+          className={`p-2 rounded-full hover:bg-gray-100 ${image.active ? 'text-green-600' : 'text-gray-400'}`}
+          title={image.active ? "Ocultar" : "Mostrar"}
+        >
+          {image.active ? <Eye size={20} /> : <EyeOff size={20} />}
+        </button>
+        <button
+          onClick={() => onDelete(image.id)}
+          className="p-2 rounded-full hover:bg-red-50 text-red-500"
+          title="Remover"
+        >
+          <Trash2 size={20} />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function CarouselManager() {
   const [images, setImages] = useState<CarouselImage[]>([]);
@@ -11,6 +91,14 @@ export default function CarouselManager() {
   const [newImageUrl, setNewImageUrl] = useState("");
   const [newImageTitle, setNewImageTitle] = useState("");
   const [adding, setAdding] = useState(false);
+  const [validationError, setValidationError] = useState("");
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const fetchImages = async () => {
     setLoading(true);
@@ -18,7 +106,9 @@ export default function CarouselManager() {
       const res = await fetch("/api/carousel");
       if (res.ok) {
         const data = await res.json();
-        setImages(data);
+        // Ensure sorted by display_order
+        const sorted = data.sort((a: CarouselImage, b: CarouselImage) => a.display_order - b.display_order);
+        setImages(sorted);
       }
     } catch (error) {
       console.error("Failed to fetch images", error);
@@ -31,22 +121,57 @@ export default function CarouselManager() {
     fetchImages();
   }, []);
 
+  const validateImage = (url: string): Promise<{ width: number; height: number; format: string }> => {
+      return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => {
+              // Basic validation: ensure it's not tiny
+              if (img.width < 100 || img.height < 100) {
+                  reject("Imagem muito pequena. Use alta resolução.");
+                  return;
+              }
+              resolve({
+                  width: img.width,
+                  height: img.height,
+                  format: url.split('.').pop()?.toUpperCase() || 'UNKNOWN'
+              });
+          };
+          img.onerror = () => reject("Não foi possível carregar a imagem. Verifique a URL.");
+          img.src = url;
+      });
+  };
+
   const handleAdd = async () => {
     if (!newImageUrl) return;
+    setValidationError("");
     setAdding(true);
+    
     try {
+      // Validate image before adding
+      const metadata = await validateImage(newImageUrl);
+      
       const res = await fetch("/api/carousel", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageUrl: newImageUrl, title: newImageTitle }),
+        body: JSON.stringify({ 
+            imageUrl: newImageUrl, 
+            title: newImageTitle,
+            metadata: {
+                width: metadata.width,
+                height: metadata.height,
+                format: metadata.format,
+                device_origin: "web_import"
+            }
+        }),
       });
       if (res.ok) {
         setNewImageUrl("");
         setNewImageTitle("");
         fetchImages();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to add image", error);
+      setValidationError(typeof error === 'string' ? error : "Erro ao validar/adicionar imagem.");
     } finally {
       setAdding(false);
     }
@@ -74,143 +199,119 @@ export default function CarouselManager() {
     }
   };
 
-  const handleMove = async (index: number, direction: 'up' | 'down') => {
-    if (direction === 'up' && index === 0) return;
-    if (direction === 'down' && index === images.length - 1) return;
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
 
-    const newImages = [...images];
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    
-    // Swap in local state for instant feedback
-    [newImages[index], newImages[targetIndex]] = [newImages[targetIndex], newImages[index]];
-    
-    // Update display_order based on new index
-    // We essentially just swap the display_order values of the two items
-    const itemA = newImages[index];
-    const itemB = newImages[targetIndex];
-    
-    // Optimistic update
-    setImages(newImages);
+    if (over && active.id !== over.id) {
+      setImages((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        
+        const newItems = arrayMove(items, oldIndex, newIndex);
+        
+        // Update order in backend
+        // We update all items with their new index as display_order
+        const updates = newItems.map((item, index) => ({
+            id: item.id,
+            display_order: index
+        }));
 
-    try {
-        // We need to update both items in DB
-        await Promise.all([
-            fetch(`/api/carousel/${itemA.id}`, {
+        // Send updates in background
+        Promise.all(updates.map(u => 
+            fetch(`/api/carousel/${u.id}`, {
                 method: "PATCH",
-                body: JSON.stringify({ display_order: itemA.display_order }),
-            }),
-            fetch(`/api/carousel/${itemB.id}`, {
-                method: "PATCH",
-                body: JSON.stringify({ display_order: itemB.display_order }),
+                body: JSON.stringify({ display_order: u.display_order })
             })
-        ]);
-        // Ideally we should refetch to be sure, but let's trust the optimistic update for now
-        // Or actually, swapping display_order values:
-        // But wait, the display_order might not be sequential 0,1,2... 
-        // A safer way is to just fetch everything again after swapping orders.
-        // Let's just re-fetch to be safe and ensure consistent state.
-        fetchImages();
-    } catch (error) {
-        console.error("Failed to move", error);
-        fetchImages(); // Revert on error
+        )).catch(err => console.error("Failed to update order", err));
+
+        return newItems;
+      });
     }
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-8 mt-8">
-      <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-        <ImageIcon size={24} />
-        Gerenciador de Carrossel
-      </h2>
-
-      {/* Add New */}
-      <div className="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
-        <h3 className="text-sm font-medium text-gray-700 mb-3">Adicionar Nova Imagem</h3>
-        <div className="flex flex-col md:flex-row gap-3">
-          <input
-            type="text"
-            placeholder="URL da Imagem (https://...)"
-            className="flex-1 p-2 border border-gray-300 rounded-md text-sm"
-            value={newImageUrl}
-            onChange={(e) => setNewImageUrl(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Título (Opcional)"
-            className="flex-1 p-2 border border-gray-300 rounded-md text-sm"
-            value={newImageTitle}
-            onChange={(e) => setNewImageTitle(e.target.value)}
-          />
-          <button
-            onClick={handleAdd}
-            disabled={adding || !newImageUrl}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2 justify-center"
-          >
-            {adding ? "Adicionando..." : <><Plus size={18} /> Adicionar</>}
-          </button>
+    <div>
+        <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold text-lg text-gray-800">Gerenciar Carrossel</h3>
+            <span className="text-xs text-gray-500">Arraste para reordenar</span>
         </div>
-      </div>
 
-      {/* List */}
-      {loading ? (
-        <div className="text-center py-8 text-gray-500">Carregando imagens...</div>
-      ) : images.length === 0 ? (
-        <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-          Nenhuma imagem no carrossel.
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {images.map((img, index) => (
-            <div key={img.id} className={`flex items-center gap-4 p-3 border rounded-md bg-white ${!img.active ? 'opacity-60 bg-gray-50' : ''}`}>
-              <div className="relative w-24 h-16 bg-gray-200 rounded overflow-hidden flex-shrink-0">
-                <Image src={img.image_url} alt={img.title || "img"} fill className="object-cover" />
-              </div>
-              
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-800 truncate">{img.title || "Sem título"}</p>
-                <p className="text-xs text-gray-500 truncate" title={img.image_url}>{img.image_url}</p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <div className="flex flex-col gap-1 mr-2">
-                    <button 
-                        onClick={() => handleMove(index, 'up')} 
-                        disabled={index === 0}
-                        className="p-1 hover:bg-gray-100 rounded text-gray-500 disabled:opacity-30"
-                        title="Mover para cima"
-                    >
-                        <ArrowUp size={16} />
-                    </button>
-                    <button 
-                        onClick={() => handleMove(index, 'down')}
-                        disabled={index === images.length - 1}
-                        className="p-1 hover:bg-gray-100 rounded text-gray-500 disabled:opacity-30"
-                        title="Mover para baixo"
-                    >
-                        <ArrowDown size={16} />
-                    </button>
+        {/* Add New Image Form */}
+        <div className="bg-gray-50 p-4 rounded-lg border mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">URL da Imagem</label>
+                    <input
+                        type="text"
+                        value={newImageUrl}
+                        onChange={(e) => setNewImageUrl(e.target.value)}
+                        placeholder="https://..."
+                        className="w-full p-2 border rounded text-sm"
+                    />
                 </div>
-
-                <button
-                  onClick={() => handleToggleActive(img)}
-                  className={`p-2 rounded-md ${img.active ? 'text-green-600 hover:bg-green-50' : 'text-gray-400 hover:bg-gray-100'}`}
-                  title={img.active ? "Ocultar" : "Mostrar"}
-                >
-                  {img.active ? <Eye size={20} /> : <EyeOff size={20} />}
-                </button>
-
-                <button
-                  onClick={() => handleDelete(img.id)}
-                  className="p-2 text-red-600 hover:bg-red-50 rounded-md"
-                  title="Remover"
-                >
-                  <Trash2 size={20} />
-                </button>
-              </div>
+                <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Título (Opcional)</label>
+                    <input
+                        type="text"
+                        value={newImageTitle}
+                        onChange={(e) => setNewImageTitle(e.target.value)}
+                        placeholder="Promoção de Verão"
+                        className="w-full p-2 border rounded text-sm"
+                    />
+                </div>
             </div>
-          ))}
+            
+            {validationError && (
+                <div className="mb-4 text-red-600 text-sm flex items-center gap-2">
+                    <AlertCircle size={16} />
+                    {validationError}
+                </div>
+            )}
+
+            <button
+                onClick={handleAdd}
+                disabled={adding || !newImageUrl}
+                className="w-full md:w-auto bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+                {adding ? "Validando..." : "Adicionar ao Carrossel"}
+                <ImageIcon size={16} />
+            </button>
+            <p className="mt-2 text-xs text-gray-500">
+                Suporta JPEG, PNG, WebP, AVIF, SVG. A imagem será validada antes de adicionar.
+            </p>
         </div>
-      )}
+
+        {/* List */}
+        {loading ? (
+            <div className="text-center py-8 text-gray-500">Carregando imagens...</div>
+        ) : (
+            <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+            >
+                <SortableContext
+                    items={images.map(img => img.id)}
+                    strategy={verticalListSortingStrategy}
+                >
+                    <div className="space-y-3">
+                        {images.map((image) => (
+                            <SortableItem
+                                key={image.id}
+                                image={image}
+                                onDelete={handleDelete}
+                                onToggle={handleToggleActive}
+                            />
+                        ))}
+                        {images.length === 0 && (
+                            <div className="text-center py-8 text-gray-400 bg-gray-50 rounded border border-dashed">
+                                Nenhuma imagem no carrossel.
+                            </div>
+                        )}
+                    </div>
+                </SortableContext>
+            </DndContext>
+        )}
     </div>
   );
 }
