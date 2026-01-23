@@ -16,6 +16,7 @@ try {
             select: async () => ({ data: [], error: { message: "Client init failed" } }),
             upsert: async () => ({ error: { message: "Client init failed" } })
         })
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
 }
 

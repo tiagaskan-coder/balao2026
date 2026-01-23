@@ -1,7 +1,8 @@
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import ProductCard from "@/components/ProductCard";
-import { getProducts } from "@/lib/db";
+import Carousel from "@/components/Carousel";
+import { getProducts, getCarouselImages } from "@/lib/db";
 
 // Remove force-dynamic to allow better caching and prevent 500s on timeout. 
 // Next.js will revalidate data every 60 seconds.
@@ -11,7 +12,10 @@ export default async function Home(props: {
   searchParams: Promise<{ category?: string; search?: string }>;
 }) {
   const searchParams = await props.searchParams;
-  const products = await getProducts(); // Added await
+  const [products, carouselImages] = await Promise.all([
+    getProducts(),
+    getCarouselImages(true)
+  ]);
   
   const category = searchParams.category;
   const search = searchParams.search;
@@ -28,12 +32,16 @@ export default async function Home(props: {
       <div className="flex container mx-auto flex-1 py-6 gap-6">
         <Sidebar />
         <main className="flex-1 w-full">
-            {/* Banner Placeholder */}
+            {/* Carousel Banner */}
             {!search && !category && (
                 <div className="mb-6 px-4 lg:px-0">
-                    <div className="w-full h-48 md:h-64 bg-gradient-to-r from-[#E60012] to-red-800 rounded-lg flex items-center justify-center text-white text-3xl font-bold shadow-md">
-                        Ofertas Imperdíveis
-                    </div>
+                    {carouselImages.length > 0 ? (
+                        <Carousel images={carouselImages} />
+                    ) : (
+                        <div className="w-full h-48 md:h-64 bg-gradient-to-r from-[#E60012] to-red-800 rounded-lg flex items-center justify-center text-white text-3xl font-bold shadow-md">
+                            Ofertas Imperdíveis
+                        </div>
+                    )}
                 </div>
             )}
 
