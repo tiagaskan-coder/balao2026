@@ -101,21 +101,18 @@ export default function AdminPage() {
     return new Promise((resolve) => {
       const img = new window.Image();
       img.onload = () => {
-        // High Definition: 1920x1080 minimum
-        if (img.width >= 1920 && img.height >= 1080) {
-          resolve(true);
-        } else {
-          resolve(false);
-        }
+        // Accept all sizes (Next.js Image Optimization will handle resizing)
+        // We only validate that the image exists and can be loaded
+        resolve(true);
       };
-      img.onerror = () => resolve(false);
+      img.onerror = () => resolve(false); // Reject broken URLs
       img.src = url;
     });
   };
 
   const handleParse = async () => {
     setStatus("loading");
-    setMessage("Processando e validando imagens...");
+    setMessage("Verificando disponibilidade das imagens...");
 
     const products = parseProducts(text);
     if (products.length === 0) {
@@ -124,6 +121,7 @@ export default function AdminPage() {
         return;
     }
 
+    // Verify if images are accessible
     const validationResults = await Promise.all(
         products.map(async (p) => {
             const isValid = await validateImage(p.image);
@@ -135,11 +133,11 @@ export default function AdminPage() {
         .filter(r => r.isValid)
         .map(r => r.product);
         
-    const rejectedCount = products.length - validProducts.length;
+    const brokenCount = products.length - validProducts.length;
 
     if (validProducts.length === 0) {
         setStatus("error");
-        setMessage(`Nenhum produto válido. ${rejectedCount} rejeitados por baixa resolução (mínimo 1920x1080).`);
+        setMessage(`Nenhum produto válido. ${brokenCount} imagens inacessíveis.`);
         return;
     }
 
@@ -147,8 +145,8 @@ export default function AdminPage() {
     setImportStep("preview");
     setStatus("idle");
     
-    if (rejectedCount > 0) {
-        setMessage(`${validProducts.length} produtos válidos. ${rejectedCount} rejeitados por baixa resolução.`);
+    if (brokenCount > 0) {
+        setMessage(`${validProducts.length} produtos válidos. ${brokenCount} imagens removidas (URL inválida).`);
     } else {
         setMessage("");
     }

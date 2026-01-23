@@ -1,28 +1,33 @@
 "use client";
 
 import { Product } from "@/lib/utils";
+import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
+import { useToast } from "@/context/ToastContext";
 import { ShoppingCart } from "lucide-react";
 
 export default function ProductCard({ product }: { product: Product }) {
   const { addToCart } = useCart();
+  const { showToast } = useToast();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation if wrapped in Link
     addToCart(product);
+    showToast("Adicionado ao carrinho!");
   };
 
   return (
     <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-100 flex flex-col h-full group">
       <Link href={`/product/${product.id}`} className="flex-1">
         <div className="relative pt-[100%] bg-gray-50 overflow-hidden">
-             {/* eslint-disable-next-line @next/next/no-img-element */}
-             <img
+             <Image
                 src={product.image}
                 alt={product.name}
-                className="absolute top-0 left-0 w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
-                loading="lazy"
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+                priority={false}
              />
         </div>
         <div className="p-4">
