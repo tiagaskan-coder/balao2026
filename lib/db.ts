@@ -4,8 +4,6 @@ import { Product } from './utils';
 // Fallback to empty array if connection fails or env vars missing
 export async function getProducts(): Promise<Product[]> {
   try {
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return [];
-    
     const { data, error } = await supabase
       .from('products')
       .select('*');
@@ -24,8 +22,6 @@ export async function getProducts(): Promise<Product[]> {
 
 export async function saveProducts(products: Product[]) {
   try {
-     if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return;
-
      const { error } = await supabase
         .from('products')
         .upsert(products, { onConflict: 'id' });
