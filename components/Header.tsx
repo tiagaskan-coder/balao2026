@@ -1,17 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Search, ShoppingCart, User } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
+import { Product } from "@/lib/utils";
+import SearchPreview from "@/components/SearchPreview";
 
 export default function Header() {
   const router = useRouter();
   const { cartCount } = useCart();
   const [logoClicks, setLogoClicks] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // Search Preview State
+  const [showPreview, setShowPreview] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const searchContainerRef = useRef<HTMLFormElement>(null);
+
+  // Fetch products for client-side search preview
+  useEffect(() => {
+    fetch("/api/products")
+      .then(res => res.json())
+      .then(data => setProducts(data))
+      .catch(err => console.error("Failed to load products for search", err));
+  }, []);
+
+  // Handle click outside to close preview
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setShowPreview(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleLogoClick = () => {
     const newClicks = logoClicks + 1;
@@ -26,15 +53,26 @@ export default function Header() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    setShowPreview(false);
     if (searchQuery === "56676009") {
       router.push("/admin");
     } else {
       // Basic search param redirection
       if (searchQuery.trim()) {
         router.push(`/?search=${encodeURIComponent(searchQuery)}`);
+        setSearchQuery(""); // Clear input after search
       }
     }
   };
+
+  const previewProducts = searchQuery.length >= 2 
+    ? products
+        .filter(p => 
+            p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+            p.category?.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        .slice(0, 5)
+    : [];
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
@@ -57,17 +95,38 @@ export default function Header() {
         </div>
 
         {/* Search Bar */}
-        <form onSubmit={handleSearch} className="flex-1 max-w-2xl relative hidden md:block">
+        <form 
+            ref={searchContainerRef}
+            onSubmit={handleSearch} 
+            className="flex-1 max-w-2xl relative hidden md:block"
+        >
           <input
             type="text"
             placeholder="Buscar produtos..."
             className="w-full pl-5 pr-12 py-2.5 border border-gray-300 rounded-full focus:outline-none focus:border-[#E60012] focus:ring-1 focus:ring-[#E60012] bg-gray-50 text-gray-800"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setShowPreview(true);
+            }}
+            onFocus={() => setShowPreview(true)}
           />
           <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#E60012] text-white p-1.5 rounded-full hover:bg-red-700 transition-colors">
             <Search size={18} />
           </button>
+
+          {/* Search Preview */}
+          {showPreview && searchQuery.length >= 2 && (
+              <SearchPreview 
+                  products={previewProducts}
+                  onSelect={(product) => {
+                      router.push(`/product/${product.id}`);
+                      setShowPreview(false);
+                      setSearchQuery("");
+                  }}
+                  onClose={() => setShowPreview(false)}
+              />
+          )}
         </form>
 
         {/* Mobile Search Icon (visible only on small screens) */}
