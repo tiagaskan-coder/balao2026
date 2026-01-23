@@ -19,6 +19,8 @@ export default function Header() {
     if (newClicks >= 5) {
       router.push("/admin");
       setLogoClicks(0);
+    } else {
+      router.push("/");
     }
   };
 
