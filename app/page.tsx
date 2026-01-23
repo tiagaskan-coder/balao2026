@@ -3,7 +3,9 @@ import Sidebar from "@/components/Sidebar";
 import ProductCard from "@/components/ProductCard";
 import { getProducts } from "@/lib/db";
 
-export const dynamic = 'force-dynamic';
+// Remove force-dynamic to allow better caching and prevent 500s on timeout. 
+// Next.js will revalidate data every 60 seconds.
+export const revalidate = 60;
 
 export default async function Home(props: {
   searchParams: Promise<{ category?: string; search?: string }>;
