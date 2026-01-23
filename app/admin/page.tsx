@@ -1,13 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { parseProducts, Product, CATEGORIES } from "@/lib/utils";
 import Link from "next/link";
-import { ArrowLeft, Upload, CheckCircle, AlertCircle, Layout, Layers, History, Save, Search, Settings } from "lucide-react";
+import { ArrowLeft, Upload, CheckCircle, AlertCircle, Layout, Layers, History, Save, Search, Settings, ExternalLink } from "lucide-react";
 import CarouselManager from "@/components/admin/CarouselManager";
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<"import" | "carousel" | "products">("import");
+
+  // Product List State
+  const [products, setProducts] = useState<Product[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loadingProducts, setLoadingProducts] = useState(false);
   
   // Import State
   const [text, setText] = useState("");
@@ -22,6 +27,46 @@ export default function AdminPage() {
   
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+
+  // Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey) {
+        if (e.key === "1") setActiveTab("import");
+        if (e.key === "2") setActiveTab("carousel");
+        if (e.key === "3") setActiveTab("products");
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Fetch Products when tab changes
+  useEffect(() => {
+    if (activeTab === "products") {
+      fetchProducts();
+    }
+  }, [activeTab]);
+
+  const fetchProducts = async () => {
+    setLoadingProducts(true);
+    try {
+      const res = await fetch("/api/products");
+      if (res.ok) {
+        const data = await res.json();
+        setProducts(data);
+      }
+    } catch (e) {
+      console.error("Failed to fetch products", e);
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
+
+  const filteredProducts = products.filter(p => 
+    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.category?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   // Preview Logic
   const getPreviewProducts = () => {
@@ -84,6 +129,18 @@ export default function AdminPage() {
       });
 
       if (!res.ok) throw new Error("Falha ao salvar");
+
+      // Save History
+      await fetch("/api/history", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            product_count: finalProducts.length,
+            price_percentage: priceAdjustment,
+            applied_category: selectedCategory,
+            applied_scope: adjustmentScope
+        })
+      });
 
       const data = await res.json();
       setStatus("success");
@@ -325,6 +382,94 @@ export default function AdminPage() {
                     {activeTab === "carousel" && (
                         <div className="animate-in fade-in duration-300">
                             <CarouselManager />
+                        </div>
+                    )}
+
+                    {/* PRODUCTS TAB */}
+                    {activeTab === "products" && (
+                        <div className="animate-in fade-in duration-300">
+                             <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                    <Layers className="text-[#E60012]" />
+                                    Gerenciar Produtos
+                                </h2>
+                                <span className="text-sm text-gray-500">
+                                    {filteredProducts.length} produtos encontrados
+                                </span>
+                            </div>
+
+                            <div className="mb-6 relative">
+                                <input
+                                    type="text"
+                                    placeholder="Buscar por nome ou categoria..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-2 border rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent"
+                                />
+                                <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+                            </div>
+
+                            {loadingProducts ? (
+                                <div className="text-center py-12 text-gray-500">Carregando produtos...</div>
+                            ) : (
+                                <div className="overflow-x-auto border rounded-lg">
+                                    <table className="w-full text-sm text-left text-gray-500">
+                                        <thead className="text-xs text-gray-700 uppercase bg-gray-100">
+                                            <tr>
+                                                <th className="px-4 py-3">Imagem</th>
+                                                <th className="px-4 py-3">Nome</th>
+                                                <th className="px-4 py-3">Categoria</th>
+                                                <th className="px-4 py-3">Preço</th>
+                                                <th className="px-4 py-3 text-right">Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {filteredProducts.length > 0 ? (
+                                                filteredProducts.map((product) => (
+                                                    <tr key={product.id} className="bg-white border-b hover:bg-gray-50">
+                                                        <td className="px-4 py-3">
+                                                            <div className="w-10 h-10 relative bg-gray-100 rounded overflow-hidden">
+                                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                                <img 
+                                                                    src={product.image} 
+                                                                    alt={product.name}
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-4 py-3 font-medium text-gray-900 max-w-xs truncate" title={product.name}>
+                                                            {product.name}
+                                                        </td>
+                                                        <td className="px-4 py-3">
+                                                            <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded border border-gray-500">
+                                                                {product.category || "Geral"}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-4 py-3 font-bold text-gray-900">
+                                                            {product.price}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-right">
+                                                            <Link 
+                                                                href={`/product/${product.id}`}
+                                                                target="_blank"
+                                                                className="text-blue-600 hover:text-blue-900 font-medium text-xs flex items-center justify-end gap-1"
+                                                            >
+                                                                Ver <ExternalLink size={14} />
+                                                            </Link>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
+                                                        Nenhum produto encontrado.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>

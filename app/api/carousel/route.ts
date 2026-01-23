@@ -8,11 +8,11 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { imageUrl, title } = await request.json();
+    const { imageUrl, title, metadata } = await request.json();
     if (!imageUrl) {
         return NextResponse.json({ error: "Image URL is required" }, { status: 400 });
     }
-    const newImage = await addCarouselImage(imageUrl, title);
+    const newImage = await addCarouselImage(imageUrl, title, metadata);
     return NextResponse.json(newImage);
   } catch (error) {
     console.error("Error adding carousel image:", error);

@@ -61,7 +61,7 @@ export async function getCarouselImages(activeOnly = true): Promise<CarouselImag
   }
 }
 
-export async function addCarouselImage(imageUrl: string, title?: string) {
+export async function addCarouselImage(imageUrl: string, title?: string, metadata?: any) {
     try {
         // Get max order to append to end
         const { data: maxOrderData } = await supabase
@@ -78,7 +78,8 @@ export async function addCarouselImage(imageUrl: string, title?: string) {
                 image_url: imageUrl,
                 title,
                 display_order: nextOrder,
-                active: true
+                active: true,
+                metadata: metadata || {}
             })
             .select()
             .single();
@@ -88,6 +89,30 @@ export async function addCarouselImage(imageUrl: string, title?: string) {
     } catch (error) {
         console.error("Error adding carousel image:", error);
         throw error;
+    }
+}
+
+export async function saveImportHistory(history: { 
+    product_count: number; 
+    price_percentage: number; 
+    applied_category: string; 
+    applied_scope: string; 
+}) {
+    try {
+        const { error } = await supabase
+            .from('import_history')
+            .insert({
+                product_count: history.product_count,
+                price_percentage: history.price_percentage,
+                applied_category: history.applied_category,
+                applied_scope: history.applied_scope,
+                created_at: new Date().toISOString()
+            });
+
+        if (error) throw error;
+    } catch (error) {
+        console.error("Error saving import history:", error);
+        // Don't throw, just log, so it doesn't break the import flow
     }
 }
 
