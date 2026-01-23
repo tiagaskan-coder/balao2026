@@ -26,8 +26,17 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     description: `Compre ${product.name} por ${product.price}`,
     openGraph: {
       title: product.name,
-      description: `Por apenas ${product.price}`,
-      images: [product.image],
+      description: `Por apenas ${product.price} - ${product.category || "Hardware"}`,
+      images: [
+        {
+          url: product.image,
+          width: 800,
+          height: 800,
+          alt: product.name,
+        }
+      ],
+      type: 'website',
+      siteName: 'Balão da Informática',
     },
     twitter: {
       card: 'summary_large_image',

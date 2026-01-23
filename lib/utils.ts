@@ -44,6 +44,16 @@ export const CATEGORIES = [
 export function enhanceImageUrl(url: string): string {
   let enhancedUrl = url;
 
+  try {
+    // 0. Remove common query parameters that limit size
+    const urlObj = new URL(enhancedUrl);
+    const paramsToDelete = ['w', 'width', 'h', 'height', 'quality', 'q', 'resize', 'size'];
+    paramsToDelete.forEach(param => urlObj.searchParams.delete(param));
+    enhancedUrl = urlObj.toString();
+  } catch (e) {
+    // Continue if URL parsing fails
+  }
+
   // 1. Kabum: _m, _p, _peq -> _g
   if (enhancedUrl.includes('kabum.com.br')) {
     enhancedUrl = enhancedUrl.replace(/_(m|p|peq)\./g, '_g.');
@@ -54,27 +64,22 @@ export function enhanceImageUrl(url: string): string {
     enhancedUrl = enhancedUrl.replace(/(_t|_small)\./g, '_g.');
   }
 
-  // 3. Amazon: remove ._SX..._ and ._AC_
+  // 3. Amazon: remove ._SX..._ and ._AC_ and ._SS..._
   if (enhancedUrl.includes('amazon.com') || enhancedUrl.includes('media-amazon.com')) {
-    enhancedUrl = enhancedUrl.replace(/\._SX\d+_|\._AC_/g, '');
+    enhancedUrl = enhancedUrl.replace(/\._[S|A][X|C|S]\d+_|\._[S|A][X|C|S]_/g, '');
   }
 
-  // 4. Mercado Livre: -O / -I -> -F
+  // 4. Mercado Livre: -O / -I -> -F / -V (High res)
   if (enhancedUrl.includes('mercadolivre.com') || enhancedUrl.includes('mlstatic.com')) {
-    enhancedUrl = enhancedUrl.replace(/-(O|I)\./g, '-F.');
+    // Try to force high resolution suffix if present, or remove low res indicators
+    enhancedUrl = enhancedUrl.replace(/-(O|I|T)\./g, '-F.');
+    enhancedUrl = enhancedUrl.replace(/-thumb\./g, '-F.');
   }
 
-  // 5. Remove common size query parameters
-  try {
-    const urlObj = new URL(enhancedUrl);
-    urlObj.searchParams.delete('w');
-    urlObj.searchParams.delete('width');
-    urlObj.searchParams.delete('h');
-    urlObj.searchParams.delete('height');
-    enhancedUrl = urlObj.toString();
-  } catch (e) {
-    // If URL parsing fails, continue with string manipulation or ignore
-  }
+  // 5. Generic: Remove common thumbnail suffixes before extension
+  // Matches: -thumb.jpg, _small.png, .100x100.jpg
+  enhancedUrl = enhancedUrl.replace(/[-_](thumb|small|mini|tiny|icon)\./gi, '.');
+  enhancedUrl = enhancedUrl.replace(/[-_]\d+x\d+\./g, '.');
 
   return enhancedUrl;
 }
@@ -83,7 +88,7 @@ export function isLowResolution(url: string): boolean {
   const lowerUrl = url.toLowerCase();
   
   // Check for common thumbnail keywords
-  const lowResKeywords = ['thumb', 'thumbnail', 'small', 'mini', '50x50', '100x100', 'w=100'];
+  const lowResKeywords = ['thumb', 'thumbnail', 'small', 'mini', 'tiny', 'icon', '50x50', '100x100', '150x150', 'w=100', 'h=100'];
   if (lowResKeywords.some(keyword => lowerUrl.includes(keyword))) {
     return true;
   }
@@ -93,7 +98,15 @@ export function isLowResolution(url: string): boolean {
   const amazonMatch = url.match(/\._(SX|SS)(\d+)_/);
   if (amazonMatch) {
     const size = parseInt(amazonMatch[2], 10);
-    if (size < 500) return true;
+    if (size < 600) return true; // Increased threshold
+  }
+  
+  // Generic size check in filename (e.g., image-200x200.jpg)
+  const sizeMatch = url.match(/[-_](\d+)x(\d+)\./);
+  if (sizeMatch) {
+    const width = parseInt(sizeMatch[1], 10);
+    const height = parseInt(sizeMatch[2], 10);
+    if (width < 400 || height < 400) return true;
   }
 
   return false;
