@@ -53,15 +53,13 @@ export default async function ProductPage(props: Props) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
                 {/* Image Section */}
                 <div className="relative aspect-square bg-white border border-gray-100 rounded-lg flex items-center justify-center p-4">
-                    <div className="relative w-1/2 h-1/2">
-                        <Image 
-                            src={product.image}
-                            alt={product.name}
-                            fill
-                            className="object-contain"
-                            priority
-                        />
-                    </div>
+                    <Image 
+                        src={product.image}
+                        alt={product.name}
+                        fill
+                        className="object-contain"
+                        priority
+                    />
                 </div>
 
                 {/* Info Section */}

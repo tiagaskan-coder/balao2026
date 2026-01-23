@@ -15,9 +15,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Balão da Informática | Hardware, PCs Gamer e Mais",
   description: "Sua loja de confiança para hardware, PCs gamer, notebooks e periféricos.",
-  icons: {
-    icon: '/logo.png', // Assuming logo.png is the red balloon image
-  }
 };
 
 import { CartProvider } from "@/context/CartContext";
