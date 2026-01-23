@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 };
 
 import { CartProvider } from "@/context/CartContext";
+import { ToastProvider } from "@/context/ToastContext";
 import Footer from "@/components/Footer";
 
 export default function RootLayout({
@@ -30,10 +31,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
       >
-        <CartProvider>
-            {children}
-            <Footer />
-        </CartProvider>
+        <ToastProvider>
+          <CartProvider>
+              {children}
+              <Footer />
+          </CartProvider>
+        </ToastProvider>
       </body>
     </html>
   );
