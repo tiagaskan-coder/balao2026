@@ -207,6 +207,63 @@ export default function CarouselManager() {
       });
   };
 
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setImages((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        const newItems = arrayMove(items, oldIndex, newIndex);
+        
+        // Update display_order
+        const updatedItems = newItems.map((item, index) => ({
+          ...item,
+          display_order: index
+        }));
+
+        // Save order
+        fetch("/api/carousel/reorder", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ items: updatedItems.map(i => ({ id: i.id, display_order: i.display_order })) })
+        }).catch(err => console.error("Failed to save order", err));
+
+        return updatedItems;
+      });
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Tem certeza que deseja remover esta imagem?")) return;
+    try {
+      const res = await fetch(`/api/carousel?id=${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setImages(images.filter(img => img.id !== id));
+      } else {
+          console.error("Failed to delete");
+      }
+    } catch (error) {
+      console.error("Failed to delete image", error);
+    }
+  };
+
+  const handleToggleActive = async (image: CarouselImage) => {
+    try {
+      const updatedImage = { ...image, active: !image.active };
+      const res = await fetch("/api/carousel", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedImage),
+      });
+
+      if (res.ok) {
+        setImages(images.map(img => img.id === image.id ? updatedImage : img));
+      }
+    } catch (error) {
+      console.error("Failed to toggle status", error);
+    }
+  };
+
   const handleAdd = async () => {
     if (!newImageUrl) return;
     setValidationError("");
