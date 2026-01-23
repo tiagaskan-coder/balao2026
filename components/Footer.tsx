@@ -103,7 +103,7 @@ export default function Footer() {
         {/* Copyright */}
         <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
           <p className="mb-2">&copy; 2026 Balão da Informática. Todos os direitos reservados. <a href="http://www.balao.info" target="_blank" className="hover:text-[#E60012]">www.balao.info</a></p>
-          <p className="text-xs opacity-60">Razão Social: Balão da Informática Ltda | CNPJ: [Inserir CNPJ]</p>
+          <p className="text-xs opacity-60">Razão Social: Balão da Informática Ltda | CNPJ: 34.397.947/0001-08</p>
         </div>
       </div>
     </footer>
