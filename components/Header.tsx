@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, ShoppingCart, User } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 
 export default function Header() {
@@ -42,11 +43,15 @@ export default function Header() {
           className="cursor-pointer select-none flex-shrink-0"
           title="Clique 5 vezes para acesso administrativo"
         >
-             <div className="flex items-center gap-2">
-                <div className="text-2xl font-black text-[#E60012] flex flex-col leading-none tracking-tight">
-                    <span className="text-lg">Balão da®</span>
-                    <span className="text-3xl">Informática</span>
-                </div>
+             <div className="relative w-[180px] h-[60px]">
+                {/* @ts-expect-error Next.js 16/React 19 type mismatch workaround */}
+                <Image 
+                    src="/logo.png" 
+                    alt="Balão da Informática" 
+                    fill
+                    className="object-contain"
+                    priority
+                />
              </div>
         </div>
 

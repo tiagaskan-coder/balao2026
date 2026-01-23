@@ -9,11 +9,13 @@ export default function Footer() {
           
           {/* About Section */}
           <div>
-            <div className="flex items-center gap-2 mb-6">
-                <div className="text-2xl font-black text-[#E60012] flex flex-col leading-none tracking-tight">
-                    <span className="text-lg">Balão da®</span>
-                    <span className="text-3xl">Informática</span>
-                </div>
+            <div className="relative w-[160px] h-[50px] mb-6">
+                <Image 
+                    src="/logo.png" 
+                    alt="Balão da Informática" 
+                    fill
+                    className="object-contain"
+                />
             </div>
             <p className="text-sm leading-relaxed mb-6">
               Sua loja de confiança para hardware, PCs gamer, notebooks e periféricos. 
