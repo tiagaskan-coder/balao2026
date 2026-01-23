@@ -44,7 +44,6 @@ export default function Header() {
           title="Clique 5 vezes para acesso administrativo"
         >
              <div className="relative w-[180px] h-[60px]">
-                {/* @ts-expect-error Next.js 16/React 19 type mismatch workaround */}
                 <Image 
                     src="/logo.png" 
                     alt="Balão da Informática" 
