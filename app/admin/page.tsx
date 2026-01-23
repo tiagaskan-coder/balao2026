@@ -97,17 +97,61 @@ export default function AdminPage() {
     });
   };
 
-  const handleParse = () => {
+  const validateImage = (url: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const img = new window.Image();
+      img.onload = () => {
+        // High Definition: 1920x1080 minimum
+        if (img.width >= 1920 && img.height >= 1080) {
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      };
+      img.onerror = () => resolve(false);
+      img.src = url;
+    });
+  };
+
+  const handleParse = async () => {
+    setStatus("loading");
+    setMessage("Processando e validando imagens...");
+
     const products = parseProducts(text);
     if (products.length === 0) {
         setStatus("error");
         setMessage("Nenhum produto encontrado no texto.");
         return;
     }
-    setParsedProducts(products);
+
+    const validationResults = await Promise.all(
+        products.map(async (p) => {
+            const isValid = await validateImage(p.image);
+            return { product: p, isValid };
+        })
+    );
+
+    const validProducts = validationResults
+        .filter(r => r.isValid)
+        .map(r => r.product);
+        
+    const rejectedCount = products.length - validProducts.length;
+
+    if (validProducts.length === 0) {
+        setStatus("error");
+        setMessage(`Nenhum produto válido. ${rejectedCount} rejeitados por baixa resolução (mínimo 1920x1080).`);
+        return;
+    }
+
+    setParsedProducts(validProducts);
     setImportStep("preview");
     setStatus("idle");
-    setMessage("");
+    
+    if (rejectedCount > 0) {
+        setMessage(`${validProducts.length} produtos válidos. ${rejectedCount} rejeitados por baixa resolução.`);
+    } else {
+        setMessage("");
+    }
   };
 
   const handleConfirmImport = async () => {
