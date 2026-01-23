@@ -41,6 +41,64 @@ export const CATEGORIES = [
   "Áudio",
 ];
 
+export function enhanceImageUrl(url: string): string {
+  let enhancedUrl = url;
+
+  // 1. Kabum: _m, _p, _peq -> _g
+  if (enhancedUrl.includes('kabum.com.br')) {
+    enhancedUrl = enhancedUrl.replace(/_(m|p|peq)\./g, '_g.');
+  }
+
+  // 2. Terabyte: _t or _small -> _g
+  if (enhancedUrl.includes('terabyteshop.com.br')) {
+    enhancedUrl = enhancedUrl.replace(/(_t|_small)\./g, '_g.');
+  }
+
+  // 3. Amazon: remove ._SX..._ and ._AC_
+  if (enhancedUrl.includes('amazon.com') || enhancedUrl.includes('media-amazon.com')) {
+    enhancedUrl = enhancedUrl.replace(/\._SX\d+_|\._AC_/g, '');
+  }
+
+  // 4. Mercado Livre: -O / -I -> -F
+  if (enhancedUrl.includes('mercadolivre.com') || enhancedUrl.includes('mlstatic.com')) {
+    enhancedUrl = enhancedUrl.replace(/-(O|I)\./g, '-F.');
+  }
+
+  // 5. Remove common size query parameters
+  try {
+    const urlObj = new URL(enhancedUrl);
+    urlObj.searchParams.delete('w');
+    urlObj.searchParams.delete('width');
+    urlObj.searchParams.delete('h');
+    urlObj.searchParams.delete('height');
+    enhancedUrl = urlObj.toString();
+  } catch (e) {
+    // If URL parsing fails, continue with string manipulation or ignore
+  }
+
+  return enhancedUrl;
+}
+
+export function isLowResolution(url: string): boolean {
+  const lowerUrl = url.toLowerCase();
+  
+  // Check for common thumbnail keywords
+  const lowResKeywords = ['thumb', 'thumbnail', 'small', 'mini', '50x50', '100x100', 'w=100'];
+  if (lowResKeywords.some(keyword => lowerUrl.includes(keyword))) {
+    return true;
+  }
+
+  // Amazon specific check: _SX or _SS < 500
+  // Pattern: ._SX300_.jpg or ._SS400_.jpg
+  const amazonMatch = url.match(/\._(SX|SS)(\d+)_/);
+  if (amazonMatch) {
+    const size = parseInt(amazonMatch[2], 10);
+    if (size < 500) return true;
+  }
+
+  return false;
+}
+
 export function parseProducts(text: string): Product[] {
   const products: Product[] = [];
   // Regex explanation:
@@ -53,9 +111,17 @@ export function parseProducts(text: string): Product[] {
   
   let match;
   while ((match = regex.exec(text)) !== null) {
-    const image = match[1];
+    let image = match[1];
     const name = match[2].trim();
     const price = match[3];
+
+    // Enhance Image URL
+    image = enhanceImageUrl(image);
+
+    // Filter Low Resolution
+    if (isLowResolution(image)) {
+        continue; // Skip this product
+    }
 
     // Clean up the image URL if it has extra garbage (though regex [^\s]+ should handle it)
     // Clean up name if it captured too much (unlikely with non-greedy + following price)

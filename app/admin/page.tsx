@@ -28,11 +28,6 @@ export default function AdminPage() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
 
-  // Image Enhancement State
-  const [enableEnhancement, setEnableEnhancement] = useState(false);
-  const [enhancementScale, setEnhancementScale] = useState(2);
-  const [processingLog, setProcessingLog] = useState<string[]>([]);
-
   // Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -157,61 +152,10 @@ export default function AdminPage() {
     }
   };
 
-  const processImages = async (productsToProcess: any[]) => {
-      setMessage("Iniciando tratamento de imagens (IA Upscale)...");
-      const total = productsToProcess.length;
-      let processed = 0;
-      let successes = 0;
-      let failures = 0;
-      const logs: string[] = [];
-
-      // Process in batches of 3 to avoid overwhelming the server/browser
-      const batchSize = 3;
-      const processedProducts = [...productsToProcess];
-      
-      for (let i = 0; i < total; i += batchSize) {
-          const batch = processedProducts.slice(i, i + batchSize);
-          await Promise.all(batch.map(async (p, idx) => {
-              const realIdx = i + idx;
-              if (!p.image) return;
-
-              try {
-                  const res = await fetch("/api/process-image", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ 
-                          imageUrl: p.image,
-                          options: { scale: enhancementScale }
-                      })
-                  });
-                  
-                  const data = await res.json();
-                  processed++;
-                  
-                  if (data.success) {
-                      successes++;
-                      logs.push(`[OK] ${p.name}: Upscale ${data.details.originalWidth}px -> ${data.details.newWidth}px`);
-                      processedProducts[realIdx].image = data.processedUrl;
-                  } else {
-                      failures++;
-                      logs.push(`[FALHA] ${p.name}: ${data.error}`);
-                  }
-              } catch (e) {
-                  failures++;
-                  logs.push(`[ERRO] ${p.name}: Erro de conexão`);
-              }
-          }));
-          setMessage(`Processando imagens: ${Math.min(i + batchSize, total)}/${total} (${successes} melhoradas)`);
-      }
-      
-      setProcessingLog(logs);
-      return processedProducts;
-  };
-
   const handleConfirmImport = async () => {
     setStatus("loading");
     try {
-      let finalProducts = getPreviewProducts().map(p => ({
+      const finalProducts = getPreviewProducts().map(p => ({
           id: p.id,
           name: p.name,
           price: p.newPrice, // Use calculated price
@@ -219,11 +163,6 @@ export default function AdminPage() {
           category: p.category,
           slug: p.slug
       }));
-
-      // Image Processing Step
-      if (enableEnhancement) {
-          finalProducts = await processImages(finalProducts);
-      }
 
       const res = await fetch("/api/products", {
         method: "POST",
@@ -247,13 +186,7 @@ export default function AdminPage() {
 
       const data = await res.json();
       setStatus("success");
-      
-      let successMsg = `${data.count} produtos importados com sucesso!`;
-      if (enableEnhancement) {
-          successMsg += ` Imagens processadas. Ver logs para detalhes.`;
-      }
-      setMessage(successMsg);
-      
+      setMessage(`${data.count} produtos importados com sucesso!`);
       setText("");
       setParsedProducts([]);
       setImportStep("input");
@@ -430,56 +363,7 @@ export default function AdminPage() {
                                                 </div>
                                             )}
                                         </div>
-                                        
-                                        {/* Image Enhancement Settings */}
-                                        <div>
-                                            <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Tratamento de Imagem (IA)</label>
-                                            <div className="flex flex-col gap-2 bg-white p-2 rounded border border-gray-200">
-                                                <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer select-none">
-                                                    <input 
-                                                        type="checkbox" 
-                                                        checked={enableEnhancement}
-                                                        onChange={(e) => setEnableEnhancement(e.target.checked)}
-                                                        className="rounded text-[#E60012] focus:ring-[#E60012]"
-                                                    />
-                                                    Ativar Super-Resolução
-                                                </label>
-                                                {enableEnhancement && (
-                                                    <div className="pl-6 animate-in fade-in slide-in-from-top-1">
-                                                        <label className="text-xs text-gray-500 block mb-1">Fator de Escala</label>
-                                                        <select 
-                                                            value={enhancementScale}
-                                                            onChange={(e) => setEnhancementScale(Number(e.target.value))}
-                                                            className="w-full p-1 border rounded text-xs mb-1"
-                                                        >
-                                                            <option value={2}>2x (Recomendado)</option>
-                                                            <option value={4}>4x (Máxima Qualidade)</option>
-                                                        </select>
-                                                        <p className="text-[10px] text-gray-400 leading-tight">
-                                                            Aplica redimensionamento Lanczos3, nitidez e otimização WebP.
-                                                        </p>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
                                     </div>
-
-                                    {/* Processing Logs */}
-                                    {processingLog.length > 0 && (
-                                        <div className="mb-6 bg-gray-900 text-green-400 p-4 rounded-md font-mono text-xs max-h-48 overflow-y-auto shadow-inner border border-gray-700">
-                                            <div className="font-bold text-white mb-2 sticky top-0 bg-gray-900 pb-2 border-b border-gray-700 flex justify-between">
-                                                <span>Logs de Processamento</span>
-                                                <span className="text-gray-400">{processingLog.length} eventos</span>
-                                            </div>
-                                            <div className="space-y-1">
-                                                {processingLog.map((log, i) => (
-                                                    <div key={i} className={`${log.includes("FALHA") || log.includes("ERRO") ? "text-red-400" : "text-green-400"}`}>
-                                                        {log}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
 
                                     <div className="mb-6 overflow-x-auto">
                                         <table className="w-full text-sm text-left text-gray-500">
