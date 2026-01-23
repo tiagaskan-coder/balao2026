@@ -12,7 +12,7 @@ type Props = {
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
-  const products = getProducts();
+  const products = await getProducts(); // Added await
   const product = products.find((p) => p.id === params.id);
 
   if (!product) {
@@ -40,7 +40,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 export default async function ProductPage(props: Props) {
   const params = await props.params;
-  const products = getProducts();
+  const products = await getProducts(); // Added await
   const product = products.find((p) => p.id === params.id);
 
   if (!product) return notFound();

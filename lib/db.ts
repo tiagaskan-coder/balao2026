@@ -1,31 +1,41 @@
-import fs from 'fs';
-import path from 'path';
+import { supabase } from './supabase';
 import { Product } from './utils';
 
-const DB_PATH = path.join(process.cwd(), 'data', 'products.json');
-
-export function getProducts(): Product[] {
+// Fallback to empty array if connection fails or env vars missing
+export async function getProducts(): Promise<Product[]> {
   try {
-    if (!fs.existsSync(DB_PATH)) {
-        // Return some default products if file doesn't exist
-        return [];
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return [];
+    
+    const { data, error } = await supabase
+      .from('products')
+      .select('*');
+      
+    if (error) {
+      console.error("Supabase error:", error);
+      return [];
     }
-    const data = fs.readFileSync(DB_PATH, 'utf-8');
-    return JSON.parse(data);
+    
+    return data as Product[];
   } catch (error) {
-    console.error("Error reading products:", error);
+    console.error("Error fetching products:", error);
     return [];
   }
 }
 
-export function saveProducts(products: Product[]) {
+export async function saveProducts(products: Product[]) {
   try {
-    const dir = path.dirname(DB_PATH);
-    if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-    }
-    fs.writeFileSync(DB_PATH, JSON.stringify(products, null, 2));
+     if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return;
+
+     const { error } = await supabase
+        .from('products')
+        .upsert(products, { onConflict: 'id' });
+
+     if (error) {
+        console.error("Supabase save error:", error);
+        throw error;
+     }
   } catch (error) {
       console.error("Error saving products:", error);
+      throw error;
   }
 }

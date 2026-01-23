@@ -10,7 +10,7 @@ export default async function Home(props: {
   searchParams: Promise<{ category?: string; search?: string }>;
 }) {
   const searchParams = await props.searchParams;
-  const products = getProducts();
+  const products = await getProducts(); // Added await
   
   const category = searchParams.category;
   const search = searchParams.search;
@@ -48,7 +48,7 @@ export default async function Home(props: {
                 <p className="text-xl font-medium">Nenhum produto encontrado.</p>
                 {products.length === 0 && (
                     <p className="mt-4 text-sm bg-blue-50 text-blue-700 inline-block px-4 py-2 rounded-md">
-                        Dica: Acesse a área administrativa (clique 5x no logo) para importar produtos.
+                        Dica: Configure as chaves do Supabase no .env.local e acesse a área administrativa.
                     </p>
                 )}
              </div>
