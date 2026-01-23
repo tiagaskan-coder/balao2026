@@ -101,11 +101,8 @@ export default function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-gray-800 pt-8 text-center text-xs text-gray-500">
-          <p>© {new Date().getFullYear()} Balão da Informática. Todos os direitos reservados.</p>
-          <p className="mt-2">
-            Preços e condições de pagamento exclusivos para compras via internet. Vendas sujeitas a análise e confirmação de dados.
-          </p>
+        <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
+          <p>&copy; 2026 Balão da Informática. Todos os direitos reservados. <a href="http://www.balao.info" target="_blank" className="hover:text-[#E60012]">www.balao.info</a></p>
         </div>
       </div>
     </footer>

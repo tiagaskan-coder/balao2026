@@ -20,7 +20,7 @@ export default function CartPage() {
       .join("\n")}\n\n*Total: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cartTotal)}*`;
 
     // Replace with actual number if available, or just a placeholder
-    const phoneNumber = "5511999999999"; 
+    const phoneNumber = "5519987510267"; 
     const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     
     window.open(url, "_blank");
