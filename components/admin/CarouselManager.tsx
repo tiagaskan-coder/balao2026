@@ -92,13 +92,79 @@ export default function CarouselManager() {
   const [newImageTitle, setNewImageTitle] = useState("");
   const [adding, setAdding] = useState(false);
   const [validationError, setValidationError] = useState("");
-
+  const [uploading, setUploading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFileUpload(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      handleFileUpload(e.target.files[0]);
+    }
+  };
+
+  const handleFileUpload = async (file: File) => {
+    setUploading(true);
+    setValidationError("");
+    
+    // Basic validation
+    if (!file.type.startsWith('image/')) {
+        setValidationError("Apenas arquivos de imagem são permitidos.");
+        setUploading(false);
+        return;
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('title', newImageTitle || file.name.split('.')[0]);
+
+        const res = await fetch("/api/carousel/upload", {
+            method: "POST",
+            body: formData,
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.error || "Erro no upload");
+        }
+
+        setNewImageUrl("");
+        setNewImageTitle("");
+        fetchImages();
+    } catch (error: any) {
+        console.error("Upload failed", error);
+        setValidationError(error.message || "Falha ao enviar imagem.");
+    } finally {
+        setUploading(false);
+    }
+  };
+
 
   const fetchImages = async () => {
     setLoading(true);
@@ -177,141 +243,107 @@ export default function CarouselManager() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Tem certeza que deseja remover esta imagem?")) return;
-    try {
-      await fetch(`/api/carousel/${id}`, { method: "DELETE" });
-      setImages(images.filter(img => img.id !== id));
-    } catch (error) {
-      console.error("Failed to delete", error);
-    }
-  };
-
-  const handleToggleActive = async (image: CarouselImage) => {
-    try {
-      await fetch(`/api/carousel/${image.id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ active: !image.active }),
-      });
-      setImages(images.map(img => img.id === image.id ? { ...img, active: !img.active } : img));
-    } catch (error) {
-      console.error("Failed to toggle", error);
-    }
-  };
-
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (over && active.id !== over.id) {
-      setImages((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        
-        const newItems = arrayMove(items, oldIndex, newIndex);
-        
-        // Update order in backend
-        // We update all items with their new index as display_order
-        const updates = newItems.map((item, index) => ({
-            id: item.id,
-            display_order: index
-        }));
-
-        // Send updates in background
-        Promise.all(updates.map(u => 
-            fetch(`/api/carousel/${u.id}`, {
-                method: "PATCH",
-                body: JSON.stringify({ display_order: u.display_order })
-            })
-        )).catch(err => console.error("Failed to update order", err));
-
-        return newItems;
-      });
-    }
-  };
-
   return (
-    <div>
-        <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-lg text-gray-800">Gerenciar Carrossel</h3>
-            <span className="text-xs text-gray-500">Arraste para reordenar</span>
-        </div>
-
-        {/* Add New Image Form */}
-        <div className="bg-gray-50 p-4 rounded-lg border mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">URL da Imagem</label>
-                    <input
-                        type="text"
-                        value={newImageUrl}
-                        onChange={(e) => setNewImageUrl(e.target.value)}
-                        placeholder="https://..."
-                        className="w-full p-2 border rounded text-sm"
+    <div className="space-y-6">
+      <div 
+        className={`bg-white p-6 rounded-lg shadow-sm border-2 border-dashed transition-colors ${
+            dragActive ? "border-[#E60012] bg-red-50" : "border-gray-200"
+        }`}
+        onDragEnter={handleDrag}
+        onDragLeave={handleDrag}
+        onDragOver={handleDrag}
+        onDrop={handleDrop}
+      >
+        <h2 className="text-lg font-bold text-gray-800 mb-4">Adicionar Nova Imagem</h2>
+        
+        <div className="flex flex-col gap-4">
+           {/* Drag and Drop Area */}
+           <div className="flex flex-col items-center justify-center py-8 text-center">
+                <ImageIcon size={48} className={`mb-4 ${dragActive ? "text-[#E60012]" : "text-gray-300"}`} />
+                <p className="text-sm text-gray-500 mb-2">
+                    Arraste e solte uma imagem aqui ou
+                </p>
+                <label className="cursor-pointer bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-50 transition-colors text-sm font-medium">
+                    Selecionar Arquivo
+                    <input 
+                        type="file" 
+                        className="hidden" 
+                        accept="image/*"
+                        onChange={handleFileSelect}
+                        disabled={uploading}
                     />
-                </div>
-                <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Título (Opcional)</label>
-                    <input
-                        type="text"
-                        value={newImageTitle}
-                        onChange={(e) => setNewImageTitle(e.target.value)}
-                        placeholder="Promoção de Verão"
-                        className="w-full p-2 border rounded text-sm"
-                    />
-                </div>
-            </div>
-            
-            {validationError && (
-                <div className="mb-4 text-red-600 text-sm flex items-center gap-2">
-                    <AlertCircle size={16} />
-                    {validationError}
-                </div>
-            )}
+                </label>
+                {uploading && <p className="text-xs text-[#E60012] mt-2 animate-pulse">Enviando imagem...</p>}
+           </div>
 
+           <div className="relative flex items-center gap-4 py-2">
+               <div className="flex-grow border-t border-gray-200"></div>
+               <span className="flex-shrink-0 text-gray-400 text-xs uppercase">Ou use uma URL</span>
+               <div className="flex-grow border-t border-gray-200"></div>
+           </div>
+
+          <div className="flex gap-4">
+            <input
+              type="text"
+              placeholder="URL da imagem (https://...)"
+              className="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:border-[#E60012]"
+              value={newImageUrl}
+              onChange={(e) => setNewImageUrl(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Título (opcional)"
+              className="w-1/3 p-2 border border-gray-300 rounded focus:outline-none focus:border-[#E60012]"
+              value={newImageTitle}
+              onChange={(e) => setNewImageTitle(e.target.value)}
+            />
             <button
-                onClick={handleAdd}
-                disabled={adding || !newImageUrl}
-                className="w-full md:w-auto bg-[#E60012] text-white px-4 py-2 rounded text-sm font-medium hover:bg-[#cc0010] disabled:opacity-50 flex items-center justify-center gap-2"
+              onClick={handleAdd}
+              disabled={adding || !newImageUrl}
+              className="bg-[#E60012] text-white px-4 py-2 rounded hover:bg-red-700 disabled:opacity-50 transition-colors"
             >
-                {adding ? "Validando..." : "Adicionar ao Carrossel"}
-                <ImageIcon size={16} />
+              {adding ? "Adicionando..." : "Adicionar"}
             </button>
-            <p className="mt-2 text-xs text-gray-500">
-                Suporta JPEG, PNG, WebP, AVIF, SVG. A imagem será validada antes de adicionar.
-            </p>
+          </div>
+          
+          {validationError && (
+              <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 p-3 rounded">
+                  <AlertCircle size={16} />
+                  {validationError}
+              </div>
+          )}
         </div>
+      </div>
 
-        {/* List */}
-        {loading ? (
-            <div className="text-center py-8 text-gray-500">Carregando imagens...</div>
-        ) : (
-            <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-            >
-                <SortableContext
-                    items={images.map(img => img.id)}
-                    strategy={verticalListSortingStrategy}
-                >
-                    <div className="space-y-3">
-                        {images.map((image) => (
-                            <SortableItem
-                                key={image.id}
-                                image={image}
-                                onDelete={handleDelete}
-                                onToggle={handleToggleActive}
-                            />
-                        ))}
-                        {images.length === 0 && (
-                            <div className="text-center py-8 text-gray-400 bg-gray-50 rounded border border-dashed">
-                                Nenhuma imagem no carrossel.
-                            </div>
-                        )}
-                    </div>
-                </SortableContext>
-            </DndContext>
-        )}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={images.map(img => img.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="space-y-3">
+            {loading ? (
+                <p className="text-center text-gray-500 py-8">Carregando imagens...</p>
+            ) : images.length === 0 ? (
+                <p className="text-center text-gray-500 py-8 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                    Nenhuma imagem no carrossel. Adicione uma acima.
+                </p>
+            ) : (
+                images.map((image) => (
+                <SortableItem 
+                    key={image.id} 
+                    image={image} 
+                    onDelete={handleDelete}
+                    onToggle={handleToggleActive}
+                />
+                ))
+            )}
+          </div>
+        </SortableContext>
+      </DndContext>
     </div>
   );
 }
