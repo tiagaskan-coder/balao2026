@@ -24,6 +24,7 @@ export default function Header() {
   const [showPreview, setShowPreview] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const searchContainerRef = useRef<HTMLFormElement>(null);
+  const mobileSearchContainerRef = useRef<HTMLDivElement>(null);
 
   // Fetch products for client-side search preview
   useEffect(() => {
@@ -36,7 +37,11 @@ export default function Header() {
   // Handle click outside to close preview
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const isOutsideDesktop = searchContainerRef.current && !searchContainerRef.current.contains(target);
+      const isOutsideMobile = mobileSearchContainerRef.current && !mobileSearchContainerRef.current.contains(target);
+
+      if (isOutsideDesktop && isOutsideMobile) {
         setShowPreview(false);
       }
     };
