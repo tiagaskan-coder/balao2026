@@ -10,10 +10,12 @@ export async function PUT(
   try {
     const { id } = await params;
     const data = await request.json();
+    console.log(`[API] Updating category ${id} with data:`, data);
     await updateCategory(id, data);
     return NextResponse.json({ success: true });
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to update category" }, { status: 500 });
+  } catch (error: any) {
+    console.error("[API] Update category failed:", error);
+    return NextResponse.json({ error: error.message || "Failed to update category" }, { status: 500 });
   }
 }
 

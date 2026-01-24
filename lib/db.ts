@@ -196,12 +196,24 @@ export async function createCategory(category: Partial<Category>) {
 
 export async function updateCategory(id: string, updates: Partial<Category>) {
     try {
-        const { error } = await supabaseAdmin
+        console.log(`[DB] Updating category ${id} via supabaseAdmin`, updates);
+        const { data, error } = await supabaseAdmin
             .from('categories')
             .update(updates)
-            .eq('id', id);
+            .eq('id', id)
+            .select();
 
-        if (error) throw error;
+        if (error) {
+            console.error("[DB] Supabase update error:", error);
+            throw error;
+        }
+        
+        if (!data || data.length === 0) {
+             console.error(`[DB] Category ${id} not found or not updated.`);
+             throw new Error(`Category with ID ${id} not found.`);
+        }
+
+        console.log(`[DB] Category ${id} updated successfully`);
     } catch (error) {
         console.error("Error updating category:", error);
         throw error;

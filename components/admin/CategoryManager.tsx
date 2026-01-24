@@ -27,7 +27,7 @@ export default function CategoryManager() {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/categories");
+      const res = await fetch("/api/categories", { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
         setCategories(data);
@@ -101,7 +101,15 @@ export default function CategoryManager() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData)
         });
-        if (res.ok) fetchCategories();
+        
+        if (res.ok) {
+            await fetchCategories();
+            setEditingId(null);
+            setIsAdding(false);
+        } else {
+            const err = await res.json();
+            alert(`Erro ao atualizar: ${err.error}`);
+        }
       } else {
         // Create
         const res = await fetch("/api/categories", {
@@ -109,12 +117,19 @@ export default function CategoryManager() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData)
         });
-        if (res.ok) fetchCategories();
+        
+        if (res.ok) {
+            await fetchCategories();
+            setEditingId(null);
+            setIsAdding(false);
+        } else {
+            const err = await res.json();
+            alert(`Erro ao criar: ${err.error}`);
+        }
       }
-      setEditingId(null);
-      setIsAdding(false);
     } catch (error) {
       console.error("Failed to save", error);
+      alert("Erro ao salvar. Verifique o console.");
     }
   };
 
