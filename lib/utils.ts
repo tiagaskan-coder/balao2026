@@ -5,6 +5,11 @@ export interface Product {
   image: string;
   category: string;
   slug: string;
+  cost?: number;
+  supplier?: string;
+  video_url?: string;
+  description?: string;
+  created_at?: string;
 }
 
 export interface CarouselImage {

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getProducts, saveProducts } from '@/lib/db';
+import { getProducts, saveProducts, createProduct } from '@/lib/db';
 
 
 export async function GET() {
@@ -9,13 +9,18 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { products } = await request.json();
+    const body = await request.json();
     
-    // In Supabase logic, we usually append/upsert. 
-    // If "replace" was needed, we'd delete all first, but let's stick to upsert for safety.
-    
-    await saveProducts(products);
-    return NextResponse.json({ success: true, count: products.length });
+    // Check if bulk import
+    if (body.products && Array.isArray(body.products)) {
+        await saveProducts(body.products);
+        return NextResponse.json({ success: true, count: body.products.length });
+    }
+
+    // Single product creation
+    const newProduct = await createProduct(body);
+    return NextResponse.json(newProduct);
+
   } catch (e) {
     console.error(e);
     return NextResponse.json({ success: false, error: 'Failed to save' }, { status: 500 });

@@ -37,6 +37,55 @@ export async function saveProducts(products: Product[]) {
   }
 }
 
+// --- Products CRUD ---
+
+export async function createProduct(product: Partial<Product>) {
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('products')
+            .insert(product)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    } catch (error) {
+        console.error("Error creating product:", error);
+        throw error;
+    }
+}
+
+export async function updateProduct(id: string, updates: Partial<Product>) {
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('products')
+            .update(updates)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    } catch (error) {
+        console.error("Error updating product:", error);
+        throw error;
+    }
+}
+
+export async function deleteProduct(id: string) {
+    try {
+        const { error } = await supabaseAdmin
+            .from('products')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+    } catch (error) {
+        console.error("Error deleting product:", error);
+        throw error;
+    }
+}
+
 export async function getCarouselImages(activeOnly = true): Promise<CarouselImage[]> {
   try {
     let query = supabase
