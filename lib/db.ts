@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { supabaseAdmin } from './supabase-admin';
 import { Product, CarouselImage, Category } from './utils';
 
 // Fallback to empty array if connection fails or env vars missing
@@ -168,7 +169,7 @@ export async function getCategories(): Promise<Category[]> {
 export async function createCategory(category: Partial<Category>) {
     try {
         // Get max order
-        const { data: maxOrderData } = await supabase
+        const { data: maxOrderData } = await supabaseAdmin
             .from('categories')
             .select('display_order')
             .order('display_order', { ascending: false })
@@ -176,7 +177,7 @@ export async function createCategory(category: Partial<Category>) {
         
         const nextOrder = (maxOrderData?.[0]?.display_order ?? -1) + 1;
 
-        const { data, error } = await supabase
+        const { data, error } = await supabaseAdmin
             .from('categories')
             .insert({
                 ...category,
@@ -195,7 +196,7 @@ export async function createCategory(category: Partial<Category>) {
 
 export async function updateCategory(id: string, updates: Partial<Category>) {
     try {
-        const { error } = await supabase
+        const { error } = await supabaseAdmin
             .from('categories')
             .update(updates)
             .eq('id', id);
@@ -209,7 +210,7 @@ export async function updateCategory(id: string, updates: Partial<Category>) {
 
 export async function deleteCategory(id: string) {
     try {
-        const { error } = await supabase
+        const { error } = await supabaseAdmin
             .from('categories')
             .delete()
             .eq('id', id);
