@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, TouchEvent } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { CarouselImage } from "@/lib/utils";
@@ -50,7 +50,7 @@ export default function Carousel({ images }: { images: CarouselImage[] }) {
   }, [images.length]);
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+    setCurrentIndex((prev: number) => (prev - 1 + images.length) % images.length);
   };
 
   useEffect(() => {
