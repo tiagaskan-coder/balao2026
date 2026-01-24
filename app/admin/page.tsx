@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { parseProducts, Product, CATEGORIES } from "@/lib/utils";
+import { parseProducts, Product, Category, buildCategoryTree, CATEGORIES } from "@/lib/utils";
 import Link from "next/link";
 import { ArrowLeft, Upload, CheckCircle, AlertCircle, Layout, Layers, History, Save, Search, Settings, ExternalLink, Menu } from "lucide-react";
 import CarouselManager from "@/components/admin/CarouselManager";
@@ -12,6 +12,7 @@ export default function AdminPage() {
 
   // Product List State
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loadingProducts, setLoadingProducts] = useState(false);
   
@@ -31,6 +32,7 @@ export default function AdminPage() {
 
   // Keyboard Shortcuts
   useEffect(() => {
+    fetchCategories();
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.altKey) {
         if (e.key === "1") setActiveTab("import");
@@ -41,6 +43,18 @@ export default function AdminPage() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  const fetchCategories = async () => {
+    try {
+        const res = await fetch("/api/categories");
+        if (res.ok) {
+            const data = await res.json();
+            setCategories(data);
+        }
+    } catch (e) {
+        console.error("Failed to fetch categories", e);
+    }
+  };
 
   // Fetch Products when tab changes
   useEffect(() => {
@@ -201,6 +215,17 @@ export default function AdminPage() {
     }
   };
 
+  const categoryTree = buildCategoryTree(categories);
+  const flatCategories: { name: string; level: number }[] = [];
+  
+  const flatten = (nodes: Category[], level = 0) => {
+    nodes.forEach(node => {
+        flatCategories.push({ name: node.name, level });
+        if (node.children) flatten(node.children, level + 1);
+    });
+  };
+  flatten(categoryTree);
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       {/* Top Bar */}
@@ -322,9 +347,19 @@ export default function AdminPage() {
                                                 onChange={(e) => setSelectedCategory(e.target.value)}
                                                 className="w-full p-2 border rounded-md text-sm"
                                             >
-                                                {CATEGORIES.map(c => (
-                                                    <option key={c} value={c}>{c}</option>
-                                                ))}
+                                                {flatCategories.length > 0 ? (
+                                                    flatCategories.map(c => (
+                                                        <option key={c.name} value={c.name}>
+                                                            {/* Indentation */}
+                                                            {'\u00A0'.repeat(c.level * 4)}{c.name}
+                                                        </option>
+                                                    ))
+                                                ) : (
+                                                    // Fallback to static list if empty (loading or error)
+                                                    CATEGORIES.map(c => (
+                                                        <option key={c} value={c}>{c}</option>
+                                                    ))
+                                                )}
                                             </select>
                                         </div>
                                         <div>

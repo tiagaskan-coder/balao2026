@@ -39,6 +39,25 @@ export default function CategoryManager() {
     }
   };
 
+  const handleSeed = async () => {
+    if (!confirm("Isso irá recriar todas as categorias padrão. Deseja continuar?")) return;
+    setLoading(true);
+    try {
+        const res = await fetch("/api/seed");
+        if (res.ok) {
+            alert("Categorias restauradas com sucesso!");
+            fetchCategories();
+        } else {
+            const data = await res.json();
+            alert("Erro ao restaurar: " + data.error);
+        }
+    } catch (error) {
+        console.error("Failed to seed", error);
+    } finally {
+        setLoading(false);
+    }
+  };
+
   const tree = buildCategoryTree(categories);
 
   const toggleExpand = (id: string) => {
@@ -160,12 +179,21 @@ export default function CategoryManager() {
       <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-bold">Estrutura de Categorias</h2>
-          <button 
-            onClick={() => handleAdd(null)}
-            className="flex items-center gap-2 bg-[#E60012] text-white px-3 py-2 rounded hover:bg-red-700 text-sm"
-          >
-            <Plus size={16} /> Nova Categoria Raiz
-          </button>
+          <div className="flex gap-2">
+            <button 
+                onClick={handleSeed}
+                className="text-xs bg-gray-100 text-gray-600 px-2 py-2 rounded hover:bg-gray-200"
+                title="Restaurar Categorias Padrão"
+            >
+                Restaurar Padrão
+            </button>
+            <button 
+                onClick={() => handleAdd(null)}
+                className="flex items-center gap-2 bg-[#E60012] text-white px-3 py-2 rounded hover:bg-red-700 text-sm"
+            >
+                <Plus size={16} /> Nova Categoria Raiz
+            </button>
+          </div>
         </div>
 
         {loading ? (
