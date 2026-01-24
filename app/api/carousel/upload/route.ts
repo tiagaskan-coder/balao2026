@@ -111,6 +111,14 @@ export async function POST(req: NextRequest) {
 
     if (dbError) {
         console.error("Erro na inserção (DB):", dbError);
+
+        // Verifica se o erro é "tabela não existe" (código 42P01)
+        if (dbError.code === '42P01' || dbError.message?.includes('does not exist') || dbError.message?.includes('Could not find the table')) {
+             return NextResponse.json({ 
+                 error: "A tabela 'carousel_images' não existe. Execute o script 'supabase/setup.sql' no SQL Editor do Supabase." 
+             }, { status: 500 });
+        }
+
         // Tentar limpar a imagem enviada se falhar no banco (opcional, mas boa prática)
         await adminClient.storage.from(BUCKET_NAME).remove([fileName]);
         return NextResponse.json({ error: "Falha ao salvar registro no banco de dados: " + dbError.message }, { status: 500 });
