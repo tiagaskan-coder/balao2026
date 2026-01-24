@@ -1,15 +1,18 @@
+
 "use client";
 
 import Link from "next/link";
 import { CheckCircle, Home, Copy, Check } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useRef } from "react";
 import { generatePixPayload } from "@/lib/pix";
+import Script from "next/script";
 
 function ThankYouContent() {
   const searchParams = useSearchParams();
   const [pixPayload, setPixPayload] = useState("");
   const [copied, setCopied] = useState(false);
+  const qrCodeRef = useRef<HTMLDivElement>(null);
   
   const totalParam = searchParams.get("total");
   const orderId = searchParams.get("orderId");
@@ -29,6 +32,20 @@ function ThankYouContent() {
     }
   }, [total, orderId]);
 
+  useEffect(() => {
+    if (pixPayload && qrCodeRef.current && (window as any).QRCode) {
+      qrCodeRef.current.innerHTML = "";
+      new (window as any).QRCode(qrCodeRef.current, {
+        text: pixPayload,
+        width: 200,
+        height: 200,
+        colorDark : "#000000",
+        colorLight : "#ffffff",
+        correctLevel : (window as any).QRCode.CorrectLevel.H
+      });
+    }
+  }, [pixPayload]);
+
   const handleCopy = () => {
     navigator.clipboard.writeText(pixPayload);
     setCopied(true);
@@ -37,6 +54,24 @@ function ThankYouContent() {
 
   return (
     <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
+        <Script 
+          src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" 
+          strategy="lazyOnload"
+          onLoad={() => {
+            if (pixPayload && qrCodeRef.current) {
+              qrCodeRef.current.innerHTML = "";
+              new (window as any).QRCode(qrCodeRef.current, {
+                text: pixPayload,
+                width: 200,
+                height: 200,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : (window as any).QRCode.CorrectLevel.H
+              });
+            }
+          }}
+        />
+
         <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
           <CheckCircle className="text-green-600 w-10 h-10" />
         </div>
@@ -57,12 +92,7 @@ function ThankYouContent() {
             </h2>
             
             <div className="mb-4 flex justify-center">
-               {/* eslint-disable-next-line @next/next/no-img-element */}
-               <img 
-                 src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(pixPayload)}`} 
-                 alt="QR Code Pix" 
-                 className="w-48 h-48 border-4 border-white shadow-sm rounded-md"
-               />
+               <div ref={qrCodeRef} className="border-4 border-white shadow-sm rounded-md p-2 bg-white"></div>
             </div>
             
             <p className="text-sm text-gray-600 mb-3 font-medium">
@@ -109,16 +139,16 @@ function ThankYouContent() {
         <div className="mt-8 text-sm text-gray-400">
           Se tiver alguma dúvida, entre em contato conosco pelo WhatsApp.
         </div>
-      </div>
+    </div>
   );
 }
 
 export default function ThankYouPage() {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-      <Suspense fallback={<div className="text-center">Carregando...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Carregando...</div>}>
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
         <ThankYouContent />
-      </Suspense>
-    </div>
+      </div>
+    </Suspense>
   );
 }
