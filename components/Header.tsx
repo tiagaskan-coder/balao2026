@@ -146,10 +146,7 @@ export default function Header() {
           )}
         </form>
 
-        {/* Mobile Search Icon (visible only on small screens) */}
-        <button className="md:hidden text-[#E60012]">
-             <Search size={28} strokeWidth={2.5} />
-        </button>
+
 
         {/* Actions */}
         <div className="flex items-center gap-8 text-gray-700">
