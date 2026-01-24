@@ -53,6 +53,14 @@ export async function POST(req: NextRequest) {
 
     if (uploadError) {
       console.error("Storage upload error:", uploadError);
+      
+      // Handle RLS error specifically
+      if (uploadError.message.includes("row-level security")) {
+          return NextResponse.json({ 
+              error: "Erro de Permissão (RLS): O upload foi bloqueado. Adicione a variável SUPABASE_SERVICE_ROLE_KEY no arquivo .env para corrigir isso automaticamente, ou configure as políticas de RLS no bucket 'carousel' para permitir uploads." 
+          }, { status: 500 });
+      }
+
       // Provide a helpful error if it's the bucket missing error and we couldn't create it
       if (uploadError.message.includes("Bucket not found")) {
           return NextResponse.json({ 
@@ -67,8 +75,13 @@ export async function POST(req: NextRequest) {
       .from(BUCKET_NAME)
       .getPublicUrl(filename);
 
+    // Use service role client for database operations too if available to bypass RLS on table
+    const dbClient = serviceRoleKey 
+        ? createClient(supabaseUrl, serviceRoleKey)
+        : supabase;
+
     // Get next order
-    const { data: maxOrderData } = await supabase
+    const { data: maxOrderData } = await dbClient
         .from('carousel_images')
         .select('display_order')
         .order('display_order', { ascending: false })
@@ -77,7 +90,7 @@ export async function POST(req: NextRequest) {
     const nextOrder = (maxOrderData?.[0]?.display_order ?? -1) + 1;
 
     // Save to database
-    const { data, error: dbError } = await supabase
+    const { data, error: dbError } = await dbClient
         .from('carousel_images')
         .insert({
             image_url: publicUrl,
