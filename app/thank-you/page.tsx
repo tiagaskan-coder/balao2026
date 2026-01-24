@@ -19,11 +19,11 @@ function ThankYouContent() {
     if (total > 0) {
       // Use the provided CNPJ as key
       const payload = generatePixPayload({
-        key: "34397947000108",
+        key: "34397947000108", // CNPJ without symbols
         name: "BALAO CASTELO",
         city: "SAO PAULO",
         amount: total,
-        txid: orderId ? orderId.slice(0, 20).replace(/[^a-zA-Z0-9]/g, '') : "***" // Ensure txid is alphanumeric for Pix compliance if needed, though standard allows more. Limits length.
+        txid: "***" // Use *** for broad compatibility (Static QR Code style)
       });
       setPixPayload(payload);
     }

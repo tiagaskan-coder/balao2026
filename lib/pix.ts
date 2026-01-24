@@ -46,9 +46,21 @@ export function generatePixPayload({
   // Payload Format Indicator
   const payloadFormat = '000201';
 
+  // Point of Initiation Method (12 = Dynamic, 11 = Static)
+  // Using 12 because we have a specific amount, but 11 is also valid.
+  // However, for "Pix Key" based (no URL), 11 is safer.
+  // If we omit, it defaults to 11? Better to be explicit if issues arise.
+  // Actually, some banks prefer 010211.
+  // But to be safest with "Key Not Found" errors, let's omit if not strictly required, 
+  // OR try 11. 
+  // Let's stick to standard structure. 
+  // 000201 is mandatory.
+  
   // Merchant Account Information
   // GUI (00) + Key (01)
   const gui = '0014br.gov.bcb.pix';
+  // Force clean key to be just numbers if it looks like CNPJ/CPF (only digits provided in input)
+  // But user input "34397947000108" is digits.
   const keyField = `01${cleanKey.length.toString().padStart(2, '0')}${cleanKey}`;
   const merchantAccountContent = gui + keyField;
   const merchantAccount = `26${merchantAccountContent.length.toString().padStart(2, '0')}${merchantAccountContent}`;
