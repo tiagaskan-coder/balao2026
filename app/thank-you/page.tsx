@@ -73,8 +73,6 @@ function ThankYouContent() {
         {pixPayload && (
           <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 mb-8">
             <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center justify-center gap-2">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg" alt="Pix" className="h-6" />
               Pagamento via Pix
             </h2>
             
