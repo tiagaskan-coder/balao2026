@@ -65,7 +65,7 @@ export default async function ProductPage(props: Props) {
       <Header />
       <div className="container mx-auto py-8 px-4">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-4 md:p-8">
                 {/* Image Section */}
                 <div className="relative aspect-square bg-white border border-gray-100 rounded-lg flex items-center justify-center p-4">
                     <Image 

@@ -50,7 +50,7 @@ function ThankYouContent() {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
+    <div className="bg-white rounded-lg shadow-xl p-6 md:p-8 max-w-md w-full text-center mx-4 md:mx-0">
         <Script 
           src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js" 
           strategy="afterInteractive"
