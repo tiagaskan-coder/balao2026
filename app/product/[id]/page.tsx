@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import ShareButton from '@/components/ShareButton';
 import ProductActions from '@/components/ProductActions';
-import RelatedProducts from '@/components/RelatedProducts';
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -123,8 +122,6 @@ export default async function ProductPage(props: Props) {
                 </div>
             </div>
         </div>
-
-        <RelatedProducts currentProduct={product} allProducts={products} />
       </div>
      </div>
   );
