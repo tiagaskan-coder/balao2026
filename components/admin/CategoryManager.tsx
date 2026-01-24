@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Category } from "@/lib/utils";
+import { Category, buildCategoryTree } from "@/lib/utils";
 import { Plus, Edit, Trash2, ChevronRight, ChevronDown, Save, X } from "lucide-react";
 
 export default function CategoryManager() {

@@ -2,7 +2,7 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import ProductCard from "@/components/ProductCard";
 import Carousel from "@/components/Carousel";
-import { getProducts, getCarouselImages } from "@/lib/db";
+import { getProducts, getCarouselImages, getCategories } from "@/lib/db";
 
 // Remove force-dynamic to allow better caching and prevent 500s on timeout. 
 // Next.js will revalidate data every 60 seconds.
@@ -12,9 +12,10 @@ export default async function Home(props: {
   searchParams: Promise<{ category?: string; search?: string }>;
 }) {
   const searchParams = await props.searchParams;
-  const [products, carouselImages] = await Promise.all([
+  const [products, carouselImages, categories] = await Promise.all([
     getProducts(),
-    getCarouselImages(true)
+    getCarouselImages(true),
+    getCategories()
   ]);
   
   const category = searchParams.category;
