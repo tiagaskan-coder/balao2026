@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Product, Category } from "@/lib/utils";
-import { Plus, Edit, Trash2, Copy, Search, Upload, X, Save, Image as ImageIcon, Video, DollarSign, Package } from "lucide-react";
+import { Plus, Edit, Trash2, Copy, Search, Upload, X, Save, Image as ImageIcon, Video, DollarSign, Package, CheckSquare, Square, ChevronDown, Percent } from "lucide-react";
 
 // Helper to format currency
 const formatCurrency = (value: number) => {
@@ -15,6 +15,14 @@ export default function ProductManager() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   
+  // Selection State
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  
+  // Bulk Action State
+  const [bulkCategory, setBulkCategory] = useState("");
+  const [bulkPricePercent, setBulkPricePercent] = useState<number>(0);
+  const [isProcessingBulk, setIsProcessingBulk] = useState(false);
+
   // Edit/Create State
   const [isEditing, setIsEditing] = useState(false);
   const [currentProduct, setCurrentProduct] = useState<Partial<Product>>({});
@@ -41,6 +49,86 @@ export default function ProductManager() {
         const res = await fetch("/api/categories");
         if (res.ok) setCategories(await res.json());
     } catch (e) { console.error(e); }
+  };
+
+  // Selection Handlers
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filteredProducts.length) {
+        setSelectedIds(new Set());
+    } else {
+        setSelectedIds(new Set(filteredProducts.map(p => p.id)));
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    const newSet = new Set(selectedIds);
+    if (newSet.has(id)) newSet.delete(id);
+    else newSet.add(id);
+    setSelectedIds(newSet);
+  };
+
+  // Bulk Actions
+  const handleBulkUpdateCategory = async () => {
+    if (!bulkCategory) return alert("Selecione uma categoria");
+    if (!confirm(`Mover ${selectedIds.size} produtos para ${bulkCategory}?`)) return;
+
+    setIsProcessingBulk(true);
+    try {
+        const res = await fetch("/api/products/bulk", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                ids: Array.from(selectedIds),
+                action: "update_category",
+                value: bulkCategory
+            })
+        });
+
+        if (res.ok) {
+            alert("Categoria atualizada com sucesso!");
+            setSelectedIds(new Set());
+            fetchProducts();
+        } else {
+            throw new Error("Falha ao atualizar");
+        }
+    } catch (e) {
+        alert("Erro ao atualizar em massa");
+        console.error(e);
+    } finally {
+        setIsProcessingBulk(false);
+    }
+  };
+
+  const handleBulkUpdatePrice = async () => {
+    if (bulkPricePercent === 0) return alert("Digite uma porcentagem");
+    if (!confirm(`Alterar preço de ${selectedIds.size} produtos em ${bulkPricePercent}%?`)) return;
+
+    setIsProcessingBulk(true);
+    try {
+        const res = await fetch("/api/products/bulk", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                ids: Array.from(selectedIds),
+                action: "update_price",
+                value: bulkPricePercent
+            })
+        });
+
+        if (res.ok) {
+            alert("Preços atualizados com sucesso!");
+            setSelectedIds(new Set());
+            setBulkPricePercent(0);
+            fetchProducts();
+        } else {
+            throw new Error("Falha ao atualizar");
+        }
+    } catch (e) {
+        alert("Erro ao atualizar em massa");
+        console.error(e);
+    } finally {
+        setIsProcessingBulk(false);
+    }
   };
 
   const handleEdit = (product: Product) => {
@@ -80,6 +168,10 @@ export default function ProductManager() {
   };
 
   const handleSave = async () => {
+    if (!currentProduct.name) return alert("Nome é obrigatório");
+    if (!currentProduct.price) return alert("Preço é obrigatório");
+    if (!currentProduct.category) return alert("Categoria é obrigatória");
+
     setSaving(true);
     try {
         let imageUrl = currentProduct.image;
@@ -99,31 +191,54 @@ export default function ProductManager() {
             }
         }
 
+        // Format price if user entered plain number
+        let formattedPrice = currentProduct.price;
+        if (!currentProduct.price.includes("R$")) {
+            const num = parseFloat(currentProduct.price.replace(",", "."));
+            if (!isNaN(num)) {
+                formattedPrice = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(num);
+            }
+        }
+
         const productData = {
             ...currentProduct,
+            price: formattedPrice,
             image: imageUrl,
         };
 
+        let res;
         if (currentProduct.id) {
             // Update
-             const res = await fetch(`/api/products/${currentProduct.id}`, {
+             res = await fetch(`/api/products/${currentProduct.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(productData)
             });
-            if (!res.ok) throw new Error("Erro ao atualizar");
         } else {
             // Create
-            // Generate basic ID/Slug if missing
-            if (!productData.id) productData.id = Math.random().toString(36).substring(2, 9);
+            // Ensure ID is undefined so DB generates it (if UUID)
+            // Or if DB requires text ID, we should use a better generator like crypto.randomUUID() if available, 
+            // but usually letting DB handle it is best.
+            // If the schema expects a string ID that IS NOT a UUID, then the random string is fine.
+            // But "save error" usually implies constraint violation or type mismatch.
+            
             if (!productData.slug) productData.slug = productData.name?.toLowerCase().replace(/\s+/g, '-') || 'produto';
             
-            const res = await fetch("/api/products", {
+            // Remove the manual ID generation to let Supabase/Postgres generate it (assuming UUID default)
+            // If the table doesn't have a default for ID, this might fail. 
+            // However, typical Supabase setup uses uuid_generate_v4().
+            delete productData.id;
+
+            res = await fetch("/api/products", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(productData)
             });
-            if (!res.ok) throw new Error("Erro ao criar");
+        }
+
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.error || "Erro ao salvar produto");
         }
 
         setIsEditing(false);
@@ -143,6 +258,68 @@ export default function ProductManager() {
 
   return (
     <div>
+        {/* Bulk Actions Bar */}
+        {selectedIds.size > 0 && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex flex-wrap items-center gap-4 animate-in fade-in slide-in-from-top-2">
+                <div className="font-medium text-blue-800 flex items-center gap-2">
+                    <CheckSquare size={18} />
+                    {selectedIds.size} selecionados
+                </div>
+                
+                <div className="h-6 w-px bg-blue-200 mx-2 hidden md:block"></div>
+
+                {/* Bulk Category */}
+                <div className="flex items-center gap-2">
+                    <select 
+                        value={bulkCategory}
+                        onChange={(e) => setBulkCategory(e.target.value)}
+                        className="text-sm border-blue-200 rounded-md py-1.5 px-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                    >
+                        <option value="">Alterar Categoria...</option>
+                        {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                    </select>
+                    <button 
+                        onClick={handleBulkUpdateCategory}
+                        disabled={!bulkCategory || isProcessingBulk}
+                        className="bg-blue-600 text-white px-3 py-1.5 rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+                    >
+                        Aplicar
+                    </button>
+                </div>
+
+                <div className="h-6 w-px bg-blue-200 mx-2 hidden md:block"></div>
+
+                {/* Bulk Price */}
+                <div className="flex items-center gap-2">
+                    <div className="relative w-32">
+                        <input 
+                            type="number" 
+                            placeholder="0"
+                            value={bulkPricePercent || ""}
+                            onChange={(e) => setBulkPricePercent(Number(e.target.value))}
+                            className="w-full text-sm border-blue-200 rounded-md py-1.5 pl-2 pr-6 focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                        <span className="absolute right-2 top-1.5 text-blue-500 text-xs font-bold">%</span>
+                    </div>
+                    <button 
+                        onClick={handleBulkUpdatePrice}
+                        disabled={!bulkPricePercent || isProcessingBulk}
+                        className="bg-blue-600 text-white px-3 py-1.5 rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+                    >
+                        Aplicar
+                    </button>
+                </div>
+
+                <div className="flex-1"></div>
+                <button 
+                    onClick={() => setSelectedIds(new Set())}
+                    className="text-sm text-blue-600 hover:text-blue-800 underline"
+                >
+                    Cancelar Seleção
+                </button>
+            </div>
+        )}
+
         {/* Header & Controls */}
         <div className="flex justify-between items-center mb-6">
             <div className="relative w-64">
@@ -173,6 +350,11 @@ export default function ProductManager() {
             <table className="w-full text-left">
                 <thead className="bg-gray-50 text-gray-600 text-sm">
                     <tr>
+                        <th className="p-4 w-10">
+                            <button onClick={toggleSelectAll} className="text-gray-400 hover:text-gray-600">
+                                {selectedIds.size === filteredProducts.length && filteredProducts.length > 0 ? <CheckSquare size={20} /> : <Square size={20} />}
+                            </button>
+                        </th>
                         <th className="p-4">Produto</th>
                         <th className="p-4">Categoria</th>
                         <th className="p-4">Preço</th>
@@ -182,12 +364,17 @@ export default function ProductManager() {
                 </thead>
                 <tbody className="divide-y">
                     {loading ? (
-                        <tr><td colSpan={5} className="p-8 text-center text-gray-500">Carregando produtos...</td></tr>
+                        <tr><td colSpan={6} className="p-8 text-center text-gray-500">Carregando produtos...</td></tr>
                     ) : filteredProducts.length === 0 ? (
-                        <tr><td colSpan={5} className="p-8 text-center text-gray-500">Nenhum produto encontrado.</td></tr>
+                        <tr><td colSpan={6} className="p-8 text-center text-gray-500">Nenhum produto encontrado.</td></tr>
                     ) : (
                         filteredProducts.map(product => (
-                            <tr key={product.id} className="hover:bg-gray-50">
+                            <tr key={product.id} className={`hover:bg-gray-50 ${selectedIds.has(product.id) ? "bg-blue-50" : ""}`}>
+                                <td className="p-4">
+                                    <button onClick={() => toggleSelect(product.id)} className={`text-gray-400 hover:text-gray-600 ${selectedIds.has(product.id) ? "text-blue-600" : ""}`}>
+                                        {selectedIds.has(product.id) ? <CheckSquare size={20} /> : <Square size={20} />}
+                                    </button>
+                                </td>
                                 <td className="p-4 flex items-center gap-3">
                                     <div className="w-10 h-10 rounded overflow-hidden bg-gray-100 flex-shrink-0">
                                         <img src={product.image} className="w-full h-full object-cover" alt={product.name} />
