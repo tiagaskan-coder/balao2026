@@ -75,15 +75,15 @@ export default function Header() {
     : [];
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-      <div className="container mx-auto px-4 py-4 flex items-center justify-between gap-4">
+    <header className="bg-white border-b-4 border-[#E60012] sticky top-0 z-50 shadow-md">
+      <div className="container mx-auto px-4 py-5 flex items-center justify-between gap-6">
         {/* Logo Section */}
         <div 
           onClick={handleLogoClick}
-          className="cursor-pointer select-none flex-shrink-0"
+          className="cursor-pointer select-none flex-shrink-0 drop-shadow-sm transition-transform hover:scale-105"
           title="Clique 5 vezes para acesso administrativo"
         >
-             <div className="relative w-[180px] h-[60px]">
+             <div className="relative w-[200px] h-[65px]">
                 <Image 
                     src="/logo.png" 
                     alt="Balão da Informática" 
@@ -98,22 +98,24 @@ export default function Header() {
         <form 
             ref={searchContainerRef}
             onSubmit={handleSearch} 
-            className="flex-1 max-w-2xl relative hidden md:block"
+            className="flex-1 max-w-3xl relative hidden md:block"
         >
-          <input
-            type="text"
-            placeholder="Buscar produtos..."
-            className="w-full pl-5 pr-12 py-2.5 border border-gray-300 rounded-full focus:outline-none focus:border-[#E60012] focus:ring-1 focus:ring-[#E60012] bg-gray-50 text-gray-800"
-            value={searchQuery}
-            onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setShowPreview(true);
-            }}
-            onFocus={() => setShowPreview(true)}
-          />
-          <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#E60012] text-white p-1.5 rounded-full hover:bg-red-700 transition-colors">
-            <Search size={18} />
-          </button>
+          <div className="relative group">
+            <input
+                type="text"
+                placeholder="O que você procura hoje?"
+                className="w-full pl-6 pr-14 py-3 border-2 border-gray-200 rounded-full focus:outline-none focus:border-[#E60012] focus:ring-0 bg-gray-50 text-gray-800 placeholder-gray-400 text-base shadow-inner transition-all group-hover:border-gray-300"
+                value={searchQuery}
+                onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setShowPreview(true);
+                }}
+                onFocus={() => setShowPreview(true)}
+            />
+            <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#E60012] text-white p-2 rounded-full hover:bg-red-700 transition-colors shadow-md hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0">
+                <Search size={20} strokeWidth={2.5} />
+            </button>
+          </div>
 
           {/* Search Preview */}
           {showPreview && searchQuery.length >= 2 && (
@@ -130,30 +132,42 @@ export default function Header() {
         </form>
 
         {/* Mobile Search Icon (visible only on small screens) */}
-        <button className="md:hidden text-gray-600">
-             <Search size={24} />
+        <button className="md:hidden text-[#E60012]">
+             <Search size={28} strokeWidth={2.5} />
         </button>
 
         {/* Actions */}
-        <div className="flex items-center gap-6 text-gray-600">
-            <a href="https://wa.me/5519987510267" target="_blank" className="flex items-center gap-2 cursor-pointer hover:text-[#E60012] transition-colors" title="Fale no WhatsApp">
-                <div className="bg-green-500 text-white p-1.5 rounded-full hover:bg-green-600 transition-colors">
-                     {/* WhatsApp Icon placeholder or Lucide MessageCircle */}
-                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+        <div className="flex items-center gap-8 text-gray-700">
+            <a href="https://wa.me/5519987510267" target="_blank" className="hidden xl:flex items-center gap-3 cursor-pointer group" title="Fale no WhatsApp">
+                <div className="bg-green-500 text-white p-2 rounded-full shadow-md group-hover:bg-green-600 group-hover:shadow-lg transition-all transform group-hover:-translate-y-0.5">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                </div>
+                <div className="flex flex-col leading-tight">
+                    <span className="text-xs font-medium text-gray-500">Atendimento</span>
+                    <span className="text-sm font-bold text-green-600 group-hover:text-green-700">WhatsApp</span>
                 </div>
             </a>
 
-          <Link href="/login" className="flex items-center gap-2 hover:text-[#E60012] transition-colors">
-            <User size={24} />
-            <div className="hidden lg:flex flex-col text-xs leading-tight">
-                <span>Bem-vindo,</span>
-                <span className="font-bold">Entrar</span>
+          <Link href="/login" className="flex items-center gap-3 group">
+            <div className="p-2 bg-gray-100 rounded-full text-gray-600 group-hover:bg-[#E60012] group-hover:text-white transition-colors shadow-sm">
+                <User size={24} strokeWidth={2.5} />
+            </div>
+            <div className="hidden lg:flex flex-col text-sm leading-tight">
+                <span className="text-gray-500">Bem-vindo,</span>
+                <span className="font-bold text-gray-800 group-hover:text-[#E60012] transition-colors">Entrar</span>
             </div>
           </Link>
-          <Link href="/cart" className="relative hover:text-[#E60012] transition-colors">
-            <ShoppingCart size={24} />
+          
+          <Link href="/cart" className="relative group flex items-center gap-3">
+             <div className="p-2 bg-gray-100 rounded-full text-gray-600 group-hover:bg-[#E60012] group-hover:text-white transition-colors shadow-sm">
+                <ShoppingCart size={24} strokeWidth={2.5} />
+             </div>
+             <div className="hidden lg:flex flex-col text-sm leading-tight">
+                <span className="text-gray-500">Meu</span>
+                <span className="font-bold text-gray-800 group-hover:text-[#E60012] transition-colors">Carrinho</span>
+            </div>
             {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-[#E60012] text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full">
+                <span className="absolute top-0 right-0 lg:left-7 lg:top-0 bg-[#E60012] text-white text-[11px] font-bold h-5 w-5 flex items-center justify-center rounded-full border-2 border-white shadow-sm">
                     {cartCount}
                 </span>
             )}

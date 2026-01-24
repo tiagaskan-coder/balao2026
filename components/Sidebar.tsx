@@ -102,26 +102,26 @@ export default function Sidebar({ categories }: { categories: Category[] }) {
   };
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 hidden lg:block min-h-screen shrink-0">
-      <div className="py-6 pr-2">
-        <div className="flex items-center gap-3 px-4 mb-6 text-[#E60012]">
-            <Menu size={24} />
-            <h2 className="font-bold text-lg uppercase tracking-wide">Departamentos</h2>
+    <aside className="w-64 bg-white border-r border-gray-200 hidden lg:block min-h-screen shrink-0 shadow-[2px_0_5px_rgba(0,0,0,0.05)]">
+      <div className="py-0 pr-0">
+        <div className="bg-[#E60012] text-white px-5 py-4 mb-2 flex items-center gap-3 shadow-md">
+            <Menu size={24} className="text-white" />
+            <h2 className="font-bold text-lg uppercase tracking-wide text-white">Departamentos</h2>
         </div>
-        <nav className="space-y-0.5">
+        <nav className="space-y-1 p-2">
           <Link
               href="/"
-              className={`flex items-center gap-3 px-3 py-2 text-sm transition-colors border-l-[3px]
+              className={`flex items-center gap-3 px-3 py-3 text-sm transition-all border-l-[4px] rounded-r-md font-medium
                 ${!currentCategory || currentCategory === "Todos os Produtos" 
-                    ? 'border-[#E60012] text-[#E60012] bg-red-50 font-medium' 
-                    : 'border-transparent text-gray-700 hover:bg-gray-100 hover:text-[#E60012]'}
+                    ? 'border-[#E60012] text-[#E60012] bg-red-50 shadow-sm' 
+                    : 'border-transparent text-gray-700 hover:bg-gray-100 hover:text-[#E60012] hover:border-gray-300'}
               `}
           >
-              <List size={18} className="text-gray-400" />
+              <List size={20} className={`${!currentCategory || currentCategory === "Todos os Produtos" ? "text-[#E60012]" : "text-gray-500"}`} />
               Todos os Produtos
           </Link>
           
-          {tree.map(node => (
+          {tree.filter(node => node.name !== "Todos os Produtos").map(node => (
             <CategoryItem key={node.id} node={node} level={0} />
           ))}
         </nav>
