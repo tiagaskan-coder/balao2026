@@ -32,13 +32,13 @@ export default function Footer() {
           <div>
             <h3 className="text-white font-bold text-lg mb-6">Institucional</h3>
             <ul className="space-y-3 text-sm">
-              <li><Link href="#" className="hover:text-[#E60012] transition-colors">Sobre Nós</Link></li>
-              <li><Link href="#" className="hover:text-[#E60012] transition-colors">Sobre a Empresa</Link></li>
-              <li><Link href="#" className="hover:text-[#E60012] transition-colors">Como Comprar</Link></li>
-              <li><Link href="#" className="hover:text-[#E60012] transition-colors">Segurança e Privacidade</Link></li>
-              <li><Link href="#" className="hover:text-[#E60012] transition-colors">Envio e Entrega</Link></li>
-              <li><Link href="#" className="hover:text-[#E60012] transition-colors">Trocas e Devoluções</Link></li>
-              <li><Link href="#" className="hover:text-[#E60012] transition-colors">Fale Conosco</Link></li>
+              <li><Link href="/sobre-nos" className="hover:text-[#E60012] transition-colors">Sobre Nós</Link></li>
+              <li><Link href="/sobre-a-empresa" className="hover:text-[#E60012] transition-colors">Sobre a Empresa</Link></li>
+              <li><Link href="/como-comprar" className="hover:text-[#E60012] transition-colors">Como Comprar</Link></li>
+              <li><Link href="/seguranca-e-privacidade" className="hover:text-[#E60012] transition-colors">Segurança e Privacidade</Link></li>
+              <li><Link href="/envio-e-entrega" className="hover:text-[#E60012] transition-colors">Envio e Entrega</Link></li>
+              <li><Link href="/trocas-e-devolucoes" className="hover:text-[#E60012] transition-colors">Trocas e Devoluções</Link></li>
+              <li><Link href="/fale-conosco" className="hover:text-[#E60012] transition-colors">Fale Conosco</Link></li>
             </ul>
           </div>
 
