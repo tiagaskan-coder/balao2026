@@ -75,7 +75,11 @@ export default function Sidebar({ categories }: { categories: Category[] }) {
                 borderLeft: isSelected ? '3px solid #E60012' : '3px solid transparent'
             }}
          >
-            <Link href={`/?category=${encodeURIComponent(node.name)}`} className="flex-1 flex items-center gap-3 truncate">
+            <Link 
+                href={`/?category=${encodeURIComponent(node.name)}`} 
+                className="flex-1 flex items-center gap-3 truncate"
+                onClick={closeSidebar}
+            >
                {Icon && <span className="text-gray-400">{Icon}</span>}
                <span>{node.name}</span>
             </Link>
@@ -102,30 +106,41 @@ export default function Sidebar({ categories }: { categories: Category[] }) {
   };
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 hidden lg:block min-h-screen shrink-0 shadow-[2px_0_5px_rgba(0,0,0,0.05)]">
-      <div className="py-0 pr-0">
-        <div className="bg-[#E60012] text-white px-5 py-4 mb-2 flex items-center gap-3 shadow-md">
-            <Menu size={24} className="text-white" />
-            <h2 className="font-bold text-lg uppercase tracking-wide text-white">Departamentos</h2>
-        </div>
-        <nav className="space-y-1 p-2">
-          <Link
-              href="/"
-              className={`flex items-center gap-3 px-3 py-3 text-sm transition-all border-l-[4px] rounded-r-md font-medium
-                ${!currentCategory || currentCategory === "Todos os Produtos" 
-                    ? 'border-[#E60012] text-[#E60012] bg-red-50 shadow-sm' 
-                    : 'border-transparent text-gray-700 hover:bg-gray-100 hover:text-[#E60012] hover:border-gray-300'}
-              `}
-          >
-              <List size={20} className={`${!currentCategory || currentCategory === "Todos os Produtos" ? "text-[#E60012]" : "text-gray-500"}`} />
-              Todos os Produtos
-          </Link>
-          
-          {tree.filter(node => node.name !== "Todos os Produtos").map(node => (
-            <CategoryItem key={node.id} node={node} level={0} />
-          ))}
-        </nav>
-      </div>
-    </aside>
+    <>
+        {/* Mobile Overlay */}
+        {isOpen && (
+            <div 
+                className="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity"
+                onClick={closeSidebar}
+            />
+        )}
+
+        {/* Sidebar Container */}
+        <aside className={`
+            bg-white rounded-lg shadow-md border border-gray-100 flex-shrink-0 flex flex-col
+            lg:w-64 lg:static lg:block lg:h-fit
+            fixed inset-y-0 left-0 z-50 w-[280px] transform transition-transform duration-300 ease-in-out
+            ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}>
+            <div className="p-4 bg-gray-50 border-b border-gray-100 font-bold text-gray-700 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <List size={20} className="text-[#E60012]" />
+                    <span>Categorias</span>
+                </div>
+                <button 
+                    onClick={closeSidebar}
+                    className="lg:hidden text-gray-500 hover:text-red-600"
+                >
+                    <X size={20} />
+                </button>
+            </div>
+            
+            <div className="py-2 overflow-y-auto max-h-[calc(100vh-60px)] lg:max-h-none custom-scrollbar">
+                {tree.map(node => (
+                    <CategoryItem key={node.id} node={node} level={0} />
+                ))}
+            </div>
+        </aside>
+    </>
   );
 }

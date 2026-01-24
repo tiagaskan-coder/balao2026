@@ -3,6 +3,7 @@ import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { AuthProvider } from "@/context/AuthContext";
+import { SidebarProvider } from "@/context/SidebarContext";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
@@ -23,8 +24,10 @@ export default function RootLayout({
         <AuthProvider>
           <ToastProvider>
             <CartProvider>
+              <SidebarProvider>
                 {children}
                 <Footer />
+              </SidebarProvider>
             </CartProvider>
           </ToastProvider>
         </AuthProvider>

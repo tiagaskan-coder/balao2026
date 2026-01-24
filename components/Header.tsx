@@ -80,6 +80,16 @@ export default function Header() {
   return (
     <header className="bg-white border-b-4 border-[#E60012] sticky top-0 z-50 shadow-md">
       <div className="container mx-auto px-4 py-5 flex items-center justify-between gap-6">
+        
+        {/* Mobile Menu Button */}
+        <button 
+          onClick={toggleSidebar}
+          className="lg:hidden p-2 -ml-2 text-gray-600 hover:text-[#E60012] transition-colors"
+          aria-label="Abrir menu"
+        >
+            <Menu size={28} />
+        </button>
+
         {/* Logo Section */}
         <div 
           onClick={handleLogoClick}
