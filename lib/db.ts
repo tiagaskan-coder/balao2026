@@ -307,38 +307,3 @@ export async function deleteOrder(id: string) {
         throw error;
     }
 }
-            .from('categories')
-            .update(updates)
-            .eq('id', id)
-            .select();
-
-        if (error) {
-            console.error("[DB] Supabase update error:", error);
-            throw error;
-        }
-        
-        if (!data || data.length === 0) {
-             console.error(`[DB] Category ${id} not found or not updated.`);
-             throw new Error(`Category with ID ${id} not found.`);
-        }
-
-        console.log(`[DB] Category ${id} updated successfully`);
-    } catch (error) {
-        console.error("Error updating category:", error);
-        throw error;
-    }
-}
-
-export async function deleteCategory(id: string) {
-    try {
-        const { error } = await supabaseAdmin
-            .from('categories')
-            .delete()
-            .eq('id', id);
-
-        if (error) throw error;
-    } catch (error) {
-        console.error("Error deleting category:", error);
-        throw error;
-    }
-}
