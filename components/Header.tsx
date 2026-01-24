@@ -85,7 +85,7 @@ export default function Header() {
     : [];
 
   return (
-    <header className="bg-white border-b-4 border-[#E60012] sticky top-0 z-[60] shadow-md">
+    <header className="bg-white border-b-4 border-[#E60012] sticky top-0 z-[900] shadow-md">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between gap-4">
         
         {/* Mobile Menu Button - Optimized for Touch */}

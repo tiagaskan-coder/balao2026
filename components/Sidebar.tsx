@@ -113,7 +113,7 @@ export default function Sidebar({ categories }: { categories: Category[] }) {
         {/* Mobile Overlay */}
         {isOpen && (
             <div 
-                className="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity"
+                className="fixed inset-0 bg-black/50 z-[990] lg:hidden transition-opacity"
                 onClick={closeSidebar}
             />
         )}
@@ -121,7 +121,7 @@ export default function Sidebar({ categories }: { categories: Category[] }) {
         {/* Sidebar Container */}
         <aside className={`
             bg-white rounded-lg shadow-md border border-gray-100 flex-shrink-0 flex flex-col
-            fixed inset-y-0 left-0 z-[70] w-[280px] transform transition-transform duration-300 ease-in-out
+            fixed inset-y-0 left-0 z-[1000] w-[280px] transform transition-transform duration-300 ease-in-out
             ${isOpen ? 'translate-x-0' : '-translate-x-full'}
             ${mobileOnly ? 'lg:hidden' : 'lg:w-64 lg:static lg:block lg:h-fit lg:translate-x-0'}
         `}>
