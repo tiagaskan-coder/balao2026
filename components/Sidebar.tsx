@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { Category, buildCategoryTree } from "@/lib/utils";
 import { 
@@ -38,7 +38,7 @@ const iconMap: Record<string, any> = {
   "Câmeras": Camera
 };
 
-export default function Sidebar({ categories }: { categories: Category[] }) {
+export default function Sidebar({ categories, mobileOnly = false }: { categories: Category[], mobileOnly?: boolean }) {
   const tree = buildCategoryTree(categories);
   const searchParams = useSearchParams();
   const currentCategory = searchParams.get("category");
