@@ -69,6 +69,7 @@ export default async function ProductPage(props: Props) {
                         fill
                         className="object-contain"
                         priority
+                        unoptimized
                     />
                 </div>
 

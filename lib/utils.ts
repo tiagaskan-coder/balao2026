@@ -180,10 +180,10 @@ export function parseProducts(text: string): Product[] {
     // Enhance Image URL
     image = enhanceImageUrl(image);
 
-    // Filter Low Resolution
-    if (isLowResolution(image)) {
-        continue; // Skip this product
-    }
+    // Filter Low Resolution (Disabled to prevent missing products)
+    // if (isLowResolution(image)) {
+    //    continue; // Skip this product
+    // }
 
     // Clean up the image URL if it has extra garbage (though regex [^\s]+ should handle it)
     // Clean up name if it captured too much (unlikely with non-greedy + following price)

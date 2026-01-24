@@ -138,35 +138,22 @@ export default function AdminPage() {
         return;
     }
 
-    // Verify if images are accessible
-    const validationResults = await Promise.all(
+    // Verify if images are accessible (Optional check, don't filter out)
+    const productsWithValidation = await Promise.all(
         products.map(async (p) => {
             const isValid = await validateImage(p.image);
-            return { product: p, isValid };
+            return { ...p, imageValid: isValid };
         })
     );
 
-    const validProducts = validationResults
-        .filter(r => r.isValid)
-        .map(r => r.product);
+    // We don't filter out invalid images anymore to avoid CORS false positives
+    // const validProducts = validationResults.filter(r => r.isValid).map(r => r.product);
         
-    const brokenCount = products.length - validProducts.length;
-
-    if (validProducts.length === 0) {
-        setStatus("error");
-        setMessage(`Nenhum produto válido. ${brokenCount} imagens inacessíveis.`);
-        return;
-    }
-
-    setParsedProducts(validProducts);
+    setParsedProducts(productsWithValidation);
     setImportStep("preview");
     setStatus("idle");
     
-    if (brokenCount > 0) {
-        setMessage(`${validProducts.length} produtos válidos. ${brokenCount} imagens removidas (URL inválida).`);
-    } else {
-        setMessage("");
-    }
+    setMessage(`${productsWithValidation.length} produtos encontrados.`);
   };
 
   const handleConfirmImport = async () => {
@@ -421,6 +408,7 @@ export default function AdminPage() {
                                         <table className="w-full text-sm text-left text-gray-500">
                                             <thead className="text-xs text-gray-700 uppercase bg-gray-100">
                                                 <tr>
+                                                    <th className="px-4 py-3">Imagem</th>
                                                     <th className="px-4 py-3">Produto</th>
                                                     <th className="px-4 py-3">Preço Original</th>
                                                     <th className="px-4 py-3">Novo Preço</th>
@@ -430,6 +418,15 @@ export default function AdminPage() {
                                             <tbody>
                                                 {getPreviewProducts().map((p, idx) => (
                                                     <tr key={idx} className="bg-white border-b hover:bg-gray-50">
+                                                        <td className="px-4 py-3">
+                                                            <div className="w-12 h-12 relative">
+                                                                <img 
+                                                                    src={p.image} 
+                                                                    alt="" 
+                                                                    className="w-full h-full object-contain rounded border"
+                                                                />
+                                                            </div>
+                                                        </td>
                                                         <td className="px-4 py-3 font-medium text-gray-900 max-w-xs truncate" title={p.name}>
                                                             {p.name}
                                                         </td>

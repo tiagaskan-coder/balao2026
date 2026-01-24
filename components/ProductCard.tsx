@@ -28,6 +28,7 @@ export default function ProductCard({ product }: { product: Product }) {
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"
                 priority={false}
+                unoptimized
              />
         </div>
         <div className="p-4">
