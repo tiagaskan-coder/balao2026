@@ -36,12 +36,48 @@ const iconMap: Record<string, any> = {
   "Câmeras": Camera
 };
 
-export default function Sidebar({ categories }: { categories: Category[] }) {
+export default function Sidebar({ 
+  categories,
+  brands = [],
+  selectedBrands = [],
+  onBrandToggle,
+  priceRange = [0, 10000],
+  minMaxPrice = [0, 10000],
+  onPriceChange
+}: { 
+  categories: Category[];
+  brands?: string[];
+  selectedBrands?: string[];
+  onBrandToggle?: (brand: string) => void;
+  priceRange?: [number, number];
+  minMaxPrice?: [number, number];
+  onPriceChange?: (min: number, max: number) => void;
+}) {
   const tree = buildCategoryTree(categories);
   const searchParams = useSearchParams();
   const currentCategory = searchParams.get("category");
 
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  
+  // Local state for price inputs to avoid excessive re-renders/updates
+  const [localMin, setLocalMin] = useState(priceRange[0]);
+  const [localMax, setLocalMax] = useState(priceRange[1]);
+
+  useEffect(() => {
+    setLocalMin(priceRange[0]);
+    setLocalMax(priceRange[1]);
+  }, [priceRange]);
+
+  const handlePriceBlur = () => {
+    if (onPriceChange) {
+        let newMin = Math.max(minMaxPrice[0], localMin);
+        let newMax = Math.min(minMaxPrice[1], localMax);
+        
+        if (newMin > newMax) newMin = newMax;
+        
+        onPriceChange(newMin, newMax);
+    }
+  };
 
   const toggleExpand = (id: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -102,7 +138,7 @@ export default function Sidebar({ categories }: { categories: Category[] }) {
   };
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 hidden lg:block min-h-screen shrink-0 shadow-[2px_0_5px_rgba(0,0,0,0.05)]">
+    <aside className="w-full lg:w-64 bg-white border-r border-gray-200 block min-h-screen shrink-0 shadow-[2px_0_5px_rgba(0,0,0,0.05)] pb-10">
       <div className="py-0 pr-0">
         <div className="bg-[#E60012] text-white px-5 py-4 mb-2 flex items-center gap-3 shadow-md">
             <Menu size={24} className="text-white" />
@@ -125,6 +161,55 @@ export default function Sidebar({ categories }: { categories: Category[] }) {
             <CategoryItem key={node.id} node={node} level={0} />
           ))}
         </nav>
+
+        {/* FILTERS SECTION */}
+        <div className="mt-8 px-4 border-t pt-6">
+            <h3 className="font-bold text-gray-800 mb-4 uppercase text-sm tracking-wider">Filtros</h3>
+            
+            {/* Price Filter */}
+            <div className="mb-6">
+                <h4 className="text-sm font-semibold text-gray-600 mb-2">Preço (R$)</h4>
+                <div className="flex items-center gap-2">
+                    <input 
+                        type="number" 
+                        value={localMin}
+                        onChange={(e) => setLocalMin(Number(e.target.value))}
+                        onBlur={handlePriceBlur}
+                        className="w-full px-2 py-1 border rounded text-sm"
+                        placeholder="Mín"
+                    />
+                    <span className="text-gray-400">-</span>
+                    <input 
+                        type="number" 
+                        value={localMax}
+                        onChange={(e) => setLocalMax(Number(e.target.value))}
+                        onBlur={handlePriceBlur}
+                        className="w-full px-2 py-1 border rounded text-sm"
+                        placeholder="Máx"
+                    />
+                </div>
+            </div>
+
+            {/* Brand Filter */}
+            {brands.length > 0 && (
+                <div>
+                    <h4 className="text-sm font-semibold text-gray-600 mb-2">Marcas</h4>
+                    <div className="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                        {brands.map(brand => (
+                            <label key={brand} className="flex items-center gap-2 text-sm cursor-pointer hover:text-[#E60012]">
+                                <input 
+                                    type="checkbox" 
+                                    checked={selectedBrands.includes(brand)}
+                                    onChange={() => onBrandToggle?.(brand)}
+                                    className="rounded border-gray-300 text-[#E60012] focus:ring-[#E60012]"
+                                />
+                                <span className="truncate">{brand}</span>
+                            </label>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
       </div>
     </aside>
   );
