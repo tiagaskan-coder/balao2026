@@ -23,22 +23,33 @@ export interface CarouselImage {
   };
 }
 
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  parent_id: string | null;
+  display_order: number;
+  icon?: string;
+  active: boolean;
+  children?: Category[]; // For frontend tree structure
+}
+
 export const CATEGORIES = [
   "Todos os Produtos",
-  "Hardware",
-  "PC Gamer",
-  "PC Office",
-  "Notebooks",
-  "Monitores",
-  "Placa de Vídeo",
+  "Computadores & Informática",
+  "Monitores & Displays",
   "Apple",
-  "Acessórios",
-  "Smart TV",
-  "Rede",
-  "Impressoras",
-  "Casa Inteligente",
-  "Smartphone",
+  "Games & Consoles",
+  "Smartphones & Tablets",
   "Áudio",
+  "TV & Vídeo",
+  "Rede & Conectividade",
+  "Impressão & Digitalização",
+  "Casa Inteligente",
+  "Acessórios",
+  "Armazenamento",
+  "Escritório & Ergonomia",
+  "Segurança & Energia"
 ];
 
 export function enhanceImageUrl(url: string): string {
@@ -112,7 +123,40 @@ export function isLowResolution(url: string): boolean {
   return false;
 }
 
+export function buildCategoryTree(categories: Category[]): Category[] {
+  const map: Record<string, Category> = {};
+  const roots: Category[] = [];
+  
+  // Clone to avoid mutating original objects if needed, 
+  // and initialize children array
+  categories.forEach(cat => {
+    map[cat.id] = { ...cat, children: [] };
+  });
+
+  categories.forEach(cat => {
+    if (cat.parent_id && map[cat.parent_id]) {
+      map[cat.parent_id].children?.push(map[cat.id]);
+    } else {
+      roots.push(map[cat.id]);
+    }
+  });
+
+  // Recursive sort by display_order
+  const sortRecursive = (nodes: Category[]) => {
+    nodes.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+    nodes.forEach(node => {
+      if (node.children && node.children.length > 0) {
+          sortRecursive(node.children);
+      }
+    });
+  };
+
+  sortRecursive(roots);
+  return roots;
+}
+
 export function parseProducts(text: string): Product[] {
+
   const products: Product[] = [];
   // Regex explanation:
   // (https?:\/\/[^\s]+\.(?:jpg|png|jpeg|webp|gif)) -> Capture Group 1: Image URL

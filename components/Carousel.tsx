@@ -39,14 +39,14 @@ export default function Carousel({ images }: { images: CarouselImage[] }) {
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
       >
         {images.map((image) => (
-          <div key={image.id} className="min-w-full relative h-full bg-gray-200">
+          <div key={image.id} className="min-w-full relative h-full bg-transparent">
              <Image
                 src={image.image_url}
                 alt={image.title || "Banner"}
                 fill
-                className="object-fill"
+                className="object-fill w-full h-full"
                 priority={currentIndex === 0}
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
+                sizes="100vw"
              />
              {/* Title removed as requested */}
           </div>

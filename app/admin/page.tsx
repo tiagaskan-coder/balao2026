@@ -3,11 +3,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { parseProducts, Product, CATEGORIES } from "@/lib/utils";
 import Link from "next/link";
-import { ArrowLeft, Upload, CheckCircle, AlertCircle, Layout, Layers, History, Save, Search, Settings, ExternalLink } from "lucide-react";
+import { ArrowLeft, Upload, CheckCircle, AlertCircle, Layout, Layers, History, Save, Search, Settings, ExternalLink, Menu } from "lucide-react";
 import CarouselManager from "@/components/admin/CarouselManager";
+import CategoryManager from "@/components/admin/CategoryManager";
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState<"import" | "carousel" | "products">("import");
+  const [activeTab, setActiveTab] = useState<"import" | "carousel" | "products" | "categories">("import");
 
   // Product List State
   const [products, setProducts] = useState<Product[]>([]);

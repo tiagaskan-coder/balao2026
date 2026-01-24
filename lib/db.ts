@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { Product, CarouselImage } from './utils';
+import { Product, CarouselImage, Category } from './utils';
 
 // Fallback to empty array if connection fails or env vars missing
 export async function getProducts(): Promise<Product[]> {
@@ -140,6 +140,83 @@ export async function updateCarouselImage(id: string, updates: Partial<CarouselI
         if (error) throw error;
     } catch (error) {
         console.error("Error updating carousel image:", error);
+        throw error;
+    }
+}
+
+// --- Categories ---
+
+export async function getCategories(): Promise<Category[]> {
+    try {
+        const { data, error } = await supabase
+            .from('categories')
+            .select('*')
+            .order('display_order', { ascending: true });
+
+        if (error) {
+            console.error("Supabase error (categories):", error);
+            return [];
+        }
+
+        return data as Category[];
+    } catch (error) {
+        console.error("Error fetching categories:", error);
+        return [];
+    }
+}
+
+export async function createCategory(category: Partial<Category>) {
+    try {
+        // Get max order
+        const { data: maxOrderData } = await supabase
+            .from('categories')
+            .select('display_order')
+            .order('display_order', { ascending: false })
+            .limit(1);
+        
+        const nextOrder = (maxOrderData?.[0]?.display_order ?? -1) + 1;
+
+        const { data, error } = await supabase
+            .from('categories')
+            .insert({
+                ...category,
+                display_order: category.display_order ?? nextOrder
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    } catch (error) {
+        console.error("Error creating category:", error);
+        throw error;
+    }
+}
+
+export async function updateCategory(id: string, updates: Partial<Category>) {
+    try {
+        const { error } = await supabase
+            .from('categories')
+            .update(updates)
+            .eq('id', id);
+
+        if (error) throw error;
+    } catch (error) {
+        console.error("Error updating category:", error);
+        throw error;
+    }
+}
+
+export async function deleteCategory(id: string) {
+    try {
+        const { error } = await supabase
+            .from('categories')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+    } catch (error) {
+        console.error("Error deleting category:", error);
         throw error;
     }
 }
