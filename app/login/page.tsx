@@ -182,29 +182,6 @@ export default function LoginPage() {
         </div>
 
         <div className="mt-8 space-y-6">
-            {/* Google Login Button */}
-            <button
-                onClick={handleGoogleLogin}
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-700 hover:bg-gray-50 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-                {isLoading ? (
-                    <Loader2 className="animate-spin h-5 w-5 text-gray-400" />
-                ) : (
-                    <Chrome size={20} className="text-blue-600" />
-                )}
-                Continuar com Google
-            </button>
-
-            <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white text-gray-500">Ou continue com email</span>
-                </div>
-            </div>
-
             <form className="mt-8 space-y-6" onSubmit={handleAuth}>
                 <div className="rounded-md shadow-sm -space-y-px">
                 <div className="relative mb-4">
