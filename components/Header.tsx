@@ -155,6 +155,7 @@ export default function Header() {
 
         {/* Actions */}
         <div className="flex items-center gap-2 md:gap-8 text-gray-700">
+            {/* WhatsApp Desktop */}
             <a href="https://wa.me/5519987510267" target="_blank" className="hidden xl:flex items-center gap-3 cursor-pointer group" title="Fale no WhatsApp">
                 <div className="bg-green-500 text-white p-2 rounded-full shadow-md group-hover:bg-green-600 group-hover:shadow-lg transition-all transform group-hover:-translate-y-0.5">
                      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
@@ -163,6 +164,11 @@ export default function Header() {
                     <span className="text-xs font-medium text-gray-500">Atendimento</span>
                     <span className="text-sm font-bold text-green-600 group-hover:text-green-700">WhatsApp</span>
                 </div>
+            </a>
+
+            {/* WhatsApp Mobile */}
+            <a href="https://wa.me/5519987510267" target="_blank" className="xl:hidden p-1.5 md:p-2 text-green-600 hover:text-green-700 transition-colors" aria-label="WhatsApp">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-[20px] h-[20px] md:w-6 md:h-6"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
             </a>
 
           <Link href="/login" className="flex items-center gap-3 group">
