@@ -77,7 +77,11 @@ export default function LoginPage() {
       if (error) throw error;
     } catch (error: any) {
       console.error("Google auth error:", error);
-      showToast(error.message || "Erro ao conectar com Google", "error");
+      if (error.message?.includes("provider is not enabled")) {
+        showToast("O login com Google ainda não foi ativado no sistema.", "error");
+      } else {
+        showToast(error.message || "Erro ao conectar com Google", "error");
+      }
     }
   };
 
