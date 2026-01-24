@@ -16,13 +16,15 @@ export default function Carousel({ images }: { images: CarouselImage[] }) {
   // Minimum swipe distance (in px)
   const minSwipeDistance = 50;
 
-  const onTouchStart = (e: TouchEvent) => {
+  const onTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.targetTouches.length === 0) return;
     setTouchEnd(null); // Reset touch end
     setTouchStart(e.targetTouches[0].clientX);
     setIsAutoPlay(false); // Pause autoplay on touch
   };
 
-  const onTouchMove = (e: TouchEvent) => {
+  const onTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.targetTouches.length === 0) return;
     setTouchEnd(e.targetTouches[0].clientX);
   };
 
