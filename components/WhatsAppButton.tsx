@@ -16,11 +16,10 @@ export default function WhatsAppButton({ productName }: { productName: string })
     <button 
       onClick={handleWhatsAppClick}
       className="flex items-center gap-2 px-4 py-2 bg-[#25D366] text-white rounded-md font-medium hover:bg-[#128C7E] transition-colors shadow-sm"
-      title="Consultar disponibilidade via WhatsApp"
+      title="Verificar disponibilidade no WhatsApp"
     >
       <MessageCircle size={20} />
-      <span className="hidden sm:inline">Consultar Disponibilidade</span>
-      <span className="sm:hidden">WhatsApp</span>
+      <span>Verificar disponibilidade no WhatsApp</span>
     </button>
   );
 }
