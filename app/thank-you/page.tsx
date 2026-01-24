@@ -12,7 +12,8 @@ function ThankYouContent() {
   const searchParams = useSearchParams();
   const [pixPayload, setPixPayload] = useState("");
   const [copied, setCopied] = useState(false);
-  const qrCodeRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [qrCodeLibReady, setQrCodeLibReady] = useState(false);
   
   const totalParam = searchParams.get("total");
   const orderId = searchParams.get("orderId");
@@ -20,31 +21,27 @@ function ThankYouContent() {
 
   useEffect(() => {
     if (total > 0) {
-      // Use the provided CNPJ as key
       const payload = generatePixPayload({
-        key: "34397947000108", // CNPJ without symbols
+        key: "34397947000108",
         name: "BALAO CASTELO",
         city: "SAO PAULO",
         amount: total,
-        txid: "***" // Use *** for broad compatibility (Static QR Code style)
+        txid: "***"
       });
       setPixPayload(payload);
     }
   }, [total, orderId]);
 
   useEffect(() => {
-    if (pixPayload && qrCodeRef.current && (window as any).QRCode) {
-      qrCodeRef.current.innerHTML = "";
-      new (window as any).QRCode(qrCodeRef.current, {
-        text: pixPayload,
-        width: 200,
-        height: 200,
-        colorDark : "#000000",
-        colorLight : "#ffffff",
-        correctLevel : (window as any).QRCode.CorrectLevel.H
+    if (pixPayload && canvasRef.current && (window as any).QRious) {
+      new (window as any).QRious({
+        element: canvasRef.current,
+        value: pixPayload,
+        size: 200,
+        level: 'H'
       });
     }
-  }, [pixPayload]);
+  }, [pixPayload, qrCodeLibReady]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(pixPayload);
@@ -55,20 +52,10 @@ function ThankYouContent() {
   return (
     <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
         <Script 
-          src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" 
-          strategy="lazyOnload"
+          src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js" 
+          strategy="afterInteractive"
           onLoad={() => {
-            if (pixPayload && qrCodeRef.current) {
-              qrCodeRef.current.innerHTML = "";
-              new (window as any).QRCode(qrCodeRef.current, {
-                text: pixPayload,
-                width: 200,
-                height: 200,
-                colorDark : "#000000",
-                colorLight : "#ffffff",
-                correctLevel : (window as any).QRCode.CorrectLevel.H
-              });
-            }
+            setQrCodeLibReady(true);
           }}
         />
 
@@ -92,7 +79,9 @@ function ThankYouContent() {
             </h2>
             
             <div className="mb-4 flex justify-center">
-               <div ref={qrCodeRef} className="border-4 border-white shadow-sm rounded-md p-2 bg-white"></div>
+               <div className="border-4 border-white shadow-sm rounded-md p-2 bg-white inline-block">
+                 <canvas ref={canvasRef} />
+               </div>
             </div>
             
             <p className="text-sm text-gray-600 mb-3 font-medium">
