@@ -219,7 +219,7 @@ export default function CartPage() {
                                     required
                                     value={formData.name}
                                     onChange={handleInputChange}
-                                    className="w-full px-3 py-3 border rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent outline-none transition-all"
+                                    className="w-full px-3 py-3 border rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent outline-none transition-all text-black font-medium"
                                     placeholder="Digite seu nome completo"
                                 />
                             </div>
@@ -232,7 +232,7 @@ export default function CartPage() {
                                         required
                                         value={formData.phone}
                                         onChange={handleInputChange}
-                                        className="w-full px-3 py-3 border rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent outline-none transition-all"
+                                        className="w-full px-3 py-3 border rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent outline-none transition-all text-black font-medium"
                                         placeholder="(00) 00000-0000"
                                         maxLength={15}
                                     />
@@ -245,7 +245,7 @@ export default function CartPage() {
                                         required
                                         value={formData.email}
                                         onChange={handleInputChange}
-                                        className="w-full px-3 py-3 border rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent outline-none transition-all"
+                                        className="w-full px-3 py-3 border rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent outline-none transition-all text-black font-medium"
                                         placeholder="seu@email.com"
                                     />
                                 </div>
@@ -280,7 +280,7 @@ export default function CartPage() {
                                             required
                                             value={formData.cep}
                                             onChange={handleInputChange}
-                                            className="w-full px-3 py-3 border rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent outline-none transition-all"
+                                            className="w-full px-3 py-3 border rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent outline-none transition-all text-black font-medium"
                                             placeholder="00000-000"
                                             maxLength={9}
                                         />
@@ -300,7 +300,7 @@ export default function CartPage() {
                                         required
                                         value={formData.address}
                                         onChange={handleInputChange}
-                                        className="w-full px-3 py-3 border rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent outline-none transition-all bg-gray-50"
+                                        className="w-full px-3 py-3 border rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent outline-none transition-all bg-gray-50 text-black font-medium"
                                         placeholder="Preenchido automaticamente"
                                     />
                                 </div>
@@ -316,7 +316,7 @@ export default function CartPage() {
                                         required
                                         value={formData.number}
                                         onChange={handleInputChange}
-                                        className="w-full px-3 py-3 border rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent outline-none transition-all"
+                                        className="w-full px-3 py-3 border rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent outline-none transition-all text-black font-medium"
                                         placeholder="123"
                                     />
                                 </div>
@@ -355,7 +355,7 @@ export default function CartPage() {
                                         maxLength={2}
                                         value={formData.state}
                                         onChange={handleInputChange}
-                                        className="w-full px-3 py-3 border rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent outline-none transition-all uppercase bg-gray-50"
+                                        className="w-full px-3 py-3 border rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent outline-none transition-all uppercase bg-gray-50 text-black font-medium"
                                         placeholder="SP"
                                     />
                                 </div>
