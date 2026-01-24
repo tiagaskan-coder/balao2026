@@ -22,12 +22,12 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
     return (
       <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-100 flex flex-col md:flex-row h-full group">
         <Link href={`/product/${product.id}`} className="flex-1 flex flex-col md:flex-row">
-          <div className="relative w-full md:w-48 pt-[100%] md:pt-0 md:h-full bg-gray-50 overflow-hidden shrink-0">
+          <div className="relative w-full md:w-56 pt-[100%] md:pt-0 md:h-auto md:min-h-[14rem] bg-gray-50 overflow-hidden shrink-0">
              <Image
                 src={product.image}
                 alt={product.name}
                 fill
-                sizes="(max-width: 768px) 100vw, 200px"
+                sizes="(max-width: 768px) 100vw, 250px"
                 className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"
                 priority={false}
                 unoptimized
