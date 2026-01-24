@@ -4,6 +4,7 @@ import Header from '@/components/Header';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import ShareButton from '@/components/ShareButton';
+import WhatsAppButton from '@/components/WhatsAppButton';
 import ProductActions from '@/components/ProductActions';
 
 type Props = {
