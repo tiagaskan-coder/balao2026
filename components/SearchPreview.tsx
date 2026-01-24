@@ -26,6 +26,7 @@ export default function SearchPreview({ products, onSelect, onClose }: SearchPre
                 alt={product.name}
                 fill
                 className="object-contain"
+                unoptimized
               />
             </div>
             <div className="flex-1 min-w-0">
