@@ -75,6 +75,10 @@ export async function updateProduct(id: string, updates: Partial<Product>) {
         if (updates.image !== undefined) dbUpdates.image = updates.image;
         if (updates.category !== undefined) dbUpdates.category = updates.category;
         if (updates.slug !== undefined) dbUpdates.slug = updates.slug;
+        if (updates.cost !== undefined) dbUpdates.cost = updates.cost;
+        if (updates.supplier !== undefined) dbUpdates.supplier = updates.supplier;
+        if (updates.video_url !== undefined) dbUpdates.video_url = updates.video_url;
+        if (updates.description !== undefined) dbUpdates.description = updates.description;
 
         const { data, error } = await supabaseAdmin
             .from('products')

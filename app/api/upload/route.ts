@@ -51,6 +51,13 @@ export async function POST(req: NextRequest) {
                 fileSizeLimit: 10485760, // 10MB
                 allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'video/mp4', 'video/webm']
             });
+        } else {
+            // Se o bucket já existe, atualize para garantir que seja público
+            await adminClient.storage.updateBucket(bucket, {
+                public: true,
+                fileSizeLimit: 10485760,
+                allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'video/mp4', 'video/webm']
+            });
         }
     } catch (e) {
         console.warn("Aviso ao verificar buckets:", e);

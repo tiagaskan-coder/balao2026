@@ -55,11 +55,18 @@ export async function POST(req: NextRequest) {
             const { error: createError } = await adminClient.storage.createBucket(BUCKET_NAME, {
                 public: true,
                 fileSizeLimit: 10485760, // 10MB
-                allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/gif']
+                allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'video/mp4', 'video/webm']
             });
             if (createError) {
                 console.warn("Aviso: Falha ao criar bucket (pode já existir ou erro de permissão):", createError.message);
             }
+        } else {
+            // Se o bucket já existe, atualize para garantir que seja público
+            await adminClient.storage.updateBucket(BUCKET_NAME, {
+                public: true,
+                fileSizeLimit: 10485760,
+                allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'video/mp4', 'video/webm']
+            });
         }
     } catch (e) {
         console.warn("Aviso ao verificar buckets:", e);
