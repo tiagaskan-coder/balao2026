@@ -1,6 +1,6 @@
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
-import ProductCard from "@/components/ProductCard";
+import ProductList from "@/components/ProductList";
 import Carousel from "@/components/Carousel";
 import { getProducts, getCarouselImages, getCategories } from "@/lib/db";
 
@@ -63,11 +63,7 @@ export default async function Home(props: {
                 )}
              </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 px-4 lg:px-0 pb-10">
-                {filteredProducts.map(p => (
-                    <ProductCard key={p.id} product={p} />
-                ))}
-            </div>
+            <ProductList products={filteredProducts} />
           )}
         </main>
       </div>
