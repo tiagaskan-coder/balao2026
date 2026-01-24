@@ -33,6 +33,7 @@ export default function RootLayout({
             <CartProvider>
               <Suspense fallback={null}>
                 <SidebarProvider>
+                  <Sidebar categories={categories} mobileOnly />
                   {children}
                   <Footer />
                 </SidebarProvider>

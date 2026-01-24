@@ -68,7 +68,9 @@ export default async function ProductPage(props: Props) {
      <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       <Header />
       <div className="flex container mx-auto flex-1 py-6 gap-6">
-        <Sidebar categories={categories} />
+        <div className="hidden lg:block">
+            <Sidebar categories={categories} />
+        </div>
         <main className="flex-1 w-full px-4 lg:px-0">
           <div className="bg-white rounded-lg shadow-lg overflow-hidden">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-4 md:p-8">

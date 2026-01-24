@@ -31,7 +31,9 @@ export default async function Home(props: {
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       <Header />
       <div className="flex container mx-auto flex-1 py-6 gap-6">
-        <Sidebar categories={categories} />
+        <div className="hidden lg:block">
+            <Sidebar categories={categories} />
+        </div>
         <main className="flex-1 w-full">
             {/* Carousel Banner */}
             {!search && !category && (

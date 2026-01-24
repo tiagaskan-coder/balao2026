@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { Product } from "@/lib/utils";
 import ProductCard from "./ProductCard";
-import { LayoutGrid, Grid2x2, List, ArrowUpDown } from "lucide-react";
+import { LayoutGrid, Grid2x2, List, ArrowUpDown, Filter } from "lucide-react";
 
 type ViewMode = "small" | "large" | "list";
 type SortMode = "default" | "price-asc" | "price-desc";
@@ -101,13 +101,19 @@ export default function ProductList({ products }: { products: Product[] }) {
 
       {/* Grid */}
       <div className={`grid gap-4 px-4 lg:px-0 pb-10 ${getGridClasses()}`}>
-        {sortedProducts.map((product) => (
-          <ProductCard 
-            key={product.id} 
-            product={product} 
-            variant={viewMode === "list" ? "list" : "grid"} 
-          />
-        ))}
+        {filteredAndSortedProducts.length === 0 ? (
+            <div className="col-span-full text-center py-12 text-gray-500">
+                <p>Nenhum produto encontrado nessa faixa de preço.</p>
+            </div>
+        ) : (
+            filteredAndSortedProducts.map((product) => (
+            <ProductCard 
+                key={product.id} 
+                product={product} 
+                variant={viewMode === "list" ? "list" : "grid"} 
+            />
+            ))
+        )}
       </div>
     </div>
   );

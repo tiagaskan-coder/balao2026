@@ -121,9 +121,9 @@ export default function Sidebar({ categories }: { categories: Category[] }) {
         {/* Sidebar Container */}
         <aside className={`
             bg-white rounded-lg shadow-md border border-gray-100 flex-shrink-0 flex flex-col
-            lg:w-64 lg:static lg:block lg:h-fit
-            fixed inset-y-0 left-0 z-[70] lg:z-0 w-[280px] transform transition-transform duration-300 ease-in-out
-            ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+            fixed inset-y-0 left-0 z-[70] w-[280px] transform transition-transform duration-300 ease-in-out
+            ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+            ${mobileOnly ? 'lg:hidden' : 'lg:w-64 lg:static lg:block lg:h-fit lg:translate-x-0'}
         `}>
             <div className="p-4 bg-gray-50 border-b border-gray-100 font-bold text-gray-700 flex items-center justify-between">
                 <div className="flex items-center gap-2">
