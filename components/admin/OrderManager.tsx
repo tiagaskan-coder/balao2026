@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Order, OrderItem } from "@/lib/db";
-import { MessageCircle, Mail, Trash2, CheckCircle, Truck, Package, XCircle, Search } from "lucide-react";
+import { MessageCircle, Mail, Trash2, CheckCircle, Truck, Package, XCircle, Search, Eye, Copy, X } from "lucide-react";
 import Image from "next/image";
 
 export default function OrderManager() {
@@ -10,6 +10,7 @@ export default function OrderManager() {
   const [loading, setLoading] = useState(true);
   const [hoveredOrder, setHoveredOrder] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   useEffect(() => {
     fetchOrders();
@@ -39,6 +40,9 @@ export default function OrderManager() {
 
       if (res.ok) {
         setOrders(orders.map(o => o.id === id ? { ...o, status: newStatus as any } : o));
+        if (selectedOrder?.id === id) {
+          setSelectedOrder({ ...selectedOrder, status: newStatus as any });
+        }
       }
     } catch (error) {
       console.error("Failed to update status", error);
@@ -55,10 +59,38 @@ export default function OrderManager() {
 
       if (res.ok) {
         setOrders(orders.filter(o => o.id !== id));
+        if (selectedOrder?.id === id) setSelectedOrder(null);
       }
     } catch (error) {
       console.error("Failed to delete order", error);
     }
+  };
+
+  const copyOrderData = (order: Order) => {
+    const text = `
+PEDIDO #${order.id.slice(0, 8)}
+DATA: ${new Date(order.created_at).toLocaleDateString('pt-BR')}
+--------------------------------
+CLIENTE:
+Nome: ${order.customer_name}
+Email: ${order.customer_email}
+WhatsApp: ${order.customer_whatsapp}
+
+ENDEREÇO DE ENTREGA:
+${order.address.street}, ${order.address.number}
+${order.address.complement ? `Complemento: ${order.address.complement}` : ''}
+${order.address.city} - ${order.address.state}
+CEP: ${order.address.cep}
+
+ITENS DO PEDIDO:
+${order.items?.map(i => `- ${i.quantity}x ${i.product_name} | ${formatCurrency(i.price)} un.`).join('\n')}
+
+TOTAL: ${formatCurrency(order.total)}
+STATUS: ${getStatusLabel(order.status)}
+    `.trim();
+
+    navigator.clipboard.writeText(text);
+    alert("Dados do pedido copiados para a área de transferência!");
   };
 
   const getStatusColor = (status: string) => {
@@ -138,7 +170,25 @@ export default function OrderManager() {
                       <div className="absolute left-20 top-full z-50 bg-white shadow-xl border border-gray-200 p-4 rounded-lg w-96 transform -translate-y-4">
                         <h4 className="font-bold mb-2 text-gray-800">Itens do Pedido</h4>
                         <div className="grid grid-cols-3 gap-2">
-                          {order.items.map((item) => (
+                          View Details Action */}
+                      <button 
+                        onClick={() => setSelectedOrder(order)}
+                        className="text-gray-600 hover:text-gray-900 p-1 rounded hover:bg-gray-100"
+                        title="Ver Detalhes"
+                      >
+                        <Eye size={18} />
+                      </button>
+
+                      {/* Copy Data Action */}
+                      <button 
+                        onClick={() => copyOrderData(order)}
+                        className="text-gray-600 hover:text-gray-900 p-1 rounded hover:bg-gray-100"
+                        title="Copiar Dados"
+                      >
+                        <Copy size={18} />
+                      </button>
+
+                      {/* {order.items.map((item) => (
                             <div key={item.id} className="relative group/item border rounded p-1">
                               <div className="relative aspect-square w-full mb-1">
                                 <Image

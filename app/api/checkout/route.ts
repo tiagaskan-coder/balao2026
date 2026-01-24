@@ -89,8 +89,15 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, orderId: order.id });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Checkout error:", error);
-    return NextResponse.json({ error: "Failed to process order" }, { status: 500 });
+    return NextResponse.json(
+        { 
+            error: "Failed to process order", 
+            details: error.message || JSON.stringify(error),
+            hint: "Verifique se as tabelas 'orders' e 'order_items' existem no Supabase e se a chave de serviço (SERVICE_ROLE_KEY) está configurada."
+        }, 
+        { status: 500 }
+    );
   }
 }
