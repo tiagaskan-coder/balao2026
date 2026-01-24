@@ -61,7 +61,7 @@ export default function Header() {
     }
   };
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = (e: FormEvent) => {
     e.preventDefault();
     setShowPreview(false);
     if (searchQuery === "56676009") {
