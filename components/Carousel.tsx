@@ -59,14 +59,7 @@ export default function Carousel({ images }: { images: CarouselImage[] }) {
                 priority={currentIndex === 0}
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
              />
-             {image.title && (
-                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-white z-20">
-                     <h3 className="text-lg md:text-2xl font-bold">{image.title}</h3>
-                     {image.metadata && image.metadata.width && image.metadata.height && (
-                        <meta itemProp="dimensions" content={`${image.metadata.width}x${image.metadata.height}`} />
-                     )}
-                 </div>
-             )}
+             {/* Title removed as requested */}
           </div>
         ))}
       </div>
