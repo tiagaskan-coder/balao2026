@@ -39,23 +39,12 @@ export default function Carousel({ images }: { images: CarouselImage[] }) {
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
       >
         {images.map((image) => (
-          <div key={image.id} className="min-w-full relative h-full bg-gray-900 overflow-hidden">
-             {/* Background blurred image for fill effect */}
-             <div className="absolute inset-0 opacity-30">
-                 <Image
-                    src={image.image_url}
-                    alt=""
-                    fill
-                    className="object-cover blur-2xl scale-110"
-                 />
-             </div>
-             
-             {/* Main image - contained */}
+          <div key={image.id} className="min-w-full relative h-full bg-gray-200">
              <Image
                 src={image.image_url}
                 alt={image.title || "Banner"}
                 fill
-                className="object-contain relative z-10"
+                className="object-fill"
                 priority={currentIndex === 0}
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
              />
