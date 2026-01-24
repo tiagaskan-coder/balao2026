@@ -55,6 +55,11 @@ export default async function ProductPage(props: Props) {
 
   if (!product) return notFound();
 
+  // Price Calculation
+  const priceNum = parseFloat(product.price.replace("R$", "").replace(/\./g, "").replace(",", ".").trim());
+  const cashPrice = priceNum * 0.85;
+  const installmentValue = priceNum / 10;
+
   return (
      <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       <Header />
@@ -80,24 +85,34 @@ export default async function ProductPage(props: Props) {
                             {product.category || "Hardware"}
                         </span>
                     </div>
-                    <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 leading-tight">
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6 leading-tight">
                         {product.name}
                     </h1>
                     
-                    <div className="flex items-center gap-4 mb-6">
-                        {/* Rating stars placeholder */}
-                        <div className="flex text-yellow-400">
-                            {'★'.repeat(5)}
-                        </div>
-                        <span className="text-gray-400 text-sm">(0 avaliações)</span>
-                    </div>
-
                     <div className="mt-auto bg-gray-50 p-6 rounded-xl border border-gray-100">
-                         <div className="text-[#E60012] font-black text-4xl mb-2">
-                            {product.price}
+                         {/* Cash Price */}
+                         <div className="mb-4">
+                            <div className="text-gray-500 text-sm mb-1">
+                                De: <span className="line-through">{product.price}</span>
+                            </div>
+                            <div className="flex items-baseline gap-2">
+                                 <span className="text-[#E60012] font-black text-4xl">
+                                    {cashPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                 </span>
+                            </div>
+                            <div className="text-gray-600 text-sm font-medium">
+                                à vista no PIX com <strong>15% de desconto</strong>
+                            </div>
                          </div>
-                         <div className="text-gray-600 text-sm mb-6">
-                            à vista no PIX com <strong>15% de desconto</strong>
+
+                         {/* Installment Price */}
+                         <div className="mb-6 pt-4 border-t border-gray-200">
+                            <div className="text-gray-800 font-bold text-xl">
+                                {product.price}
+                            </div>
+                            <div className="text-gray-600 text-sm">
+                                em até 10x de <strong>{installmentValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong> sem juros
+                            </div>
                          </div>
 
                          <ProductActions product={product} />
