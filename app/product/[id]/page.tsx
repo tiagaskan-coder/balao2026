@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
-import { getProducts } from '@/lib/db';
+import { getProducts, getCategories } from '@/lib/db';
 import Header from '@/components/Header';
+import Sidebar from '@/components/Sidebar';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import ShareButton from '@/components/ShareButton';
@@ -50,7 +51,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 export default async function ProductPage(props: Props) {
   const params = await props.params;
-  const products = await getProducts(); // Added await
+  const [products, categories] = await Promise.all([
+    getProducts(),
+    getCategories()
+  ]);
   const product = products.find((p) => p.id === params.id);
 
   if (!product) return notFound();
@@ -63,8 +67,10 @@ export default async function ProductPage(props: Props) {
   return (
      <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       <Header />
-      <div className="container mx-auto py-8 px-4">
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="flex container mx-auto flex-1 py-6 gap-6">
+        <Sidebar categories={categories} />
+        <main className="flex-1 w-full px-4 lg:px-0">
+          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-4 md:p-8">
                 {/* Image Section */}
                 <div className="relative aspect-square bg-white border border-gray-100 rounded-lg flex items-center justify-center p-4">
@@ -139,7 +145,8 @@ export default async function ProductPage(props: Props) {
                     </p>
                 </div>
             </div>
-        </div>
+          </div>
+        </main>
       </div>
      </div>
   );
