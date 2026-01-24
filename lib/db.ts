@@ -258,6 +258,36 @@ export interface Order {
     items?: OrderItem[];
 }
 
+export async function createOrder(orderData: Omit<Order, 'id' | 'created_at' | 'updated_at'>, items: Omit<OrderItem, 'id' | 'order_id'>[]) {
+    try {
+        // 1. Create Order
+        const { data: order, error: orderError } = await supabaseAdmin
+            .from('orders')
+            .insert(orderData)
+            .select()
+            .single();
+
+        if (orderError) throw orderError;
+
+        // 2. Create Order Items
+        const itemsWithOrderId = items.map(item => ({
+            ...item,
+            order_id: order.id
+        }));
+
+        const { error: itemsError } = await supabaseAdmin
+            .from('order_items')
+            .insert(itemsWithOrderId);
+
+        if (itemsError) throw itemsError;
+
+        return order;
+    } catch (error) {
+        console.error("Error creating order:", error);
+        throw error;
+    }
+}
+
 export async function getOrders(): Promise<Order[]> {
     try {
         const { data, error } = await supabaseAdmin

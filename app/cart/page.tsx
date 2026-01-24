@@ -2,28 +2,78 @@
 
 import Header from "@/components/Header";
 import { useCart } from "@/context/CartContext";
-import { Trash2, Minus, Plus, ArrowRight, ShoppingBag } from "lucide-react";
+import { Trash2, Minus, Plus, ArrowRight, ShoppingBag, Truck, CreditCard } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, cartTotal, clearCart } = useCart();
   const router = useRouter();
+  
+  const [formData, setFormData] = useState({
+    name: "",
+    phone: "",
+    email: "",
+    cep: "",
+    address: "",
+    number: "",
+    complement: "",
+    city: "",
+    state: ""
+  });
+  
+  const [loading, setLoading] = useState(false);
 
-  const handleCheckout = () => {
-    // Generate WhatsApp message
-    const message = `Olá! Gostaria de finalizar meu pedido no Balão da Informática:\n\n${items
-      .map(
-        (item) =>
-          `* ${item.quantity}x ${item.name} - ${item.price}`
-      )
-      .join("\n")}\n\n*Total: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cartTotal)}*`;
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
-    // Replace with actual number if available, or just a placeholder
-    const phoneNumber = "5519987510267"; 
-    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-    
-    window.open(url, "_blank");
+  const handleFinalizeOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+        const orderData = {
+            customer: {
+                ...formData
+            },
+            items: items.map(item => {
+                 // Parse price string to number for consistency with API expectation
+                 const priceStr = item.price.replace("R$", "").replace(/\./g, "").replace(",", ".");
+                 const price = parseFloat(priceStr) || 0;
+                 return {
+                    name: item.name,
+                    image: item.image,
+                    quantity: item.quantity,
+                    price: price
+                 };
+            }),
+            total: cartTotal
+        };
+
+        const response = await fetch('/api/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderData)
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            clearCart();
+            router.push('/thank-you');
+        } else {
+            alert("Ocorreu um erro ao processar seu pedido. Por favor, tente novamente.");
+            console.error("Order failed:", result);
+        }
+    } catch (error) {
+        console.error("Error submitting order:", error);
+        alert("Erro de conexão. Verifique sua internet.");
+    } finally {
+        setLoading(false);
+    }
   };
 
   return (
@@ -53,60 +103,198 @@ export default function CartPage() {
           </div>
         ) : (
           <div className="flex flex-col lg:flex-row gap-8">
-            {/* Cart Items */}
-            <div className="flex-1 bg-white rounded-lg shadow-sm overflow-hidden">
-                <div className="p-6">
-                    <div className="space-y-6">
-                        {items.map((item) => (
-                            <div key={item.id} className="flex gap-4 border-b pb-6 last:border-0 last:pb-0">
-                                <div className="w-24 h-24 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                                </div>
-                                <div className="flex-1 flex flex-col justify-between">
-                                    <div>
-                                        <h3 className="font-medium text-gray-800 line-clamp-2">{item.name}</h3>
-                                        <p className="text-sm text-gray-500 mt-1">{item.category}</p>
+            {/* Left Column: Items & Form */}
+            <div className="flex-1 space-y-6">
+                {/* Cart Items */}
+                <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                    <div className="p-6">
+                        <h2 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Itens do Pedido</h2>
+                        <div className="space-y-6">
+                            {items.map((item) => (
+                                <div key={item.id} className="flex gap-4 border-b pb-6 last:border-0 last:pb-0">
+                                    <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                                     </div>
-                                    <div className="flex items-center justify-between mt-4">
-                                        <div className="font-bold text-[#E60012]">{item.price}</div>
-                                        
-                                        <div className="flex items-center gap-4">
-                                            <div className="flex items-center border rounded-md">
+                                    <div className="flex-1 flex flex-col justify-between">
+                                        <div>
+                                            <h3 className="font-medium text-gray-800 line-clamp-2">{item.name}</h3>
+                                            <p className="text-sm text-gray-500 mt-1">{item.category}</p>
+                                        </div>
+                                        <div className="flex items-center justify-between mt-2">
+                                            <div className="font-bold text-[#E60012]">{item.price}</div>
+                                            
+                                            <div className="flex items-center gap-4">
+                                                <div className="flex items-center border rounded-md">
+                                                    <button 
+                                                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                        className="p-1 hover:bg-gray-100 text-gray-600"
+                                                    >
+                                                        <Minus size={14} />
+                                                    </button>
+                                                    <span className="px-3 text-sm font-medium">{item.quantity}</span>
+                                                    <button 
+                                                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                        className="p-1 hover:bg-gray-100 text-gray-600"
+                                                    >
+                                                        <Plus size={14} />
+                                                    </button>
+                                                </div>
                                                 <button 
-                                                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                                    className="p-1 hover:bg-gray-100 text-gray-600"
+                                                    onClick={() => removeFromCart(item.id)}
+                                                    className="text-gray-400 hover:text-red-500 transition-colors"
+                                                    title="Remover"
                                                 >
-                                                    <Minus size={16} />
-                                                </button>
-                                                <span className="px-3 text-sm font-medium">{item.quantity}</span>
-                                                <button 
-                                                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                                    className="p-1 hover:bg-gray-100 text-gray-600"
-                                                >
-                                                    <Plus size={16} />
+                                                    <Trash2 size={16} />
                                                 </button>
                                             </div>
-                                            <button 
-                                                onClick={() => removeFromCart(item.id)}
-                                                className="text-gray-400 hover:text-red-500 transition-colors"
-                                                title="Remover"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
+                </div>
+
+                {/* Checkout Form */}
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                    <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2 border-b pb-2">
+                        <Truck className="text-[#E60012]" size={20} />
+                        Dados para Entrega e Contato
+                    </h2>
+                    
+                    <form id="checkout-form" onSubmit={handleFinalizeOrder} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Nome Completo *</label>
+                                <input 
+                                    type="text" 
+                                    name="name" 
+                                    required
+                                    value={formData.name}
+                                    onChange={handleInputChange}
+                                    className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent"
+                                    placeholder="Seu nome"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Telefone (WhatsApp) *</label>
+                                <input 
+                                    type="text" 
+                                    name="phone" 
+                                    required
+                                    value={formData.phone}
+                                    onChange={handleInputChange}
+                                    className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent"
+                                    placeholder="(00) 00000-0000"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                            <input 
+                                type="email" 
+                                name="email" 
+                                required
+                                value={formData.email}
+                                onChange={handleInputChange}
+                                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent"
+                                placeholder="seu@email.com"
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">CEP *</label>
+                                <input 
+                                    type="text" 
+                                    name="cep" 
+                                    required
+                                    value={formData.cep}
+                                    onChange={handleInputChange}
+                                    className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent"
+                                    placeholder="00000-000"
+                                />
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Endereço (Rua, Av) *</label>
+                                <input 
+                                    type="text" 
+                                    name="address" 
+                                    required
+                                    value={formData.address}
+                                    onChange={handleInputChange}
+                                    className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent"
+                                    placeholder="Nome da rua"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                             <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Número *</label>
+                                <input 
+                                    type="text" 
+                                    name="number" 
+                                    required
+                                    value={formData.number}
+                                    onChange={handleInputChange}
+                                    className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent"
+                                    placeholder="123"
+                                />
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Complemento</label>
+                                <input 
+                                    type="text" 
+                                    name="complement" 
+                                    value={formData.complement}
+                                    onChange={handleInputChange}
+                                    className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent"
+                                    placeholder="Apto, Bloco, etc."
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Cidade *</label>
+                                <input 
+                                    type="text" 
+                                    name="city" 
+                                    required
+                                    value={formData.city}
+                                    onChange={handleInputChange}
+                                    className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent"
+                                    placeholder="Cidade"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Estado (UF) *</label>
+                                <input 
+                                    type="text" 
+                                    name="state" 
+                                    required
+                                    maxLength={2}
+                                    value={formData.state}
+                                    onChange={handleInputChange}
+                                    className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent uppercase"
+                                    placeholder="SP"
+                                />
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
 
-            {/* Summary */}
+            {/* Right Column: Summary */}
             <div className="w-full lg:w-96">
                 <div className="bg-white rounded-lg shadow-sm p-6 sticky top-24">
-                    <h3 className="font-bold text-lg text-gray-800 mb-4">Resumo do Pedido</h3>
+                    <h3 className="font-bold text-lg text-gray-800 mb-4 flex items-center gap-2">
+                        <CreditCard className="text-[#E60012]" size={20} />
+                        Resumo
+                    </h3>
                     
                     <div className="space-y-3 mb-6">
                         <div className="flex justify-between text-gray-600">
@@ -124,11 +312,13 @@ export default function CartPage() {
                     </div>
 
                     <button 
-                        onClick={handleCheckout}
-                        className="w-full bg-[#00B140] text-white py-3 rounded-md font-bold hover:bg-green-600 transition-colors flex items-center justify-center gap-2 mb-3"
+                        type="submit"
+                        form="checkout-form"
+                        disabled={loading}
+                        className="w-full bg-[#E60012] text-white py-3 rounded-md font-bold hover:bg-red-700 transition-colors flex items-center justify-center gap-2 mb-3 disabled:opacity-70 disabled:cursor-not-allowed"
                     >
-                        Finalizar pelo WhatsApp
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                        {loading ? 'Processando...' : 'Finalizar Pedido'}
+                        {!loading && <ArrowRight size={18} />}
                     </button>
                     
                     <button 
@@ -137,6 +327,10 @@ export default function CartPage() {
                     >
                         Continuar Comprando
                     </button>
+
+                    <p className="text-xs text-gray-400 text-center mt-4">
+                        Ao finalizar o pedido, você receberá um e-mail de confirmação.
+                    </p>
                 </div>
             </div>
           </div>
