@@ -201,6 +201,115 @@ export async function updateCategory(id: string, updates: Partial<Category>) {
             .from('categories')
             .update(updates)
             .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error("Supabase error (update category):", error);
+            throw error;
+        }
+        return data;
+    } catch (error) {
+        console.error("Error updating category:", error);
+        throw error;
+    }
+}
+
+export async function deleteCategory(id: string) {
+    try {
+        console.log(`[DB] Deleting category ${id} via supabaseAdmin`);
+        const { error } = await supabaseAdmin
+            .from('categories')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error("Supabase error (delete category):", error);
+            throw error;
+        }
+    } catch (error) {
+        console.error("Error deleting category:", error);
+        throw error;
+    }
+}
+
+// --- Orders ---
+
+export interface OrderItem {
+    id: string;
+    order_id: string;
+    product_id: string;
+    product_name: string;
+    product_image: string;
+    quantity: number;
+    price: number;
+}
+
+export interface Order {
+    id: string;
+    user_id?: string;
+    status: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
+    total: number;
+    customer_name: string;
+    customer_email: string;
+    customer_whatsapp: string;
+    address: any;
+    created_at: string;
+    items?: OrderItem[];
+}
+
+export async function getOrders(): Promise<Order[]> {
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('orders')
+            .select(`
+                *,
+                items:order_items(*)
+            `)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error("Supabase error (orders):", error);
+            return [];
+        }
+
+        return data as Order[];
+    } catch (error) {
+        console.error("Error fetching orders:", error);
+        return [];
+    }
+}
+
+export async function updateOrderStatus(id: string, status: string) {
+    try {
+        const { error } = await supabaseAdmin
+            .from('orders')
+            .update({ status })
+            .eq('id', id);
+
+        if (error) throw error;
+    } catch (error) {
+        console.error("Error updating order status:", error);
+        throw error;
+    }
+}
+
+export async function deleteOrder(id: string) {
+    try {
+        const { error } = await supabaseAdmin
+            .from('orders')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+    } catch (error) {
+        console.error("Error deleting order:", error);
+        throw error;
+    }
+}
+            .from('categories')
+            .update(updates)
+            .eq('id', id)
             .select();
 
         if (error) {

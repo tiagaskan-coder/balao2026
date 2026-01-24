@@ -3,12 +3,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { parseProducts, Product, Category, buildCategoryTree, CATEGORIES } from "@/lib/utils";
 import Link from "next/link";
-import { ArrowLeft, Upload, CheckCircle, AlertCircle, Layout, Layers, History, Save, Search, Settings, ExternalLink, Menu } from "lucide-react";
+import { ArrowLeft, Upload, CheckCircle, AlertCircle, Layout, Layers, History, Save, Search, Settings, ExternalLink, Menu, ShoppingBag } from "lucide-react";
 import CarouselManager from "@/components/admin/CarouselManager";
 import CategoryManager from "@/components/admin/CategoryManager";
+import OrderManager from "@/components/admin/OrderManager";
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState<"import" | "carousel" | "products" | "categories">("import");
+  const [activeTab, setActiveTab] = useState<"import" | "carousel" | "products" | "categories" | "orders">("import");
 
   // Product List State
   const [products, setProducts] = useState<Product[]>([]);
@@ -270,6 +271,13 @@ export default function AdminPage() {
                         Gerenciar Categorias
                     </button>
                     <button
+                        onClick={() => setActiveTab("orders")}
+                        className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${activeTab === "orders" ? "bg-red-50 text-[#E60012] border-l-4 border-[#E60012]" : "text-gray-600 hover:bg-gray-50"}`}
+                    >
+                        <ShoppingBag size={18} />
+                        Gerenciar Pedidos
+                    </button>
+                    <button
                          disabled
                         className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 cursor-not-allowed"
                     >
@@ -486,6 +494,19 @@ export default function AdminPage() {
                                 </h2>
                             </div>
                             <CategoryManager />
+                        </div>
+                    )}
+
+                    {/* ORDERS TAB */}
+                    {activeTab === "orders" && (
+                        <div className="animate-in fade-in duration-300">
+                             <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                    <ShoppingBag className="text-[#E60012]" />
+                                    Gerenciamento de Pedidos
+                                </h2>
+                            </div>
+                            <OrderManager />
                         </div>
                     )}
 

@@ -1,0 +1,231 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { Order, OrderItem } from "@/lib/db";
+import { MessageCircle, Mail, Trash2, CheckCircle, Truck, Package, XCircle, Search } from "lucide-react";
+import Image from "next/image";
+
+export default function OrderManager() {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [hoveredOrder, setHoveredOrder] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    try {
+      const res = await fetch("/api/orders");
+      if (res.ok) {
+        const data = await res.json();
+        setOrders(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch orders", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    try {
+      const res = await fetch(`/api/orders/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (res.ok) {
+        setOrders(orders.map(o => o.id === id ? { ...o, status: newStatus as any } : o));
+      }
+    } catch (error) {
+      console.error("Failed to update status", error);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Tem certeza que deseja excluir este pedido?")) return;
+
+    try {
+      const res = await fetch(`/api/orders/${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        setOrders(orders.filter(o => o.id !== id));
+      }
+    } catch (error) {
+      console.error("Failed to delete order", error);
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'paid': return 'bg-green-100 text-green-800';
+      case 'shipped': return 'bg-blue-100 text-blue-800';
+      case 'delivered': return 'bg-purple-100 text-purple-800';
+      case 'cancelled': return 'bg-red-100 text-red-800';
+      default: return 'bg-yellow-100 text-yellow-800';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'paid': return 'Pago';
+      case 'shipped': return 'Enviado';
+      case 'delivered': return 'Entregue';
+      case 'cancelled': return 'Cancelado';
+      default: return 'Pendente';
+    }
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  };
+
+  const filteredOrders = orders.filter(o => 
+    o.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    o.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    o.customer_email?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-gray-800">Gerenciamento de Pedidos</h2>
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Buscar pedido..."
+            className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E60012]"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-8">Carregando pedidos...</div>
+      ) : (
+        <div className="bg-white rounded-lg shadow overflow-visible"> {/* overflow-visible for hover popup */}
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID / Data</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredOrders.map((order) => (
+                <tr 
+                  key={order.id} 
+                  className="hover:bg-gray-50 relative group"
+                  onMouseEnter={() => setHoveredOrder(order.id)}
+                  onMouseLeave={() => setHoveredOrder(null)}
+                >
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div className="font-mono text-xs text-gray-500">#{order.id.slice(0, 8)}</div>
+                    <div>{new Date(order.created_at).toLocaleDateString('pt-BR')}</div>
+                    
+                    {/* Hover Preview Grid */}
+                    {hoveredOrder === order.id && order.items && order.items.length > 0 && (
+                      <div className="absolute left-20 top-full z-50 bg-white shadow-xl border border-gray-200 p-4 rounded-lg w-96 transform -translate-y-4">
+                        <h4 className="font-bold mb-2 text-gray-800">Itens do Pedido</h4>
+                        <div className="grid grid-cols-3 gap-2">
+                          {order.items.map((item) => (
+                            <div key={item.id} className="relative group/item border rounded p-1">
+                              <div className="relative aspect-square w-full mb-1">
+                                <Image
+                                  src={item.product_image || "/placeholder.png"}
+                                  alt={item.product_name}
+                                  fill
+                                  className="object-cover rounded"
+                                />
+                              </div>
+                              <div className="text-xs truncate font-medium" title={item.product_name}>{item.product_name}</div>
+                              <div className="text-xs text-gray-500">{item.quantity}x {formatCurrency(item.price)}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div className="font-medium">{order.customer_name || 'N/A'}</div>
+                    <div className="text-gray-500 text-xs">{order.customer_email}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                    {formatCurrency(order.total)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.status)}`}>
+                      {getStatusLabel(order.status)}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div className="flex items-center gap-2">
+                      {/* WhatsApp Action */}
+                      {order.customer_whatsapp && (
+                        <a 
+                          href={`https://wa.me/${order.customer_whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Olá ${order.customer_name}, referente ao seu pedido #${order.id.slice(0, 8)} no Balão da Informática...`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50"
+                          title="WhatsApp"
+                        >
+                          <MessageCircle size={18} />
+                        </a>
+                      )}
+                      
+                      {/* Email Action */}
+                      {order.customer_email && (
+                        <a 
+                          href={`mailto:${order.customer_email}?subject=Pedido #${order.id.slice(0, 8)} - Balão da Informática`}
+                          className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
+                          title="Email"
+                        >
+                          <Mail size={18} />
+                        </a>
+                      )}
+
+                      {/* Status Actions */}
+                      <div className="relative group/status">
+                        <button className="text-gray-500 hover:text-gray-700 p-1">
+                            <CheckCircle size={18} />
+                        </button>
+                        <div className="absolute right-0 top-full hidden group-hover/status:flex flex-col bg-white border shadow-lg rounded z-20 min-w-[120px]">
+                            <button onClick={() => handleStatusChange(order.id, 'paid')} className="px-4 py-2 text-left hover:bg-gray-100 text-xs">Marcar Pago</button>
+                            <button onClick={() => handleStatusChange(order.id, 'shipped')} className="px-4 py-2 text-left hover:bg-gray-100 text-xs">Marcar Enviado</button>
+                            <button onClick={() => handleStatusChange(order.id, 'delivered')} className="px-4 py-2 text-left hover:bg-gray-100 text-xs">Marcar Entregue</button>
+                            <button onClick={() => handleStatusChange(order.id, 'cancelled')} className="px-4 py-2 text-left hover:bg-red-50 text-red-600 text-xs">Cancelar</button>
+                        </div>
+                      </div>
+
+                      {/* Delete Action */}
+                      <button 
+                        onClick={() => handleDelete(order.id)}
+                        className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
+                        title="Excluir"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {filteredOrders.length === 0 && (
+            <div className="text-center py-8 text-gray-500">Nenhum pedido encontrado.</div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
