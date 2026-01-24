@@ -192,18 +192,37 @@ export default function Header() {
       </div>
       
       {/* Mobile Search Bar (Full width below header on mobile) */}
-      <div className="md:hidden px-4 pb-3">
+      <div className="md:hidden px-4 pb-3" ref={mobileSearchContainerRef}>
           <form onSubmit={handleSearch} className="relative">
             <input
                 type="text"
                 placeholder="Buscar produtos..."
                 className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-full focus:outline-none focus:border-[#E60012]"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setShowPreview(true);
+                }}
+                onFocus={() => setShowPreview(true)}
             />
              <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
                 <Search size={18} />
             </button>
+
+            {/* Mobile Search Preview */}
+            {showPreview && searchQuery.length >= 2 && (
+                <div className="absolute top-full left-0 right-0 mt-1 z-50">
+                    <SearchPreview 
+                        products={previewProducts}
+                        onSelect={(product) => {
+                            router.push(`/product/${product.id}`);
+                            setShowPreview(false);
+                            setSearchQuery("");
+                        }}
+                        onClose={() => setShowPreview(false)}
+                    />
+                </div>
+            )}
           </form>
       </div>
     </header>
