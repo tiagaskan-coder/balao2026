@@ -9,6 +9,8 @@ import {
   Laptop, Cpu, Keyboard, Mouse, Watch, Tablet, Headphones, Camera
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import { useSidebar } from "@/context/SidebarContext";
+import { X } from "lucide-react";
 
 // Icon mapping
 const iconMap: Record<string, any> = {
@@ -40,6 +42,7 @@ export default function Sidebar({ categories }: { categories: Category[] }) {
   const tree = buildCategoryTree(categories);
   const searchParams = useSearchParams();
   const currentCategory = searchParams.get("category");
+  const { isOpen, closeSidebar } = useSidebar();
 
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 

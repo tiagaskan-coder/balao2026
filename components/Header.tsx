@@ -3,11 +3,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Search, ShoppingCart, User } from "lucide-react";
+import { Search, ShoppingCart, User, Menu } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
+import { useSidebar } from "@/context/SidebarContext";
 import { Product } from "@/lib/utils";
 import SearchPreview from "@/components/SearchPreview";
 
@@ -15,6 +16,7 @@ export default function Header() {
   const router = useRouter();
   const { cartCount } = useCart();
   const { user } = useAuth();
+  const { toggleSidebar } = useSidebar();
   const [logoClicks, setLogoClicks] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   

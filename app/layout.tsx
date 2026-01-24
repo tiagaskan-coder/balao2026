@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { ToastProvider } from "@/context/ToastContext";
@@ -24,10 +25,12 @@ export default function RootLayout({
         <AuthProvider>
           <ToastProvider>
             <CartProvider>
-              <SidebarProvider>
-                {children}
-                <Footer />
-              </SidebarProvider>
+              <Suspense fallback={null}>
+                <SidebarProvider>
+                  {children}
+                  <Footer />
+                </SidebarProvider>
+              </Suspense>
             </CartProvider>
           </ToastProvider>
         </AuthProvider>
