@@ -118,9 +118,11 @@ export default async function ProductPage(props: Props) {
                          <ProductActions product={product} />
                     </div>
 
-                    <div className="mt-6 flex flex-row items-center justify-end gap-2">
-                         <WhatsAppButton productName={product.name} />
-                         <ShareButton title={product.name} text={`Confira ${product.name} no Balão da Informática!`} />
+                    <div className="mt-6 flex flex-col xl:flex-row items-center justify-between gap-4">
+                         <SocialButtons productName={product.name} />
+                         <div className="w-full xl:w-auto flex justify-center xl:justify-end">
+                            <ShareButton title={product.name} text={`Confira ${product.name} no Balão da Informática!`} />
+                         </div>
                     </div>
                 </div>
             </div>
