@@ -39,8 +39,8 @@ export default function ProductCard({ product }: { product: Product }) {
             
             <div className="mt-4">
                 <p className="text-xs text-gray-400 line-through">
-                    {/* Fake original price calculation for visual effect */}
-                    R$ {(parseFloat(product.price.replace("R$", "").replace(/\./g, "").replace(",", ".")) * 1.2).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    {/* Reverse calculation: product.price is Cash Price (85% of List) */}
+                    {(parseFloat(product.price.replace("R$", "").replace(/\./g, "").replace(",", ".")) / 0.85).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                 </p>
                 <div className="flex items-baseline gap-1">
                     <span className="text-sm font-bold text-[#E60012]">R$</span>
