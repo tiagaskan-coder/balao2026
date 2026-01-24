@@ -185,9 +185,14 @@ export default function LoginPage() {
             {/* Google Login Button */}
             <button
                 onClick={handleGoogleLogin}
-                className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-700 hover:bg-gray-50 font-medium transition-all"
+                disabled={isLoading}
+                className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-700 hover:bg-gray-50 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-                <Chrome size={20} className="text-blue-600" />
+                {isLoading ? (
+                    <Loader2 className="animate-spin h-5 w-5 text-gray-400" />
+                ) : (
+                    <Chrome size={20} className="text-blue-600" />
+                )}
                 Continuar com Google
             </button>
 
