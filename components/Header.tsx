@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -6,12 +7,14 @@ import { Search, ShoppingCart, User } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import { Product } from "@/lib/utils";
 import SearchPreview from "@/components/SearchPreview";
 
 export default function Header() {
   const router = useRouter();
   const { cartCount } = useCart();
+  const { user } = useAuth();
   const [logoClicks, setLogoClicks] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   
@@ -153,8 +156,12 @@ export default function Header() {
                 <User size={24} strokeWidth={2.5} />
             </div>
             <div className="hidden lg:flex flex-col text-sm leading-tight">
-                <span className="text-gray-500">Bem-vindo,</span>
-                <span className="font-bold text-gray-800 group-hover:text-[#E60012] transition-colors">Entrar</span>
+                <span className="text-gray-500">
+                  {user ? "Olá, " + (user.email?.split('@')[0] || "Visitante") : "Bem-vindo,"}
+                </span>
+                <span className="font-bold text-gray-800 group-hover:text-[#E60012] transition-colors">
+                  {user ? "Minha Conta" : "Entrar"}
+                </span>
             </div>
           </Link>
           
