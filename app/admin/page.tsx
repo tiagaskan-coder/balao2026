@@ -263,10 +263,17 @@ export default function AdminPage() {
                         Gerenciar Carrossel
                     </button>
                     <button
+                        onClick={() => setActiveTab("categories")}
+                        className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${activeTab === "categories" ? "bg-red-50 text-[#E60012] border-l-4 border-[#E60012]" : "text-gray-600 hover:bg-gray-50"}`}
+                    >
+                        <Layers size={18} />
+                        Gerenciar Categorias
+                    </button>
+                    <button
                          disabled
                         className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 cursor-not-allowed"
                     >
-                        <Layers size={18} />
+                        <Settings size={18} />
                         Produtos (Em breve)
                     </button>
                     <button
@@ -459,7 +466,26 @@ export default function AdminPage() {
                     {/* CAROUSEL TAB */}
                     {activeTab === "carousel" && (
                         <div className="animate-in fade-in duration-300">
+                             <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                    <Layout className="text-[#E60012]" />
+                                    Gerenciamento do Carrossel
+                                </h2>
+                            </div>
                             <CarouselManager />
+                        </div>
+                    )}
+
+                    {/* CATEGORIES TAB */}
+                    {activeTab === "categories" && (
+                        <div className="animate-in fade-in duration-300">
+                             <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                    <Layers className="text-[#E60012]" />
+                                    Gerenciamento de Categorias
+                                </h2>
+                            </div>
+                            <CategoryManager />
                         </div>
                     )}
 
