@@ -59,7 +59,7 @@ function SortableItem({ image, onDelete, onToggle }: { image: CarouselImage; onD
         <p className="font-medium text-gray-800">{image.title || "Sem título"}</p>
         <p className="text-xs text-gray-500 truncate max-w-[200px]">{image.image_url}</p>
         {image.metadata && (
-             <p className="text-xs text-blue-500 mt-1">
+             <p className="text-xs text-gray-500 mt-1">
                 {image.metadata.width}x{image.metadata.height} • {image.metadata.format}
              </p>
         )}

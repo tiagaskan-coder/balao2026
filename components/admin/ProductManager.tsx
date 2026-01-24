@@ -143,7 +143,7 @@ export default function ProductManager() {
     
     const newProduct = {
         ...product,
-        id: undefined, // Let DB generate or generate new one
+        id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15),
         name: `${product.name} (Cópia)`,
         slug: `${product.slug}-copia-${Math.floor(Math.random() * 1000)}`
     };
@@ -191,6 +191,11 @@ export default function ProductManager() {
             }
         }
 
+        if (!imageUrl) {
+            setSaving(false);
+            return alert("Imagem é obrigatória. Por favor, faça upload de uma imagem.");
+        }
+
         // Format price if user entered plain number
         let formattedPrice = currentProduct.price;
         if (!currentProduct.price.includes("R$")) {
@@ -216,19 +221,10 @@ export default function ProductManager() {
             });
         } else {
             // Create
-            // Ensure ID is undefined so DB generates it (if UUID)
-            // Or if DB requires text ID, we should use a better generator like crypto.randomUUID() if available, 
-            // but usually letting DB handle it is best.
-            // If the schema expects a string ID that IS NOT a UUID, then the random string is fine.
-            // But "save error" usually implies constraint violation or type mismatch.
-            
+            // Generate basic ID/Slug if missing (Required because DB id is TEXT with no default)
+            if (!productData.id) productData.id = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15);
             if (!productData.slug) productData.slug = productData.name?.toLowerCase().replace(/\s+/g, '-') || 'produto';
             
-            // Remove the manual ID generation to let Supabase/Postgres generate it (assuming UUID default)
-            // If the table doesn't have a default for ID, this might fail. 
-            // However, typical Supabase setup uses uuid_generate_v4().
-            delete productData.id;
-
             res = await fetch("/api/products", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -260,20 +256,20 @@ export default function ProductManager() {
     <div>
         {/* Bulk Actions Bar */}
         {selectedIds.size > 0 && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex flex-wrap items-center gap-4 animate-in fade-in slide-in-from-top-2">
-                <div className="font-medium text-blue-800 flex items-center gap-2">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 flex flex-wrap items-center gap-4 animate-in fade-in slide-in-from-top-2">
+                <div className="font-medium text-red-800 flex items-center gap-2">
                     <CheckSquare size={18} />
                     {selectedIds.size} selecionados
                 </div>
                 
-                <div className="h-6 w-px bg-blue-200 mx-2 hidden md:block"></div>
+                <div className="h-6 w-px bg-red-200 mx-2 hidden md:block"></div>
 
                 {/* Bulk Category */}
                 <div className="flex items-center gap-2">
                     <select 
                         value={bulkCategory}
                         onChange={(e) => setBulkCategory(e.target.value)}
-                        className="text-sm border-blue-200 rounded-md py-1.5 px-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                        className="text-sm border-red-200 rounded-md py-1.5 px-2 focus:ring-2 focus:ring-red-500 outline-none"
                     >
                         <option value="">Alterar Categoria...</option>
                         {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
@@ -281,13 +277,13 @@ export default function ProductManager() {
                     <button 
                         onClick={handleBulkUpdateCategory}
                         disabled={!bulkCategory || isProcessingBulk}
-                        className="bg-blue-600 text-white px-3 py-1.5 rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+                        className="bg-red-600 text-white px-3 py-1.5 rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-50"
                     >
                         Aplicar
                     </button>
                 </div>
 
-                <div className="h-6 w-px bg-blue-200 mx-2 hidden md:block"></div>
+                <div className="h-6 w-px bg-red-200 mx-2 hidden md:block"></div>
 
                 {/* Bulk Price */}
                 <div className="flex items-center gap-2">
@@ -297,14 +293,14 @@ export default function ProductManager() {
                             placeholder="0"
                             value={bulkPricePercent || ""}
                             onChange={(e) => setBulkPricePercent(Number(e.target.value))}
-                            className="w-full text-sm border-blue-200 rounded-md py-1.5 pl-2 pr-6 focus:ring-2 focus:ring-blue-500 outline-none"
+                            className="w-full text-sm border-red-200 rounded-md py-1.5 pl-2 pr-6 focus:ring-2 focus:ring-red-500 outline-none"
                         />
-                        <span className="absolute right-2 top-1.5 text-blue-500 text-xs font-bold">%</span>
+                        <span className="absolute right-2 top-1.5 text-red-500 text-xs font-bold">%</span>
                     </div>
                     <button 
                         onClick={handleBulkUpdatePrice}
                         disabled={!bulkPricePercent || isProcessingBulk}
-                        className="bg-blue-600 text-white px-3 py-1.5 rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+                        className="bg-red-600 text-white px-3 py-1.5 rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-50"
                     >
                         Aplicar
                     </button>
@@ -313,7 +309,7 @@ export default function ProductManager() {
                 <div className="flex-1"></div>
                 <button 
                     onClick={() => setSelectedIds(new Set())}
-                    className="text-sm text-blue-600 hover:text-blue-800 underline"
+                    className="text-sm text-red-600 hover:text-red-800 underline"
                 >
                     Cancelar Seleção
                 </button>
@@ -339,7 +335,7 @@ export default function ProductManager() {
                     setImageFile(null);
                     setIsEditing(true);
                 }}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700"
+                className="bg-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-red-700"
             >
                 <Plus size={20} /> Novo Produto
             </button>
@@ -369,9 +365,9 @@ export default function ProductManager() {
                         <tr><td colSpan={6} className="p-8 text-center text-gray-500">Nenhum produto encontrado.</td></tr>
                     ) : (
                         filteredProducts.map(product => (
-                            <tr key={product.id} className={`hover:bg-gray-50 ${selectedIds.has(product.id) ? "bg-blue-50" : ""}`}>
+                            <tr key={product.id} className={`hover:bg-gray-50 ${selectedIds.has(product.id) ? "bg-red-50" : ""}`}>
                                 <td className="p-4">
-                                    <button onClick={() => toggleSelect(product.id)} className={`text-gray-400 hover:text-gray-600 ${selectedIds.has(product.id) ? "text-blue-600" : ""}`}>
+                                    <button onClick={() => toggleSelect(product.id)} className={`text-gray-400 hover:text-gray-600 ${selectedIds.has(product.id) ? "text-red-600" : ""}`}>
                                         {selectedIds.has(product.id) ? <CheckSquare size={20} /> : <Square size={20} />}
                                     </button>
                                 </td>
@@ -389,7 +385,7 @@ export default function ProductManager() {
                                 <td className="p-4 text-gray-500">{product.cost ? formatCurrency(product.cost) : "-"}</td>
                                 <td className="p-4 text-right">
                                     <div className="flex justify-end gap-2">
-                                        <button onClick={() => handleEdit(product)} className="p-2 text-blue-600 hover:bg-blue-50 rounded" title="Editar"><Edit size={18} /></button>
+                                        <button onClick={() => handleEdit(product)} className="p-2 text-red-600 hover:bg-red-50 rounded" title="Editar"><Edit size={18} /></button>
                                         <button onClick={() => handleDuplicate(product)} className="p-2 text-orange-600 hover:bg-orange-50 rounded" title="Duplicar"><Copy size={18} /></button>
                                         <button onClick={() => handleDelete(product.id)} className="p-2 text-red-600 hover:bg-red-50 rounded" title="Excluir"><Trash2 size={18} /></button>
                                     </div>
@@ -457,7 +453,7 @@ export default function ProductManager() {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Vídeo (YouTube)</label>
-                                <div className="flex items-center gap-2 border rounded-lg px-3 py-2 focus-within:ring-2 ring-blue-500">
+                                <div className="flex items-center gap-2 border rounded-lg px-3 py-2 focus-within:ring-2 ring-red-500">
                                     <Video size={20} className="text-gray-400" />
                                     <input 
                                         type="text" 
@@ -476,7 +472,7 @@ export default function ProductManager() {
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Nome do Produto</label>
                                 <input 
                                     type="text" 
-                                    className="w-full border rounded-lg px-3 py-2 focus:ring-2 ring-blue-500 outline-none"
+                                    className="w-full border rounded-lg px-3 py-2 focus:ring-2 ring-red-500 outline-none"
                                     value={currentProduct.name || ""}
                                     onChange={e => setCurrentProduct({...currentProduct, name: e.target.value})}
                                 />
@@ -487,7 +483,7 @@ export default function ProductManager() {
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Preço (Venda)</label>
                                     <input 
                                         type="text" 
-                                        className="w-full border rounded-lg px-3 py-2 focus:ring-2 ring-blue-500 outline-none"
+                                        className="w-full border rounded-lg px-3 py-2 focus:ring-2 ring-red-500 outline-none"
                                         placeholder="R$ 0,00"
                                         value={currentProduct.price || ""}
                                         onChange={e => setCurrentProduct({...currentProduct, price: e.target.value})}
@@ -497,7 +493,7 @@ export default function ProductManager() {
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Custo</label>
                                     <input 
                                         type="number" 
-                                        className="w-full border rounded-lg px-3 py-2 focus:ring-2 ring-blue-500 outline-none"
+                                        className="w-full border rounded-lg px-3 py-2 focus:ring-2 ring-red-500 outline-none"
                                         placeholder="0.00"
                                         value={currentProduct.cost || ""}
                                         onChange={e => setCurrentProduct({...currentProduct, cost: parseFloat(e.target.value)})}
@@ -508,7 +504,7 @@ export default function ProductManager() {
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
                                 <select 
-                                    className="w-full border rounded-lg px-3 py-2 focus:ring-2 ring-blue-500 outline-none"
+                                    className="w-full border rounded-lg px-3 py-2 focus:ring-2 ring-red-500 outline-none"
                                     value={currentProduct.category || ""}
                                     onChange={e => setCurrentProduct({...currentProduct, category: e.target.value})}
                                 >
@@ -530,7 +526,7 @@ export default function ProductManager() {
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Fornecedor</label>
                                 <input 
                                     type="text" 
-                                    className="w-full border rounded-lg px-3 py-2 focus:ring-2 ring-blue-500 outline-none"
+                                    className="w-full border rounded-lg px-3 py-2 focus:ring-2 ring-red-500 outline-none"
                                     value={currentProduct.supplier || ""}
                                     onChange={e => setCurrentProduct({...currentProduct, supplier: e.target.value})}
                                 />
@@ -539,7 +535,7 @@ export default function ProductManager() {
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
                                 <textarea 
-                                    className="w-full border rounded-lg px-3 py-2 h-32 focus:ring-2 ring-blue-500 outline-none resize-none"
+                                    className="w-full border rounded-lg px-3 py-2 h-32 focus:ring-2 ring-red-500 outline-none resize-none"
                                     value={currentProduct.description || ""}
                                     onChange={e => setCurrentProduct({...currentProduct, description: e.target.value})}
                                 />
@@ -557,7 +553,7 @@ export default function ProductManager() {
                         <button 
                             onClick={handleSave}
                             disabled={saving}
-                            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                            className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
                         >
                             {saving ? "Salvando..." : (
                                 <>

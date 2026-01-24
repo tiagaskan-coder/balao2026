@@ -41,9 +41,20 @@ export async function saveProducts(products: Product[]) {
 
 export async function createProduct(product: Partial<Product>) {
     try {
+        // Sanitize product to only include DB columns
+        const dbProduct = {
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            image: product.image,
+            category: product.category,
+            slug: product.slug
+            // cost, supplier, etc. are NOT in DB yet, so we exclude them to prevent errors
+        };
+
         const { data, error } = await supabaseAdmin
             .from('products')
-            .insert(product)
+            .insert(dbProduct)
             .select()
             .single();
 
@@ -57,9 +68,17 @@ export async function createProduct(product: Partial<Product>) {
 
 export async function updateProduct(id: string, updates: Partial<Product>) {
     try {
+        // Sanitize updates
+        const dbUpdates: any = {};
+        if (updates.name !== undefined) dbUpdates.name = updates.name;
+        if (updates.price !== undefined) dbUpdates.price = updates.price;
+        if (updates.image !== undefined) dbUpdates.image = updates.image;
+        if (updates.category !== undefined) dbUpdates.category = updates.category;
+        if (updates.slug !== undefined) dbUpdates.slug = updates.slug;
+
         const { data, error } = await supabaseAdmin
             .from('products')
-            .update(updates)
+            .update(dbUpdates)
             .eq('id', id)
             .select()
             .single();

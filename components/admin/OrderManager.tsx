@@ -228,7 +228,7 @@ STATUS: ${getStatusLabel(order.status)}
                       {order.customer_email && (
                         <a 
                           href={`mailto:${order.customer_email}?subject=Pedido #${order.id.slice(0, 8)} - Balão da Informática`}
-                          className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
+                          className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
                           title="Email"
                         >
                           <Mail size={18} />
@@ -247,7 +247,7 @@ STATUS: ${getStatusLabel(order.status)}
                               <CheckCircle size={14} className="text-green-500" /> Marcar como Pago
                             </button>
                             <button onClick={() => handleStatusChange(order.id, 'shipped')} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
-                              <Truck size={14} className="text-blue-500" /> Marcar como Enviado
+                              <Truck size={14} className="text-gray-500" /> Marcar como Enviado
                             </button>
                             <button onClick={() => handleStatusChange(order.id, 'delivered')} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
                               <Package size={14} className="text-purple-500" /> Marcar como Entregue
@@ -333,7 +333,7 @@ STATUS: ${getStatusLabel(order.status)}
                     </div>
                     <div>
                       <span className="block text-sm text-gray-500">Email</span>
-                      <a href={`mailto:${selectedOrder.customer_email}`} className="font-medium text-blue-600 hover:underline">
+                      <a href={`mailto:${selectedOrder.customer_email}`} className="font-medium text-red-600 hover:underline">
                         {selectedOrder.customer_email}
                       </a>
                     </div>

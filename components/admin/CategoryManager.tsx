@@ -149,7 +149,7 @@ export default function CategoryManager() {
 
     return (
       <div className="border-l border-gray-200 ml-4 first:ml-0">
-        <div className={`flex items-center gap-2 p-2 hover:bg-gray-50 rounded group ${editingId === node.id ? 'bg-blue-50' : ''}`}>
+        <div className={`flex items-center gap-2 p-2 hover:bg-gray-50 rounded group ${editingId === node.id ? 'bg-red-50' : ''}`}>
           <div style={{ width: level * 16 }} /> {/* Indentation */}
           
           <button 
@@ -168,7 +168,7 @@ export default function CategoryManager() {
             <button onClick={() => handleAdd(node.id)} className="p-1 text-green-600 hover:bg-green-50 rounded" title="Adicionar Subcategoria">
               <Plus size={16} />
             </button>
-            <button onClick={() => handleEdit(node)} className="p-1 text-blue-600 hover:bg-blue-50 rounded" title="Editar">
+            <button onClick={() => handleEdit(node)} className="p-1 text-red-600 hover:bg-red-50 rounded" title="Editar">
               <Edit size={16} />
             </button>
             <button onClick={() => handleDelete(node.id)} className="p-1 text-red-600 hover:bg-red-50 rounded" title="Excluir">
