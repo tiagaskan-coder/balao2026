@@ -154,9 +154,11 @@ export function checkCompatibility(
 
   // 1. CPU ↔ Placa-mãe (Socket)
   if (categoryContext === 'motherboard' && config.cpu?.specs?.socket) {
-    if (product.specs?.socket && product.specs.socket !== config.cpu.specs.socket) {
+    const cpuSocket = config.cpu.specs.socket;
+    const moboSocket = product.specs?.socket;
+    if (!moboSocket || moboSocket !== cpuSocket) {
       valid = false;
-      messages.push(`Socket incompatível: CPU requer ${config.cpu.specs.socket}, placa é ${product.specs.socket}`);
+      messages.push(`Socket incompatível: CPU requer ${cpuSocket}${moboSocket ? `, placa é ${moboSocket}` : ''}`);
     }
   }
   if (categoryContext === 'cpu' && config.motherboard?.specs?.socket) {

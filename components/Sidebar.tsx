@@ -226,7 +226,7 @@ export default function Sidebar({ categories, mobileOnly = false }: { categories
                     </div>
                     
                     <Link 
-                        href="/?category=PC%20Gamer" 
+                        href="/pcgamer" 
                         className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#E60012] transition-colors pl-[12px] border-l-[3px] border-transparent hover:border-l-[#E60012]"
                         onClick={closeSidebar}
                     >
@@ -235,7 +235,7 @@ export default function Sidebar({ categories, mobileOnly = false }: { categories
                     </Link>
 
                     <Link 
-                        href="/?category=Notebooks" 
+                        href="/notebooks" 
                         className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#E60012] transition-colors pl-[12px] border-l-[3px] border-transparent hover:border-l-[#E60012]"
                         onClick={closeSidebar}
                     >
@@ -244,7 +244,7 @@ export default function Sidebar({ categories, mobileOnly = false }: { categories
                     </Link>
 
                     <Link 
-                        href="/?search=promo%C3%A7%C3%A3o" 
+                        href="/promocao" 
                         className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#E60012] transition-colors pl-[12px] border-l-[3px] border-transparent hover:border-l-[#E60012]"
                         onClick={closeSidebar}
                     >
@@ -253,7 +253,7 @@ export default function Sidebar({ categories, mobileOnly = false }: { categories
                     </Link>
 
                     <Link 
-                        href="/?search=manuten%C3%A7%C3%A3o" 
+                        href="/manutencao" 
                         className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#E60012] transition-colors pl-[12px] border-l-[3px] border-transparent hover:border-l-[#E60012]"
                         onClick={closeSidebar}
                     >
@@ -262,7 +262,7 @@ export default function Sidebar({ categories, mobileOnly = false }: { categories
                     </Link>
 
                     <Link 
-                        href="/?search=consigna%C3%A7%C3%A3o" 
+                        href="/consignacao" 
                         className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#E60012] transition-colors pl-[12px] border-l-[3px] border-transparent hover:border-l-[#E60012]"
                         onClick={closeSidebar}
                     >
