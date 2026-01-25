@@ -120,13 +120,13 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
     const potentialParents = [currentStep.parentSlug, ...((currentStep.parentSlugs || []))];
     const parentCat = categories.find(c => potentialParents.includes(c.slug) || potentialParents.includes(c.name.toLowerCase()));
     let allowedCategoryIds: string[] = [];
+    let allowedNames: string[] = [];
+    let allowedSlugs: string[] = currentStep.targetSlugs || [];
     if (parentCat) {
         const subCategories = categories.filter(c => c.parent_id === parentCat.id);
         const matches = subCategories.filter(sub => currentStep.targetSlugs?.some(slug => sub.slug === slug));
         allowedCategoryIds = matches.map(m => m.id);
-        if (currentStep.targetSlugs?.includes(parentCat.slug)) {
-          allowedCategoryIds.push(parentCat.id);
-        }
+        allowedNames = matches.map(m => m.name.toLowerCase());
     }
 
     // 2. Filtrar por categoria estrita
@@ -151,12 +151,12 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
         const catObj = categoriesByNameNorm.get(normalizedProductCat) 
           || categoriesBySlug.get(p.category) 
           || categories.find(c => normalizeText(c.slug) === normalizedProductCat);
-        let baseMatch = false;
-        if (allowedCategoryIds.length > 0) {
-          baseMatch = !!(catObj && allowedCategoryIds.includes(catObj.id));
-        } else if (parentCat) {
-          baseMatch = isUnderParent(catObj, parentCat);
-        }
+        const strictNames = allowedNames.map(n => normalizeText(n));
+        const strictSlugs = (allowedSlugs || []).map(s => normalizeText(s));
+        const nameMatchStrict = strictNames.length > 0 && strictNames.includes(normalizedProductCat);
+        const slugMatchStrict = strictSlugs.length > 0 && strictSlugs.includes(normalizedProductCat);
+        const idMatchStrict = !!(catObj && allowedCategoryIds.includes(catObj.id));
+        const baseMatch = nameMatchStrict || slugMatchStrict || idMatchStrict;
         if (!baseMatch) return false;
         if (currentStep.filterKeywords && !currentStep.filterKeywords.some(k => normalizedProductName.includes(normalizeText(k)))) {
           return false;
