@@ -9,6 +9,7 @@ export interface Product {
   supplier?: string;
   video_url?: string;
   description?: string;
+  specs?: Record<string, any>;
   created_at?: string;
 }
 

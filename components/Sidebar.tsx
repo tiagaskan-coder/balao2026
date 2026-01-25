@@ -100,6 +100,14 @@ export default function Sidebar({ categories, mobileOnly = false }: { categories
   const currentCategory = searchParams.get("category");
   const { isOpen, closeSidebar } = useSidebar();
 
+  // Custom tool item
+  const monteSeuPcItem = {
+    name: "Monte seu PC",
+    slug: "monteseupc",
+    icon: Wrench,
+    href: "/monteseupc"
+  };
+
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   const toggleExpand = (id: string, e: React.MouseEvent) => {
@@ -195,6 +203,17 @@ export default function Sidebar({ categories, mobileOnly = false }: { categories
             </div>
             
             <div className="py-2 overflow-y-auto max-h-[calc(100vh-60px)] lg:max-h-none custom-scrollbar">
+                {/* Monte seu PC - Prominent Link */}
+                <Link 
+                    href={monteSeuPcItem.href}
+                    className="flex items-center gap-3 px-3 py-2 text-sm font-bold text-[#E60012] bg-red-50 hover:bg-red-100 transition-colors mb-2 border-l-[3px] border-[#E60012]"
+                    onClick={closeSidebar}
+                >
+                    <span className="text-[#E60012]"><monteSeuPcItem.icon size={18} /></span>
+                    <span>{monteSeuPcItem.name}</span>
+                </Link>
+                <div className="h-px bg-gray-100 mx-3 mb-2"></div>
+
                 {tree.map(node => (
                     <CategoryItem key={node.id} node={node} level={0} />
                 ))}

@@ -49,7 +49,8 @@ export async function createProduct(product: Partial<Product>) {
             image: product.image,
             category: product.category,
             slug: product.slug,
-            video_url: product.video_url || null
+            video_url: product.video_url || null,
+            specs: product.specs || null
             // cost, supplier, etc. are NOT in DB yet, so we exclude them to prevent errors
         };
 
@@ -80,6 +81,7 @@ export async function updateProduct(id: string, updates: Partial<Product>) {
         if (updates.supplier !== undefined) dbUpdates.supplier = updates.supplier;
         if (updates.video_url !== undefined) dbUpdates.video_url = updates.video_url;
         if (updates.description !== undefined) dbUpdates.description = updates.description;
+        if (updates.specs !== undefined) dbUpdates.specs = updates.specs;
 
         const { data, error } = await supabaseAdmin
             .from('products')
