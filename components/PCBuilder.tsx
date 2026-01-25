@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { Product, Category } from "@/lib/utils";
-import { Check, AlertCircle, Cpu, CircuitBoard, MemoryStick, Box, Zap, HardDrive, Monitor, Trash2, ShoppingCart, RefreshCcw, Wrench, Search, ShieldCheck, AlertTriangle, Key, Keyboard, Mouse, Network, Armchair } from "lucide-react";
+import { Check, AlertCircle, Cpu, CircuitBoard, MemoryStick, Box, Zap, HardDrive, Monitor, Trash2, ShoppingCart, RefreshCcw, Wrench, Search, ShieldCheck, AlertTriangle, Key, Keyboard, Mouse, Network, Armchair, Headphones } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import Image from "next/image";
 import { 
@@ -36,8 +36,9 @@ const STEPS: Step[] = [
   { id: "case", label: "Gabinete", icon: Box, categoryKeywords: ["gabinete", "case", "torre"], targetSlugs: ["gabinetes"], parentSlug: "hardware" },
   { id: "licenses", label: "Licenças", icon: Key, categoryKeywords: ["licenças", "licencas", "windows", "office"], targetSlugs: ["licencas", "windows", "microsoft-office", "antivirus", "softwares-design", "softwares-edicao"], parentSlug: "licencas" },
   { id: "monitor", label: "Monitores", icon: Monitor, categoryKeywords: ["monitor"], targetSlugs: ["monitores","monitor-gamer","monitor-curvo","monitor-profissional","monitor-ultrawide","monitor-4k"], parentSlug: "monitores" },
-  { id: "keyboard", label: "Teclados", icon: Keyboard, categoryKeywords: ["teclado"], targetSlugs: ["teclados-gamer-mecanicos"], parentSlug: "perifericos" },
-  { id: "mouse", label: "Mouses", icon: Mouse, categoryKeywords: ["mouse"], targetSlugs: ["mouses-gamer"], parentSlug: "perifericos" },
+  { id: "keyboard", label: "Teclados", icon: Keyboard, categoryKeywords: ["teclado"], targetSlugs: ["teclados", "teclados-gamer-mecanicos"], parentSlug: "acessorios" },
+  { id: "mouse", label: "Mouses", icon: Mouse, categoryKeywords: ["mouse"], targetSlugs: ["mouses", "mouses-gamer"], parentSlug: "acessorios" },
+  { id: "headset", label: "Fones de Ouvido", icon: Headphones, categoryKeywords: ["fone", "headset", "headphone"], targetSlugs: ["headsets-fones", "fones-ouvido"], parentSlug: "acessorios" },
   { id: "netadapters", label: "Adaptadores de Rede", icon: Network, categoryKeywords: ["rede","wifi","ethernet","lan"], targetSlugs: ["placas-rede-som"], parentSlug: "hardware", filterKeywords: ["rede","wifi","ethernet","lan","pci","usb","adaptador"] },
   { id: "chairs", label: "Cadeiras", icon: Armchair, categoryKeywords: ["cadeira"], targetSlugs: ["cadeiras-gamer","cadeiras-ergonomicas"], parentSlug: "escritorio" },
 ];
@@ -59,12 +60,13 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
     psu: null,
     case: null,
   });
-  const accessoryIds = new Set(["licenses","monitor","keyboard","mouse","netadapters","chairs"]);
+  const accessoryIds = new Set(["licenses","monitor","keyboard","mouse","headset","netadapters","chairs"]);
   const [extras, setExtras] = useState<Record<string, { product: TechProduct; quantity: number }[]>>({
     licenses: [],
     monitor: [],
     keyboard: [],
     mouse: [],
+    headset: [],
     netadapters: [],
     chairs: []
   });
@@ -118,11 +120,33 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
     }
 
     // 2. Filtrar por categoria estrita
+    const categoriesByNameNorm = new Map<string, Category>();
+    categories.forEach(c => categoriesByNameNorm.set(normalizeText(c.name), c));
+    const isUnderParent = (cat: Category | undefined, parent: Category | undefined) => {
+      if (!cat || !parent) return false;
+      let current: Category | undefined = cat;
+      const visited = new Set<string>();
+      while (current && !visited.has(current.id)) {
+        if (current.id === parent.id) return true;
+        visited.add(current.id);
+        current = categories.find(c => c.id === current?.parent_id);
+      }
+      return false;
+    };
     let filtered = products.filter((p: TechProduct) => {
         const normalizedProductCat = normalizeText(p.category);
         const normalizedProductName = normalizeText(p.name || "");
-        const isStrictCategoryMatch = targetCategoryNames.some(targetName => normalizedProductCat === normalizeText(targetName));
-        const baseMatch = isStrictCategoryMatch || (!parentCat && currentStep.categoryKeywords.some(keyword => normalizedProductCat.includes(normalizeText(keyword))));
+        const catObj = categoriesByNameNorm.get(normalizedProductCat);
+        const strictNames = targetCategoryNames.map(n => normalizeText(n));
+        const isStrictCategoryMatch = strictNames.some(targetName => normalizedProductCat === targetName);
+        let baseMatch = isStrictCategoryMatch || (!parentCat && currentStep.categoryKeywords.some(keyword => normalizedProductCat.includes(normalizeText(keyword))));
+        if (parentCat && !baseMatch) {
+          const underParent = isUnderParent(catObj, parentCat);
+          const noExplicitMatches = targetCategoryNames.length === 0;
+          if (underParent && noExplicitMatches) {
+            baseMatch = currentStep.categoryKeywords.some(k => normalizedProductCat.includes(normalizeText(k)) || normalizedProductName.includes(normalizeText(k)));
+          }
+        }
         if (!baseMatch) return false;
         if (currentStep.filterKeywords && !currentStep.filterKeywords.some(k => normalizedProductName.includes(normalizeText(k)))) {
           return false;
@@ -241,7 +265,7 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
         <div className="w-full lg:w-1/3 space-y-6">
             
             {/* Resumo da Build */}
-            <div className="bg-white rounded-lg shadow-sm border p-4 sticky top-20">
+            <div className="bg-white rounded-lg shadow-sm border p-4">
                 <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
                     <Wrench className="text-[#E60012]" />
                     Sua Configuração
@@ -367,7 +391,7 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
                     <button 
                         onClick={() => { 
                           setConfig({ cpu: null, motherboard: null, ram: null, gpu: null, storage: null, psu: null, case: null });
-                          setExtras({ licenses: [], monitor: [], keyboard: [], mouse: [], netadapters: [], chairs: [] });
+                          setExtras({ licenses: [], monitor: [], keyboard: [], mouse: [], headset: [], netadapters: [], chairs: [] });
                         }}
                         className="w-full py-2 text-xs text-gray-500 hover:text-gray-700 underline flex items-center justify-center gap-1"
                     >
