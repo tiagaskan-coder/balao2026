@@ -101,21 +101,25 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
         targetCategoryNames = matches.map(m => m.name.toLowerCase());
     }
 
-    // 2. Filtrar por categoria
+    // 2. Filtrar por categoria ou nome
     let filtered = products.filter((p: TechProduct) => {
         const normalizedProductCat = normalizeText(p.category);
+        const normalizedProductName = normalizeText(p.name || "");
         
         // Match Hierarquia Hardware
         const isHardwareSubmatch = targetCategoryNames.some(targetName => 
             normalizedProductCat.includes(normalizeText(targetName))
         );
 
-        // Fallback Keyword
+        // Fallback Keyword no nome da peça ou na categoria
         const matchesKeyword = currentStep.categoryKeywords.some(keyword => 
             normalizedProductCat.includes(normalizeText(keyword))
         );
+        const matchesKeywordByName = currentStep.categoryKeywords.some(keyword =>
+            normalizedProductName.includes(normalizeText(keyword))
+        );
 
-        const baseMatch = isHardwareSubmatch || matchesKeyword;
+        const baseMatch = isHardwareSubmatch || matchesKeyword || matchesKeywordByName;
         if (!baseMatch) return false;
         if (currentStep.id === "storage") {
           const name = p.name.toLowerCase();
@@ -322,6 +326,20 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
                     <p className="text-gray-500">
                         Selecione um componente compatível abaixo. O sistema verifica automaticamente a compatibilidade.
                     </p>
+                    
+                    {currentStep.id === "psu" && (
+                        <div className="mt-3">
+                            <a
+                                href="https://www.balao.info/categoria/fontes-alimentacao"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 text-sm font-medium text-[#E60012] hover:underline"
+                            >
+                                <Zap size={16} />
+                                Ver todas as Fontes na loja
+                            </a>
+                        </div>
+                    )}
                     
                     {/* Campo de Busca */}
                     <div className="mt-4 relative">
