@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { parseProducts, Product, Category, buildCategoryTree, CATEGORIES } from "@/lib/utils";
 import Link from "next/link";
-import { ArrowLeft, Upload, CheckCircle, AlertCircle, Layout, Layers, History, Save, Search, Settings, ExternalLink, Menu, ShoppingBag } from "lucide-react";
+import { ArrowLeft, Upload, CheckCircle, AlertCircle, Layout, Layers, Save, Search, Settings, ShoppingBag } from "lucide-react";
 import CarouselManager from "@/components/admin/CarouselManager";
 import CategoryManager from "@/components/admin/CategoryManager";
 import OrderManager from "@/components/admin/OrderManager";
