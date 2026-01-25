@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Product, Category } from "@/lib/utils";
-import { Plus, Edit, Trash2, Copy, Search, Upload, X, Save, Image as ImageIcon, Video, DollarSign, Package, CheckSquare, Square, ChevronDown, Percent } from "lucide-react";
+import { Edit, Trash2, Plus, Save, X, Search, CheckSquare, Square, Upload, Copy, AlertTriangle, ImageOff, Image as ImageIcon, Video, DollarSign, Package, ChevronDown, Percent } from "lucide-react";
+import Image from "next/image";
 
 // Helper to format currency
 const formatCurrency = (value: number) => {
@@ -49,6 +50,97 @@ export default function ProductManager() {
         const res = await fetch("/api/categories");
         if (res.ok) setCategories(await res.json());
     } catch (e) { console.error(e); }
+  };
+
+  // Maintenance Functions
+  const handleDeleteNoImage = async () => {
+    const productsToDelete = products.filter(p => !p.image || p.image.trim() === "");
+    
+    if (productsToDelete.length === 0) {
+        alert("Nenhum produto sem imagem encontrado.");
+        return;
+    }
+
+    if (!confirm(`Encontrados ${productsToDelete.length} produtos sem imagem. Deseja excluí-los?`)) return;
+
+    setIsProcessingBulk(true);
+    let deletedCount = 0;
+    
+    try {
+        for (const product of productsToDelete) {
+            await fetch(`/api/products/${product.id}`, { method: "DELETE" });
+            deletedCount++;
+        }
+        alert(`${deletedCount} produtos excluídos com sucesso.`);
+        fetchProducts();
+    } catch (e) {
+        console.error(e);
+        alert("Erro ao excluir alguns produtos.");
+    } finally {
+        setIsProcessingBulk(false);
+    }
+  };
+
+  const handleDeleteDuplicates = async () => {
+    const nameMap = new Map<string, Product[]>();
+    
+    // Group by normalized name
+    products.forEach(p => {
+        const normalizedName = p.name.trim().toLowerCase();
+        if (!nameMap.has(normalizedName)) {
+            nameMap.set(normalizedName, []);
+        }
+        nameMap.get(normalizedName)?.push(p);
+    });
+
+    const productsToDelete: Product[] = [];
+    
+    nameMap.forEach((group) => {
+        if (group.length > 1) {
+            // Sort to keep the best one: prefer one with image, then created_at (if available), or just first
+            // We want to DELETE the others.
+            // Sort: Products with image come first.
+            group.sort((a, b) => {
+                const aHasImage = a.image && a.image.trim() !== "";
+                const bHasImage = b.image && b.image.trim() !== "";
+                if (aHasImage && !bHasImage) return -1; // a comes first (keep)
+                if (!aHasImage && bHasImage) return 1;  // b comes first (keep)
+                return 0;
+            });
+
+            // Keep index 0, delete the rest
+            for (let i = 1; i < group.length; i++) {
+                productsToDelete.push(group[i]);
+            }
+        }
+    });
+
+    if (productsToDelete.length === 0) {
+        alert("Nenhum produto duplicado encontrado.");
+        return;
+    }
+
+    if (!confirm(`Encontrados ${productsToDelete.length} produtos duplicados (pelo nome). Deseja excluir as cópias e manter o original?`)) return;
+
+    setIsProcessingBulk(true);
+    let deletedCount = 0;
+    
+    try {
+        // Process in chunks to avoid overwhelming the server
+        const chunkSize = 5;
+        for (let i = 0; i < productsToDelete.length; i += chunkSize) {
+            const chunk = productsToDelete.slice(i, i + chunkSize);
+            await Promise.all(chunk.map(p => fetch(`/api/products/${p.id}`, { method: "DELETE" })));
+            deletedCount += chunk.length;
+        }
+        alert(`${deletedCount} produtos duplicados excluídos com sucesso.`);
+        fetchProducts();
+    } catch (e) {
+        console.error(e);
+        alert("Erro ao excluir alguns produtos.");
+    } finally {
+        setIsProcessingBulk(false);
+    }
   };
 
   // Selection Handlers
@@ -317,8 +409,8 @@ export default function ProductManager() {
         )}
 
         {/* Header & Controls */}
-        <div className="flex justify-between items-center mb-6">
-            <div className="relative w-64">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            <div className="relative w-full md:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                 <input 
                     type="text" 
@@ -328,17 +420,40 @@ export default function ProductManager() {
                     onChange={e => setSearchTerm(e.target.value)}
                 />
             </div>
-            <button 
-                onClick={() => {
-                    setCurrentProduct({ category: "Hardware" }); // Default
-                    setImagePreview("");
-                    setImageFile(null);
-                    setIsEditing(true);
-                }}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-red-700"
-            >
-                <Plus size={20} /> Novo Produto
-            </button>
+            
+            <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+                {/* Maintenance Buttons */}
+                <button
+                    onClick={handleDeleteNoImage}
+                    className="bg-white text-gray-700 px-3 py-2 rounded-lg flex items-center gap-2 hover:bg-red-50 hover:text-red-600 border border-gray-300 transition-colors"
+                    title="Apagar itens sem foto"
+                >
+                    <ImageOff size={18} />
+                    <span className="hidden lg:inline">Sem Foto</span>
+                </button>
+                <button
+                    onClick={handleDeleteDuplicates}
+                    className="bg-white text-gray-700 px-3 py-2 rounded-lg flex items-center gap-2 hover:bg-red-50 hover:text-red-600 border border-gray-300 transition-colors"
+                    title="Apagar itens repetidos"
+                >
+                    <Copy size={18} />
+                    <span className="hidden lg:inline">Duplicados</span>
+                </button>
+
+                <div className="h-8 w-px bg-gray-300 mx-2 hidden md:block"></div>
+
+                <button 
+                    onClick={() => {
+                        setCurrentProduct({ category: "Hardware" }); // Default
+                        setImagePreview("");
+                        setImageFile(null);
+                        setIsEditing(true);
+                    }}
+                    className="bg-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-red-700 whitespace-nowrap"
+                >
+                    <Plus size={20} /> <span className="hidden sm:inline">Novo Produto</span>
+                </button>
+            </div>
         </div>
 
         {/* List */}
