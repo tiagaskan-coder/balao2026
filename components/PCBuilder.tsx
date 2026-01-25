@@ -131,13 +131,13 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
   });
   const { addToCart } = useCart();
 
-  // Função auxiliar para normalizar texto (remove acentos e pontuação)
+  // Função auxiliar para normalizar texto (remove acentos, pontuação e espaços)
   const normalizeText = (text: string) => {
     return text
       .toLowerCase()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "") // Remove acentos
-      .replace(/[^\w\s]/g, ""); // Remove pontuação
+      .replace(/[^a-z0-9]/g, ""); // Remove tudo que não for letra ou número (incluindo espaços e pontuação)
   };
 
   // Enriquecer produtos com specs mockadas se não tiverem (apenas para demo funcionar imediatamente)
