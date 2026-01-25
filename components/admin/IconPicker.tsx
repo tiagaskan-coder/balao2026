@@ -38,7 +38,8 @@ import {
 
   // Misc & UI
   Star, ThumbsUp, Award, Crown, Diamond, Key, Lock, Unlock, Eye, EyeOff, Bell, 
-  Music, Video, Image, Film, Book, GraduationCap, Ghost, Smile, Flag
+  Music, Video, Image, Film, Book, GraduationCap, Ghost, Smile, Flag,
+  Gamepad2, Cable, RefreshCcw, Usb, Backpack, Lightbulb, Fan, Network, ToggleLeft, Disc, Mic, Square, PenTool, FileText, Move, Copy, Droplet, Cylinder, Scan, Aperture, CircuitBoard, MemoryStick, Feather
 } from "lucide-react";
 
 export const ICON_LIST = [
@@ -199,6 +200,31 @@ export const ICON_LIST = [
   { name: "Ghost", icon: Ghost },
   { name: "Smile", icon: Smile },
   { name: "Flag", icon: Flag },
+
+  // Added from Seed
+  { name: "Gamepad2", icon: Gamepad2 },
+  { name: "Cable", icon: Cable },
+  { name: "RefreshCcw", icon: RefreshCcw },
+  { name: "Usb", icon: Usb },
+  { name: "Backpack", icon: Backpack },
+  { name: "Lightbulb", icon: Lightbulb },
+  { name: "Fan", icon: Fan },
+  { name: "Network", icon: Network },
+  { name: "ToggleLeft", icon: ToggleLeft },
+  { name: "Disc", icon: Disc },
+  { name: "Mic", icon: Mic },
+  { name: "Square", icon: Square },
+  { name: "PenTool", icon: PenTool },
+  { name: "FileText", icon: FileText },
+  { name: "Move", icon: Move },
+  { name: "Copy", icon: Copy },
+  { name: "Droplet", icon: Droplet },
+  { name: "Cylinder", icon: Cylinder },
+  { name: "Scan", icon: Scan },
+  { name: "Aperture", icon: Aperture },
+  { name: "CircuitBoard", icon: CircuitBoard },
+  { name: "MemoryStick", icon: MemoryStick },
+  { name: "Feather", icon: Feather },
 ];
 
 interface IconPickerProps {
