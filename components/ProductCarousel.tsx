@@ -60,7 +60,7 @@ export default function ProductCarousel({ title, products, categoryId }: Product
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {products.map((product) => (
-          <div key={product.id} className="min-w-[200px] md:min-w-[240px] snap-start">
+          <div key={product.id} className="flex-none w-[200px] md:w-[240px] snap-start">
             <ProductCard product={product} variant="grid" />
           </div>
         ))}
