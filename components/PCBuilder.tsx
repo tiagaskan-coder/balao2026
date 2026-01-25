@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { Product, Category } from "@/lib/utils";
-import { Check, AlertCircle, Cpu, CircuitBoard, MemoryStick, Box, Zap, HardDrive, Monitor, Trash2, ShoppingCart, RefreshCcw, Wrench } from "lucide-react";
+import { Check, AlertCircle, Cpu, CircuitBoard, MemoryStick, Box, Zap, HardDrive, Monitor, Trash2, ShoppingCart, RefreshCcw, Wrench, Search } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import Image from "next/image";
 
@@ -69,6 +69,7 @@ interface PCBuilderProps {
 
 export default function PCBuilder({ products: initialProducts, categories }: PCBuilderProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
   const [config, setConfig] = useState<PCConfig>({
     cpu: null,
     motherboard: null,
@@ -79,6 +80,15 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
     case: null,
   });
   const { addToCart } = useCart();
+
+  // Função auxiliar para normalizar texto (remove acentos e pontuação)
+  const normalizeText = (text: string) => {
+    return text
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") // Remove acentos
+      .replace(/[^\w\s]/g, ""); // Remove pontuação
+  };
 
   // Enriquecer produtos com specs mockadas se não tiverem (apenas para demo funcionar imediatamente)
   const products = useMemo(() => {
@@ -117,13 +127,30 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
 
   const currentStep = STEPS[currentStepIndex];
 
+  // Resetar busca ao mudar de passo
+  React.useEffect(() => {
+    setSearchTerm("");
+  }, [currentStepIndex]);
+
   // --- Lógica de Compatibilidade ---
   const filteredProducts = useMemo(() => {
     let base = products.filter((p: TechProduct) => {
-        // Filtro robusto por categoria usando keywords
-        const cat = p.category.toLowerCase();
-        // Verifica se a categoria do produto contém alguma das palavras-chave do passo atual
-        return currentStep.categoryKeywords.some(keyword => cat.includes(keyword));
+        // Filtro robusto por categoria usando keywords e normalização
+        const normalizedCat = normalizeText(p.category);
+        const matchesCategory = currentStep.categoryKeywords.some(keyword => 
+            normalizedCat.includes(normalizeText(keyword))
+        );
+
+        if (!matchesCategory) return false;
+
+        // Filtro por termo de busca (input do usuário)
+        if (searchTerm) {
+            const normalizedSearch = normalizeText(searchTerm);
+            const normalizedName = normalizeText(p.name);
+            return normalizedName.includes(normalizedSearch);
+        }
+
+        return true;
     });
 
     // 1. Filtro de Soquete (CPU <-> Mobo)
@@ -306,6 +333,20 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
                     <p className="text-gray-500">
                         Selecione um componente compatível abaixo. O sistema filtra automaticamente as opções.
                     </p>
+                    
+                    {/* Campo de Busca */}
+                    <div className="mt-4 relative">
+                        <input
+                            type="text"
+                            placeholder={`Buscar ${currentStep.label.toLowerCase()}...`}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E60012] focus:border-transparent outline-none"
+                        />
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                            <Search size={18} />
+                        </div>
+                    </div>
                 </div>
 
                 {filteredProducts.length === 0 ? (
