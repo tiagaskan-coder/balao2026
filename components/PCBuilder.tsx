@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { Product, Category } from "@/lib/utils";
-import { Check, AlertCircle, Cpu, CircuitBoard, MemoryStick, Box, Zap, HardDrive, Monitor, Trash2, ShoppingCart, RefreshCcw, Wrench, Search, ShieldCheck, AlertTriangle } from "lucide-react";
+import { Check, AlertCircle, Cpu, CircuitBoard, MemoryStick, Box, Zap, HardDrive, Monitor, Trash2, ShoppingCart, RefreshCcw, Wrench, Search, ShieldCheck, AlertTriangle, Key, Keyboard, Mouse, Network, Armchair } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import Image from "next/image";
 import { 
@@ -22,16 +22,24 @@ interface Step {
   icon: any;
   categoryKeywords: string[];
   targetSlugs?: string[];
+  parentSlug: string;
+  filterKeywords?: string[];
 }
 
 const STEPS: Step[] = [
-  { id: "cpu", label: "Processador", icon: Cpu, categoryKeywords: ["processador", "cpu"], targetSlugs: ["processadores", "processadores-cpu"] },
-  { id: "motherboard", label: "Placa-mãe", icon: CircuitBoard, categoryKeywords: ["placa-mãe", "placa mãe", "motherboard", "placas-mãe", "placas-mae"], targetSlugs: ["placas-mae", "placas-mãe"] },
-  { id: "storage", label: "Armazenamento", icon: HardDrive, categoryKeywords: ["ssd", "hd", "disco", "armazenamento", "nvme", "sata"], targetSlugs: ["ssd-hd-nvme", "ssd", "hd"] },
-  { id: "ram", label: "Memória RAM", icon: MemoryStick, categoryKeywords: ["memória ram", "memoria ram", "ram"], targetSlugs: ["memoria-ram"] },
-  { id: "gpu", label: "Placa de Vídeo", icon: Monitor, categoryKeywords: ["placa de vídeo", "placa de video", "gpu", "rtx", "rx", "gtx"], targetSlugs: ["placas-de-video", "placas-de-video-gpu"] },
-  { id: "psu", label: "Fonte", icon: Zap, categoryKeywords: ["fonte", "alimentação", "psu"], targetSlugs: ["fontes-alimentacao", "fontes-de-alimentacao"] },
-  { id: "case", label: "Gabinete", icon: Box, categoryKeywords: ["gabinete", "case", "torre"], targetSlugs: ["gabinetes"] },
+  { id: "cpu", label: "Processador", icon: Cpu, categoryKeywords: ["processador", "cpu"], targetSlugs: ["processadores", "processadores-cpu"], parentSlug: "hardware" },
+  { id: "motherboard", label: "Placa-mãe", icon: CircuitBoard, categoryKeywords: ["placa-mãe", "placa mãe", "motherboard", "placas-mãe", "placas-mae"], targetSlugs: ["placas-mae", "placas-mãe"], parentSlug: "hardware" },
+  { id: "storage", label: "Armazenamento", icon: HardDrive, categoryKeywords: ["ssd", "hd", "disco", "armazenamento", "nvme", "sata"], targetSlugs: ["ssd-hd-nvme", "ssd", "hd"], parentSlug: "hardware" },
+  { id: "ram", label: "Memória RAM", icon: MemoryStick, categoryKeywords: ["memória ram", "memoria ram", "ram"], targetSlugs: ["memoria-ram"], parentSlug: "hardware" },
+  { id: "gpu", label: "Placa de Vídeo", icon: Monitor, categoryKeywords: ["placa de vídeo", "placa de video", "gpu", "rtx", "rx", "gtx"], targetSlugs: ["placas-de-video", "placas-de-video-gpu"], parentSlug: "hardware" },
+  { id: "psu", label: "Fonte", icon: Zap, categoryKeywords: ["fonte", "alimentação", "psu"], targetSlugs: ["fontes-alimentacao", "fontes-de-alimentacao"], parentSlug: "hardware" },
+  { id: "case", label: "Gabinete", icon: Box, categoryKeywords: ["gabinete", "case", "torre"], targetSlugs: ["gabinetes"], parentSlug: "hardware" },
+  { id: "licenses", label: "Licenças", icon: Key, categoryKeywords: ["licenças", "licencas", "windows", "office"], targetSlugs: ["licencas", "windows", "microsoft-office", "antivirus", "softwares-design", "softwares-edicao"], parentSlug: "licencas" },
+  { id: "monitor", label: "Monitores", icon: Monitor, categoryKeywords: ["monitor"], targetSlugs: ["monitores","monitor-gamer","monitor-curvo","monitor-profissional","monitor-ultrawide","monitor-4k"], parentSlug: "monitores" },
+  { id: "keyboard", label: "Teclados", icon: Keyboard, categoryKeywords: ["teclado"], targetSlugs: ["teclados-gamer-mecanicos"], parentSlug: "perifericos" },
+  { id: "mouse", label: "Mouses", icon: Mouse, categoryKeywords: ["mouse"], targetSlugs: ["mouses-gamer"], parentSlug: "perifericos" },
+  { id: "netadapters", label: "Adaptadores de Rede", icon: Network, categoryKeywords: ["rede","wifi","ethernet","lan"], targetSlugs: ["placas-rede-som"], parentSlug: "hardware", filterKeywords: ["rede","wifi","ethernet","lan","pci","usb","adaptador"] },
+  { id: "chairs", label: "Cadeiras", icon: Armchair, categoryKeywords: ["cadeira"], targetSlugs: ["cadeiras-gamer","cadeiras-ergonomicas"], parentSlug: "escritorio" },
 ];
 
 interface PCBuilderProps {
@@ -50,6 +58,15 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
     storage: null,
     psu: null,
     case: null,
+  });
+  const accessoryIds = new Set(["licenses","monitor","keyboard","mouse","netadapters","chairs"]);
+  const [extras, setExtras] = useState<Record<string, { product: TechProduct; quantity: number }[]>>({
+    licenses: [],
+    monitor: [],
+    keyboard: [],
+    mouse: [],
+    netadapters: [],
+    chairs: []
   });
   const { addToCart } = useCart();
 
@@ -89,38 +106,27 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
     if (!prerequisitesSatisfied(currentStep.id, config)) {
       return [];
     }
-    // 1. Filtro Básico (Categoria)
-    const hardwareCat = categories.find(c => c.slug === 'hardware' || c.name.toLowerCase() === 'hardware');
-    
+    const parentCat = categories.find(c => c.slug === currentStep.parentSlug || c.name.toLowerCase() === currentStep.parentSlug);
     let targetCategoryNames: string[] = [];
-    if (hardwareCat) {
-        const subCategories = categories.filter(c => c.parent_id === hardwareCat.id);
-        const matches = subCategories.filter(sub => 
-            currentStep.targetSlugs?.some(slug => sub.slug === slug)
-        );
+    if (parentCat) {
+        const subCategories = categories.filter(c => c.parent_id === parentCat.id);
+        const matches = subCategories.filter(sub => currentStep.targetSlugs?.some(slug => sub.slug === slug));
         targetCategoryNames = matches.map(m => m.name.toLowerCase());
+        if (currentStep.targetSlugs?.includes(parentCat.slug)) {
+          targetCategoryNames.push(parentCat.name.toLowerCase());
+        }
     }
 
-    // 2. Filtrar por categoria ou nome
+    // 2. Filtrar por categoria estrita
     let filtered = products.filter((p: TechProduct) => {
         const normalizedProductCat = normalizeText(p.category);
         const normalizedProductName = normalizeText(p.name || "");
-        
-        // Match Hierarquia Hardware
-        const isHardwareSubmatch = targetCategoryNames.some(targetName => 
-            normalizedProductCat.includes(normalizeText(targetName))
-        );
-
-        // Fallback Keyword no nome da peça ou na categoria
-        const matchesKeyword = currentStep.categoryKeywords.some(keyword => 
-            normalizedProductCat.includes(normalizeText(keyword))
-        );
-        const matchesKeywordByName = currentStep.categoryKeywords.some(keyword =>
-            normalizedProductName.includes(normalizeText(keyword))
-        );
-
-        const baseMatch = isHardwareSubmatch || matchesKeyword || matchesKeywordByName;
+        const isStrictCategoryMatch = targetCategoryNames.some(targetName => normalizedProductCat === normalizeText(targetName));
+        const baseMatch = isStrictCategoryMatch || (!parentCat && currentStep.categoryKeywords.some(keyword => normalizedProductCat.includes(normalizeText(keyword))));
         if (!baseMatch) return false;
+        if (currentStep.filterKeywords && !currentStep.filterKeywords.some(k => normalizedProductName.includes(normalizeText(k)))) {
+          return false;
+        }
         if (currentStep.id === "ram") {
           const moboName = (config.motherboard?.name || "").toLowerCase();
           let expected: "ddr4" | "ddr5" | null = null;
@@ -160,10 +166,21 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
   }, [products, currentStep, config, searchTerm, categories]);
 
   const handleSelect = (product: TechProduct, isValid: boolean) => {
-    if (!isValid) return; // Impede seleção se incompatível
+    if (!isValid) return;
+    if (accessoryIds.has(currentStep.id)) {
+      setExtras(prev => {
+        const list = prev[currentStep.id] || [];
+        const idx = list.findIndex(x => x.product.id === product.id);
+        if (idx >= 0) {
+          const updated = [...list];
+          updated[idx] = { product: updated[idx].product, quantity: updated[idx].quantity + 1 };
+          return { ...prev, [currentStep.id]: updated };
+        }
+        return { ...prev, [currentStep.id]: [...list, { product, quantity: 1 }] };
+      });
+      return;
+    }
     setConfig((prev: PCConfig) => ({ ...prev, [currentStep.id]: product }));
-    
-    // Auto-advance
     if (currentStepIndex < STEPS.length - 1) {
         setTimeout(() => setCurrentStepIndex((prev: number) => prev + 1), 300);
     }
@@ -174,12 +191,22 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
     const stepIdx = STEPS.findIndex(s => s.id === stepId);
     if (stepIdx !== -1) setCurrentStepIndex(stepIdx);
   };
+  const clearExtrasForStep = (stepId: string) => {
+    setExtras(prev => ({ ...prev, [stepId]: [] }));
+    const stepIdx = STEPS.findIndex(s => s.id === stepId);
+    if (stepIdx !== -1) setCurrentStepIndex(stepIdx);
+  };
 
-  const totalPrice = (Object.values(config) as (TechProduct | null)[]).reduce((acc, item) => {
+  const totalPriceHardware = (Object.values(config) as (TechProduct | null)[]).reduce((acc, item) => {
     if (!item) return acc;
     const price = parseFloat(item.price.replace("R$", "").replace(/\./g, "").replace(",", ".").trim());
     return acc + (isNaN(price) ? 0 : price);
   }, 0);
+  const totalPriceExtras = Object.values(extras).flat().reduce((acc, x) => {
+    const price = parseFloat(x.product.price.replace("R$", "").replace(/\./g, "").replace(",", ".").trim());
+    return acc + (isNaN(price) ? 0 : price) * x.quantity;
+  }, 0);
+  const totalPrice = totalPriceHardware + totalPriceExtras;
 
   const totalTDP = (config.cpu?.specs?.tdp || 0) + (config.gpu?.specs?.tdp || 0);
 
@@ -194,6 +221,11 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
     }
     Object.values(config).forEach(item => {
         if (item) addToCart(item);
+    });
+    Object.entries(extras).forEach(([_, list]) => {
+      list.forEach(x => {
+        for (let i = 0; i < x.quantity; i++) addToCart(x.product);
+      });
     });
     alert("Setup adicionado ao carrinho com sucesso!");
   };
@@ -220,6 +252,8 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
                     const selected = config[step.id as keyof PCConfig];
                     const isActive = index === currentStepIndex;
                     const isDone = !!selected;
+                    const extrasList = extras[step.id] || [];
+                    const extrasDone = accessoryIds.has(step.id) && extrasList.length > 0;
 
                     return (
                         <div 
@@ -227,7 +261,7 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
                         className={`
                             relative p-2 rounded-lg border transition-all cursor-pointer
                             ${isActive ? "border-[#E60012] bg-red-50 ring-1 ring-[#E60012]" : "border-gray-200 hover:border-gray-300"}
-                            ${isDone ? "bg-gray-50" : ""}
+                            ${(isDone || extrasDone) ? "bg-gray-50" : ""}
                         `}
                         onClick={() => setCurrentStepIndex(index)}
                         >
@@ -240,22 +274,36 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
                                 <span className={`text-xs font-medium ${isActive ? "text-[#E60012]" : "text-gray-700"}`}>
                                     {step.label}
                                 </span>
-                                {isDone && (
+                                {(isDone || extrasDone) && (
                                     <button 
-                                        onClick={(e) => { e.stopPropagation(); handleRemove(step.id as keyof PCConfig); }}
+                                        onClick={(e) => { 
+                                          e.stopPropagation(); 
+                                          if (accessoryIds.has(step.id)) clearExtrasForStep(step.id);
+                                          else handleRemove(step.id as keyof PCConfig); 
+                                        }}
                                         className="text-gray-400 hover:text-red-500"
                                     >
                                         <Trash2 size={12} />
                                     </button>
                                 )}
                             </div>
-                            {selected ? (
-                                <div className="text-xs text-gray-600 truncate">{selected.name}</div>
-                            ) : (
+                            {accessoryIds.has(step.id) ? (
+                              extrasDone ? (
+                                <div className="text-xs text-gray-600 truncate">
+                                  {extrasList.map((x) => `${x.product.name} x${x.quantity}`).join(", ")}
+                                </div>
+                              ) : (
                                 <div className="text-xs text-gray-400 italic">Pendente...</div>
-                            )}
-                            {selected && (
-                                <div className="text-xs font-bold text-[#E60012] mt-1">{selected.price}</div>
+                              )
+                            ) : (
+                              selected ? (
+                                <>
+                                  <div className="text-xs text-gray-600 truncate">{selected.name}</div>
+                                  <div className="text-xs font-bold text-[#E60012] mt-1">{selected.price}</div>
+                                </>
+                              ) : (
+                                <div className="text-xs text-gray-400 italic">Pendente...</div>
+                              )
                             )}
                             </div>
                         </div>
@@ -317,7 +365,10 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
                     </button>
                     
                     <button 
-                        onClick={() => setConfig({ cpu: null, motherboard: null, ram: null, gpu: null, storage: null, psu: null, case: null })}
+                        onClick={() => { 
+                          setConfig({ cpu: null, motherboard: null, ram: null, gpu: null, storage: null, psu: null, case: null });
+                          setExtras({ licenses: [], monitor: [], keyboard: [], mouse: [], netadapters: [], chairs: [] });
+                        }}
                         className="w-full py-2 text-xs text-gray-500 hover:text-gray-700 underline flex items-center justify-center gap-1"
                     >
                         <RefreshCcw size={12} />
@@ -384,7 +435,11 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
                                 key={product.id}
                                 className={`
                                     border rounded-lg p-4 flex gap-4 transition-all
-                                    ${config[currentStep.id as keyof PCConfig]?.id === product.id ? "border-[#E60012] bg-red-50" : "border-gray-200"}
+                                    ${
+                                      accessoryIds.has(currentStep.id)
+                                        ? ((extras[currentStep.id]?.some(x => x.product.id === product.id)) ? "border-[#E60012] bg-red-50" : "border-gray-200")
+                                        : (config[currentStep.id as keyof PCConfig]?.id === product.id ? "border-[#E60012] bg-red-50" : "border-gray-200")
+                                    }
                                     ${!status.valid ? "opacity-60 bg-gray-50 cursor-not-allowed grayscale" : "hover:shadow-md cursor-pointer group bg-white"}
                                 `}
                                 onClick={() => handleSelect(product, status.valid)}
@@ -411,7 +466,6 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
                                             {product.name}
                                         </h3>
                                         
-                                        {/* Specs Badges */}
                                         <div className="flex flex-wrap gap-1 mt-2">
                                             {product.specs?.socket && (
                                                 <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
@@ -428,6 +482,11 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
                                                     {product.specs.ram_type}
                                                 </span>
                                             )}
+                                            {accessoryIds.has(currentStep.id) && (extras[currentStep.id]?.find(x => x.product.id === product.id)?.quantity || 0) > 0 && (
+                                              <span className="text-[10px] bg-[#E60012] text-white px-2 py-0.5 rounded">
+                                                x{extras[currentStep.id]?.find(x => x.product.id === product.id)?.quantity}
+                                              </span>
+                                            )}
                                         </div>
 
                                         {/* Mensagem de Incompatibilidade */}
@@ -441,7 +500,7 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
                                     
                                     <div className="flex items-center justify-between mt-2">
                                         <span className="text-lg font-bold text-[#E60012]">{product.price}</span>
-                                        {config[currentStep.id as keyof PCConfig]?.id === product.id && (
+                                        {!accessoryIds.has(currentStep.id) && config[currentStep.id as keyof PCConfig]?.id === product.id && (
                                             <span className="bg-[#E60012] text-white p-1 rounded-full">
                                                 <Check size={16} />
                                             </span>
