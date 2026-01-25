@@ -4,12 +4,14 @@ import { useState, useEffect } from "react";
 import { Category, buildCategoryTree } from "@/lib/utils";
 import { Plus, Edit, Trash2, ChevronRight, ChevronDown, Save, X } from "lucide-react";
 import SimpleEmojiPicker from "./SimpleEmojiPicker";
+import IconPicker, { ICON_LIST } from "./IconPicker";
 
 export default function CategoryManager() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showIconPicker, setShowIconPicker] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   // Editing/Adding State
@@ -292,14 +294,40 @@ export default function CategoryManager() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Ícone (Opcional)</label>
-              <input
-                type="text"
-                className="w-full p-2 border rounded"
-                value={formData.icon || ""}
-                onChange={e => setFormData({ ...formData, icon: e.target.value })}
-                placeholder="Ex: Monitor, Cpu, etc"
-              />
+              <label className="block text-sm font-medium text-gray-700 mb-1">Ícone</label>
+              <div className="relative">
+                <button
+                    type="button"
+                    onClick={() => setShowIconPicker(!showIconPicker)}
+                    className="w-full p-2 border rounded flex items-center justify-between hover:bg-gray-50 text-left bg-white"
+                >
+                    <div className="flex items-center gap-2">
+                        {formData.icon ? (
+                            <>
+                                {(() => {
+                                    const Icon = ICON_LIST.find(i => i.name === formData.icon)?.icon;
+                                    return Icon ? <Icon size={20} className="text-gray-600" /> : <span className="text-gray-400">?</span>
+                                })()}
+                                <span>{formData.icon}</span>
+                            </>
+                        ) : (
+                            <span className="text-gray-400">Selecione um ícone...</span>
+                        )}
+                    </div>
+                    <ChevronDown size={16} className="text-gray-400" />
+                </button>
+                
+                {showIconPicker && (
+                    <IconPicker 
+                        selectedIcon={formData.icon || null}
+                        onSelect={(iconName) => {
+                            setFormData(prev => ({ ...prev, icon: iconName }));
+                            setShowIconPicker(false);
+                        }}
+                        onClose={() => setShowIconPicker(false)}
+                    />
+                )}
+              </div>
             </div>
 
             <div>

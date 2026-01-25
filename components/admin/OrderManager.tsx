@@ -167,13 +167,35 @@ STATUS: ${getStatusLabel(order.status)}
                   <td className="px-6 py-4">
                     <div className="flex -space-x-2 overflow-hidden">
                         {order.items?.slice(0, 4).map((item) => (
-                        <div key={item.id} className="relative inline-block h-10 w-10 rounded-full ring-2 ring-white bg-white">
-                            <Image
-                            src={item.product_image || "/placeholder.png"}
-                            alt={item.product_name}
-                            fill
-                            className="rounded-full object-cover"
-                            />
+                        <div key={item.id} className="relative inline-block h-10 w-10 rounded-full ring-2 ring-white bg-gray-100 overflow-hidden">
+                            {item.product_image ? (
+                                <Image
+                                    src={item.product_image}
+                                    alt={item.product_name}
+                                    fill
+                                    className="object-cover"
+                                    onError={(e) => {
+                                        // Fallback to icon if image fails to load
+                                        const target = e.target as HTMLImageElement;
+                                        target.style.display = 'none';
+                                        target.parentElement?.classList.add('flex', 'items-center', 'justify-center');
+                                        // We can't easily inject React component here, so we rely on the parent div showing the background
+                                        // Better approach: use a state or a separate component. 
+                                        // For simplicity in this map, let's use a conditional render wrapper component concept inline if possible, 
+                                        // but since we can't use hooks inside callback, we'll use a component.
+                                    }}
+                                />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                    <Package size={20} />
+                                </div>
+                            )}
+                            {/* Fallback element that shows if image is hidden/missing */}
+                            {item.product_image && (
+                                <div className="absolute inset-0 flex items-center justify-center text-gray-400 -z-10">
+                                    <Package size={20} />
+                                </div>
+                            )}
                         </div>
                         ))}
                         {order.items && order.items.length > 4 && (
