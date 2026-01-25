@@ -40,15 +40,29 @@ export async function saveProducts(products: Product[]) {
         console.log(`[saveProducts] First item sample: ID=${dbProducts[0].id}, Slug=${dbProducts[0].slug}`);
      }
 
-     const { error } = await supabaseAdmin
-        .from('products')
-        .upsert(dbProducts, { onConflict: 'id' });
-
-     if (error) {
-        console.error("Supabase save error details:", JSON.stringify(error, null, 2));
-        throw new Error(`Database error: ${error.message} (${error.code})`);
+     // Prefer admin client when available; otherwise, fallback to anon client
+     let error: any = null;
+     try {
+       const { error: adminError } = await supabaseAdmin
+         .from('products')
+         .upsert(dbProducts, { onConflict: 'id' });
+       error = adminError || null;
+     } catch (e) {
+       error = e;
      }
-     
+ 
+     // Fallback: try anon client if admin failed or not configured
+     if (error) {
+       console.warn("[saveProducts] Admin upsert failed or not configured, attempting anon fallback...");
+       const { error: anonError } = await supabase
+         .from('products')
+         .upsert(dbProducts, { onConflict: 'id' });
+       if (anonError) {
+         console.error("Supabase save error details (anon):", JSON.stringify(anonError, null, 2));
+         throw new Error(`Database error: ${anonError.message} (${anonError.code})`);
+       }
+     }
+
      console.log(`[saveProducts] Success.`);
   } catch (error) {
       console.error("Error saving products:", error);
