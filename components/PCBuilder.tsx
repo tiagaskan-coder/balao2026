@@ -121,6 +121,19 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
 
         const baseMatch = isHardwareSubmatch || matchesKeyword || matchesKeywordByName;
         if (!baseMatch) return false;
+        if (currentStep.id === "ram") {
+          const moboName = (config.motherboard?.name || "").toLowerCase();
+          let expected: "ddr4" | "ddr5" | null = null;
+          if (moboName.includes("ddr5")) expected = "ddr5";
+          else if (moboName.includes("ddr4")) expected = "ddr4";
+          
+          if (!expected) return false;
+          
+          const ramName = (p.name || "").toLowerCase();
+          const ramTypeSpec = (p.specs?.ram_type || "").toLowerCase();
+          const matchesRam = ramName.includes(expected) || ramTypeSpec === expected.toUpperCase();
+          if (!matchesRam) return false;
+        }
         if (currentStep.id === "storage") {
           const name = p.name.toLowerCase();
           if (name.includes("externo") || name.includes("external") || name.includes("usb")) return false;

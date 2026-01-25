@@ -169,16 +169,29 @@ export function checkCompatibility(
   }
 
   // 2. Placa-mãe ↔ RAM (Tipo de Memória)
-  if (categoryContext === 'ram' && config.motherboard?.specs?.ram_type) {
-    if (product.specs?.ram_type && product.specs.ram_type !== config.motherboard.specs.ram_type) {
-      valid = false;
-      messages.push(`Tipo de memória incompatível: Placa usa ${config.motherboard.specs.ram_type}, RAM é ${product.specs.ram_type}`);
+  if (categoryContext === 'ram' && config.motherboard) {
+    const moboName = (config.motherboard.name || '').toLowerCase();
+    let expected: 'DDR4' | 'DDR5' | null = null;
+    if (moboName.includes('ddr5')) expected = 'DDR5';
+    else if (moboName.includes('ddr4')) expected = 'DDR4';
+    else if (config.motherboard.specs?.ram_type) expected = config.motherboard.specs.ram_type as 'DDR4' | 'DDR5';
+
+    if (expected) {
+      const ramName = (product.name || '').toLowerCase();
+      const actual = product.specs?.ram_type || (ramName.includes('ddr5') ? 'DDR5' : ramName.includes('ddr4') ? 'DDR4' : undefined);
+      if (!actual || actual !== expected) {
+        valid = false;
+        messages.push(`Tipo de memória incompatível: Placa usa ${expected}, RAM é ${actual || 'indefinido'}`);
+      }
     }
   }
   if (categoryContext === 'motherboard' && config.ram?.specs?.ram_type) {
-    if (product.specs?.ram_type && product.specs.ram_type !== config.ram.specs.ram_type) {
-        valid = false;
-        messages.push(`Tipo de memória incompatível: RAM selecionada é ${config.ram.specs.ram_type}, placa suporta ${product.specs.ram_type}`);
+    const moboName = (product.name || '').toLowerCase();
+    const moboRam = product.specs?.ram_type || (moboName.includes('ddr5') ? 'DDR5' : moboName.includes('ddr4') ? 'DDR4' : undefined);
+    const ramType = config.ram.specs.ram_type;
+    if (!moboRam || moboRam !== ramType) {
+      valid = false;
+      messages.push(`Tipo de memória incompatível: RAM selecionada é ${ramType}, placa suporta ${moboRam || 'indefinido'}`);
     }
   }
 
@@ -257,8 +270,11 @@ export function validateBuild(config: PCConfig): ValidationResult {
 
   // Check RAM <-> Mobo
   if (config.ram && config.motherboard) {
-    if (config.ram.specs?.ram_type !== config.motherboard.specs?.ram_type) {
-        errors.push(`Incompatibilidade Crítica: Memória (${config.ram.specs?.ram_type}) não encaixa na Placa-mãe (${config.motherboard.specs?.ram_type}).`);
+    const moboName = (config.motherboard.name || '').toLowerCase();
+    const moboRam = config.motherboard.specs?.ram_type || (moboName.includes('ddr5') ? 'DDR5' : moboName.includes('ddr4') ? 'DDR4' : undefined);
+    const ramType = config.ram.specs?.ram_type || ((config.ram.name || '').toLowerCase().includes('ddr5') ? 'DDR5' : (config.ram.name || '').toLowerCase().includes('ddr4') ? 'DDR4' : undefined);
+    if (!moboRam || !ramType || ramType !== moboRam) {
+        errors.push(`Incompatibilidade Crítica: Memória (${ramType || 'indefinida'}) não encaixa na Placa-mãe (${moboRam || 'indefinida'}).`);
     }
   }
 
