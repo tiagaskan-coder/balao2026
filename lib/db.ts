@@ -32,9 +32,7 @@ export async function saveProducts(products: Product[]) {
         price: String(p.price),
         image: p.image,
         category: p.category,
-        slug: p.slug || p.name.toLowerCase().replace(/\s+/g, '-') + '-' + Math.random().toString(36).substring(2, 7),
-        video_url: p.video_url || null,
-        specs: p.specs || null
+        slug: p.slug || p.name.toLowerCase().replace(/\s+/g, '-') + '-' + Math.random().toString(36).substring(2, 7)
      }));
 
      console.log(`[saveProducts] Saving ${dbProducts.length} products via supabaseAdmin...`);
@@ -69,9 +67,7 @@ export async function createProduct(product: Partial<Product>) {
             price: product.price,
             image: product.image,
             category: product.category,
-            slug: product.slug,
-            video_url: product.video_url || null,
-            specs: product.specs || null
+            slug: product.slug
             // cost, supplier, etc. are NOT in DB yet, so we exclude them to prevent errors
         };
 
@@ -98,11 +94,6 @@ export async function updateProduct(id: string, updates: Partial<Product>) {
         if (updates.image !== undefined) dbUpdates.image = updates.image;
         if (updates.category !== undefined) dbUpdates.category = updates.category;
         if (updates.slug !== undefined) dbUpdates.slug = updates.slug;
-        if (updates.cost !== undefined) dbUpdates.cost = updates.cost;
-        if (updates.supplier !== undefined) dbUpdates.supplier = updates.supplier;
-        if (updates.video_url !== undefined) dbUpdates.video_url = updates.video_url;
-        if (updates.description !== undefined) dbUpdates.description = updates.description;
-        if (updates.specs !== undefined) dbUpdates.specs = updates.specs;
 
         const { data, error } = await supabaseAdmin
             .from('products')

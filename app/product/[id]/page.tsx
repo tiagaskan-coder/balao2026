@@ -9,12 +9,13 @@ import WhatsAppButton from '@/components/WhatsAppButton';
 import ProductActions from '@/components/ProductActions';
 
 type Props = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const products = await getProducts(); // Added await
-  const product = products.find((p) => p.id === params.id);
+  const products = await getProducts();
+  const { id } = await params;
+  const product = products.find((p) => p.id === id);
 
   if (!product) {
     return {
@@ -49,11 +50,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ProductPage({ params }: Props) {
+  const { id } = await params;
   const [products, categories] = await Promise.all([
     getProducts(),
     getCategories()
   ]);
-  const product = products.find((p) => p.id === params.id);
+  const product = products.find((p) => p.id === id);
 
   if (!product) return notFound();
 
