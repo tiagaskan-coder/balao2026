@@ -132,6 +132,8 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
     // 2. Filtrar por categoria estrita
     const categoriesByNameNorm = new Map<string, Category>();
     categories.forEach(c => categoriesByNameNorm.set(normalizeText(c.name), c));
+    const categoriesBySlug = new Map<string, Category>();
+    categories.forEach(c => categoriesBySlug.set(c.slug, c));
     const isUnderParent = (cat: Category | undefined, parent: Category | undefined) => {
       if (!cat || !parent) return false;
       let current: Category | undefined = cat;
@@ -146,17 +148,14 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
     let filtered = products.filter((p: TechProduct) => {
         const normalizedProductCat = normalizeText(p.category);
         const normalizedProductName = normalizeText(p.name || "");
-        const catObj = categoriesByNameNorm.get(normalizedProductCat);
+        const catObj = categoriesByNameNorm.get(normalizedProductCat) 
+          || categoriesBySlug.get(p.category) 
+          || categories.find(c => normalizeText(c.slug) === normalizedProductCat);
         const strictNames = targetCategoryNames.map(n => normalizeText(n));
-        const isStrictCategoryMatch = strictNames.some(targetName => normalizedProductCat === targetName);
-        let baseMatch = isStrictCategoryMatch || (!parentCat && currentStep.categoryKeywords.some(keyword => normalizedProductCat.includes(normalizeText(keyword))));
-        if (parentCat && !baseMatch) {
-          const underParent = isUnderParent(catObj, parentCat);
-          const noExplicitMatches = targetCategoryNames.length === 0;
-          if (underParent && noExplicitMatches) {
-            baseMatch = currentStep.categoryKeywords.some(k => normalizedProductCat.includes(normalizeText(k)) || normalizedProductName.includes(normalizeText(k)));
-          }
-        }
+        const isStrictCategoryMatch = strictNames.length > 0 && strictNames.some(targetName => normalizedProductCat === targetName);
+        const nameKeywords = currentStep.categoryKeywords.map(k => normalizeText(k));
+        const nameMatch = nameKeywords.some(k => normalizedProductName.includes(k) || normalizedProductCat.includes(k));
+        const baseMatch = isStrictCategoryMatch || nameMatch;
         if (!baseMatch) return false;
         if (currentStep.filterKeywords && !currentStep.filterKeywords.some(k => normalizedProductName.includes(normalizeText(k)))) {
           return false;
