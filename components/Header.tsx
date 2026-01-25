@@ -186,6 +186,39 @@ export default function Header() {
           </Link>
         </div>
       </div>
+
+      {/* Navigation Links */}
+      <nav className="hidden md:block border-t border-gray-100 bg-gray-50/50 backdrop-blur-sm">
+        <div className="container mx-auto px-4">
+            <ul className="flex items-center justify-center gap-8 py-3 text-sm font-semibold text-gray-700">
+                <li>
+                    <Link href="/category/pc-gamer" className="hover:text-[#E60012] transition-colors flex items-center gap-2">
+                        PC Gamer
+                    </Link>
+                </li>
+                <li>
+                    <Link href="/category/notebooks" className="hover:text-[#E60012] transition-colors">
+                        Notebooks
+                    </Link>
+                </li>
+                <li>
+                    <Link href="/promocao" className="hover:text-[#E60012] transition-colors text-[#E60012]">
+                        Promoção
+                    </Link>
+                </li>
+                <li>
+                    <Link href="/manutencao" className="hover:text-[#E60012] transition-colors">
+                        Manutenção
+                    </Link>
+                </li>
+                <li>
+                    <Link href="/consignacao" className="hover:text-[#E60012] transition-colors">
+                        Consignação
+                    </Link>
+                </li>
+            </ul>
+        </div>
+      </nav>
       
       {/* Mobile Search Bar (Full width below header on mobile) */}
       <div className="md:hidden px-4 pb-4" ref={mobileSearchContainerRef}>
