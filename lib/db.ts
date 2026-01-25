@@ -5,26 +5,36 @@ import { Product, CarouselImage, Category, HomeBlock } from './utils';
 // Fallback to empty array if connection fails or env vars missing
 export async function getProducts(): Promise<Product[]> {
   try {
-    let { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .order('created_at', { ascending: false });
-    
-    if (error) {
-      console.warn("Supabase products order by created_at failed, retrying without order...", error);
-      const retry = await supabase
+    const pageSize = 1000;
+    let all: Product[] = [];
+    let from = 0;
+    while (true) {
+      const { data, error } = await supabase
         .from('products')
-        .select('*');
-      data = retry.data as any;
-      error = retry.error as any;
+        .select('*')
+        .order('created_at', { ascending: false })
+        .range(from, from + pageSize - 1);
+      if (error) {
+        const retry = await supabase
+          .from('products')
+          .select('*')
+          .range(from, from + pageSize - 1);
+        if (retry.error) {
+          console.error("Supabase error:", retry.error);
+          break;
+        }
+        const chunk = (retry.data as Product[]) || [];
+        all = all.concat(chunk);
+        if (chunk.length < pageSize) break;
+        from += pageSize;
+        continue;
+      }
+      const chunk = (data as Product[]) || [];
+      all = all.concat(chunk);
+      if (chunk.length < pageSize) break;
+      from += pageSize;
     }
-      
-    if (error) {
-      console.error("Supabase error:", error);
-      return [];
-    }
-    
-    return data as Product[];
+    return all;
   } catch (error) {
     console.error("Error fetching products:", error);
     return [];
