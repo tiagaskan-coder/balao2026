@@ -129,11 +129,30 @@ export default function AdminPage() {
   const optimizeUrl = (url: string) => {
     try {
         const u = new URL(url);
-        // Remove common width/height params often used in CDNs to try and get high-res
-        ['w', 'h', 'width', 'height', 'size', 'resize'].forEach(p => u.searchParams.delete(p));
+        
+        // 1. Remove common resize query parameters
+        const paramsToRemove = ['w', 'h', 'width', 'height', 'size', 'resize', 'format', 'quality', 'fit', 'crop', 'dpr', 'auto', 'v'];
+        paramsToRemove.forEach(p => u.searchParams.delete(p));
+
+        let path = u.pathname;
+
+        // 2. Handle Google/Blogspot image resizing (/sXXX/) -> switch to /s0/ (original)
+        if (/\/s\d+(-c)?\//.test(path)) {
+            path = path.replace(/\/s\d+(-c)?\//, '/s0/');
+        }
+        
+        // 3. Remove size suffixes in filename (e.g., image_50x50.jpg -> image.jpg)
+        // Matches _100x100, _thumb, -thumb, _small, .small before extension
+        const sizePattern = /[-_](?:\d+x\d+|thumb|thumbnail|small|medium|large|mini)(?=\.[a-zA-Z0-9]+$)/i;
+        if (sizePattern.test(path)) {
+             path = path.replace(sizePattern, '');
+        }
+
+        u.pathname = path;
         return u.toString();
     } catch {
-        return url;
+        // Fallback for non-standard URLs: try basic regex cleanup
+        return url.replace(/[-_]\d+x\d+(?=\.[a-zA-Z0-9]+$)/, '');
     }
   };
 
