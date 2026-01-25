@@ -208,7 +208,10 @@ export default function AdminPage() {
         body: JSON.stringify({ products: finalProducts }),
       });
 
-      if (!res.ok) throw new Error("Falha ao salvar");
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Falha ao salvar");
+      }
 
       // Save History
       await fetch("/api/history", {

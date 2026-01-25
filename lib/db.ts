@@ -29,7 +29,7 @@ export async function saveProducts(products: Product[]) {
      const dbProducts = products.map(p => ({
         id: p.id,
         name: p.name,
-        price: p.price,
+        price: String(p.price),
         image: p.image,
         category: p.category,
         slug: p.slug || p.name.toLowerCase().replace(/\s+/g, '-') + '-' + Math.random().toString(36).substring(2, 7),
@@ -47,8 +47,8 @@ export async function saveProducts(products: Product[]) {
         .upsert(dbProducts, { onConflict: 'id' });
 
      if (error) {
-        console.error("Supabase save error:", error);
-        throw error;
+        console.error("Supabase save error details:", JSON.stringify(error, null, 2));
+        throw new Error(`Database error: ${error.message} (${error.code})`);
      }
      
      console.log(`[saveProducts] Success.`);
