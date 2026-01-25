@@ -64,6 +64,15 @@ export default async function ProductPage(props: Props) {
   const listPriceNum = cashPriceNum / 0.85;
   const installmentValue = listPriceNum / 10;
 
+  // Video ID Extraction
+  const getVideoId = (url: string) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+  const videoId = product.video_url ? getVideoId(product.video_url) : null;
+
   return (
      <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       <Header />
@@ -74,16 +83,33 @@ export default async function ProductPage(props: Props) {
         <main className="flex-1 w-full px-4 lg:px-0">
           <div className="bg-white rounded-lg shadow-lg overflow-hidden">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-4 md:p-8">
-                {/* Image Section */}
-                <div className="relative aspect-square bg-white border border-gray-100 rounded-lg flex items-center justify-center p-4">
-                    <Image 
-                        src={product.image}
-                        alt={product.name}
-                        fill
-                        className="object-contain"
-                        priority
-                        unoptimized
-                    />
+                {/* Image & Video Section */}
+                <div className="flex flex-col gap-6">
+                    <div className="relative aspect-square bg-white border border-gray-100 rounded-lg flex items-center justify-center p-4">
+                        <Image 
+                            src={product.image}
+                            alt={product.name}
+                            fill
+                            className="object-contain"
+                            priority
+                            unoptimized
+                        />
+                    </div>
+                    
+                    {videoId && (
+                        <div className="aspect-video w-full rounded-lg overflow-hidden shadow-sm border border-gray-100">
+                            <iframe 
+                                width="100%" 
+                                height="100%" 
+                                src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`} 
+                                title={product.name}
+                                frameBorder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                allowFullScreen
+                                className="w-full h-full"
+                            ></iframe>
+                        </div>
+                    )}
                 </div>
 
                 {/* Info Section */}
