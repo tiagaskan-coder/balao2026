@@ -14,6 +14,7 @@ export default function HomeBlocksManager({ categories }: HomeBlocksManagerProps
   const [isAdding, setIsAdding] = useState(false);
   const [newBlockCategory, setNewBlockCategory] = useState("");
   const [newBlockTitle, setNewBlockTitle] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchBlocks();
@@ -21,13 +22,17 @@ export default function HomeBlocksManager({ categories }: HomeBlocksManagerProps
 
   const fetchBlocks = async () => {
     try {
+      setError(null);
       const res = await fetch("/api/home-blocks");
       if (res.ok) {
         const data = await res.json();
         setBlocks(data);
+      } else {
+          setError("Falha ao carregar blocos. Verifique se a tabela 'home_blocks' foi criada no Supabase.");
       }
     } catch (error) {
       console.error("Error fetching blocks:", error);
+      setError("Erro de conexão ao carregar blocos.");
     } finally {
       setLoading(false);
     }
@@ -37,6 +42,7 @@ export default function HomeBlocksManager({ categories }: HomeBlocksManagerProps
     if (!newBlockCategory) return;
 
     try {
+      setError(null);
       const res = await fetch("/api/home-blocks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -51,9 +57,13 @@ export default function HomeBlocksManager({ categories }: HomeBlocksManagerProps
         setIsAdding(false);
         setNewBlockCategory("");
         setNewBlockTitle("");
+      } else {
+          const errData = await res.json();
+          setError(errData.error || "Erro ao criar bloco. Verifique o console.");
       }
     } catch (error) {
       console.error("Error creating block:", error);
+      setError("Erro de conexão ao criar bloco.");
     }
   };
 
@@ -108,6 +118,13 @@ export default function HomeBlocksManager({ categories }: HomeBlocksManagerProps
           <Plus size={18} /> Novo Bloco
         </button>
       </div>
+
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-md">
+          <p className="font-medium">Erro</p>
+          <p className="text-sm">{error}</p>
+        </div>
+      )}
 
       {isAdding && (
         <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">

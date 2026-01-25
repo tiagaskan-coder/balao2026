@@ -442,7 +442,7 @@ export async function getHomeBlocks(activeOnly = true): Promise<HomeBlock[]> {
 export async function createHomeBlock(block: Partial<HomeBlock>) {
   try {
      // Get max order
-    const { data: maxOrderData } = await supabase
+    const { data: maxOrderData } = await supabaseAdmin
         .from('home_blocks')
         .select('display_order')
         .order('display_order', { ascending: false })
