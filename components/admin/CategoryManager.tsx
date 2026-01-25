@@ -48,7 +48,7 @@ export default function CategoryManager() {
     if (!confirm("Isso irá recriar todas as categorias padrão. Deseja continuar?")) return;
     setLoading(true);
     try {
-        const res = await fetch("/api/seed");
+        const res = await fetch("/api/admin/seed-categories");
         if (res.ok) {
             alert("Categorias restauradas com sucesso!");
             fetchCategories();

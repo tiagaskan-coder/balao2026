@@ -29,18 +29,22 @@ export default async function Home(props: {
     return true;
   });
 
+  // Limit to 20 items for the "Destaques" (default) view
+  const isFeatured = !category && !search;
+  const displayedProducts = isFeatured ? filteredProducts.slice(0, 20) : filteredProducts;
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       <Header />
-      <div className="flex container mx-auto flex-1 py-6 gap-6">
+      <div className="flex container mx-auto flex-1 py-6 gap-6 px-4 lg:px-0">
         <div className="hidden lg:block">
             <Sidebar categories={categories} />
         </div>
-        <main className="flex-1 w-full">
+        <main className="flex-1 w-full min-w-0">
             {/* Carousel Banner */}
             {!search && !category && (
                 <>
-                <div className="mb-6 px-4 lg:px-0">
+                <div className="mb-6 -mx-4 lg:mx-0">
                     {carouselImages.length > 0 ? (
                         <Carousel images={carouselImages} />
                     ) : (
@@ -66,15 +70,15 @@ export default async function Home(props: {
                 </>
             )}
 
-            <div className="flex items-center justify-between mb-4 px-4 lg:px-0">
+            <div className="flex items-center justify-between mb-4">
                 <h1 className="text-xl font-bold text-gray-800">
                     {category || (search ? `Resultados para: "${search}"` : "Destaques")}
                 </h1>
-                <span className="text-sm text-gray-500">{filteredProducts.length} produtos</span>
+                <span className="text-sm text-gray-500">{displayedProducts.length} produtos</span>
             </div>
 
-          {filteredProducts.length === 0 ? (
-             <div className="text-center py-20 text-gray-500 bg-white rounded-lg shadow-sm mx-4 lg:mx-0">
+          {displayedProducts.length === 0 ? (
+             <div className="text-center py-20 text-gray-500 bg-white rounded-lg shadow-sm">
                 <p className="text-xl font-medium">Nenhum produto encontrado.</p>
                 {products.length === 0 && (
                     <p className="mt-4 text-sm bg-blue-50 text-blue-700 inline-block px-4 py-2 rounded-md">
@@ -83,7 +87,7 @@ export default async function Home(props: {
                 )}
              </div>
           ) : (
-            <ProductList products={filteredProducts} />
+            <ProductList products={displayedProducts} />
           )}
         </main>
       </div>

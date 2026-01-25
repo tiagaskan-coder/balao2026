@@ -30,7 +30,7 @@ export default async function RootLayout({
   return (
     <html lang="pt-BR">
       <body
-        className={`antialiased flex flex-col min-h-screen`}
+        className={`antialiased flex flex-col min-h-screen overflow-x-hidden`}
       >
         <AuthProvider>
           <ToastProvider>
