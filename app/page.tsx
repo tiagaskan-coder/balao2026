@@ -6,9 +6,7 @@ import ProductCarousel from "@/components/ProductCarousel";
 import { getProducts, getCarouselImages, getCategories, getHomeBlocks } from "@/lib/db";
 import { searchProducts } from "@/lib/searchUtils";
 
-// Remove force-dynamic to allow better caching and prevent 500s on timeout. 
-// Next.js will revalidate data every 60 seconds.
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 export default async function Home({
   searchParams,
