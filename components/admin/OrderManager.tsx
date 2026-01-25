@@ -147,6 +147,7 @@ STATUS: ${getStatusLabel(order.status)}
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID / Data</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produtos</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -158,35 +159,29 @@ STATUS: ${getStatusLabel(order.status)}
                 <tr 
                   key={order.id} 
                   className="hover:bg-gray-50 relative group"
-                  onMouseEnter={() => setHoveredOrder(order.id)}
-                  onMouseLeave={() => setHoveredOrder(null)}
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     <div className="font-mono text-xs text-gray-500">#{order.id.slice(0, 8)}</div>
                     <div>{new Date(order.created_at).toLocaleDateString('pt-BR')}</div>
-                    
-                    {/* Hover Preview Grid */}
-                    {hoveredOrder === order.id && order.items && order.items.length > 0 && (
-                      <div className="absolute left-20 top-full z-50 bg-white shadow-xl border border-gray-200 p-4 rounded-lg w-96 transform -translate-y-4">
-                        <h4 className="font-bold mb-2 text-gray-800">Itens do Pedido</h4>
-                        <div className="grid grid-cols-3 gap-2">
-                          {order.items.map((item) => (
-                            <div key={item.id} className="relative group/item border rounded p-1">
-                              <div className="relative aspect-square w-full mb-1">
-                                <Image
-                                  src={item.product_image || "/placeholder.png"}
-                                  alt={item.product_name}
-                                  fill
-                                  className="object-cover rounded"
-                                />
-                              </div>
-                              <div className="text-xs truncate font-medium" title={item.product_name}>{item.product_name}</div>
-                              <div className="text-xs text-gray-500">{item.quantity}x {formatCurrency(item.price)}</div>
-                            </div>
-                          ))}
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex -space-x-2 overflow-hidden">
+                        {order.items?.slice(0, 4).map((item) => (
+                        <div key={item.id} className="relative inline-block h-10 w-10 rounded-full ring-2 ring-white bg-white">
+                            <Image
+                            src={item.product_image || "/placeholder.png"}
+                            alt={item.product_name}
+                            fill
+                            className="rounded-full object-cover"
+                            />
                         </div>
-                      </div>
-                    )}
+                        ))}
+                        {order.items && order.items.length > 4 && (
+                            <div className="flex items-center justify-center h-10 w-10 rounded-full ring-2 ring-white bg-gray-100 text-xs font-medium text-gray-600">
+                                +{order.items.length - 4}
+                            </div>
+                        )}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     <div className="font-medium">{order.customer_name || 'N/A'}</div>
