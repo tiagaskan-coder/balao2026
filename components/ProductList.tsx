@@ -11,22 +11,9 @@ type SortMode = "default" | "price-asc" | "price-desc";
 export default function ProductList({ products }: { products: Product[] }) {
   const [viewMode, setViewMode] = useState<ViewMode>("small");
   const [sortMode, setSortMode] = useState<SortMode>("default");
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
-  const [showPriceFilter, setShowPriceFilter] = useState(false);
 
   const filteredAndSortedProducts = useMemo(() => {
     let result = [...products];
-
-    // Filter by Price
-    if (minPrice || maxPrice) {
-      result = result.filter(p => {
-        const price = parseFloat(p.price.replace("R$", "").replace(/\./g, "").replace(",", ".").trim());
-        const min = minPrice ? parseFloat(minPrice) : 0;
-        const max = maxPrice ? parseFloat(maxPrice) : Infinity;
-        return price >= min && price <= max;
-      });
-    }
 
     // Sort
     if (sortMode !== "default") {
@@ -38,7 +25,7 @@ export default function ProductList({ products }: { products: Product[] }) {
     }
 
     return result;
-  }, [products, sortMode, minPrice, maxPrice]);
+  }, [products, sortMode]);
 
   const getGridClasses = () => {
     switch (viewMode) {
@@ -77,53 +64,6 @@ export default function ProductList({ products }: { products: Product[] }) {
         {/* View Controls */}
         <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
             
-            {/* Price Filter */}
-            <div className="relative">
-                <button 
-                    onClick={() => setShowPriceFilter(!showPriceFilter)}
-                    className={`p-2 rounded-md transition-all flex items-center gap-2 ${
-                        showPriceFilter || (minPrice || maxPrice)
-                        ? "bg-white text-[#E60012] border border-[#E60012]" 
-                        : "bg-white text-gray-500 hover:bg-gray-100 border border-gray-200"
-                    }`}
-                    title="Filtrar por Preço"
-                >
-                    <Filter size={20} />
-                    <span className="hidden sm:inline text-sm font-medium">Preço</span>
-                </button>
-                
-                {showPriceFilter && (
-                    <div className="absolute top-full right-0 mt-2 bg-white p-4 rounded-lg shadow-xl border border-gray-100 z-50 w-64">
-                        <h4 className="font-bold text-gray-700 mb-3 text-sm">Faixa de Preço (R$)</h4>
-                        <div className="flex items-center gap-2 mb-3">
-                            <input 
-                                type="number" 
-                                placeholder="Min" 
-                                value={minPrice}
-                                onChange={e => setMinPrice(e.target.value)}
-                                className="w-full p-2 border border-gray-300 rounded text-sm focus:border-[#E60012] outline-none"
-                            />
-                            <span className="text-gray-400">-</span>
-                            <input 
-                                type="number" 
-                                placeholder="Max" 
-                                value={maxPrice}
-                                onChange={e => setMaxPrice(e.target.value)}
-                                className="w-full p-2 border border-gray-300 rounded text-sm focus:border-[#E60012] outline-none"
-                            />
-                        </div>
-                        <button 
-                            onClick={() => setShowPriceFilter(false)}
-                            className="w-full bg-[#E60012] text-white py-2 rounded text-sm font-bold hover:bg-red-700 transition-colors"
-                        >
-                            Aplicar
-                        </button>
-                    </div>
-                )}
-            </div>
-
-            <div className="w-px h-8 bg-gray-200 mx-2 hidden sm:block"></div>
-
             <span className="text-sm text-gray-500 font-medium mr-2 hidden sm:inline">Visualização:</span>
             
             <button
@@ -149,18 +89,6 @@ export default function ProductList({ products }: { products: Product[] }) {
             >
             <Grid2x2 size={20} />
             </button>
-
-            <button
-            onClick={() => setViewMode("list")}
-            className={`p-2 rounded-md transition-all ${
-                viewMode === "list" 
-                ? "bg-[#E60012] text-white shadow-md" 
-                : "bg-white text-gray-500 hover:bg-gray-100 border border-gray-200"
-            }`}
-            title="Lista"
-            >
-            <List size={20} />
-            </button>
         </div>
       </div>
 
@@ -170,7 +98,7 @@ export default function ProductList({ products }: { products: Product[] }) {
           <ProductCard 
             key={product.id} 
             product={product} 
-            variant={viewMode === "list" ? "list" : "grid"}
+            variant="grid"
           />
         ))}
       </div>
