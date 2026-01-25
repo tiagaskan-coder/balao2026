@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export default function NotebooksPage() {
   return (
-    <div className="min-h-screen bg-[#f4f6f8] text-[#333] font-sans leading-relaxed">
+    <div className="min-h-screen bg-[#f4f6f8] text-black font-sans leading-relaxed">
       <header className="bg-gradient-to-br from-[#ff4d00] to-[#ff9900] text-white py-20 px-5 text-center">
         <h1 className="text-5xl font-bold mb-3">Balão da Informática</h1>
         <p className="text-xl max-w-3xl mx-auto mb-8">
