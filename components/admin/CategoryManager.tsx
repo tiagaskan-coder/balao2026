@@ -10,6 +10,7 @@ export default function CategoryManager() {
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   // Editing/Adding State
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -93,7 +94,11 @@ export default function CategoryManager() {
   };
 
   const handleSave = async () => {
-    if (!formData.name || !formData.slug) return;
+    setError(null);
+    if (!formData.name || !formData.slug) {
+        setError("Nome e Slug são obrigatórios.");
+        return;
+    }
 
     try {
       if (editingId) {
@@ -110,7 +115,7 @@ export default function CategoryManager() {
             setIsAdding(false);
         } else {
             const err = await res.json();
-            alert(`Erro ao atualizar: ${err.error}`);
+            setError(`Erro ao atualizar: ${err.error}`);
         }
       } else {
         // Create
@@ -126,12 +131,12 @@ export default function CategoryManager() {
             setIsAdding(false);
         } else {
             const err = await res.json();
-            alert(`Erro ao criar: ${err.error}`);
+            setError(`Erro ao criar: ${err.error}`);
         }
       }
     } catch (error) {
       console.error("Failed to save", error);
-      alert("Erro ao salvar. Verifique o console.");
+      setError("Erro ao salvar. Verifique o console.");
     }
   };
 
@@ -238,6 +243,11 @@ export default function CategoryManager() {
           </div>
 
           <div className="space-y-4">
+            {error && (
+                <div className="bg-red-50 text-red-700 p-3 rounded text-sm border border-red-200">
+                    {error}
+                </div>
+            )}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
               <div className="flex gap-2">

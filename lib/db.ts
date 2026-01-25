@@ -249,12 +249,19 @@ export async function createCategory(category: Partial<Category>) {
         
         const nextOrder = (maxOrderData?.[0]?.display_order ?? -1) + 1;
 
+        // Sanitize input
+        const dbCategory = {
+            name: category.name,
+            slug: category.slug,
+            parent_id: category.parent_id || null, // Ensure empty string becomes null
+            display_order: category.display_order ?? nextOrder,
+            icon: category.icon || null,
+            active: category.active ?? true
+        };
+
         const { data, error } = await supabaseAdmin
             .from('categories')
-            .insert({
-                ...category,
-                display_order: category.display_order ?? nextOrder
-            })
+            .insert(dbCategory)
             .select()
             .single();
 
@@ -269,9 +276,19 @@ export async function createCategory(category: Partial<Category>) {
 export async function updateCategory(id: string, updates: Partial<Category>) {
     try {
         console.log(`[DB] Updating category ${id} via supabaseAdmin`, updates);
+        
+        // Sanitize updates
+        const dbUpdates: any = {};
+        if (updates.name !== undefined) dbUpdates.name = updates.name;
+        if (updates.slug !== undefined) dbUpdates.slug = updates.slug;
+        if (updates.parent_id !== undefined) dbUpdates.parent_id = updates.parent_id || null;
+        if (updates.display_order !== undefined) dbUpdates.display_order = updates.display_order;
+        if (updates.icon !== undefined) dbUpdates.icon = updates.icon || null;
+        if (updates.active !== undefined) dbUpdates.active = updates.active;
+
         const { data, error } = await supabaseAdmin
             .from('categories')
-            .update(updates)
+            .update(dbUpdates)
             .eq('id', id)
             .select()
             .single();
