@@ -52,25 +52,67 @@ export default function ProductManager() {
     } catch (e) { console.error(e); }
   };
 
+  // Helper to check if an image URL is valid and loadable
+  const checkImageExists = (url: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = url;
+    });
+  };
+
   // Maintenance Functions
   const handleDeleteNoImage = async () => {
-    const productsToDelete = products.filter(p => !p.image || p.image.trim() === "");
-    
-    if (productsToDelete.length === 0) {
-        alert("Nenhum produto sem imagem encontrado.");
-        return;
-    }
-
-    if (!confirm(`Encontrados ${productsToDelete.length} produtos sem imagem. Deseja excluí-los?`)) return;
-
     setIsProcessingBulk(true);
-    let deletedCount = 0;
-    
     try {
-        for (const product of productsToDelete) {
-            await fetch(`/api/products/${product.id}`, { method: "DELETE" });
-            deletedCount++;
+        // 1. Identify candidates (empty or null)
+        let productsToDelete = products.filter(p => !p.image || p.image.trim() === "");
+        
+        // 2. Identify candidates with potential broken links (scan the rest)
+        const productsWithImage = products.filter(p => p.image && p.image.trim() !== "");
+        
+        if (productsWithImage.length > 0) {
+             const userConfirmed = confirm(`Existem ${productsWithImage.length} produtos com URL de imagem. Deseja verificar quais estão quebradas? (Isso pode levar alguns instantes)`);
+             
+             if (userConfirmed) {
+                 const brokenImages: Product[] = [];
+                 
+                 // Process in chunks to avoid browser freeze/network saturation
+                 const chunkSize = 20;
+                 for (let i = 0; i < productsWithImage.length; i += chunkSize) {
+                     const chunk = productsWithImage.slice(i, i + chunkSize);
+                     const results = await Promise.all(chunk.map(async (p) => {
+                         const exists = await checkImageExists(p.image);
+                         return exists ? null : p;
+                     }));
+                     
+                     results.forEach(p => {
+                         if (p) brokenImages.push(p);
+                     });
+                 }
+                 
+                 productsToDelete = [...productsToDelete, ...brokenImages];
+             }
         }
+    
+        if (productsToDelete.length === 0) {
+            alert("Nenhum produto sem imagem ou com imagem quebrada encontrado.");
+            return;
+        }
+
+        if (!confirm(`Encontrados ${productsToDelete.length} produtos inválidos (sem imagem ou link quebrado). Deseja excluí-los?`)) return;
+
+        let deletedCount = 0;
+        
+        // Process in chunks
+        const chunkSize = 5;
+        for (let i = 0; i < productsToDelete.length; i += chunkSize) {
+             const chunk = productsToDelete.slice(i, i + chunkSize);
+             await Promise.all(chunk.map(p => fetch(`/api/products/${p.id}`, { method: "DELETE" })));
+             deletedCount += chunk.length;
+        }
+
         alert(`${deletedCount} produtos excluídos com sucesso.`);
         fetchProducts();
     } catch (e) {
