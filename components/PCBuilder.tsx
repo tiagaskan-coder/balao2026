@@ -28,12 +28,12 @@ interface Step {
 
 const STEPS: Step[] = [
   { id: "cpu", label: "Processador", icon: Cpu, categoryKeywords: ["processador", "cpu"], targetSlugs: ["processadores", "processadores-cpu"], parentSlug: "hardware" },
-  { id: "motherboard", label: "Placa-mãe", icon: CircuitBoard, categoryKeywords: ["placa-mãe", "placa mãe", "motherboard", "placas-mãe", "placas-mae"], targetSlugs: ["placas-mae", "placas-mãe"], parentSlug: "hardware" },
+  { id: "motherboard", label: "Placa-mãe", icon: CircuitBoard, categoryKeywords: ["placa-mãe", "placa mãe", "motherboard", "placas-mãe", "placas-mae", "placa-mae"], targetSlugs: ["placas-mae", "placas-mãe", "placa-mae"], parentSlug: "hardware" },
   { id: "storage", label: "Armazenamento", icon: HardDrive, categoryKeywords: ["ssd", "hd", "disco", "armazenamento", "nvme", "sata"], targetSlugs: ["ssd-hd-nvme", "ssd", "hd"], parentSlug: "hardware" },
   { id: "ram", label: "Memória RAM", icon: MemoryStick, categoryKeywords: ["memória ram", "memoria ram", "ram"], targetSlugs: ["memoria-ram"], parentSlug: "hardware" },
-  { id: "gpu", label: "Placa de Vídeo", icon: Monitor, categoryKeywords: ["placa de vídeo", "placa de video", "gpu", "rtx", "rx", "gtx"], targetSlugs: ["placas-de-video", "placas-de-video-gpu"], parentSlug: "hardware" },
-  { id: "psu", label: "Fonte", icon: Zap, categoryKeywords: ["fonte", "alimentação", "psu"], targetSlugs: ["fontes-alimentacao", "fontes-de-alimentacao"], parentSlug: "hardware" },
-  { id: "case", label: "Gabinete", icon: Box, categoryKeywords: ["gabinete", "case", "torre"], targetSlugs: ["gabinetes"], parentSlug: "hardware" },
+  { id: "gpu", label: "Placa de Vídeo", icon: Monitor, categoryKeywords: ["placa de vídeo", "placa de video", "gpu", "rtx", "rx", "gtx"], targetSlugs: ["placas-de-video", "placas-de-video-gpu", "placa-de-video"], parentSlug: "hardware" },
+  { id: "psu", label: "Fonte", icon: Zap, categoryKeywords: ["fonte", "alimentação", "psu"], targetSlugs: ["fontes-alimentacao", "fontes-de-alimentacao", "fontes"], parentSlug: "hardware" },
+  { id: "case", label: "Gabinete", icon: Box, categoryKeywords: ["gabinete", "case", "torre"], targetSlugs: ["gabinetes", "gabinete"], parentSlug: "hardware" },
   { id: "licenses", label: "Licenças", icon: Key, categoryKeywords: ["licenças", "licencas", "windows", "office"], targetSlugs: ["licencas", "windows", "microsoft-office", "antivirus", "softwares-design", "softwares-edicao"], parentSlug: "licencas" },
   { id: "monitor", label: "Monitores", icon: Monitor, categoryKeywords: ["monitor"], targetSlugs: ["monitores","monitor-gamer","monitor-curvo","monitor-profissional","monitor-ultrawide","monitor-4k"], parentSlug: "monitores" },
   { id: "keyboard", label: "Teclados", icon: Keyboard, categoryKeywords: ["teclado"], targetSlugs: ["teclados-gamer-mecanicos","teclados"], parentSlug: "perifericos" },
