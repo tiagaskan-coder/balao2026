@@ -3,11 +3,13 @@
 import { useState, useEffect } from "react";
 import { Category, buildCategoryTree } from "@/lib/utils";
 import { Plus, Edit, Trash2, ChevronRight, ChevronDown, Save, X } from "lucide-react";
+import SimpleEmojiPicker from "./SimpleEmojiPicker";
 
 export default function CategoryManager() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   
   // Editing/Adding State
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -238,12 +240,35 @@ export default function CategoryManager() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
-              <input
-                type="text"
-                className="w-full p-2 border rounded"
-                value={formData.name}
-                onChange={e => setFormData({ ...formData, name: e.target.value, slug: e.target.value.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '') })}
-              />
+              <div className="flex gap-2">
+                 <div className="relative">
+                    <button
+                        type="button"
+                        onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                        className="p-2 border rounded hover:bg-gray-50 text-xl w-[42px] h-[42px] flex items-center justify-center"
+                        title="Adicionar Emoji"
+                    >
+                        😀
+                    </button>
+                    {showEmojiPicker && (
+                        <div className="absolute top-full left-0 mt-1 z-50">
+                            <SimpleEmojiPicker 
+                                onSelect={(emoji) => {
+                                    setFormData(prev => ({ ...prev, name: emoji + " " + (prev.name || "") }));
+                                    setShowEmojiPicker(false);
+                                }} 
+                                onClose={() => setShowEmojiPicker(false)}
+                            />
+                        </div>
+                    )}
+                 </div>
+                  <input
+                    type="text"
+                    className="w-full p-2 border rounded flex-1"
+                    value={formData.name}
+                    onChange={e => setFormData({ ...formData, name: e.target.value, slug: e.target.value.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '') })}
+                  />
+              </div>
             </div>
             
             <div>
