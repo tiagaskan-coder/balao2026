@@ -6,7 +6,8 @@ import { Category, buildCategoryTree } from "@/lib/utils";
 import { 
   Menu, ChevronRight, ChevronDown, 
   Monitor, Smartphone, Gamepad, Speaker, Tv, Wifi, Printer, Home, Plug, HardDrive, Briefcase, Shield, List,
-  Laptop, Cpu, Keyboard, Mouse, Watch, Tablet, Headphones, Camera
+  Laptop, Cpu, Keyboard, Mouse, Watch, Tablet, Headphones, Camera,
+  Tag, Wrench, Handshake
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useSidebar } from "@/context/SidebarContext";
@@ -142,6 +143,58 @@ export default function Sidebar({ categories, mobileOnly = false }: { categories
                 {tree.map(node => (
                     <CategoryItem key={node.id} node={node} level={0} />
                 ))}
+
+                {/* Custom Links */}
+                <div className="mt-4 pt-4 border-t border-gray-100">
+                    <div className="px-4 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        Serviços e Ofertas
+                    </div>
+                    
+                    <Link 
+                        href="/pcgamer" 
+                        className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#E60012] transition-colors pl-[12px] border-l-[3px] border-transparent hover:border-l-[#E60012]"
+                        onClick={closeSidebar}
+                    >
+                        <span className="text-gray-400"><Gamepad size={18} /></span>
+                        <span>PC Gamer</span>
+                    </Link>
+
+                    <Link 
+                        href="/notebooks" 
+                        className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#E60012] transition-colors pl-[12px] border-l-[3px] border-transparent hover:border-l-[#E60012]"
+                        onClick={closeSidebar}
+                    >
+                        <span className="text-gray-400"><Laptop size={18} /></span>
+                        <span>Notebooks</span>
+                    </Link>
+
+                    <Link 
+                        href="/promocao" 
+                        className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#E60012] transition-colors pl-[12px] border-l-[3px] border-transparent hover:border-l-[#E60012]"
+                        onClick={closeSidebar}
+                    >
+                        <span className="text-gray-400"><Tag size={18} /></span>
+                        <span>Promoção</span>
+                    </Link>
+
+                    <Link 
+                        href="/manutencao" 
+                        className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#E60012] transition-colors pl-[12px] border-l-[3px] border-transparent hover:border-l-[#E60012]"
+                        onClick={closeSidebar}
+                    >
+                        <span className="text-gray-400"><Wrench size={18} /></span>
+                        <span>Manutenção</span>
+                    </Link>
+
+                    <Link 
+                        href="/consignacao" 
+                        className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#E60012] transition-colors pl-[12px] border-l-[3px] border-transparent hover:border-l-[#E60012]"
+                        onClick={closeSidebar}
+                    >
+                        <span className="text-gray-400"><Handshake size={18} /></span>
+                        <span>Consignação</span>
+                    </Link>
+                </div>
             </div>
         </aside>
     </>
