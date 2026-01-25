@@ -35,15 +35,65 @@ interface PCConfig {
   case: TechProduct | null;
 }
 
-// Passos do processo
-const STEPS = [
-  { id: "cpu", label: "Processador", icon: Cpu, categoryKeywords: ["processador", "cpu"] },
-  { id: "motherboard", label: "Placa-mãe", icon: CircuitBoard, categoryKeywords: ["placa-mãe", "placa mãe", "motherboard", "placas-mãe"] },
-  { id: "ram", label: "Memória RAM", icon: MemoryStick, categoryKeywords: ["memória ram", "memoria ram", "ram"] },
-  { id: "gpu", label: "Placa de Vídeo", icon: Monitor, categoryKeywords: ["placa de vídeo", "placa de video", "gpu", "rtx", "rx", "gtx"] },
-  { id: "storage", label: "Armazenamento", icon: HardDrive, categoryKeywords: ["ssd", "hd", "disco", "armazenamento", "nvme"] },
-  { id: "psu", label: "Fonte", icon: Zap, categoryKeywords: ["fonte", "alimentação", "psu"] },
-  { id: "case", label: "Gabinete", icon: Box, categoryKeywords: ["gabinete", "case", "torre"] },
+interface Step {
+  id: string;
+  label: string;
+  icon: any;
+  categoryKeywords: string[];
+  targetSlugs?: string[];
+}
+
+// Passos do processo (Mapeados para slugs/keywords das subcategorias de Hardware)
+const STEPS: Step[] = [
+  { 
+      id: "cpu", 
+      label: "Processador", 
+      icon: Cpu, 
+      categoryKeywords: ["processador", "cpu"],
+      targetSlugs: ["processadores", "processadores-cpu"] 
+  },
+  { 
+      id: "motherboard", 
+      label: "Placa-mãe", 
+      icon: CircuitBoard, 
+      categoryKeywords: ["placa-mãe", "placa mãe", "motherboard", "placas-mãe", "placas-mae"],
+      targetSlugs: ["placas-mae", "placas-mãe"] 
+  },
+  { 
+      id: "ram", 
+      label: "Memória RAM", 
+      icon: MemoryStick, 
+      categoryKeywords: ["memória ram", "memoria ram", "ram"],
+      targetSlugs: ["memoria-ram"] 
+  },
+  { 
+      id: "gpu", 
+      label: "Placa de Vídeo", 
+      icon: Monitor, 
+      categoryKeywords: ["placa de vídeo", "placa de video", "gpu", "rtx", "rx", "gtx"],
+      targetSlugs: ["placas-de-video", "placas-de-video-gpu"] 
+  },
+  { 
+      id: "storage", 
+      label: "Armazenamento", 
+      icon: HardDrive, 
+      categoryKeywords: ["ssd", "hd", "disco", "armazenamento", "nvme"],
+      targetSlugs: ["ssd-hd-nvme", "ssd", "hd"] 
+  },
+  { 
+      id: "psu", 
+      label: "Fonte", 
+      icon: Zap, 
+      categoryKeywords: ["fonte", "alimentação", "psu"],
+      targetSlugs: ["fontes-alimentacao", "fontes-de-alimentacao"] 
+  },
+  { 
+      id: "case", 
+      label: "Gabinete", 
+      icon: Box, 
+      categoryKeywords: ["gabinete", "case", "torre"],
+      targetSlugs: ["gabinetes"] 
+  },
 ];
 
 // --- Dados Mockados para Demonstração (Caso o DB esteja vazio de specs) ---
@@ -134,14 +184,49 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
 
   // --- Lógica de Compatibilidade ---
   const filteredProducts = useMemo(() => {
+    // 1. Identificar IDs/Nomes das subcategorias relevantes para o passo atual
+    // A. Encontrar categoria "Hardware"
+    const hardwareCat = categories.find(c => c.slug === 'hardware' || c.name.toLowerCase() === 'hardware');
+    
+    // B. Encontrar subcategorias alvo do passo atual
+    let targetCategoryNames: string[] = [];
+    if (hardwareCat) {
+        // Se temos a árvore de categorias (depende se getCategories retorna flat ou tree)
+        // Assumindo flat list, procuramos pelo parent_id
+        const subCategories = categories.filter(c => c.parent_id === hardwareCat.id);
+        
+        // Filtrar as subcategorias que batem com os slugs alvo do passo
+        const matches = subCategories.filter(sub => 
+            currentStep.targetSlugs?.some(slug => sub.slug === slug)
+        );
+        targetCategoryNames = matches.map(m => m.name.toLowerCase());
+    }
+
     let base = products.filter((p: TechProduct) => {
-        // Filtro robusto por categoria usando keywords e normalização
-        const normalizedCat = normalizeText(p.category);
-        const matchesCategory = currentStep.categoryKeywords.some(keyword => 
-            normalizedCat.includes(normalizeText(keyword))
+        const normalizedProductCat = normalizeText(p.category);
+        
+        // Critério 1: Match exato com subcategorias de Hardware (Prioridade)
+        // Se o nome da categoria do produto estiver na lista de subcategorias alvo
+        const isHardwareSubmatch = targetCategoryNames.some(targetName => 
+            normalizedProductCat.includes(normalizeText(targetName))
         );
 
-        if (!matchesCategory) return false;
+        if (isHardwareSubmatch) {
+             // Filtro de busca textual
+            if (searchTerm) {
+                return normalizeText(p.name).includes(normalizeText(searchTerm));
+            }
+            return true;
+        }
+
+        // Critério 2: Fallback para keywords (comportamento original melhorado)
+        // Só usa se não achou pelo critério 1, ou para ser permissivo?
+        // Vamos ser permissivos: se bater keyword TAMBÉM serve.
+        const matchesKeyword = currentStep.categoryKeywords.some(keyword => 
+            normalizedProductCat.includes(normalizeText(keyword))
+        );
+
+        if (!matchesKeyword) return false;
 
         // Filtro por termo de busca (input do usuário)
         if (searchTerm) {
@@ -368,14 +453,20 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
                                 `}
                                 onClick={() => handleSelect(product)}
                             >
-                                <div className="w-24 h-24 bg-white rounded-md overflow-hidden flex-shrink-0 border border-gray-100 p-2">
-                                    <Image 
-                                        src={product.image} 
-                                        alt={product.name} 
-                                        width={96} 
-                                        height={96} 
-                                        className="w-full h-full object-contain"
-                                    />
+                                <div className="w-24 h-24 bg-white rounded-md overflow-hidden flex-shrink-0 border border-gray-100 p-2 relative">
+                                    {product.image ? (
+                                        <Image 
+                                            src={product.image} 
+                                            alt={product.name} 
+                                            fill
+                                            className="object-contain"
+                                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-300">
+                                            <Box size={32} />
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="flex-1 min-w-0 flex flex-col justify-between">
                                     <div>
