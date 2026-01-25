@@ -48,8 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function ProductPage(props: Props) {
-  const params = await props.params;
+export default async function ProductPage({ params }: Props) {
   const [products, categories] = await Promise.all([
     getProducts(),
     getCategories()

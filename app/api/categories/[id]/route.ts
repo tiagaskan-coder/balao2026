@@ -1,17 +1,17 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { updateCategory, deleteCategory } from "@/lib/db";
 
 export const dynamic = 'force-dynamic';
 
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params;
   try {
-    const { id } = params;
     const data = await request.json();
-    console.log(`[API] Updating category ${id} with data:`, data);
-    await updateCategory(id, data);
+    console.log(`[API] Updating category ${params.id} with data:`, data);
+    await updateCategory(params.id, data);
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error("[API] Update category failed:", error);
@@ -20,12 +20,12 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params;
   try {
-    const { id } = params;
-    await deleteCategory(id);
+    await deleteCategory(params.id);
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ error: "Failed to delete category" }, { status: 500 });

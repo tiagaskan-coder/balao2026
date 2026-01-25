@@ -1,14 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { updateProduct, deleteProduct } from '@/lib/db';
 
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params;
   try {
-    const { id } = params;
     const updates = await request.json();
-    const product = await updateProduct(id, updates);
+    const product = await updateProduct(params.id, updates);
     return NextResponse.json(product);
   } catch (error) {
     console.error('Failed to update product:', error);
@@ -17,12 +17,12 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params;
   try {
-    const { id } = params;
-    await deleteProduct(id);
+    await deleteProduct(params.id);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Failed to delete product:', error);
