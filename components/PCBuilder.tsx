@@ -152,19 +152,13 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
         filtered = searchProducts(filtered, searchTerm);
     }
 
-    // 4. Verificação de Compatibilidade (Map para adicionar status)
-    return filtered.map(product => {
+    // 4. Verificação de Compatibilidade e ocultação de itens incompatíveis
+    return filtered
+      .map((product: TechProduct) => {
         const status = checkCompatibility(product, config, currentStep.id);
         return { product, status };
-    }).sort((a, b) => {
-        // Ordenar: Compatíveis primeiro
-        if (a.status.valid && !b.status.valid) return -1;
-        if (!a.status.valid && b.status.valid) return 1;
-        
-        // Se ambos tiverem o mesmo status de compatibilidade,
-        // mantém a ordem relativa original (que vem da busca por relevância ou lista padrão)
-        return 0;
-    });
+      })
+      .filter(({ status }: { status: { valid: boolean } }) => status.valid);
 
   }, [products, currentStep, config, searchTerm, categories]);
 
