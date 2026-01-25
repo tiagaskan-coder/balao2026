@@ -11,17 +11,34 @@ type SortMode = "default" | "price-asc" | "price-desc";
 export default function ProductList({ products }: { products: Product[] }) {
   const [viewMode, setViewMode] = useState<ViewMode>("small");
   const [sortMode, setSortMode] = useState<SortMode>("default");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [showPriceFilter, setShowPriceFilter] = useState(false);
 
-  const sortedProducts = useMemo(() => {
-    if (sortMode === "default") return products;
+  const filteredAndSortedProducts = useMemo(() => {
+    let result = [...products];
 
-    return [...products].sort((a, b) => {
-      const priceA = parseFloat(a.price.replace("R$", "").replace(/\./g, "").replace(",", ".").trim());
-      const priceB = parseFloat(b.price.replace("R$", "").replace(/\./g, "").replace(",", ".").trim());
+    // Filter by Price
+    if (minPrice || maxPrice) {
+      result = result.filter(p => {
+        const price = parseFloat(p.price.replace("R$", "").replace(/\./g, "").replace(",", ".").trim());
+        const min = minPrice ? parseFloat(minPrice) : 0;
+        const max = maxPrice ? parseFloat(maxPrice) : Infinity;
+        return price >= min && price <= max;
+      });
+    }
 
-      return sortMode === "price-asc" ? priceA - priceB : priceB - priceA;
-    });
-  }, [products, sortMode]);
+    // Sort
+    if (sortMode !== "default") {
+      result.sort((a, b) => {
+        const priceA = parseFloat(a.price.replace("R$", "").replace(/\./g, "").replace(",", ".").trim());
+        const priceB = parseFloat(b.price.replace("R$", "").replace(/\./g, "").replace(",", ".").trim());
+        return sortMode === "price-asc" ? priceA - priceB : priceB - priceA;
+      });
+    }
+
+    return result;
+  }, [products, sortMode, minPrice, maxPrice]);
 
   const getGridClasses = () => {
     switch (viewMode) {

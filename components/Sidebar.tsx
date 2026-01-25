@@ -49,7 +49,7 @@ export default function Sidebar({ categories, mobileOnly = false }: { categories
   const toggleExpand = (id: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
+    setExpanded((prev: Record<string, boolean>) => ({ ...prev, [id]: !prev[id] }));
   };
 
   const getIcon = (iconName?: string) => {
@@ -89,7 +89,7 @@ export default function Sidebar({ categories, mobileOnly = false }: { categories
             
             {hasChildren && (
                 <button 
-                    onClick={(e) => toggleExpand(node.id, e)}
+                    onClick={(e: React.MouseEvent) => toggleExpand(node.id, e)}
                     className="p-1 hover:bg-gray-200 rounded text-gray-400"
                 >
                     {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
