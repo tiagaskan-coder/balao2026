@@ -209,13 +209,13 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
         <div className="w-full lg:w-1/3 space-y-6">
             
             {/* Resumo da Build */}
-            <div className="bg-white rounded-xl shadow-sm border p-6 sticky top-24">
-                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <div className="bg-white rounded-lg shadow-sm border p-4 sticky top-20">
+                <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
                     <Wrench className="text-[#E60012]" />
                     Sua Configuração
                 </h2>
                 
-                <div className="space-y-4 mb-6">
+                <div className="space-y-3 mb-5">
                     {STEPS.map((step, index) => {
                     const selected = config[step.id as keyof PCConfig];
                     const isActive = index === currentStepIndex;
@@ -225,19 +225,19 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
                         <div 
                         key={step.id}
                         className={`
-                            relative p-3 rounded-lg border transition-all cursor-pointer
+                            relative p-2 rounded-lg border transition-all cursor-pointer
                             ${isActive ? "border-[#E60012] bg-red-50 ring-1 ring-[#E60012]" : "border-gray-200 hover:border-gray-300"}
                             ${isDone ? "bg-gray-50" : ""}
                         `}
                         onClick={() => setCurrentStepIndex(index)}
                         >
                         <div className="flex items-start gap-3">
-                            <div className={`p-2 rounded-full ${isActive || isDone ? "bg-[#E60012] text-white" : "bg-gray-100 text-gray-400"}`}>
-                            <step.icon size={18} />
+                            <div className={`p-1 rounded-full ${isActive || isDone ? "bg-[#E60012] text-white" : "bg-gray-100 text-gray-400"}`}>
+                            <step.icon size={14} />
                             </div>
                             <div className="flex-1 min-w-0">
                             <div className="flex justify-between items-center mb-1">
-                                <span className={`text-sm font-medium ${isActive ? "text-[#E60012]" : "text-gray-700"}`}>
+                                <span className={`text-xs font-medium ${isActive ? "text-[#E60012]" : "text-gray-700"}`}>
                                     {step.label}
                                 </span>
                                 {isDone && (
@@ -245,12 +245,12 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
                                         onClick={(e) => { e.stopPropagation(); handleRemove(step.id as keyof PCConfig); }}
                                         className="text-gray-400 hover:text-red-500"
                                     >
-                                        <Trash2 size={14} />
+                                        <Trash2 size={12} />
                                     </button>
                                 )}
                             </div>
                             {selected ? (
-                                <div className="text-sm text-gray-600 truncate">{selected.name}</div>
+                                <div className="text-xs text-gray-600 truncate">{selected.name}</div>
                             ) : (
                                 <div className="text-xs text-gray-400 italic">Pendente...</div>
                             )}
@@ -266,20 +266,20 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
 
                 {/* Checklist de Validação */}
                 <div className="border-t pt-4 mb-4">
-                    <h3 className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                        <ShieldCheck size={16} /> Checklist de Compatibilidade
+                    <h3 className="text-xs font-bold text-gray-700 mb-2 flex items-center gap-2">
+                        <ShieldCheck size={14} /> Checklist de Compatibilidade
                     </h3>
                     <div className="space-y-2 text-xs">
                         {validationResult.errors.length > 0 ? (
                             validationResult.errors.map((err, i) => (
-                                <div key={i} className="flex gap-2 text-red-600 bg-red-50 p-2 rounded">
-                                    <AlertTriangle size={14} className="flex-shrink-0 mt-0.5" />
+                                <div key={i} className="flex gap-2 text-red-600 bg-red-50 p-1 rounded">
+                                    <AlertTriangle size={12} className="flex-shrink-0 mt-0.5" />
                                     <span>{err}</span>
                                 </div>
                             ))
                         ) : isComplete ? (
-                             <div className="flex gap-2 text-green-600 bg-green-50 p-2 rounded">
-                                <Check size={14} className="flex-shrink-0 mt-0.5" />
+                             <div className="flex gap-2 text-green-600 bg-green-50 p-1 rounded">
+                                <Check size={12} className="flex-shrink-0 mt-0.5" />
                                 <span>Setup 100% Compatível!</span>
                             </div>
                         ) : (
@@ -287,8 +287,8 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
                         )}
                         
                         {validationResult.warnings.map((warn, i) => (
-                             <div key={`warn-${i}`} className="flex gap-2 text-amber-600 bg-amber-50 p-2 rounded">
-                                <AlertCircle size={14} className="flex-shrink-0 mt-0.5" />
+                             <div key={`warn-${i}`} className="flex gap-2 text-amber-600 bg-amber-50 p-1 rounded">
+                                <AlertCircle size={12} className="flex-shrink-0 mt-0.5" />
                                 <span>{warn}</span>
                             </div>
                         ))}
@@ -296,10 +296,6 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
                 </div>
 
                 <div className="border-t pt-4 space-y-3">
-                    <div className="flex justify-between items-center text-sm text-gray-600">
-                    <span>Consumo Estimado (TDP):</span>
-                    <span className="font-medium">{totalTDP > 0 ? `${totalTDP}W` : "-"}</span>
-                    </div>
                     <div className="flex justify-between items-center text-xl font-bold">
                     <span>Total:</span>
                     <span className="text-[#E60012]">
@@ -310,21 +306,21 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
                     <button 
                     onClick={handleAddToCart}
                     disabled={!isComplete && validationResult.errors.length > 0} // Permite se incompleto (opcional), mas bloqueia se erro
-                    className={`w-full py-3 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors
+                    className={`w-full py-2 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-colors
                         ${(isComplete && validationResult.valid)
                             ? "bg-[#E60012] text-white hover:bg-[#cc0010]" 
                             : "bg-gray-200 text-gray-400 cursor-not-allowed"}
                     `}
                     >
-                    <ShoppingCart size={20} />
+                    <ShoppingCart size={16} />
                     Adicionar ao Carrinho
                     </button>
                     
                     <button 
                         onClick={() => setConfig({ cpu: null, motherboard: null, ram: null, gpu: null, storage: null, psu: null, case: null })}
-                        className="w-full py-2 text-sm text-gray-500 hover:text-gray-700 underline flex items-center justify-center gap-1"
+                        className="w-full py-2 text-xs text-gray-500 hover:text-gray-700 underline flex items-center justify-center gap-1"
                     >
-                        <RefreshCcw size={14} />
+                        <RefreshCcw size={12} />
                         Limpar Configuração
                     </button>
                 </div>
