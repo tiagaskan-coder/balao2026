@@ -23,9 +23,21 @@ export async function getProducts(): Promise<Product[]> {
 
 export async function saveProducts(products: Product[]) {
   try {
-     const { error } = await supabase
+     // Sanitize products to match DB schema
+     const dbProducts = products.map(p => ({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        image: p.image,
+        category: p.category,
+        slug: p.slug,
+        video_url: p.video_url || null,
+        specs: p.specs || null
+     }));
+
+     const { error } = await supabaseAdmin
         .from('products')
-        .upsert(products, { onConflict: 'id' });
+        .upsert(dbProducts, { onConflict: 'id' });
 
      if (error) {
         console.error("Supabase save error:", error);
