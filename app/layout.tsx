@@ -6,6 +6,8 @@ import { ToastProvider } from "@/context/ToastContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { SidebarProvider } from "@/context/SidebarContext";
 import Footer from "@/components/Footer";
+import Sidebar from "@/components/Sidebar";
+import { getCategories } from "@/lib/db";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -18,11 +20,13 @@ export const metadata: Metadata = {
   description: "Sua loja de confiança para hardware, PCs gamer, notebooks e periféricos.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const categories = await getCategories();
+
   return (
     <html lang="pt-BR">
       <body
