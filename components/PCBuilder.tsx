@@ -36,10 +36,11 @@ const STEPS: Step[] = [
   { id: "case", label: "Gabinete", icon: Box, categoryKeywords: ["gabinete", "case", "torre"], targetSlugs: ["gabinetes"], parentSlug: "hardware" },
   { id: "licenses", label: "Licenças", icon: Key, categoryKeywords: ["licenças", "licencas", "windows", "office"], targetSlugs: ["licencas", "windows", "microsoft-office", "antivirus", "softwares-design", "softwares-edicao"], parentSlug: "licencas" },
   { id: "monitor", label: "Monitores", icon: Monitor, categoryKeywords: ["monitor"], targetSlugs: ["monitores","monitor-gamer","monitor-curvo","monitor-profissional","monitor-ultrawide","monitor-4k"], parentSlug: "monitores" },
-  { id: "keyboard", label: "Teclados", icon: Keyboard, categoryKeywords: ["teclado"], targetSlugs: ["teclados", "teclados-gamer-mecanicos"], parentSlug: "acessorios" },
-  { id: "mouse", label: "Mouses", icon: Mouse, categoryKeywords: ["mouse"], targetSlugs: ["mouses", "mouses-gamer"], parentSlug: "acessorios" },
-  { id: "headset", label: "Fones de Ouvido", icon: Headphones, categoryKeywords: ["fone", "headset", "headphone"], targetSlugs: ["headsets-fones", "fones-ouvido"], parentSlug: "acessorios" },
-  { id: "netadapters", label: "Adaptadores de Rede", icon: Network, categoryKeywords: ["rede","wifi","ethernet","lan"], targetSlugs: ["placas-rede-som"], parentSlug: "hardware", filterKeywords: ["rede","wifi","ethernet","lan","pci","usb","adaptador"] },
+  { id: "keyboard", label: "Teclados", icon: Keyboard, categoryKeywords: ["teclado"], targetSlugs: ["teclados-gamer-mecanicos","teclados"], parentSlug: "perifericos" },
+  { id: "mouse", label: "Mouses", icon: Mouse, categoryKeywords: ["mouse"], targetSlugs: ["mouses-gamer","mouses"], parentSlug: "perifericos" },
+  { id: "headset", label: "Fones de Ouvido", icon: Headphones, categoryKeywords: ["fone", "headset", "headphone"], targetSlugs: ["headsets-fones","fones-ouvido"], parentSlug: "perifericos" },
+  { id: "netadapters", label: "Adaptadores de Rede", icon: Network, categoryKeywords: ["rede","wifi","ethernet","lan"], targetSlugs: ["adaptadores-rede"], parentSlug: "rede-conectividade", filterKeywords: ["rede","wifi","ethernet","lan","pci","usb","adaptador"] },
+  { id: "peripherals", label: "Outros Periféricos", icon: Box, categoryKeywords: ["webcam","microfone","mousepad","controle","joystick","volante"], targetSlugs: ["webcams","microfones","mousepads","controles-joysticks","volantes-simuladores"], parentSlug: "perifericos" },
   { id: "chairs", label: "Cadeiras", icon: Armchair, categoryKeywords: ["cadeira"], targetSlugs: ["cadeiras-gamer","cadeiras-ergonomicas"], parentSlug: "escritorio" },
 ];
 
@@ -60,7 +61,7 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
     psu: null,
     case: null,
   });
-  const accessoryIds = new Set(["licenses","monitor","keyboard","mouse","headset","netadapters","chairs"]);
+  const accessoryIds = new Set(["licenses","monitor","keyboard","mouse","headset","netadapters","peripherals","chairs"]);
   const [extras, setExtras] = useState<Record<string, { product: TechProduct; quantity: number }[]>>({
     licenses: [],
     monitor: [],
@@ -68,6 +69,7 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
     mouse: [],
     headset: [],
     netadapters: [],
+    peripherals: [],
     chairs: []
   });
   const { addToCart } = useCart();
@@ -391,7 +393,7 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
                     <button 
                         onClick={() => { 
                           setConfig({ cpu: null, motherboard: null, ram: null, gpu: null, storage: null, psu: null, case: null });
-                          setExtras({ licenses: [], monitor: [], keyboard: [], mouse: [], headset: [], netadapters: [], chairs: [] });
+                          setExtras({ licenses: [], monitor: [], keyboard: [], mouse: [], headset: [], netadapters: [], peripherals: [], chairs: [] });
                         }}
                         className="w-full py-2 text-xs text-gray-500 hover:text-gray-700 underline flex items-center justify-center gap-1"
                     >
