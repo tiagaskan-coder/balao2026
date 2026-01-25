@@ -119,13 +119,13 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
     }
     const potentialParents = [currentStep.parentSlug, ...((currentStep.parentSlugs || []))];
     const parentCat = categories.find(c => potentialParents.includes(c.slug) || potentialParents.includes(c.name.toLowerCase()));
-    let targetCategoryNames: string[] = [];
+    let allowedCategoryIds: string[] = [];
     if (parentCat) {
         const subCategories = categories.filter(c => c.parent_id === parentCat.id);
         const matches = subCategories.filter(sub => currentStep.targetSlugs?.some(slug => sub.slug === slug));
-        targetCategoryNames = matches.map(m => m.name.toLowerCase());
+        allowedCategoryIds = matches.map(m => m.id);
         if (currentStep.targetSlugs?.includes(parentCat.slug)) {
-          targetCategoryNames.push(parentCat.name.toLowerCase());
+          allowedCategoryIds.push(parentCat.id);
         }
     }
 
@@ -151,11 +151,12 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
         const catObj = categoriesByNameNorm.get(normalizedProductCat) 
           || categoriesBySlug.get(p.category) 
           || categories.find(c => normalizeText(c.slug) === normalizedProductCat);
-        const strictNames = targetCategoryNames.map(n => normalizeText(n));
-        const isStrictCategoryMatch = strictNames.length > 0 && strictNames.some(targetName => normalizedProductCat === targetName);
-        const nameKeywords = currentStep.categoryKeywords.map(k => normalizeText(k));
-        const nameMatch = nameKeywords.some(k => normalizedProductName.includes(k) || normalizedProductCat.includes(k));
-        const baseMatch = isStrictCategoryMatch || nameMatch;
+        let baseMatch = false;
+        if (allowedCategoryIds.length > 0) {
+          baseMatch = !!(catObj && allowedCategoryIds.includes(catObj.id));
+        } else if (parentCat) {
+          baseMatch = isUnderParent(catObj, parentCat);
+        }
         if (!baseMatch) return false;
         if (currentStep.filterKeywords && !currentStep.filterKeywords.some(k => normalizedProductName.includes(normalizeText(k)))) {
           return false;
