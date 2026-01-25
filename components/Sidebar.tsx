@@ -10,7 +10,7 @@ import {
   Tag, Wrench, Handshake,
   Lock, Ghost, Key, Armchair, Square, Disc, Mic, Cable, RefreshCcw, Usb, Backpack, Lightbulb, Zap, Video, Bell, Radio, Power, ToggleLeft, User, Star, Smile, Shirt, Coffee, Image, Gift, FileText, PenTool, Table, Move, CreditCard, Copy, Droplet, Cylinder, Scan, Gamepad2, Box, Server, Book, Feather, Aperture, CircuitBoard, MemoryStick, Fan, Network, Battery
 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useSidebar } from "@/context/SidebarContext";
 import { X } from "lucide-react";
 
@@ -97,6 +97,7 @@ const iconMap: Record<string, any> = {
 export default function Sidebar({ categories, mobileOnly = false }: { categories: Category[], mobileOnly?: boolean }) {
   const tree = buildCategoryTree(categories);
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const currentCategory = searchParams.get("category");
   const { isOpen, closeSidebar } = useSidebar();
 
@@ -125,7 +126,7 @@ export default function Sidebar({ categories, mobileOnly = false }: { categories
   const CategoryItem = ({ node, level }: { node: Category, level: number }) => {
      const hasChildren = node.children && node.children.length > 0;
      const isExpanded = expanded[node.id];
-     const isSelected = currentCategory === node.name;
+     const isSelected = currentCategory === node.name || (!!pathname && pathname.startsWith("/categoria/") && !!node.slug && pathname.endsWith(`/${node.slug}`));
      const Icon = level === 0 ? getIcon(node.icon || node.name) : null;
 
      return (
@@ -142,8 +143,8 @@ export default function Sidebar({ categories, mobileOnly = false }: { categories
                 borderLeft: isSelected ? '3px solid #E60012' : '3px solid transparent'
             }}
          >
-            <Link 
-                href={`/?category=${encodeURIComponent(node.name)}`} 
+           <Link 
+               href={`/categoria/${encodeURIComponent(node.slug)}`} 
                 className="flex-1 flex items-center gap-3 truncate"
                 onClick={closeSidebar}
             >

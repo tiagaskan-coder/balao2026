@@ -173,6 +173,7 @@ STATUS: ${getStatusLabel(order.status)}
                                     src={item.product_image}
                                     alt={item.product_name}
                                     fill
+                                    unoptimized
                                     className="object-cover"
                                     onError={(e) => {
                                         // Fallback to icon if image fails to load
@@ -400,6 +401,7 @@ STATUS: ${getStatusLabel(order.status)}
                                   src={item.product_image || "/placeholder.png"} 
                                   alt={item.product_name} 
                                   fill
+                                  unoptimized
                                   className="object-cover rounded"
                                 />
                               </div>
