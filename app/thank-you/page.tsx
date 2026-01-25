@@ -22,9 +22,9 @@ function ThankYouContent() {
   useEffect(() => {
     if (total > 0) {
       const payload = generatePixPayload({
-        key: "34397947000108",
-        name: "BALAO CASTELO",
-        city: "SAO PAULO",
+        key: process.env.NEXT_PUBLIC_PIX_KEY || "",
+        name: process.env.NEXT_PUBLIC_PIX_NAME || "",
+        city: process.env.NEXT_PUBLIC_PIX_CITY || "",
         amount: total,
         txid: "***"
       });

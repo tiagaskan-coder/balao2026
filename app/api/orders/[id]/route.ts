@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { updateOrderStatus, deleteOrder } from '@/lib/db';
 
-export async function PATCH(request: Request, props: { params: Promise<{ id: string }> }) {
-  const params = await props.params;
+export async function PATCH(request: Request, { params }: { params: { id: string } }) {
   try {
     const { status } = await request.json();
     await updateOrderStatus(params.id, status);
@@ -12,8 +11,7 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
   }
 }
 
-export async function DELETE(request: Request, props: { params: Promise<{ id: string }> }) {
-  const params = await props.params;
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
     await deleteOrder(params.id);
     return NextResponse.json({ success: true });

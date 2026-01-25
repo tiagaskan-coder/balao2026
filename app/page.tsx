@@ -10,10 +10,11 @@ import { searchProducts } from "@/lib/searchUtils";
 // Next.js will revalidate data every 60 seconds.
 export const revalidate = 60;
 
-export default async function Home(props: {
-  searchParams: Promise<{ category?: string; search?: string }>;
+export default async function Home({
+  searchParams,
+}: {
+  searchParams?: { category?: string; search?: string };
 }) {
-  const searchParams = await props.searchParams;
   const [products, carouselImages, categories, homeBlocks] = await Promise.all([
     getProducts(),
     getCarouselImages(true),
@@ -21,8 +22,8 @@ export default async function Home(props: {
     getHomeBlocks(true)
   ]);
   
-  const category = searchParams.category;
-  const search = searchParams.search;
+  const category = searchParams?.category;
+  const search = searchParams?.search;
 
   // Helper to find all descendant category names
   const getDescendantNames = (rootName: string, allCategories: any[]) => {

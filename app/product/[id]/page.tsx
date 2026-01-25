@@ -9,11 +9,10 @@ import WhatsAppButton from '@/components/WhatsAppButton';
 import ProductActions from '@/components/ProductActions';
 
 type Props = {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 };
 
-export async function generateMetadata(props: Props): Promise<Metadata> {
-  const params = await props.params;
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const products = await getProducts(); // Added await
   const product = products.find((p) => p.id === params.id);
 

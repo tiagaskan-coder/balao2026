@@ -3,9 +3,8 @@ import { deleteCarouselImage, updateCarouselImage } from '@/lib/db';
 
 export async function DELETE(
   request: Request,
-  props: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const params = await props.params;
   try {
     await deleteCarouselImage(params.id);
     return NextResponse.json({ success: true });
@@ -17,9 +16,8 @@ export async function DELETE(
 
 export async function PATCH(
   request: Request,
-  props: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const params = await props.params;
   try {
     const updates = await request.json();
     await updateCarouselImage(params.id, updates);

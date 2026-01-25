@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getProducts, saveProducts, createProduct } from '@/lib/db';
+import { hasAdmin } from '@/lib/supabase-admin';
 
 
 export async function GET() {
@@ -13,6 +14,12 @@ export async function POST(request: Request) {
     
     // Check if bulk import
     if (body.products && Array.isArray(body.products)) {
+        if (!hasAdmin) {
+            return NextResponse.json(
+              { success: false, error: "Configuração ausente: defina SUPABASE_SERVICE_ROLE_KEY para importar em massa." },
+              { status: 500 }
+            );
+        }
         await saveProducts(body.products);
         return NextResponse.json({ success: true, count: body.products.length });
     }

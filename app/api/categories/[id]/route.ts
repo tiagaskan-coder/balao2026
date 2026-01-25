@@ -5,10 +5,10 @@ export const dynamic = 'force-dynamic';
 
 export async function PUT(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params;
+    const { id } = params;
     const data = await request.json();
     console.log(`[API] Updating category ${id} with data:`, data);
     await updateCategory(id, data);
@@ -21,10 +21,10 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params;
+    const { id } = params;
     await deleteCategory(id);
     return NextResponse.json({ success: true });
   } catch (error) {

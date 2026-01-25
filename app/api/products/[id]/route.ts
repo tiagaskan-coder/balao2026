@@ -3,10 +3,10 @@ import { updateProduct, deleteProduct } from '@/lib/db';
 
 export async function PUT(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params;
+    const { id } = params;
     const updates = await request.json();
     const product = await updateProduct(id, updates);
     return NextResponse.json(product);
@@ -18,10 +18,10 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params;
+    const { id } = params;
     await deleteProduct(id);
     return NextResponse.json({ success: true });
   } catch (error) {
