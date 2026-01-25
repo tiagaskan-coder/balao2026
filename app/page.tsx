@@ -23,8 +23,34 @@ export default async function Home(props: {
   const category = searchParams.category;
   const search = searchParams.search;
 
+  // Helper to find all descendant category names
+  const getDescendantNames = (rootName: string, allCategories: any[]) => {
+      const root = allCategories.find(c => c.name === rootName);
+      if (!root) return [];
+      
+      const descendants: string[] = [];
+      const stack = [root.id];
+      
+      while (stack.length > 0) {
+          const currentId = stack.pop();
+          const children = allCategories.filter(c => c.parent_id === currentId);
+          children.forEach(child => {
+              descendants.push(child.name);
+              stack.push(child.id);
+          });
+      }
+      return descendants;
+  }
+
+  const validCategories = new Set<string>();
+  if (category) {
+      validCategories.add(category);
+      const descendants = getDescendantNames(category, categories);
+      descendants.forEach(d => validCategories.add(d));
+  }
+
   const filteredProducts = products.filter(p => {
-    if (category && category !== "Todos os Produtos" && p.category !== category) return false;
+    if (category && category !== "Todos os Produtos" && !validCategories.has(p.category)) return false;
     if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
