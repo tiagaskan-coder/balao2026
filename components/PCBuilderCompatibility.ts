@@ -11,6 +11,8 @@ export interface PCSpecs {
   wattage?: number;        // Ex: 500, 750 (Watts)
   slots_ram?: number;      // Ex: 2, 4
   max_memory?: number;     // Ex: 64, 128 (GB)
+  has_m2?: boolean;
+  pcie_x16?: boolean;
 }
 
 export interface TechProduct extends Product {
@@ -47,10 +49,10 @@ const MOCK_SPECS_DB: Record<string, PCSpecs> = {
   "cpu-intel-12": { socket: "LGA1700", tdp: 125 }, // Gen 12/13/14
   
   // Placas-mãe
-  "mobo-am4-b550": { socket: "AM4", ram_type: "DDR4", form_factor: "Micro-ATX", slots_ram: 4 },
-  "mobo-am5-x670": { socket: "AM5", ram_type: "DDR5", form_factor: "ATX", slots_ram: 4 },
-  "mobo-intel-b660": { socket: "LGA1700", ram_type: "DDR4", form_factor: "Micro-ATX", slots_ram: 4 },
-  "mobo-intel-z790": { socket: "LGA1700", ram_type: "DDR5", form_factor: "ATX", slots_ram: 4 },
+  "mobo-am4-b550": { socket: "AM4", ram_type: "DDR4", form_factor: "Micro-ATX", slots_ram: 4, has_m2: true, pcie_x16: true },
+  "mobo-am5-x670": { socket: "AM5", ram_type: "DDR5", form_factor: "ATX", slots_ram: 4, has_m2: true, pcie_x16: true },
+  "mobo-intel-b660": { socket: "LGA1700", ram_type: "DDR4", form_factor: "Micro-ATX", slots_ram: 4, has_m2: true, pcie_x16: true },
+  "mobo-intel-z790": { socket: "LGA1700", ram_type: "DDR5", form_factor: "ATX", slots_ram: 4, has_m2: true, pcie_x16: true },
 
   // RAM
   "ram-ddr4": { ram_type: "DDR4" },
@@ -203,7 +205,7 @@ export function checkCompatibility(
     const cpuTdp = config.cpu?.specs?.tdp || 65;
     const gpuTdp = config.gpu?.specs?.tdp || 0;
     const totalTdp = cpuTdp + gpuTdp;
-    const recommended = totalTdp * 1.2;
+    const recommended = totalTdp * 1.3;
 
     if (product.specs?.wattage && product.specs.wattage < recommended) {
         valid = false;
@@ -212,6 +214,29 @@ export function checkCompatibility(
   }
   // Se estou escolhendo GPU/CPU e já tenho Fonte, avisar se estourar?
   // (Opcional, mas boa prática. Por enquanto foca em validar a Fonte quando escolhida)
+
+  // 5. Motherboard ↔ GPU (PCIe x16)
+  if (categoryContext === 'gpu' && config.motherboard) {
+    const hasSlot = config.motherboard.specs?.pcie_x16 !== false;
+    if (!hasSlot) {
+      valid = false;
+      messages.push(`Placa-mãe sem PCIe x16 para a placa de vídeo`);
+    }
+  }
+
+  // 6. Storage interno
+  if (categoryContext === 'storage') {
+    const name = (product.name || '').toLowerCase();
+    if (name.includes('externo') || name.includes('external') || name.includes('usb')) {
+      valid = false;
+      messages.push(`Apenas SSD interno é permitido`);
+    }
+    const isNvme = name.includes('nvme') || name.includes('m.2') || name.includes('m2');
+    if (isNvme && config.motherboard && config.motherboard.specs?.has_m2 === false) {
+      valid = false;
+      messages.push(`Placa-mãe sem slot M.2 para NVMe`);
+    }
+  }
 
   return { valid, messages };
 }
@@ -239,7 +264,7 @@ export function validateBuild(config: PCConfig): ValidationResult {
   if (config.psu) {
     const cpuTdp = config.cpu?.specs?.tdp || 65;
     const gpuTdp = config.gpu?.specs?.tdp || 0;
-    const totalReq = (cpuTdp + gpuTdp) * 1.2;
+    const totalReq = (cpuTdp + gpuTdp) * 1.3;
     if ((config.psu.specs?.wattage || 0) < totalReq) {
         warnings.push(`Alerta de Energia: A fonte pode estar operando no limite. Recomendado: ${Math.ceil(totalReq)}W.`);
     }

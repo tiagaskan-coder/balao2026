@@ -25,55 +25,13 @@ interface Step {
 }
 
 const STEPS: Step[] = [
-  { 
-      id: "cpu", 
-      label: "Processador", 
-      icon: Cpu, 
-      categoryKeywords: ["processador", "cpu"],
-      targetSlugs: ["processadores", "processadores-cpu"] 
-  },
-  { 
-      id: "motherboard", 
-      label: "Placa-mãe", 
-      icon: CircuitBoard, 
-      categoryKeywords: ["placa-mãe", "placa mãe", "motherboard", "placas-mãe", "placas-mae"],
-      targetSlugs: ["placas-mae", "placas-mãe"] 
-  },
-  { 
-      id: "ram", 
-      label: "Memória RAM", 
-      icon: MemoryStick, 
-      categoryKeywords: ["memória ram", "memoria ram", "ram"],
-      targetSlugs: ["memoria-ram"] 
-  },
-  { 
-      id: "gpu", 
-      label: "Placa de Vídeo", 
-      icon: Monitor, 
-      categoryKeywords: ["placa de vídeo", "placa de video", "gpu", "rtx", "rx", "gtx"],
-      targetSlugs: ["placas-de-video", "placas-de-video-gpu"] 
-  },
-  { 
-      id: "storage", 
-      label: "Armazenamento", 
-      icon: HardDrive, 
-      categoryKeywords: ["ssd", "hd", "disco", "armazenamento", "nvme"],
-      targetSlugs: ["ssd-hd-nvme", "ssd", "hd"] 
-  },
-  { 
-      id: "psu", 
-      label: "Fonte", 
-      icon: Zap, 
-      categoryKeywords: ["fonte", "alimentação", "psu"],
-      targetSlugs: ["fontes-alimentacao", "fontes-de-alimentacao"] 
-  },
-  { 
-      id: "case", 
-      label: "Gabinete", 
-      icon: Box, 
-      categoryKeywords: ["gabinete", "case", "torre"],
-      targetSlugs: ["gabinetes"] 
-  },
+  { id: "cpu", label: "Processador", icon: Cpu, categoryKeywords: ["processador", "cpu"], targetSlugs: ["processadores", "processadores-cpu"] },
+  { id: "motherboard", label: "Placa-mãe", icon: CircuitBoard, categoryKeywords: ["placa-mãe", "placa mãe", "motherboard", "placas-mãe", "placas-mae"], targetSlugs: ["placas-mae", "placas-mãe"] },
+  { id: "storage", label: "Armazenamento", icon: HardDrive, categoryKeywords: ["ssd", "hd", "disco", "armazenamento", "nvme", "sata"], targetSlugs: ["ssd-hd-nvme", "ssd", "hd"] },
+  { id: "ram", label: "Memória RAM", icon: MemoryStick, categoryKeywords: ["memória ram", "memoria ram", "ram"], targetSlugs: ["memoria-ram"] },
+  { id: "gpu", label: "Placa de Vídeo", icon: Monitor, categoryKeywords: ["placa de vídeo", "placa de video", "gpu", "rtx", "rx", "gtx"], targetSlugs: ["placas-de-video", "placas-de-video-gpu"] },
+  { id: "psu", label: "Fonte", icon: Zap, categoryKeywords: ["fonte", "alimentação", "psu"], targetSlugs: ["fontes-alimentacao", "fontes-de-alimentacao"] },
+  { id: "case", label: "Gabinete", icon: Box, categoryKeywords: ["gabinete", "case", "torre"], targetSlugs: ["gabinetes"] },
 ];
 
 interface PCBuilderProps {
@@ -110,6 +68,16 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
   }, [initialProducts]);
 
   const currentStep = STEPS[currentStepIndex];
+  const prerequisitesSatisfied = (stepId: string, cfg: PCConfig) => {
+    if (stepId === "motherboard") return !!cfg.cpu;
+    if (stepId === "storage") return !!cfg.motherboard;
+    if (stepId === "ram") return !!cfg.motherboard;
+    if (stepId === "gpu") return !!cfg.motherboard;
+    if (stepId === "psu") return !!cfg.cpu;
+    if (stepId === "case") return !!cfg.motherboard;
+    return true;
+  };
+  const blockedByPrereq = !prerequisitesSatisfied(currentStep.id, config);
 
   // Resetar busca ao mudar de passo
   React.useEffect(() => {
@@ -118,6 +86,9 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
 
   // --- Lógica de Filtragem e Compatibilidade ---
   const stepProducts = useMemo(() => {
+    if (!prerequisitesSatisfied(currentStep.id, config)) {
+      return [];
+    }
     // 1. Filtro Básico (Categoria)
     const hardwareCat = categories.find(c => c.slug === 'hardware' || c.name.toLowerCase() === 'hardware');
     
@@ -144,7 +115,16 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
             normalizedProductCat.includes(normalizeText(keyword))
         );
 
-        return isHardwareSubmatch || matchesKeyword;
+        const baseMatch = isHardwareSubmatch || matchesKeyword;
+        if (!baseMatch) return false;
+        if (currentStep.id === "storage") {
+          const name = p.name.toLowerCase();
+          if (name.includes("externo") || name.includes("external") || name.includes("usb")) return false;
+          const isNvme = name.includes("nvme") || name.includes("m.2") || name.includes("m2");
+          const isSata = name.includes("sata");
+          if (!isNvme && !isSata) return false;
+        }
+        return true;
     });
 
     // 3. Aplicar Busca Inteligente (se houver termo)
@@ -361,10 +341,14 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
                 {stepProducts.length === 0 ? (
                     <div className="text-center py-12 bg-gray-50 rounded-lg">
                         <AlertCircle className="mx-auto h-12 w-12 text-gray-400 mb-3" />
-                        <h3 className="text-lg font-medium text-gray-900">Nenhum produto compatível encontrado</h3>
-                        <p className="text-gray-500 max-w-sm mx-auto mt-2">
-                            Tente alterar o termo de busca ou verifique se há componentes disponíveis para esta categoria.
-                        </p>
+                        <h3 className="text-lg font-medium text-gray-900">
+                          {blockedByPrereq ? "Selecione o componente anterior para continuar" : "Nenhum produto compatível encontrado"}
+                        </h3>
+                        {!blockedByPrereq && (
+                          <p className="text-gray-500 max-w-sm mx-auto mt-2">
+                              Tente alterar o termo de busca ou verifique se há componentes disponíveis para esta categoria.
+                          </p>
+                        )}
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
