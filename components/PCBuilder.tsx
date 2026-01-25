@@ -23,6 +23,7 @@ interface Step {
   categoryKeywords: string[];
   targetSlugs?: string[];
   parentSlug: string;
+  parentSlugs?: string[];
   filterKeywords?: string[];
 }
 
@@ -35,7 +36,7 @@ const STEPS: Step[] = [
   { id: "psu", label: "Fonte", icon: Zap, categoryKeywords: ["fonte", "alimentação", "psu"], targetSlugs: ["fontes-alimentacao", "fontes-de-alimentacao", "fontes"], parentSlug: "hardware" },
   { id: "case", label: "Gabinete", icon: Box, categoryKeywords: ["gabinete", "case", "torre"], targetSlugs: ["gabinetes", "gabinete"], parentSlug: "hardware" },
   { id: "licenses", label: "Licenças", icon: Key, categoryKeywords: ["licenças", "licencas", "windows", "office"], targetSlugs: ["licencas", "windows", "microsoft-office", "antivirus", "softwares-design", "softwares-edicao"], parentSlug: "licencas" },
-  { id: "monitor", label: "Monitores", icon: Monitor, categoryKeywords: ["monitor"], targetSlugs: ["monitores","monitor-gamer","monitor-curvo","monitor-profissional","monitor-ultrawide","monitor-4k"], parentSlug: "monitores" },
+  { id: "monitor", label: "Monitores", icon: Monitor, categoryKeywords: ["monitor"], targetSlugs: ["monitores","monitor-gamer","monitor-curvo","monitor-profissional","monitor-ultrawide","monitor-4k"], parentSlug: "monitores", parentSlugs: ["monitores","monitores-displays"] },
   { id: "keyboard", label: "Teclados", icon: Keyboard, categoryKeywords: ["teclado"], targetSlugs: ["teclados-gamer-mecanicos","teclados"], parentSlug: "perifericos" },
   { id: "mouse", label: "Mouses", icon: Mouse, categoryKeywords: ["mouse"], targetSlugs: ["mouses-gamer","mouses"], parentSlug: "perifericos" },
   { id: "headset", label: "Fones de Ouvido", icon: Headphones, categoryKeywords: ["fone", "headset", "headphone"], targetSlugs: ["headsets-fones","fones-ouvido"], parentSlug: "perifericos" },
@@ -52,6 +53,8 @@ interface PCBuilderProps {
 export default function PCBuilder({ products: initialProducts, categories }: PCBuilderProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
+  const [minPrice, setMinPrice] = useState<string>("");
+  const [maxPrice, setMaxPrice] = useState<string>("");
   const [config, setConfig] = useState<PCConfig>({
     cpu: null,
     motherboard: null,
@@ -82,6 +85,10 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
       .replace(/[\u0300-\u036f]/g, "") 
       .replace(/[^a-z0-9]/g, ""); 
   };
+  const parsePrice = (s: string) => {
+    const n = parseFloat(s.replace("R$", "").replace(/\./g, "").replace(",", ".").trim());
+    return isNaN(n) ? 0 : n;
+  };
 
   // Enriquecer produtos com specs (via PCBuilderCompatibility)
   const products = useMemo(() => {
@@ -110,7 +117,8 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
     if (!prerequisitesSatisfied(currentStep.id, config)) {
       return [];
     }
-    const parentCat = categories.find(c => c.slug === currentStep.parentSlug || c.name.toLowerCase() === currentStep.parentSlug);
+    const potentialParents = [currentStep.parentSlug, ...((currentStep.parentSlugs || []))];
+    const parentCat = categories.find(c => potentialParents.includes(c.slug) || potentialParents.includes(c.name.toLowerCase()));
     let targetCategoryNames: string[] = [];
     if (parentCat) {
         const subCategories = categories.filter(c => c.parent_id === parentCat.id);
@@ -173,6 +181,13 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
           const isSata = name.includes("sata");
           if (!isNvme && !isSata) return false;
         }
+        const min = parseFloat(minPrice.replace(/\./g, "").replace(",", "."));
+        const max = parseFloat(maxPrice.replace(/\./g, "").replace(",", "."));
+        const hasMin = minPrice !== "" && !isNaN(min);
+        const hasMax = maxPrice !== "" && !isNaN(max);
+        const priceVal = parsePrice(p.price);
+        if (hasMin && priceVal < min) return false;
+        if (hasMax && priceVal > max) return false;
         return true;
     });
 
@@ -180,6 +195,7 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
     if (searchTerm) {
         filtered = searchProducts(filtered, searchTerm);
     }
+    filtered = filtered.sort((a: TechProduct, b: TechProduct) => parsePrice(a.price) - parsePrice(b.price));
 
     // 4. Verificação de Compatibilidade e ocultação de itens incompatíveis
     return filtered
@@ -439,6 +455,22 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
                         <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                             <Search size={18} />
                         </div>
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 gap-2">
+                        <input
+                            type="text"
+                            placeholder="Preço mínimo"
+                            value={minPrice}
+                            onChange={(e) => setMinPrice(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E60012] focus:border-transparent outline-none text-sm"
+                        />
+                        <input
+                            type="text"
+                            placeholder="Preço máximo"
+                            value={maxPrice}
+                            onChange={(e) => setMaxPrice(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E60012] focus:border-transparent outline-none text-sm"
+                        />
                     </div>
                 </div>
 
