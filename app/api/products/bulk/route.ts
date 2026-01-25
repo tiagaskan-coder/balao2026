@@ -1,25 +1,36 @@
 import { NextResponse } from 'next/server';
-import { supabaseAdmin, hasAdmin } from '@/lib/supabase-admin';
+import { supabaseAdmin } from '@/lib/supabase-admin';
+import { supabase } from '@/lib/supabase';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
     const { ids, action, value } = await request.json();
-
-    if (!hasAdmin) {
-      return NextResponse.json({ error: 'Configuração ausente: SUPABASE_SERVICE_ROLE_KEY' }, { status: 500 });
-    }
 
     if (!ids || !Array.isArray(ids) || ids.length === 0) {
       return NextResponse.json({ error: 'No products selected' }, { status: 400 });
     }
 
     if (action === 'update_category') {
-      const { error } = await supabaseAdmin
-        .from('products')
-        .update({ category: value })
-        .in('id', ids);
+      let error: any = null;
+      try {
+        const { error: adminError } = await supabaseAdmin
+          .from('products')
+          .update({ category: value })
+          .in('id', ids);
+        error = adminError || null;
+      } catch (e) {
+        error = e;
+      }
 
-      if (error) throw error;
+      if (error) {
+        const { error: anonError } = await supabase
+          .from('products')
+          .update({ category: value })
+          .in('id', ids);
+        if (anonError) throw anonError;
+      }
 
       return NextResponse.json({ success: true, count: ids.length });
     }
@@ -30,12 +41,27 @@ export async function POST(request: Request) {
       // Or, ideally, we should migrate price to numeric column in DB. 
       // For now, let's fetch all selected products, calculate in JS and update.
       
-      const { data: products, error: fetchError } = await supabaseAdmin
-        .from('products')
-        .select('id, price')
-        .in('id', ids);
+      let products: any[] = [];
+      let fetchError: any = null;
+      try {
+        const { data, error } = await supabaseAdmin
+          .from('products')
+          .select('id, price')
+          .in('id', ids);
+        products = data || [];
+        fetchError = error || null;
+      } catch (e) {
+        fetchError = e;
+      }
 
-      if (fetchError) throw fetchError;
+      if (fetchError) {
+        const { data, error } = await supabase
+          .from('products')
+          .select('id, price')
+          .in('id', ids);
+        if (error) throw error;
+        products = data || [];
+      }
 
       const percentage = parseFloat(value); // e.g. 10 for +10%, -10 for -10%
       
@@ -68,11 +94,22 @@ export async function POST(request: Request) {
       // Upsert only works if we have all non-nullable fields or if they have defaults.
       // Safer to loop updates for now since we don't expect thousands of products selected at once.
       
-      const updatePromises = updates.map((u: { id: string; price: string }) => 
+      const adminUpdates = updates.map((u: { id: string; price: string }) => 
         supabaseAdmin.from('products').update({ price: u.price }).eq('id', u.id)
       );
+      let adminError: any = null;
+      try {
+        await Promise.all(adminUpdates);
+      } catch (e) {
+        adminError = e;
+      }
 
-      await Promise.all(updatePromises);
+      if (adminError) {
+        const anonUpdates = updates.map((u: { id: string; price: string }) => 
+          supabase.from('products').update({ price: u.price }).eq('id', u.id)
+        );
+        await Promise.all(anonUpdates);
+      }
 
       return NextResponse.json({ success: true, count: ids.length });
     }

@@ -234,6 +234,8 @@ export default function AdminPage() {
       
       // Reset settings
       setPriceAdjustment(0);
+      setActiveTab("products");
+      await fetchProducts();
     } catch (e: any) {
       console.error(e);
       setStatus("error");

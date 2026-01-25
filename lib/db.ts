@@ -5,9 +5,19 @@ import { Product, CarouselImage, Category, HomeBlock } from './utils';
 // Fallback to empty array if connection fails or env vars missing
 export async function getProducts(): Promise<Product[]> {
   try {
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('products')
-      .select('*');
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.warn("Supabase products order by created_at failed, retrying without order...", error);
+      const retry = await supabase
+        .from('products')
+        .select('*');
+      data = retry.data as any;
+      error = retry.error as any;
+    }
       
     if (error) {
       console.error("Supabase error:", error);
