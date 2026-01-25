@@ -38,6 +38,9 @@ export async function saveProducts(products: Product[]) {
      }));
 
      console.log(`[saveProducts] Saving ${dbProducts.length} products via supabaseAdmin...`);
+     if (dbProducts.length > 0) {
+        console.log(`[saveProducts] First item sample: ID=${dbProducts[0].id}, Slug=${dbProducts[0].slug}`);
+     }
 
      const { error } = await supabaseAdmin
         .from('products')

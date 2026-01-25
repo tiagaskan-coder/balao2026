@@ -199,7 +199,7 @@ export function parseProducts(text: string): Product[] {
     // Clean up name if it captured too much (unlikely with non-greedy + following price)
     
     // Generate a simple ID and slug
-    const id = Math.random().toString(36).substring(2, 9);
+    const id = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15);
     const slug = name
       .toLowerCase()
       .replace(/[^\w\s-]/g, "")

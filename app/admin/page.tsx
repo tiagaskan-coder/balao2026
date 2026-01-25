@@ -231,10 +231,10 @@ export default function AdminPage() {
       
       // Reset settings
       setPriceAdjustment(0);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
       setStatus("error");
-      setMessage("Erro ao importar produtos.");
+      setMessage(`Erro ao importar: ${e.message || "Erro desconhecido"}`);
     }
   };
 

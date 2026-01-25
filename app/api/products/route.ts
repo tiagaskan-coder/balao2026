@@ -22,7 +22,8 @@ export async function POST(request: Request) {
     return NextResponse.json(newProduct);
 
   } catch (e) {
-    console.error(e);
-    return NextResponse.json({ success: false, error: 'Failed to save' }, { status: 500 });
+    console.error("API Error:", e);
+    const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+    return NextResponse.json({ success: false, error: errorMessage }, { status: 500 });
   }
 }
