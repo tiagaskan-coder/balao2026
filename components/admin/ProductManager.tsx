@@ -67,10 +67,10 @@ export default function ProductManager() {
     setIsProcessingBulk(true);
     try {
         // 1. Identify candidates (empty or null)
-        let productsToDelete = products.filter(p => !p.image || p.image.trim() === "");
+        let productsToDelete = products.filter((p: Product) => !p.image || p.image.trim() === "");
         
         // 2. Identify candidates with potential broken links (scan the rest)
-        const productsWithImage = products.filter(p => p.image && p.image.trim() !== "");
+        const productsWithImage = products.filter((p: Product) => p.image && p.image.trim() !== "");
         
         if (productsWithImage.length > 0) {
              const userConfirmed = confirm(`Existem ${productsWithImage.length} produtos com URL de imagem. Deseja verificar quais estão quebradas? (Isso pode levar alguns instantes)`);
@@ -81,16 +81,16 @@ export default function ProductManager() {
                  // Process in chunks to avoid browser freeze/network saturation
                  const chunkSize = 20;
                  for (let i = 0; i < productsWithImage.length; i += chunkSize) {
-                     const chunk = productsWithImage.slice(i, i + chunkSize);
-                     const results = await Promise.all(chunk.map(async (p) => {
-                         const exists = await checkImageExists(p.image);
-                         return exists ? null : p;
-                     }));
-                     
-                     results.forEach(p => {
-                         if (p) brokenImages.push(p);
-                     });
-                 }
+                    const chunk = productsWithImage.slice(i, i + chunkSize);
+                    const results = await Promise.all(chunk.map(async (p: Product) => {
+                        const exists = await checkImageExists(p.image);
+                        return exists ? null : p;
+                    }));
+                    
+                    results.forEach((p: Product | null) => {
+                        if (p) brokenImages.push(p);
+                    });
+                }
                  
                  productsToDelete = [...productsToDelete, ...brokenImages];
              }
@@ -109,7 +109,7 @@ export default function ProductManager() {
         const chunkSize = 5;
         for (let i = 0; i < productsToDelete.length; i += chunkSize) {
              const chunk = productsToDelete.slice(i, i + chunkSize);
-             await Promise.all(chunk.map(p => fetch(`/api/products/${p.id}`, { method: "DELETE" })));
+             await Promise.all(chunk.map((p: Product) => fetch(`/api/products/${p.id}`, { method: "DELETE" })));
              deletedCount += chunk.length;
         }
 
@@ -127,7 +127,7 @@ export default function ProductManager() {
     const nameMap = new Map<string, Product[]>();
     
     // Group by normalized name
-    products.forEach(p => {
+    products.forEach((p: Product) => {
         const normalizedName = p.name.trim().toLowerCase();
         if (!nameMap.has(normalizedName)) {
             nameMap.set(normalizedName, []);
@@ -190,7 +190,7 @@ export default function ProductManager() {
     if (selectedIds.size === filteredProducts.length) {
         setSelectedIds(new Set());
     } else {
-        setSelectedIds(new Set(filteredProducts.map(p => p.id)));
+        setSelectedIds(new Set(filteredProducts.map((p: Product) => p.id)));
     }
   };
 
@@ -381,7 +381,7 @@ export default function ProductManager() {
     }
   };
 
-  const filteredProducts = products.filter(p => 
+  const filteredProducts = products.filter((p: Product) => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     p.category?.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -402,11 +402,11 @@ export default function ProductManager() {
                 <div className="flex items-center gap-2">
                     <select 
                         value={bulkCategory}
-                        onChange={(e) => setBulkCategory(e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setBulkCategory(e.target.value)}
                         className="text-sm border-red-200 rounded-md py-1.5 px-2 focus:ring-2 focus:ring-red-500 outline-none"
                     >
                         <option value="">Alterar Categoria...</option>
-                        {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                        {categories.map((c: Category) => <option key={c.id} value={c.name}>{c.name}</option>)}
                     </select>
                     <button 
                         onClick={handleBulkUpdateCategory}
@@ -426,7 +426,7 @@ export default function ProductManager() {
                             type="number" 
                             placeholder="0"
                             value={bulkPricePercent || ""}
-                            onChange={(e) => setBulkPricePercent(Number(e.target.value))}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBulkPricePercent(Number(e.target.value))}
                             className="w-full text-sm border-red-200 rounded-md py-1.5 pl-2 pr-6 focus:ring-2 focus:ring-red-500 outline-none"
                         />
                         <span className="absolute right-2 top-1.5 text-red-500 text-xs font-bold">%</span>
@@ -459,7 +459,7 @@ export default function ProductManager() {
                     placeholder="Buscar produtos..." 
                     className="w-full pl-10 pr-4 py-2 border rounded-lg"
                     value={searchTerm}
-                    onChange={e => setSearchTerm(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
                 />
             </div>
             
@@ -521,7 +521,7 @@ export default function ProductManager() {
                     ) : filteredProducts.length === 0 ? (
                         <tr><td colSpan={6} className="p-8 text-center text-gray-500">Nenhum produto encontrado.</td></tr>
                     ) : (
-                        filteredProducts.map(product => (
+                        filteredProducts.map((product: Product) => (
                             <tr key={product.id} className={`hover:bg-gray-50 ${selectedIds.has(product.id) ? "bg-red-50" : ""}`}>
                                 <td className="p-4">
                                     <button onClick={() => toggleSelect(product.id)} className={`text-gray-400 hover:text-gray-600 ${selectedIds.has(product.id) ? "text-red-600" : ""}`}>
@@ -570,8 +570,8 @@ export default function ProductManager() {
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Imagem do Produto</label>
                                 <div 
                                     className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:bg-gray-50 cursor-pointer relative transition-colors"
-                                    onDragOver={e => e.preventDefault()}
-                                    onDrop={e => {
+                                    onDragOver={(e: React.DragEvent<HTMLDivElement>) => e.preventDefault()}
+                                    onDrop={(e: React.DragEvent<HTMLDivElement>) => {
                                         e.preventDefault();
                                         if (e.dataTransfer.files?.[0]) {
                                             const file = e.dataTransfer.files[0];
@@ -597,7 +597,7 @@ export default function ProductManager() {
                                         type="file" 
                                         accept="image/*" 
                                         className="absolute inset-0 opacity-0 cursor-pointer"
-                                        onChange={e => {
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                             if (e.target.files?.[0]) {
                                                 const file = e.target.files[0];
                                                 setImageFile(file);
@@ -617,7 +617,7 @@ export default function ProductManager() {
                                         className="flex-1 outline-none" 
                                         placeholder="https://youtube.com/watch?v=..." 
                                         value={currentProduct.video_url || ""}
-                                        onChange={e => setCurrentProduct({...currentProduct, video_url: e.target.value})}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCurrentProduct({...currentProduct, video_url: e.target.value})}
                                     />
                                 </div>
                             </div>
@@ -631,7 +631,7 @@ export default function ProductManager() {
                                     type="text" 
                                     className="w-full border rounded-lg px-3 py-2 focus:ring-2 ring-red-500 outline-none"
                                     value={currentProduct.name || ""}
-                                    onChange={e => setCurrentProduct({...currentProduct, name: e.target.value})}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCurrentProduct({...currentProduct, name: e.target.value})}
                                 />
                             </div>
 
@@ -643,7 +643,7 @@ export default function ProductManager() {
                                         className="w-full border rounded-lg px-3 py-2 focus:ring-2 ring-red-500 outline-none"
                                         placeholder="R$ 0,00"
                                         value={currentProduct.price || ""}
-                                        onChange={e => setCurrentProduct({...currentProduct, price: e.target.value})}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCurrentProduct({...currentProduct, price: e.target.value})}
                                     />
                                 </div>
                                 <div>
@@ -653,7 +653,7 @@ export default function ProductManager() {
                                         className="w-full border rounded-lg px-3 py-2 focus:ring-2 ring-red-500 outline-none"
                                         placeholder="0.00"
                                         value={currentProduct.cost || ""}
-                                        onChange={e => setCurrentProduct({...currentProduct, cost: parseFloat(e.target.value)})}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCurrentProduct({...currentProduct, cost: parseFloat(e.target.value)})}
                                     />
                                 </div>
                             </div>
@@ -663,7 +663,7 @@ export default function ProductManager() {
                                 <select 
                                     className="w-full border rounded-lg px-3 py-2 focus:ring-2 ring-red-500 outline-none"
                                     value={currentProduct.category || ""}
-                                    onChange={e => setCurrentProduct({...currentProduct, category: e.target.value})}
+                                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCurrentProduct({...currentProduct, category: e.target.value})}
                                 >
                                     <option value="">Selecione...</option>
                                     {categories.map(c => (
@@ -694,7 +694,7 @@ export default function ProductManager() {
                                 <textarea 
                                     className="w-full border rounded-lg px-3 py-2 h-32 focus:ring-2 ring-red-500 outline-none resize-none"
                                     value={currentProduct.description || ""}
-                                    onChange={e => setCurrentProduct({...currentProduct, description: e.target.value})}
+                                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setCurrentProduct({...currentProduct, description: e.target.value})}
                                 />
                             </div>
                         </div>

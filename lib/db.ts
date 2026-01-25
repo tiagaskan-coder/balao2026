@@ -48,7 +48,8 @@ export async function createProduct(product: Partial<Product>) {
             price: product.price,
             image: product.image,
             category: product.category,
-            slug: product.slug
+            slug: product.slug,
+            video_url: product.video_url || null
             // cost, supplier, etc. are NOT in DB yet, so we exclude them to prevent errors
         };
 

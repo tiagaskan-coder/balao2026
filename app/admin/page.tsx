@@ -81,14 +81,14 @@ export default function AdminPage() {
     }
   };
 
-  const filteredProducts = products.filter(p => 
+  const filteredProducts = products.filter((p: Product) => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.category?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Preview Logic
   const getPreviewProducts = () => {
-    return parsedProducts.map(p => {
+    return parsedProducts.map((p: Product) => {
         // Fix: Use global regex for replace all dots, then replace comma with dot
         let priceNum = parseFloat(p.price.replace("R$", "").replace(/\./g, "").replace(",", ".").trim());
         if (isNaN(priceNum)) priceNum = 0;
@@ -119,18 +119,27 @@ export default function AdminPage() {
     return new Promise((resolve) => {
       const img = new window.Image();
       img.onload = () => {
-        // Accept all sizes (Next.js Image Optimization will handle resizing)
-        // We only validate that the image exists and can be loaded
         resolve(true);
       };
-      img.onerror = () => resolve(false); // Reject broken URLs
+      img.onerror = () => resolve(false); 
       img.src = url;
     });
   };
 
+  const optimizeUrl = (url: string) => {
+    try {
+        const u = new URL(url);
+        // Remove common width/height params often used in CDNs to try and get high-res
+        ['w', 'h', 'width', 'height', 'size', 'resize'].forEach(p => u.searchParams.delete(p));
+        return u.toString();
+    } catch {
+        return url;
+    }
+  };
+
   const handleParse = async () => {
     setStatus("loading");
-    setMessage("Verificando disponibilidade das imagens...");
+    setMessage("Verificando disponibilidade das imagens e otimizando resolução...");
 
     const products = parseProducts(text);
     if (products.length === 0) {
@@ -139,28 +148,33 @@ export default function AdminPage() {
         return;
     }
 
-    // Verify if images are accessible (Optional check, don't filter out)
+    // Verify if images are accessible and optimize URL
     const productsWithValidation = await Promise.all(
         products.map(async (p) => {
-            const isValid = await validateImage(p.image);
-            return { ...p, imageValid: isValid };
+            const optimizedImage = optimizeUrl(p.image);
+            const isValid = await validateImage(optimizedImage);
+            return { ...p, image: optimizedImage, imageValid: isValid };
         })
     );
 
-    // We don't filter out invalid images anymore to avoid CORS false positives
-    // const validProducts = validationResults.filter(r => r.isValid).map(r => r.product);
+    // Filter out invalid images as requested
+    const validProducts = productsWithValidation.filter(r => r.imageValid && r.image);
         
-    setParsedProducts(productsWithValidation);
+    setParsedProducts(validProducts);
     setImportStep("preview");
     setStatus("idle");
     
-    setMessage(`${productsWithValidation.length} produtos encontrados.`);
+    if (validProducts.length < productsWithValidation.length) {
+        setMessage(`${validProducts.length} produtos válidos encontrados. (${productsWithValidation.length - validProducts.length} removidos por imagem inválida/quebrada).`);
+    } else {
+        setMessage(`${validProducts.length} produtos encontrados com sucesso.`);
+    }
   };
 
   const handleConfirmImport = async () => {
     setStatus("loading");
     try {
-      const finalProducts = getPreviewProducts().map(p => ({
+      const finalProducts = getPreviewProducts().map((p: any) => ({
           id: p.id,
           name: p.name,
           price: p.newPrice, // Use calculated price
