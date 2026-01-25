@@ -39,8 +39,8 @@ const STEPS: Step[] = [
   { id: "keyboard", label: "Teclados", icon: Keyboard, categoryKeywords: ["teclado"], targetSlugs: ["teclados-gamer-mecanicos","teclados"], parentSlug: "perifericos" },
   { id: "mouse", label: "Mouses", icon: Mouse, categoryKeywords: ["mouse"], targetSlugs: ["mouses-gamer","mouses"], parentSlug: "perifericos" },
   { id: "headset", label: "Fones de Ouvido", icon: Headphones, categoryKeywords: ["fone", "headset", "headphone"], targetSlugs: ["headsets-fones","fones-ouvido"], parentSlug: "perifericos" },
-  { id: "netadapters", label: "Adaptadores de Rede", icon: Network, categoryKeywords: ["rede","wifi","ethernet","lan"], targetSlugs: ["adaptadores-rede"], parentSlug: "rede-conectividade", filterKeywords: ["rede","wifi","ethernet","lan","pci","usb","adaptador"] },
-  { id: "peripherals", label: "Outros Periféricos", icon: Box, categoryKeywords: ["webcam","microfone","mousepad","controle","joystick","volante"], targetSlugs: ["webcams","microfones","mousepads","controles-joysticks","volantes-simuladores"], parentSlug: "perifericos" },
+  { id: "netadapters", label: "Adaptadores de Rede", icon: Network, categoryKeywords: ["rede","wifi","ethernet","lan"], targetSlugs: ["adaptadores-conversores"], parentSlug: "acessorios", filterKeywords: ["rede","wifi","ethernet","lan","pci","usb","adaptador","conversor"] },
+  { id: "peripherals", label: "Outros Periféricos", icon: Box, categoryKeywords: ["webcam","microfone","mousepad","controle","joystick","volante"], targetSlugs: ["perifericos","webcams","microfones","mousepads","controles-joysticks","volantes-simuladores"], parentSlug: "perifericos" },
   { id: "chairs", label: "Cadeiras", icon: Armchair, categoryKeywords: ["cadeira"], targetSlugs: ["cadeiras-gamer","cadeiras-ergonomicas"], parentSlug: "escritorio" },
 ];
 
