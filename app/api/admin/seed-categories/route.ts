@@ -39,12 +39,11 @@ const CATEGORIES: Category[] = [
     name: "Notebooks",
     icon: "Laptop",
     children: [
-      { name: "Notebooks Gamer", icon: "Gamepad2" },
+      { name: "Notebook Gamer", icon: "Gamepad2" },
+      { name: "Notebook Profissional", icon: "Briefcase" },
+      { name: "Notebook Estudante", icon: "Book" },
       { name: "Ultrabook", icon: "Feather" },
-      { name: "MacBook", slug: "macbook-notebooks", icon: "Laptop" },
-      { name: "Notebooks para Trabalho", icon: "Briefcase" },
-      { name: "Chromebook", icon: "Globe" },
-      { name: "Acessórios para Notebook", icon: "Plug" }
+      { name: "MacBook", slug: "macbook-notebooks", icon: "Laptop" }
     ]
   },
   {
@@ -63,137 +62,145 @@ const CATEGORIES: Category[] = [
     ]
   },
   {
-    name: "Periféricos",
-    icon: "Keyboard",
+    name: "Smartphones",
+    icon: "Smartphone",
     children: [
-      { name: "Mouse e Mousepad", icon: "Mouse" },
-      { name: "Teclados", icon: "Keyboard" },
-      { name: "Headsets e Fones", icon: "Headphones" },
-      { name: "Microfones", icon: "Mic" },
-      { name: "Webcams", icon: "Camera" },
-      { name: "Caixas de Som", icon: "Speaker" },
-      { name: "Controles e Joysticks", icon: "Gamepad" },
-      { name: "Hubs USB", icon: "Usb" },
-      { name: "Mesas Digitalizadoras", icon: "PenTool" }
+      { name: "Smartphones Android", icon: "Smartphone" },
+      { name: "iPhone", slug: "iphone-smartphones", icon: "Smartphone" },
+      { name: "Smartphones Gamer", icon: "Gamepad2" },
+      { name: "Capas e Películas", icon: "Shield" },
+      { name: "Carregadores e Cabos", slug: "carregadores-cabos-smartphones", icon: "Zap" },
+      { name: "Suportes e Power Banks", icon: "Battery" }
     ]
   },
   {
     name: "Monitores",
     icon: "Monitor",
     children: [
-      { name: "Monitores Gamer", icon: "Gamepad2" },
-      { name: "Monitores 4K / Ultrawide", icon: "Monitor" },
-      { name: "Monitores para Escritório", icon: "Briefcase" },
-      { name: "Suportes para Monitor", icon: "Move" },
-      { name: "Acessórios de Vídeo", icon: "Cable" }
+      { name: "Monitor Gamer", icon: "Gamepad2" },
+      { name: "Monitor Curvo", icon: "Monitor" },
+      { name: "Monitor Profissional", icon: "Briefcase" },
+      { name: "Monitor Ultrawide", icon: "Monitor" },
+      { name: "Monitor 4K", icon: "Monitor" },
+      { name: "Suportes para Monitor", icon: "Move" }
     ]
   },
   {
-    name: "Cadeiras e Escritório",
+    name: "Periféricos",
+    icon: "Keyboard",
+    children: [
+      { name: "Teclados Gamer e Mecânicos", icon: "Keyboard" },
+      { name: "Mouses Gamer", icon: "Mouse" },
+      { name: "Headsets e Fones", icon: "Headphones" },
+      { name: "Mousepads", icon: "Square" },
+      { name: "Controles / Joysticks", icon: "Gamepad" },
+      { name: "Volantes e Simuladores", icon: "Disc" },
+      { name: "Webcams", icon: "Camera" },
+      { name: "Microfones", icon: "Mic" }
+    ]
+  },
+  {
+    name: "Acessórios",
+    icon: "Plug",
+    children: [
+      { name: "Cabos (HDMI, DisplayPort, USB, Áudio)", icon: "Cable" },
+      { name: "Adaptadores e Conversores", icon: "RefreshCcw" },
+      { name: "Hubs USB", icon: "Usb" },
+      { name: "Bases para Notebook", icon: "Laptop" },
+      { name: "Suportes para Headset", icon: "Headphones" },
+      { name: "Mochilas e Cases", icon: "Backpack" },
+      { name: "Iluminação RGB", icon: "Lightbulb" },
+      { name: "Filtros de Linha e Estabilizadores", icon: "Zap" }
+    ]
+  },
+  {
+    name: "Segurança",
+    icon: "Lock",
+    children: [
+      { name: "Câmeras de Segurança (IP / Wi‑Fi)", icon: "Video" },
+      { name: "Kits CFTV", icon: "Video" },
+      { name: "DVR e NVR", icon: "HardDrive" },
+      { name: "Alarmes Residenciais", icon: "Bell" },
+      { name: "Sensores de Movimento", icon: "Radio" },
+      { name: "Fechaduras Eletrônicas", icon: "Lock" },
+      { name: "Vídeo Porteiros", icon: "Video" }
+    ]
+  },
+  {
+    name: "Automação",
+    icon: "Home",
+    children: [
+      { name: "Casa Inteligente", icon: "Home" },
+      { name: "Tomadas Inteligentes", icon: "Power" },
+      { name: "Interruptores Inteligentes", icon: "ToggleLeft" },
+      { name: "Lâmpadas e Fitas LED Smart", icon: "Lightbulb" },
+      { name: "Sensores Inteligentes", icon: "Radio" },
+      { name: "Assistentes Virtuais", icon: "Mic" },
+      { name: "Centrais de Automação", icon: "Server" }
+    ]
+  },
+  {
+    name: "Geek",
+    icon: "Ghost",
+    children: [
+      { name: "Action Figures", icon: "User" },
+      { name: "Colecionáveis", icon: "Star" },
+      { name: "Funko Pop", icon: "Smile" },
+      { name: "Camisetas e Vestuário", icon: "Shirt" },
+      { name: "Canecas e Copos", icon: "Coffee" },
+      { name: "Decoração Geek", icon: "Image" },
+      { name: "Brinquedos Temáticos", icon: "Gift" }
+    ]
+  },
+  {
+    name: "Licenças",
+    icon: "Key",
+    children: [
+      { name: "Windows", icon: "Monitor" },
+      { name: "Microsoft Office", icon: "FileText" },
+      { name: "Antivírus", icon: "Shield" },
+      { name: "Softwares de Design", icon: "PenTool" },
+      { name: "Softwares de Edição", icon: "Video" }
+    ]
+  },
+  {
+    name: "Escritório",
     icon: "Armchair",
     children: [
       { name: "Cadeiras Gamer", icon: "Armchair" },
-      { name: "Cadeiras de Escritório", icon: "Briefcase" },
-      { name: "Mesas Gamer / Escritório", icon: "Table" },
-      { name: "Iluminação e LED", icon: "Lightbulb" },
-      { name: "Organização de Cabos", icon: "Cable" }
+      { name: "Cadeiras Ergonômicas", icon: "Armchair" },
+      { name: "Mesas Gamer", icon: "Table" },
+      { name: "Mesas para Escritório", icon: "Table" },
+      { name: "Suportes Ergonômicos", icon: "Move" },
+      { name: "Organizadores", icon: "Box" }
     ]
   },
   {
-    name: "Redes e Conectividade",
-    icon: "Wifi",
-    children: [
-      { name: "Roteadores Wi‑Fi e Mesh", icon: "Wifi" },
-      { name: "Repetidores de Sinal", icon: "Signal" },
-      { name: "Switch e Hubs", icon: "Network" },
-      { name: "Cabos de Rede", icon: "Cable" },
-      { name: "Adaptadores USB / Wi‑Fi", icon: "Usb" },
-      { name: "Modems 4G / 5G", icon: "Radio" },
-      { name: "Racks e Patch Panels", icon: "Server" }
-    ]
-  },
-  {
-    name: "Servidores e Automação",
-    icon: "Server",
-    children: [
-      { name: "Servidores Torre / Rack", icon: "Server" },
-      { name: "Storage (NAS / DAS)", icon: "Database" },
-      { name: "Nobreaks e Estabilizadores", icon: "Battery" },
-      { name: "Automação Comercial", icon: "Store" },
-      { name: "Leitores de Código de Barras", icon: "Scan" },
-      { name: "Impressoras Térmicas", icon: "Printer" }
-    ]
-  },
-  {
-    name: "Games e Consoles",
+    name: "Games",
     icon: "Gamepad",
     children: [
-      { name: "PlayStation 5", icon: "Gamepad" },
-      { name: "Xbox Series X/S", icon: "Gamepad" },
-      { name: "Nintendo Switch", icon: "Gamepad" },
-      { name: "Consoles Retrô", icon: "Joystick" },
-      { name: "Jogos (Mídia Física)", icon: "Disc" },
-      { name: "Acessórios de Console", icon: "Headphones" },
-      { name: "Volantes e Simuladores", icon: "Gamepad" }
+      { name: "Jogos para PC", icon: "Monitor" },
+      { name: "Jogos para PlayStation", icon: "Gamepad" },
+      { name: "Jogos para Xbox", icon: "Gamepad" },
+      { name: "Jogos para Nintendo", icon: "Gamepad" },
+      { name: "Consoles", icon: "Tv" },
+      { name: "Controles", slug: "controles-games", icon: "Gamepad2" },
+      { name: "Assinaturas", icon: "CreditCard" },
+      { name: "Gift Cards", icon: "Gift" }
     ]
   },
   {
     name: "Apple",
     icon: "Apple",
     children: [
-      { name: "iPhone", icon: "Smartphone" },
-      { name: "iPad", icon: "Tablet" },
       { name: "MacBook", slug: "macbook-apple", icon: "Laptop" },
-      { name: "iMac / Mac Mini", icon: "Monitor" },
+      { name: "iMac", icon: "Monitor" },
+      { name: "Mac Mini", icon: "Box" },
+      { name: "iPad", icon: "Tablet" },
+      { name: "iPhone", slug: "iphone", icon: "Smartphone" },
       { name: "Apple Watch", icon: "Watch" },
-      { name: "AirPods e Acessórios", icon: "Headphones" }
-    ]
-  },
-  {
-    name: "Smart Home",
-    icon: "Home",
-    children: [
-      { name: "Assistentes Virtuais (Alexa/Google)", icon: "Mic" },
-      { name: "Lâmpadas Inteligentes", icon: "Lightbulb" },
-      { name: "Fechaduras Digitais", icon: "Lock" },
-      { name: "Câmeras de Segurança", icon: "Video" },
-      { name: "Sensores e Alarmes", icon: "Bell" },
-      { name: "Tomadas Inteligentes", icon: "Power" },
-      { name: "Robôs Aspiradores", icon: "Bot" }
-    ]
-  },
-  {
-    name: "Áudio e Vídeo",
-    icon: "Speaker",
-    children: [
-      { name: "Soundbars e Home Theater", icon: "Speaker" },
-      { name: "Caixas de Som Bluetooth", icon: "Bluetooth" },
-      { name: "Projetores e Telas", icon: "Projector" },
-      { name: "Cabos HDMI / Áudio", icon: "Cable" },
-      { name: "Streaming (Chromecast/Fire TV)", icon: "Cast" }
-    ]
-  },
-  {
-    name: "Geek e Colecionáveis",
-    icon: "Ghost",
-    children: [
-      { name: "Action Figures", icon: "User" },
-      { name: "Funko Pop", icon: "Smile" },
-      { name: "Camisetas e Vestuário", icon: "Shirt" },
-      { name: "Canecas e Decoração", icon: "Coffee" },
-      { name: "Mochilas e Malas", icon: "Backpack" },
-      { name: "Board Games / RPG", icon: "Dices" }
-    ]
-  },
-  {
-    name: "Energia",
-    icon: "Zap",
-    children: [
-      { name: "Nobreaks", icon: "Battery" },
-      { name: "Filtros de Linha", icon: "Power" },
-      { name: "Baterias e Pilhas", icon: "Battery" },
-      { name: "Carregadores e Cabos", icon: "Zap" },
-      { name: "Transformadores", icon: "RefreshCcw" }
+      { name: "AirPods", icon: "Headphones" },
+      { name: "Acessórios Apple", icon: "Plug" }
     ]
   },
   {

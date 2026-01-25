@@ -1,4 +1,4 @@
--- Script para redefinir a estrutura de categorias (ATUALIZADO COM ÍCONES)
+-- Script para redefinir a estrutura de categorias (ATUALIZADO - RESTAURAÇÃO)
 -- Copie e cole este conteúdo no Editor SQL do Supabase
 
 -- 1. Limpar categorias existentes (CUIDADO: Isso removerá todas as categorias!)
@@ -45,12 +45,11 @@ BEGIN
 
     -- 2. Notebooks (Laptop)
     perform insert_category('Notebooks', 'notebooks', null, 'Laptop', 20);
-        perform insert_category('Notebooks Gamer', 'notebooks-gamer', 'notebooks', 'Gamepad2', 0);
-        perform insert_category('Ultrabook', 'ultrabook', 'notebooks', 'Feather', 1);
-        perform insert_category('MacBook', 'macbook-notebooks', 'notebooks', 'Laptop', 2);
-        perform insert_category('Notebooks para Trabalho', 'notebooks-trabalho', 'notebooks', 'Briefcase', 3);
-        perform insert_category('Chromebook', 'chromebook', 'notebooks', 'Globe', 4);
-        perform insert_category('Acessórios para Notebook', 'acessorios-notebook', 'notebooks', 'Plug', 5);
+        perform insert_category('Notebook Gamer', 'notebook-gamer', 'notebooks', 'Gamepad2', 0);
+        perform insert_category('Notebook Profissional', 'notebook-profissional', 'notebooks', 'Briefcase', 1);
+        perform insert_category('Notebook Estudante', 'notebook-estudante', 'notebooks', 'Book', 2);
+        perform insert_category('Ultrabook', 'ultrabook', 'notebooks', 'Feather', 3);
+        perform insert_category('MacBook', 'macbook-notebooks', 'notebooks', 'Laptop', 4);
 
     -- 3. Hardware (Cpu)
     perform insert_category('Hardware', 'hardware', null, 'Cpu', 30);
@@ -64,106 +63,114 @@ BEGIN
         perform insert_category('Coolers e Water Cooler', 'coolers', 'hardware', 'Fan', 7);
         perform insert_category('Placas de Rede / Som', 'placas-rede-som', 'hardware', 'Network', 8);
 
-    -- 4. Periféricos (Keyboard)
-    perform insert_category('Periféricos', 'perifericos', null, 'Keyboard', 40);
-        perform insert_category('Mouse e Mousepad', 'mouse-mousepad', 'perifericos', 'Mouse', 0);
-        perform insert_category('Teclados', 'teclados', 'perifericos', 'Keyboard', 1);
-        perform insert_category('Headsets e Fones', 'headsets-fones', 'perifericos', 'Headphones', 2);
-        perform insert_category('Microfones', 'microfones', 'perifericos', 'Mic', 3);
-        perform insert_category('Webcams', 'webcams', 'perifericos', 'Camera', 4);
-        perform insert_category('Caixas de Som', 'caixas-de-som', 'perifericos', 'Speaker', 5);
-        perform insert_category('Controles e Joysticks', 'controles-joysticks', 'perifericos', 'Gamepad', 6);
-        perform insert_category('Hubs USB', 'hubs-usb', 'perifericos', 'Usb', 7);
-        perform insert_category('Mesas Digitalizadoras', 'mesas-digitalizadoras', 'perifericos', 'PenTool', 8);
+    -- 4. Smartphones (Smartphone)
+    perform insert_category('Smartphones', 'smartphones', null, 'Smartphone', 40);
+        perform insert_category('Smartphones Android', 'smartphones-android', 'smartphones', 'Smartphone', 0);
+        perform insert_category('iPhone', 'iphone-smartphones', 'smartphones', 'Smartphone', 1);
+        perform insert_category('Smartphones Gamer', 'smartphones-gamer', 'smartphones', 'Gamepad2', 2);
+        perform insert_category('Capas e Películas', 'capas-peliculas', 'smartphones', 'Shield', 3);
+        perform insert_category('Carregadores e Cabos', 'carregadores-cabos-smartphones', 'smartphones', 'Zap', 4);
+        perform insert_category('Suportes e Power Banks', 'suportes-power-banks', 'smartphones', 'Battery', 5);
 
     -- 5. Monitores (Monitor)
     perform insert_category('Monitores', 'monitores', null, 'Monitor', 50);
-        perform insert_category('Monitores Gamer', 'monitores-gamer', 'monitores', 'Gamepad2', 0);
-        perform insert_category('Monitores 4K / Ultrawide', 'monitores-4k-ultrawide', 'monitores', 'Monitor', 1);
-        perform insert_category('Monitores para Escritório', 'monitores-escritorio', 'monitores', 'Briefcase', 2);
-        perform insert_category('Suportes para Monitor', 'suportes-monitor', 'monitores', 'Move', 3);
-        perform insert_category('Acessórios de Vídeo', 'acessorios-video', 'monitores', 'Cable', 4);
+        perform insert_category('Monitor Gamer', 'monitor-gamer', 'monitores', 'Gamepad2', 0);
+        perform insert_category('Monitor Curvo', 'monitor-curvo', 'monitores', 'Monitor', 1);
+        perform insert_category('Monitor Profissional', 'monitor-profissional', 'monitores', 'Briefcase', 2);
+        perform insert_category('Monitor Ultrawide', 'monitor-ultrawide', 'monitores', 'Monitor', 3);
+        perform insert_category('Monitor 4K', 'monitor-4k', 'monitores', 'Monitor', 4);
+        perform insert_category('Suportes para Monitor', 'suportes-monitor', 'monitores', 'Move', 5);
 
-    -- 6. Cadeiras e Escritório (Armchair)
-    perform insert_category('Cadeiras e Escritório', 'cadeiras-escritorio', null, 'Armchair', 60);
-        perform insert_category('Cadeiras Gamer', 'cadeiras-gamer', 'cadeiras-escritorio', 'Armchair', 0);
-        perform insert_category('Cadeiras de Escritório', 'cadeiras-de-escritorio', 'cadeiras-escritorio', 'Briefcase', 1);
-        perform insert_category('Mesas Gamer / Escritório', 'mesas-gamer-escritorio', 'cadeiras-escritorio', 'Table', 2);
-        perform insert_category('Iluminação e LED', 'iluminacao-led', 'cadeiras-escritorio', 'Lightbulb', 3);
-        perform insert_category('Organização de Cabos', 'organizacao-cabos', 'cadeiras-escritorio', 'Cable', 4);
+    -- 6. Periféricos (Keyboard)
+    perform insert_category('Periféricos', 'perifericos', null, 'Keyboard', 60);
+        perform insert_category('Teclados Gamer e Mecânicos', 'teclados-gamer-mecanicos', 'perifericos', 'Keyboard', 0);
+        perform insert_category('Mouses Gamer', 'mouses-gamer', 'perifericos', 'Mouse', 1);
+        perform insert_category('Headsets e Fones', 'headsets-fones', 'perifericos', 'Headphones', 2);
+        perform insert_category('Mousepads', 'mousepads', 'perifericos', 'Square', 3);
+        perform insert_category('Controles / Joysticks', 'controles-joysticks', 'perifericos', 'Gamepad', 4);
+        perform insert_category('Volantes e Simuladores', 'volantes-simuladores', 'perifericos', 'Disc', 5);
+        perform insert_category('Webcams', 'webcams', 'perifericos', 'Camera', 6);
+        perform insert_category('Microfones', 'microfones', 'perifericos', 'Mic', 7);
 
-    -- 7. Redes e Conectividade (Wifi)
-    perform insert_category('Redes e Conectividade', 'redes-conectividade', null, 'Wifi', 70);
-        perform insert_category('Roteadores Wi‑Fi e Mesh', 'roteadores', 'redes-conectividade', 'Wifi', 0);
-        perform insert_category('Repetidores de Sinal', 'repetidores', 'redes-conectividade', 'Signal', 1);
-        perform insert_category('Switch e Hubs', 'switch-hubs', 'redes-conectividade', 'Network', 2);
-        perform insert_category('Cabos de Rede', 'cabos-rede', 'redes-conectividade', 'Cable', 3);
-        perform insert_category('Adaptadores USB / Wi‑Fi', 'adaptadores-usb-wifi', 'redes-conectividade', 'Usb', 4);
-        perform insert_category('Modems 4G / 5G', 'modems', 'redes-conectividade', 'Radio', 5);
-        perform insert_category('Racks e Patch Panels', 'racks-patch-panels', 'redes-conectividade', 'Server', 6);
+    -- 7. Acessórios (Plug)
+    perform insert_category('Acessórios', 'acessorios', null, 'Plug', 70);
+        perform insert_category('Cabos (HDMI, DisplayPort, USB, Áudio)', 'cabos-diversos', 'acessorios', 'Cable', 0);
+        perform insert_category('Adaptadores e Conversores', 'adaptadores-conversores', 'acessorios', 'RefreshCcw', 1);
+        perform insert_category('Hubs USB', 'hubs-usb', 'acessorios', 'Usb', 2);
+        perform insert_category('Bases para Notebook', 'bases-notebook', 'acessorios', 'Laptop', 3);
+        perform insert_category('Suportes para Headset', 'suportes-headset', 'acessorios', 'Headphones', 4);
+        perform insert_category('Mochilas e Cases', 'mochilas-cases', 'acessorios', 'Backpack', 5);
+        perform insert_category('Iluminação RGB', 'iluminacao-rgb', 'acessorios', 'Lightbulb', 6);
+        perform insert_category('Filtros de Linha e Estabilizadores', 'filtros-estabilizadores', 'acessorios', 'Zap', 7);
 
-    -- 8. Servidores e Automação (Server)
-    perform insert_category('Servidores e Automação', 'servidores-automacao', null, 'Server', 80);
-        perform insert_category('Servidores Torre / Rack', 'servidores', 'servidores-automacao', 'Server', 0);
-        perform insert_category('Storage (NAS / DAS)', 'storage', 'servidores-automacao', 'Database', 1);
-        perform insert_category('Nobreaks e Estabilizadores', 'nobreaks-estabilizadores', 'servidores-automacao', 'Battery', 2);
-        perform insert_category('Automação Comercial', 'automacao-comercial', 'servidores-automacao', 'Store', 3);
-        perform insert_category('Leitores de Código de Barras', 'leitores-codigo-barras', 'servidores-automacao', 'Scan', 4);
-        perform insert_category('Impressoras Térmicas', 'impressoras-termicas', 'servidores-automacao', 'Printer', 5);
+    -- 8. Segurança (Lock)
+    perform insert_category('Segurança', 'seguranca', null, 'Lock', 80);
+        perform insert_category('Câmeras de Segurança (IP / Wi‑Fi)', 'cameras-seguranca', 'seguranca', 'Video', 0);
+        perform insert_category('Kits CFTV', 'kits-cftv', 'seguranca', 'Video', 1);
+        perform insert_category('DVR e NVR', 'dvr-nvr', 'seguranca', 'HardDrive', 2);
+        perform insert_category('Alarmes Residenciais', 'alarmes-residenciais', 'seguranca', 'Bell', 3);
+        perform insert_category('Sensores de Movimento', 'sensores-movimento', 'seguranca', 'Radio', 4);
+        perform insert_category('Fechaduras Eletrônicas', 'fechaduras-eletronicas', 'seguranca', 'Lock', 5);
+        perform insert_category('Vídeo Porteiros', 'video-porteiros', 'seguranca', 'Video', 6);
 
-    -- 9. Games e Consoles (Gamepad)
-    perform insert_category('Games e Consoles', 'games-consoles', null, 'Gamepad', 90);
-        perform insert_category('PlayStation 5', 'playstation-5', 'games-consoles', 'Gamepad', 0);
-        perform insert_category('Xbox Series X/S', 'xbox-series', 'games-consoles', 'Gamepad', 1);
-        perform insert_category('Nintendo Switch', 'nintendo-switch', 'games-consoles', 'Gamepad', 2);
-        perform insert_category('Consoles Retrô', 'consoles-retro', 'games-consoles', 'Joystick', 3);
-        perform insert_category('Jogos (Mídia Física)', 'jogos-fisicos', 'games-consoles', 'Disc', 4);
-        perform insert_category('Acessórios de Console', 'acessorios-console', 'games-consoles', 'Headphones', 5);
-        perform insert_category('Volantes e Simuladores', 'volantes-simuladores', 'games-consoles', 'Gamepad', 6);
+    -- 9. Automação (Home)
+    perform insert_category('Automação', 'automacao', null, 'Home', 90);
+        perform insert_category('Casa Inteligente', 'casa-inteligente', 'automacao', 'Home', 0);
+        perform insert_category('Tomadas Inteligentes', 'tomadas-inteligentes', 'automacao', 'Power', 1);
+        perform insert_category('Interruptores Inteligentes', 'interruptores-inteligentes', 'automacao', 'ToggleLeft', 2);
+        perform insert_category('Lâmpadas e Fitas LED Smart', 'lampadas-fitas-led', 'automacao', 'Lightbulb', 3);
+        perform insert_category('Sensores Inteligentes', 'sensores-inteligentes', 'automacao', 'Radio', 4);
+        perform insert_category('Assistentes Virtuais', 'assistentes-virtuais', 'automacao', 'Mic', 5);
+        perform insert_category('Centrais de Automação', 'centrais-automacao', 'automacao', 'Server', 6);
 
-    -- 10. Apple (Apple)
-    perform insert_category('Apple', 'apple', null, 'Apple', 100);
-        perform insert_category('iPhone', 'iphone', 'apple', 'Smartphone', 0);
-        perform insert_category('iPad', 'ipad', 'apple', 'Tablet', 1);
-        perform insert_category('MacBook', 'macbook-apple', 'apple', 'Laptop', 2);
-        perform insert_category('iMac / Mac Mini', 'imac-mac-mini', 'apple', 'Monitor', 3);
-        perform insert_category('Apple Watch', 'apple-watch', 'apple', 'Watch', 4);
-        perform insert_category('AirPods e Acessórios', 'airpods-acessorios', 'apple', 'Headphones', 5);
+    -- 10. Geek (Ghost)
+    perform insert_category('Geek', 'geek', null, 'Ghost', 100);
+        perform insert_category('Action Figures', 'action-figures', 'geek', 'User', 0);
+        perform insert_category('Colecionáveis', 'colecionaveis', 'geek', 'Star', 1);
+        perform insert_category('Funko Pop', 'funko-pop', 'geek', 'Smile', 2);
+        perform insert_category('Camisetas e Vestuário', 'camisetas-vestuario', 'geek', 'Shirt', 3);
+        perform insert_category('Canecas e Copos', 'canecas-copos', 'geek', 'Coffee', 4);
+        perform insert_category('Decoração Geek', 'decoracao-geek', 'geek', 'Image', 5);
+        perform insert_category('Brinquedos Temáticos', 'brinquedos-tematicos', 'geek', 'Gift', 6);
 
-    -- 11. Smart Home (Home)
-    perform insert_category('Smart Home', 'smart-home', null, 'Home', 110);
-        perform insert_category('Assistentes Virtuais (Alexa/Google)', 'assistentes-virtuais', 'smart-home', 'Mic', 0);
-        perform insert_category('Lâmpadas Inteligentes', 'lampadas-inteligentes', 'smart-home', 'Lightbulb', 1);
-        perform insert_category('Fechaduras Digitais', 'fechaduras-digitais', 'smart-home', 'Lock', 2);
-        perform insert_category('Câmeras de Segurança', 'cameras-seguranca', 'smart-home', 'Video', 3);
-        perform insert_category('Sensores e Alarmes', 'sensores-alarmes', 'smart-home', 'Bell', 4);
-        perform insert_category('Tomadas Inteligentes', 'tomadas-inteligentes', 'smart-home', 'Power', 5);
-        perform insert_category('Robôs Aspiradores', 'robos-aspiradores', 'smart-home', 'Bot', 6);
+    -- 11. Licenças (Key)
+    perform insert_category('Licenças', 'licencas', null, 'Key', 110);
+        perform insert_category('Windows', 'windows', 'licencas', 'Monitor', 0);
+        perform insert_category('Microsoft Office', 'microsoft-office', 'licencas', 'FileText', 1);
+        perform insert_category('Antivírus', 'antivirus', 'licencas', 'Shield', 2);
+        perform insert_category('Softwares de Design', 'softwares-design', 'licencas', 'PenTool', 3);
+        perform insert_category('Softwares de Edição', 'softwares-edicao', 'licencas', 'Video', 4);
 
-    -- 12. Áudio e Vídeo (Speaker)
-    perform insert_category('Áudio e Vídeo', 'audio-video', null, 'Speaker', 120);
-        perform insert_category('Soundbars e Home Theater', 'soundbars-home-theater', 'audio-video', 'Speaker', 0);
-        perform insert_category('Caixas de Som Bluetooth', 'caixas-som-bluetooth', 'audio-video', 'Bluetooth', 1);
-        perform insert_category('Projetores e Telas', 'projetores-telas', 'audio-video', 'Projector', 2);
-        perform insert_category('Cabos HDMI / Áudio', 'cabos-hdmi-audio', 'audio-video', 'Cable', 3);
-        perform insert_category('Streaming (Chromecast/Fire TV)', 'streaming', 'audio-video', 'Cast', 4);
+    -- 12. Escritório (Armchair)
+    perform insert_category('Escritório', 'escritorio', null, 'Armchair', 120);
+        perform insert_category('Cadeiras Gamer', 'cadeiras-gamer', 'escritorio', 'Armchair', 0);
+        perform insert_category('Cadeiras Ergonômicas', 'cadeiras-ergonomicas', 'escritorio', 'Armchair', 1);
+        perform insert_category('Mesas Gamer', 'mesas-gamer', 'escritorio', 'Table', 2);
+        perform insert_category('Mesas para Escritório', 'mesas-escritorio', 'escritorio', 'Table', 3);
+        perform insert_category('Suportes Ergonômicos', 'suportes-ergonomicos', 'escritorio', 'Move', 4);
+        perform insert_category('Organizadores', 'organizadores', 'escritorio', 'Box', 5);
 
-    -- 13. Geek e Colecionáveis (Ghost)
-    perform insert_category('Geek e Colecionáveis', 'geek-colecionaveis', null, 'Ghost', 130);
-        perform insert_category('Action Figures', 'action-figures', 'geek-colecionaveis', 'User', 0);
-        perform insert_category('Funko Pop', 'funko-pop', 'geek-colecionaveis', 'Smile', 1);
-        perform insert_category('Camisetas e Vestuário', 'camisetas-vestuario', 'geek-colecionaveis', 'Shirt', 2);
-        perform insert_category('Canecas e Decoração', 'canecas-decoracao', 'geek-colecionaveis', 'Coffee', 3);
-        perform insert_category('Mochilas e Malas', 'mochilas-malas', 'geek-colecionaveis', 'Backpack', 4);
-        perform insert_category('Board Games / RPG', 'board-games-rpg', 'geek-colecionaveis', 'Dices', 5);
+    -- 13. Games (Gamepad)
+    perform insert_category('Games', 'games', null, 'Gamepad', 130);
+        perform insert_category('Jogos para PC', 'jogos-pc', 'games', 'Monitor', 0);
+        perform insert_category('Jogos para PlayStation', 'jogos-playstation', 'games', 'Gamepad', 1);
+        perform insert_category('Jogos para Xbox', 'jogos-xbox', 'games', 'Gamepad', 2);
+        perform insert_category('Jogos para Nintendo', 'jogos-nintendo', 'games', 'Gamepad', 3);
+        perform insert_category('Consoles', 'consoles', 'games', 'Tv', 4);
+        perform insert_category('Controles', 'controles-games', 'games', 'Gamepad2', 5);
+        perform insert_category('Assinaturas', 'assinaturas', 'games', 'CreditCard', 6);
+        perform insert_category('Gift Cards', 'gift-cards', 'games', 'Gift', 7);
 
-    -- 14. Energia (Zap)
-    perform insert_category('Energia', 'energia', null, 'Zap', 140);
-        perform insert_category('Nobreaks', 'nobreaks', 'energia', 'Battery', 0);
-        perform insert_category('Filtros de Linha', 'filtros-linha', 'energia', 'Power', 1);
-        perform insert_category('Baterias e Pilhas', 'baterias-pilhas', 'energia', 'Battery', 2);
-        perform insert_category('Carregadores e Cabos', 'carregadores-cabos', 'energia', 'Zap', 3);
-        perform insert_category('Transformadores', 'transformadores', 'energia', 'RefreshCcw', 4);
+    -- 14. Apple (Apple)
+    perform insert_category('Apple', 'apple', null, 'Apple', 140);
+        perform insert_category('MacBook', 'macbook-apple', 'apple', 'Laptop', 0);
+        perform insert_category('iMac', 'imac', 'apple', 'Monitor', 1);
+        perform insert_category('Mac Mini', 'mac-mini', 'apple', 'Box', 2);
+        perform insert_category('iPad', 'ipad', 'apple', 'Tablet', 3);
+        perform insert_category('iPhone', 'iphone', 'apple', 'Smartphone', 4);
+        perform insert_category('Apple Watch', 'apple-watch', 'apple', 'Watch', 5);
+        perform insert_category('AirPods', 'airpods', 'apple', 'Headphones', 6);
+        perform insert_category('Acessórios Apple', 'acessorios-apple', 'apple', 'Plug', 7);
 
     -- 15. Impressão (Printer)
     perform insert_category('Impressão', 'impressao', null, 'Printer', 150);
