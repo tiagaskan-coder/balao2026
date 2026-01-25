@@ -152,19 +152,31 @@ export function checkCompatibility(
   const messages: string[] = [];
   let valid = true;
 
-  // 1. CPU ↔ Placa-mãe (Socket)
-  if (categoryContext === 'motherboard' && config.cpu?.specs?.socket) {
-    const cpuSocket = config.cpu.specs.socket;
-    const moboSocket = product.specs?.socket;
-    if (!moboSocket || moboSocket !== cpuSocket) {
+  const deriveSocketFromName = (name?: string): string | undefined => {
+    const n = (name || '').toLowerCase();
+    if (n.includes('am5')) return 'AM5';
+    if (n.includes('am4')) return 'AM4';
+    if (n.includes('lga1700') || n.match(/\blga\s*1700\b/)) return 'LGA1700';
+    if (n.includes('z790') || n.includes('b660') || n.includes('h610')) return 'LGA1700';
+    if (n.includes('b550') || n.includes('a520') || n.includes('x570')) return 'AM4';
+    if (n.includes('x670') || n.includes('b650')) return 'AM5';
+    return undefined;
+  };
+
+  if (categoryContext === 'motherboard' && config.cpu) {
+    const cpuSocket = config.cpu.specs?.socket || deriveSocketFromName(config.cpu.name);
+    const moboSocket = product.specs?.socket || deriveSocketFromName(product.name);
+    if (!cpuSocket || !moboSocket || moboSocket !== cpuSocket) {
       valid = false;
-      messages.push(`Socket incompatível: CPU requer ${cpuSocket}${moboSocket ? `, placa é ${moboSocket}` : ''}`);
+      messages.push(`Socket incompatível: CPU requer ${cpuSocket || 'indefinido'}${moboSocket ? `, placa é ${moboSocket}` : ''}`);
     }
   }
-  if (categoryContext === 'cpu' && config.motherboard?.specs?.socket) {
-    if (product.specs?.socket && product.specs.socket !== config.motherboard.specs.socket) {
+  if (categoryContext === 'cpu' && config.motherboard) {
+    const cpuSocket = product.specs?.socket || deriveSocketFromName(product.name);
+    const moboSocket = config.motherboard.specs?.socket || deriveSocketFromName(config.motherboard.name);
+    if (!cpuSocket || !moboSocket || cpuSocket !== moboSocket) {
       valid = false;
-      messages.push(`Socket incompatível: Placa requer ${config.motherboard.specs.socket}, CPU é ${product.specs.socket}`);
+      messages.push(`Socket incompatível: Placa requer ${moboSocket || 'indefinido'}, CPU é ${cpuSocket || 'indefinido'}`);
     }
   }
 
@@ -263,8 +275,20 @@ export function validateBuild(config: PCConfig): ValidationResult {
 
   // Check CPU <-> Mobo
   if (config.cpu && config.motherboard) {
-    if (config.cpu.specs?.socket !== config.motherboard.specs?.socket) {
-        errors.push(`Incompatibilidade Crítica: CPU (${config.cpu.name}) e Placa-mãe (${config.motherboard.name}) têm sockets diferentes.`);
+    const deriveSocketFromName = (name?: string): string | undefined => {
+      const n = (name || '').toLowerCase();
+      if (n.includes('am5')) return 'AM5';
+      if (n.includes('am4')) return 'AM4';
+      if (n.includes('lga1700') || n.match(/\blga\s*1700\b/)) return 'LGA1700';
+      if (n.includes('z790') || n.includes('b660') || n.includes('h610')) return 'LGA1700';
+      if (n.includes('b550') || n.includes('a520') || n.includes('x570')) return 'AM4';
+      if (n.includes('x670') || n.includes('b650')) return 'AM5';
+      return undefined;
+    };
+    const cpuSocket = config.cpu.specs?.socket || deriveSocketFromName(config.cpu.name);
+    const moboSocket = config.motherboard.specs?.socket || deriveSocketFromName(config.motherboard.name);
+    if (!cpuSocket || !moboSocket || cpuSocket !== moboSocket) {
+        errors.push(`Incompatibilidade Crítica: CPU (${cpuSocket || 'indefinido'}) e Placa-mãe (${moboSocket || 'indefinido'}) têm sockets diferentes.`);
     }
   }
 
