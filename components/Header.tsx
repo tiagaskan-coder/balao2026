@@ -132,7 +132,7 @@ export default function Header() {
                 }}
                 onFocus={() => setShowPreview(true)}
             />
-            <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#E60012] text-white p-2 rounded-full hover:bg-red-700 transition-colors shadow-md hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0">
+            <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#E60012] text-white p-2 rounded-full hover:bg-red-700 transition-colors shadow-md hover:shadow-lg">
                 <Search size={20} strokeWidth={2.5} />
             </button>
           </div>
