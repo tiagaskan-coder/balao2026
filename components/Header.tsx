@@ -192,12 +192,12 @@ export default function Header() {
         <div className="container mx-auto px-4">
             <ul className="flex items-center justify-center gap-8 py-3 text-sm font-semibold text-gray-700">
                 <li>
-                    <Link href="/category/pc-gamer" className="hover:text-[#E60012] transition-colors flex items-center gap-2">
+                    <Link href="/pcgamer" className="hover:text-[#E60012] transition-colors flex items-center gap-2">
                         PC Gamer
                     </Link>
                 </li>
                 <li>
-                    <Link href="/category/notebooks" className="hover:text-[#E60012] transition-colors">
+                    <Link href="/notebooks" className="hover:text-[#E60012] transition-colors">
                         Notebooks
                     </Link>
                 </li>
