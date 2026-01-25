@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Product, Category } from "@/lib/utils";
+import { searchProducts } from "@/lib/searchUtils";
 import { Edit, Trash2, Plus, Save, X, Search, CheckSquare, Square, Upload, Copy, AlertTriangle, ImageOff, Image as ImageIcon, Video, DollarSign, Package, ChevronDown, Percent } from "lucide-react";
 import Image from "next/image";
 
@@ -380,11 +381,19 @@ export default function ProductManager() {
         setSaving(false);
     }
   };
-
-  const filteredProducts = products.filter((p: Product) => 
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    p.category?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+// Filter Products
+  const filteredProducts = React.useMemo(() => {
+    try {
+        return searchTerm ? searchProducts(products, searchTerm) : products;
+    } catch (e) {
+        console.error("Search error:", e);
+        // Fallback to basic filter
+        return products.filter(p => 
+            p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+            p.category?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }
+  }, [products, searchTerm]);
 
   return (
     <div>

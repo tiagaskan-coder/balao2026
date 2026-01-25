@@ -4,6 +4,7 @@ import ProductList from "@/components/ProductList";
 import Carousel from "@/components/Carousel";
 import ProductCarousel from "@/components/ProductCarousel";
 import { getProducts, getCarouselImages, getCategories, getHomeBlocks } from "@/lib/db";
+import { searchProducts } from "@/lib/searchUtils";
 
 // Remove force-dynamic to allow better caching and prevent 500s on timeout. 
 // Next.js will revalidate data every 60 seconds.
@@ -49,11 +50,14 @@ export default async function Home(props: {
       descendants.forEach(d => validCategories.add(d));
   }
 
-  const filteredProducts = products.filter(p => {
+  let filteredProducts = products.filter(p => {
     if (category && category !== "Todos os Produtos" && !validCategories.has(p.category)) return false;
-    if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
+
+  if (search) {
+      filteredProducts = searchProducts(filteredProducts, search);
+  }
 
   // Limit to 20 items for the "Destaques" (default) view
   const isFeatured = !category && !search;

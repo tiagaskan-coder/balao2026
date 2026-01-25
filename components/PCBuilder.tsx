@@ -12,6 +12,7 @@ import {
     enrichProduct, 
     validateBuild 
 } from "./PCBuilderCompatibility";
+import { searchProducts, normalizeText } from "@/lib/searchUtils";
 
 // --- Configuração dos Passos ---
 
@@ -129,7 +130,8 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
         targetCategoryNames = matches.map(m => m.name.toLowerCase());
     }
 
-    const baseProducts = products.filter((p: TechProduct) => {
+    // 2. Filtrar por categoria
+    let filtered = products.filter((p: TechProduct) => {
         const normalizedProductCat = normalizeText(p.category);
         
         // Match Hierarquia Hardware
@@ -142,24 +144,25 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
             normalizedProductCat.includes(normalizeText(keyword))
         );
 
-        if (!isHardwareSubmatch && !matchesKeyword) return false;
-
-        if (searchTerm) {
-            const normalizedSearch = normalizeText(searchTerm);
-            return normalizeText(p.name).includes(normalizedSearch);
-        }
-
-        return true;
+        return isHardwareSubmatch || matchesKeyword;
     });
 
-    // 2. Verificação de Compatibilidade (Map para adicionar status)
-    return baseProducts.map(product => {
+    // 3. Aplicar Busca Inteligente (se houver termo)
+    if (searchTerm) {
+        filtered = searchProducts(filtered, searchTerm);
+    }
+
+    // 4. Verificação de Compatibilidade (Map para adicionar status)
+    return filtered.map(product => {
         const status = checkCompatibility(product, config, currentStep.id);
         return { product, status };
     }).sort((a, b) => {
         // Ordenar: Compatíveis primeiro
         if (a.status.valid && !b.status.valid) return -1;
         if (!a.status.valid && b.status.valid) return 1;
+        
+        // Se ambos tiverem o mesmo status de compatibilidade,
+        // mantém a ordem relativa original (que vem da busca por relevância ou lista padrão)
         return 0;
     });
 

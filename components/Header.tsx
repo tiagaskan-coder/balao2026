@@ -11,6 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useSidebar } from "@/context/SidebarContext";
 import { Product } from "@/lib/utils";
 import SearchPreview from "@/components/SearchPreview";
+import { searchProducts } from "@/lib/searchUtils";
 
 export default function Header() {
   const router = useRouter();
@@ -76,12 +77,7 @@ export default function Header() {
   };
 
   const previewProducts = searchQuery.length >= 2 
-    ? products
-        .filter(p => 
-            p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-            p.category?.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-        .slice(0, 5)
+    ? searchProducts(products, searchQuery).slice(0, 5)
     : [];
 
   return (

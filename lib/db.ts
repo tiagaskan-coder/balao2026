@@ -23,6 +23,8 @@ export async function getProducts(): Promise<Product[]> {
 
 export async function saveProducts(products: Product[]) {
   try {
+     if (!products || products.length === 0) return;
+
      // Sanitize products to match DB schema
      const dbProducts = products.map(p => ({
         id: p.id,
@@ -30,10 +32,12 @@ export async function saveProducts(products: Product[]) {
         price: p.price,
         image: p.image,
         category: p.category,
-        slug: p.slug,
+        slug: p.slug || p.name.toLowerCase().replace(/\s+/g, '-') + '-' + Math.random().toString(36).substring(2, 7),
         video_url: p.video_url || null,
         specs: p.specs || null
      }));
+
+     console.log(`[saveProducts] Saving ${dbProducts.length} products via supabaseAdmin...`);
 
      const { error } = await supabaseAdmin
         .from('products')
@@ -43,6 +47,8 @@ export async function saveProducts(products: Product[]) {
         console.error("Supabase save error:", error);
         throw error;
      }
+     
+     console.log(`[saveProducts] Success.`);
   } catch (error) {
       console.error("Error saving products:", error);
       throw error;
