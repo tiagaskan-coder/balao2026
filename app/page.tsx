@@ -2,7 +2,8 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import ProductList from "@/components/ProductList";
 import Carousel from "@/components/Carousel";
-import { getProducts, getCarouselImages, getCategories } from "@/lib/db";
+import ProductCarousel from "@/components/ProductCarousel";
+import { getProducts, getCarouselImages, getCategories, getHomeBlocks } from "@/lib/db";
 
 // Remove force-dynamic to allow better caching and prevent 500s on timeout. 
 // Next.js will revalidate data every 60 seconds.
@@ -12,10 +13,11 @@ export default async function Home(props: {
   searchParams: Promise<{ category?: string; search?: string }>;
 }) {
   const searchParams = await props.searchParams;
-  const [products, carouselImages, categories] = await Promise.all([
+  const [products, carouselImages, categories, homeBlocks] = await Promise.all([
     getProducts(),
     getCarouselImages(true),
-    getCategories()
+    getCategories(),
+    getHomeBlocks(true)
   ]);
   
   const category = searchParams.category;
@@ -37,6 +39,7 @@ export default async function Home(props: {
         <main className="flex-1 w-full">
             {/* Carousel Banner */}
             {!search && !category && (
+                <>
                 <div className="mb-6 px-4 lg:px-0">
                     {carouselImages.length > 0 ? (
                         <Carousel images={carouselImages} />
@@ -46,6 +49,21 @@ export default async function Home(props: {
                         </div>
                     )}
                 </div>
+
+                {/* Dynamic Home Blocks */}
+                {homeBlocks.map(block => {
+                    const blockProducts = products.filter(p => p.category === block.category_id);
+                    if (blockProducts.length === 0) return null;
+                    return (
+                        <ProductCarousel 
+                            key={block.id}
+                            title={block.title || block.category_id}
+                            products={blockProducts}
+                            categoryId={block.category_id}
+                        />
+                    );
+                })}
+                </>
             )}
 
             <div className="flex items-center justify-between mb-4 px-4 lg:px-0">

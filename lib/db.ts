@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 import { supabaseAdmin } from './supabase-admin';
-import { Product, CarouselImage, Category } from './utils';
+import { Product, CarouselImage, Category, HomeBlock } from './utils';
 
 // Fallback to empty array if connection fails or env vars missing
 export async function getProducts(): Promise<Product[]> {
@@ -408,4 +408,92 @@ export async function deleteOrder(id: string) {
         console.error("Error deleting order:", error);
         throw error;
     }
+}
+
+// --- Home Blocks ---
+
+export async function getHomeBlocks(activeOnly = true): Promise<HomeBlock[]> {
+  try {
+    let query = supabase
+      .from('home_blocks')
+      .select('*')
+      .order('display_order', { ascending: true });
+
+    if (activeOnly) {
+      query = query.eq('active', true);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      // If table doesn't exist yet, return empty array gracefully
+      if (error.code === '42P01') return [];
+      console.error("Supabase error (home_blocks):", error);
+      return [];
+    }
+
+    return data as HomeBlock[];
+  } catch (error) {
+    console.error("Error fetching home blocks:", error);
+    return [];
+  }
+}
+
+export async function createHomeBlock(block: Partial<HomeBlock>) {
+  try {
+     // Get max order
+    const { data: maxOrderData } = await supabase
+        .from('home_blocks')
+        .select('display_order')
+        .order('display_order', { ascending: false })
+        .limit(1);
+    
+    const nextOrder = (maxOrderData?.[0]?.display_order ?? -1) + 1;
+
+    const { data, error } = await supabaseAdmin
+      .from('home_blocks')
+      .insert({
+        ...block,
+        display_order: nextOrder
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error creating home block:", error);
+    throw error;
+  }
+}
+
+export async function updateHomeBlock(id: string, updates: Partial<HomeBlock>) {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('home_blocks')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error updating home block:", error);
+    throw error;
+  }
+}
+
+export async function deleteHomeBlock(id: string) {
+  try {
+    const { error } = await supabaseAdmin
+      .from('home_blocks')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+  } catch (error) {
+    console.error("Error deleting home block:", error);
+    throw error;
+  }
 }

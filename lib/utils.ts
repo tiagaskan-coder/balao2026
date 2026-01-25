@@ -39,6 +39,15 @@ export interface Category {
   children?: Category[]; // For frontend tree structure
 }
 
+export interface HomeBlock {
+  id: string;
+  category_id: string;
+  title?: string;
+  display_order: number;
+  active: boolean;
+  created_at: string;
+}
+
 export const CATEGORIES = [
   "Todos os Produtos",
   "Computadores & Informática",

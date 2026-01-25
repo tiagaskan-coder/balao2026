@@ -8,9 +8,10 @@ import CarouselManager from "@/components/admin/CarouselManager";
 import CategoryManager from "@/components/admin/CategoryManager";
 import OrderManager from "@/components/admin/OrderManager";
 import ProductManager from "@/components/admin/ProductManager";
+import HomeBlocksManager from "@/components/admin/HomeBlocksManager";
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState<"import" | "carousel" | "products" | "categories" | "orders">("import");
+  const [activeTab, setActiveTab] = useState<"import" | "carousel" | "products" | "categories" | "orders" | "home_blocks">("import");
 
   // Product List State
   const [products, setProducts] = useState<Product[]>([]);
@@ -273,6 +274,13 @@ export default function AdminPage() {
                         Gerenciar Produtos
                     </button>
                     <button
+                        onClick={() => setActiveTab("home_blocks")}
+                        className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${activeTab === "home_blocks" ? "bg-red-50 text-[#E60012] border-l-4 border-[#E60012]" : "text-gray-600 hover:bg-gray-50"}`}
+                    >
+                        <Layout size={18} />
+                        Blocos da Home
+                    </button>
+                    <button
                         disabled
                         className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 cursor-not-allowed"
                     >
@@ -286,6 +294,13 @@ export default function AdminPage() {
             <div className="flex-1">
                 <div className="bg-white rounded-lg shadow-sm p-6 min-h-[500px]">
                     
+                    {/* HOME BLOCKS TAB */}
+                    {activeTab === "home_blocks" && (
+                         <div className="animate-in fade-in duration-300">
+                             <HomeBlocksManager categories={categories} />
+                         </div>
+                    )}
+
                     {/* IMPORT TAB */}
                     {activeTab === "import" && (
                         <div className="animate-in fade-in duration-300">
