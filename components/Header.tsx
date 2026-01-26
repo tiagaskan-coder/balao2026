@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Search, ShoppingCart, User, Menu } from "lucide-react";
+import { Search, ShoppingCart, User, Menu, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
@@ -129,9 +129,9 @@ export default function Header() {
         <form 
             ref={searchContainerRef}
             onSubmit={handleSearch} 
-            className="flex-1 max-w-3xl relative hidden md:block"
+            className="flex-1 max-w-3xl relative hidden md:flex items-center gap-3"
         >
-          <div className="relative group">
+          <div className="relative flex-1 group">
             <input
                 type="text"
                 placeholder="O que você procura hoje?"
@@ -150,20 +150,28 @@ export default function Header() {
             >
                 <Search size={20} strokeWidth={2.5} />
             </button>
-          </div>
 
-          {/* Search Preview */}
-          {showPreview && searchQuery.length >= 2 && (
-              <SearchPreview 
-                  products={previewProducts}
-                  onSelect={(product) => {
-                      router.push(`/product/${product.id}`);
-                      setShowPreview(false);
-                      setSearchQuery("");
-                  }}
-                  onClose={() => setShowPreview(false)}
-              />
-          )}
+            {showPreview && searchQuery.length >= 2 && (
+                <SearchPreview 
+                    products={previewProducts}
+                    onSelect={(product) => {
+                        router.push(`/product/${product.id}`);
+                        setShowPreview(false);
+                        setSearchQuery("");
+                    }}
+                    onClose={() => setShowPreview(false)}
+                />
+            )}
+          </div>
+          <Link
+            href="https://wa.me/5519987510267"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Falar no WhatsApp"
+            className="flex items-center justify-center h-12 w-12 rounded-full bg-[#25D366] text-white shadow-md hover:bg-[#128C7E] transition-colors"
+          >
+            <MessageCircle size={22} strokeWidth={2.5} />
+          </Link>
         </form>
 
 
