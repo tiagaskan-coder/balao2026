@@ -73,8 +73,7 @@ export default function Header() {
     }
   };
 
-  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const performSearch = () => {
     setShowPreview(false);
     if (searchQuery === "56676009") {
       router.push("/admin");
@@ -85,6 +84,11 @@ export default function Header() {
         router.push('/');
       }
     }
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    performSearch();
   };
 
   const previewProducts = searchQuery.length >= 2 
@@ -139,7 +143,7 @@ export default function Header() {
                 }}
                 onFocus={() => setShowPreview(true)}
             />
-            <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#E60012] text-white p-2 rounded-full hover:bg-red-700 transition-colors shadow-md hover:shadow-lg">
+            <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#E60012] text-white p-2 rounded-full hover:bg-red-700 transition-colors shadow-md hover:shadow-lg z-10">
                 <Search size={20} strokeWidth={2.5} />
             </button>
           </div>
@@ -208,7 +212,7 @@ export default function Header() {
                 }}
                 onFocus={() => setShowPreview(true)}
             />
-             <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 p-2">
+             <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 p-2 z-10">
                 <Search size={22} />
             </button>
 
