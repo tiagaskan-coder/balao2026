@@ -62,24 +62,28 @@ export default async function Home(props: {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       <Header />
+      
+      {/* Carousel Banner */}
+      {!search && !category && (
+          <div className="w-full">
+              {carouselImages.length > 0 ? (
+                  <Carousel images={carouselImages} />
+              ) : (
+                  <div className="w-full h-48 md:h-64 bg-gradient-to-r from-[#E60012] to-red-800 flex items-center justify-center text-white text-3xl font-bold shadow-md">
+                      Ofertas Imperdíveis
+                  </div>
+              )}
+          </div>
+      )}
+
       <div className="flex container mx-auto flex-1 py-6 gap-6 px-4 lg:px-0">
         <div className="hidden lg:block">
             <Sidebar categories={categories} />
         </div>
         <main className="flex-1 w-full min-w-0">
-            {/* Carousel Banner */}
+            {/* Dynamic Home Blocks */}
             {!search && !category && (
                 <>
-                <div className="mb-6 -mx-4 lg:mx-0">
-                    {carouselImages.length > 0 ? (
-                        <Carousel images={carouselImages} />
-                    ) : (
-                        <div className="w-full h-48 md:h-64 bg-gradient-to-r from-[#E60012] to-red-800 rounded-lg flex items-center justify-center text-white text-3xl font-bold shadow-md">
-                            Ofertas Imperdíveis
-                        </div>
-                    )}
-                </div>
-
                 {/* Dynamic Home Blocks */}
                 {homeBlocks.map(block => {
                     const blockProducts = products.filter(p => p.category === block.category_id);

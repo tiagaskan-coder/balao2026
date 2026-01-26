@@ -65,7 +65,7 @@ export default function Carousel({ images }: { images: CarouselImage[] }) {
 
   return (
     <div 
-      className="relative w-full h-48 md:h-80 lg:h-96 overflow-hidden rounded-lg shadow-md group mb-6"
+      className="relative w-full h-48 md:h-80 lg:h-96 overflow-hidden group"
       onMouseEnter={() => setIsAutoPlay(false)}
       onMouseLeave={() => setIsAutoPlay(true)}
       onTouchStart={onTouchStart}
