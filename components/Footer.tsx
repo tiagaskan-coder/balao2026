@@ -1,15 +1,29 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Facebook, Instagram, Youtube, Mail, Phone, MapPin } from "lucide-react";
+import { Facebook, Instagram, Youtube, Mail, Phone, MapPin, ChevronDown, ChevronUp } from "lucide-react";
 
 export default function Footer() {
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  const isExpanded = (section: string) => expandedSections[section];
+
   return (
     <footer className="bg-gray-100 text-gray-600 pt-16 pb-8 border-t border-gray-200 mt-auto">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           
           {/* About Section */}
-          <div>
+          <div className="mb-6 md:mb-0">
             <div className="relative w-[160px] h-[50px] mb-6">
                 <Image 
                     src="/logo.png" 
@@ -29,9 +43,17 @@ export default function Footer() {
           </div>
 
           {/* Links Section */}
-          <div>
-            <h3 className="text-gray-900 font-bold text-lg mb-6">Institucional</h3>
-            <ul className="space-y-3 text-sm">
+          <div className="border-b border-gray-200 md:border-none pb-4 md:pb-0">
+            <button 
+                onClick={() => toggleSection('institucional')}
+                className="flex items-center justify-between w-full md:cursor-default"
+            >
+                <h3 className="text-gray-900 font-bold text-lg mb-2 md:mb-6">Institucional</h3>
+                <span className="md:hidden">
+                    {isExpanded('institucional') ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                </span>
+            </button>
+            <ul className={`space-y-3 text-sm overflow-hidden transition-all duration-300 ${isExpanded('institucional') ? 'max-h-96 opacity-100 mt-4' : 'max-h-0 opacity-0 md:max-h-full md:opacity-100 md:mt-0'}`}>
               <li><Link href="/sobre-nos" className="hover:text-[#E60012] transition-colors">Sobre Nós</Link></li>
               <li><Link href="/sobre-a-empresa" className="hover:text-[#E60012] transition-colors">Sobre a Empresa</Link></li>
               <li><Link href="/como-comprar" className="hover:text-[#E60012] transition-colors">Como Comprar</Link></li>
@@ -43,9 +65,17 @@ export default function Footer() {
           </div>
 
           {/* Categories Section */}
-          <div>
-            <h3 className="text-gray-900 font-bold text-lg mb-6">Departamentos</h3>
-            <ul className="space-y-3 text-sm">
+          <div className="border-b border-gray-200 md:border-none pb-4 md:pb-0">
+            <button 
+                onClick={() => toggleSection('departamentos')}
+                className="flex items-center justify-between w-full md:cursor-default"
+            >
+                <h3 className="text-gray-900 font-bold text-lg mb-2 md:mb-6">Departamentos</h3>
+                <span className="md:hidden">
+                    {isExpanded('departamentos') ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                </span>
+            </button>
+            <ul className={`space-y-3 text-sm overflow-hidden transition-all duration-300 ${isExpanded('departamentos') ? 'max-h-96 opacity-100 mt-4' : 'max-h-0 opacity-0 md:max-h-full md:opacity-100 md:mt-0'}`}>
               <li><Link href="/?category=Hardware" className="hover:text-[#E60012] transition-colors">Hardware</Link></li>
               <li><Link href="/?category=PC Gamer" className="hover:text-[#E60012] transition-colors">Computadores Gamer</Link></li>
               <li><Link href="/?category=Notebooks" className="hover:text-[#E60012] transition-colors">Notebooks</Link></li>
@@ -56,9 +86,17 @@ export default function Footer() {
           </div>
 
           {/* Contact Section */}
-          <div>
-            <h3 className="text-gray-900 font-bold text-lg mb-6">Atendimento</h3>
-            <ul className="space-y-4 text-sm">
+          <div className="border-b border-gray-200 md:border-none pb-4 md:pb-0">
+            <button 
+                onClick={() => toggleSection('atendimento')}
+                className="flex items-center justify-between w-full md:cursor-default"
+            >
+                <h3 className="text-gray-900 font-bold text-lg mb-2 md:mb-6">Atendimento</h3>
+                <span className="md:hidden">
+                    {isExpanded('atendimento') ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                </span>
+            </button>
+            <ul className={`space-y-4 text-sm overflow-hidden transition-all duration-300 ${isExpanded('atendimento') ? 'max-h-96 opacity-100 mt-4' : 'max-h-0 opacity-0 md:max-h-full md:opacity-100 md:mt-0'}`}>
               <li className="flex items-start gap-3">
                 <Phone size={18} className="text-[#E60012] mt-0.5" />
                 <div>
