@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Search, ShoppingCart, User, Menu } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -15,11 +15,22 @@ import { searchProducts } from "@/lib/searchUtils";
 
 export default function Header() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { cartCount } = useCart();
   const { user } = useAuth();
   const { toggleSidebar } = useSidebar();
   const [logoClicks, setLogoClicks] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // Sync search query with URL params
+  useEffect(() => {
+    const query = searchParams.get("search");
+    if (query) {
+      setSearchQuery(query);
+    } else {
+      setSearchQuery("");
+    }
+  }, [searchParams]);
   
   // Search Preview State
   const [showPreview, setShowPreview] = useState(false);
@@ -68,10 +79,10 @@ export default function Header() {
     if (searchQuery === "56676009") {
       router.push("/admin");
     } else {
-      // Basic search param redirection
       if (searchQuery.trim()) {
         router.push(`/?search=${encodeURIComponent(searchQuery)}`);
-        setSearchQuery(""); // Clear input after search
+      } else {
+        router.push('/');
       }
     }
   };
