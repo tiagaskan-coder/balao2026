@@ -59,10 +59,6 @@ export default async function Home(props: {
       filteredProducts = searchProducts(filteredProducts, search);
   }
 
-  // Limit to 20 items for the "Destaques" (default) view
-  const isFeatured = !category && !search;
-  const displayedProducts = isFeatured ? filteredProducts.slice(0, 20) : filteredProducts;
-
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       <Header />
@@ -100,25 +96,25 @@ export default async function Home(props: {
                 </>
             )}
 
-            <div className="flex items-center justify-between mb-4">
-                <h1 className="text-xl font-bold text-gray-800">
-                    {category || (search ? `Resultados para: "${search}"` : "Destaques")}
-                </h1>
-                <span className="text-sm text-gray-500">{displayedProducts.length} produtos</span>
-            </div>
+            {/* Product List - Only show when searching or browsing category */}
+            {(category || search) && (
+              <>
+                <div className="flex items-center justify-between mb-4">
+                    <h1 className="text-xl font-bold text-gray-800">
+                        {category || `Resultados para: "${search}"`}
+                    </h1>
+                    <span className="text-sm text-gray-500">{filteredProducts.length} produtos</span>
+                </div>
 
-          {displayedProducts.length === 0 ? (
-             <div className="text-center py-20 text-gray-500 bg-white rounded-lg shadow-sm">
-                <p className="text-xl font-medium">Nenhum produto encontrado.</p>
-                {products.length === 0 && (
-                    <p className="mt-4 text-sm bg-blue-50 text-blue-700 inline-block px-4 py-2 rounded-md">
-                        Dica: Configure as chaves do Supabase no .env.local e acesse a área administrativa.
-                    </p>
+                {filteredProducts.length === 0 ? (
+                   <div className="text-center py-20 text-gray-500 bg-white rounded-lg shadow-sm">
+                      <p className="text-xl font-medium">Nenhum produto encontrado.</p>
+                   </div>
+                ) : (
+                  <ProductList products={filteredProducts} />
                 )}
-             </div>
-          ) : (
-            <ProductList products={displayedProducts} />
-          )}
+              </>
+            )}
         </main>
       </div>
     </div>
