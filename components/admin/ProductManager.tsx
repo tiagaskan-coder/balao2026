@@ -16,6 +16,7 @@ export default function ProductManager() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
   
   // Selection State
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -266,6 +267,34 @@ export default function ProductManager() {
     }
   };
 
+  const handleBulkDelete = async () => {
+    if (!confirm(`Tem certeza que deseja excluir ${selectedIds.size} produtos selecionados? Esta ação não pode ser desfeita.`)) return;
+    
+    setIsProcessingBulk(true);
+    let deletedCount = 0;
+    
+    try {
+        const idsToDelete = Array.from(selectedIds);
+        
+        // Process in chunks to avoid overwhelming the server
+        const chunkSize = 5;
+        for (let i = 0; i < idsToDelete.length; i += chunkSize) {
+            const chunk = idsToDelete.slice(i, i + chunkSize);
+            await Promise.all(chunk.map(id => fetch(`/api/products/${id}`, { method: "DELETE" })));
+            deletedCount += chunk.length;
+        }
+        
+        alert(`${deletedCount} produtos excluídos com sucesso.`);
+        setSelectedIds(new Set());
+        fetchProducts();
+    } catch (e) {
+        console.error(e);
+        alert("Erro ao excluir alguns produtos.");
+    } finally {
+        setIsProcessingBulk(false);
+    }
+  };
+
   const handleEdit = (product: Product) => {
     setCurrentProduct(product);
     setImagePreview(product.image);
@@ -381,19 +410,29 @@ export default function ProductManager() {
         setSaving(false);
     }
   };
-// Filter Products
+  // Filter Products
   const filteredProducts = React.useMemo(() => {
-    try {
-        return searchTerm ? searchProducts(products, searchTerm) : products;
-    } catch (e) {
-        console.error("Search error:", e);
-        // Fallback to basic filter
-        return products.filter(p => 
-            p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-            p.category?.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+    let result = products;
+
+    // Filter by Category
+    if (filterCategory) {
+        result = result.filter(p => p.category === filterCategory);
     }
-  }, [products, searchTerm]);
+
+    if (searchTerm) {
+        try {
+            result = searchProducts(result, searchTerm);
+        } catch (e) {
+            console.error("Search error:", e);
+            // Fallback to basic filter
+            result = result.filter(p => 
+                p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                p.category?.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
+    }
+    return result;
+  }, [products, searchTerm, filterCategory]);
 
   return (
     <div>
@@ -450,6 +489,16 @@ export default function ProductManager() {
                 </div>
 
                 <div className="flex-1"></div>
+                
+                <button 
+                    onClick={handleBulkDelete}
+                    disabled={isProcessingBulk}
+                    className="flex items-center gap-2 bg-white text-red-600 border border-red-200 px-3 py-1.5 rounded-md text-sm font-medium hover:bg-red-50 hover:border-red-300 transition-colors mr-4"
+                >
+                    <Trash2 size={16} />
+                    Excluir Selecionados
+                </button>
+
                 <button 
                     onClick={() => setSelectedIds(new Set())}
                     className="text-sm text-red-600 hover:text-red-800 underline"
@@ -461,15 +510,31 @@ export default function ProductManager() {
 
         {/* Header & Controls */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-            <div className="relative w-full md:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                <input 
-                    type="text" 
-                    placeholder="Buscar produtos..." 
-                    className="w-full pl-10 pr-4 py-2 border rounded-lg"
-                    value={searchTerm}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-                />
+            <div className="flex gap-4 w-full md:w-auto flex-1">
+                <div className="relative w-full md:w-64">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                    <input 
+                        type="text" 
+                        placeholder="Buscar produtos..." 
+                        className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 outline-none"
+                        value={searchTerm}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+                
+                <div className="relative w-full md:w-48">
+                    <select
+                        value={filterCategory}
+                        onChange={(e) => setFilterCategory(e.target.value)}
+                        className="w-full pl-4 pr-10 py-2 border rounded-lg appearance-none bg-white focus:ring-2 focus:ring-red-500 outline-none cursor-pointer"
+                    >
+                        <option value="">Todas Categorias</option>
+                        {categories.map((c) => (
+                            <option key={c.id} value={c.name}>{c.name}</option>
+                        ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                </div>
             </div>
             
             <div className="flex items-center gap-2 w-full md:w-auto justify-end">
