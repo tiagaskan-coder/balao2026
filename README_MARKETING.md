@@ -17,11 +17,14 @@ Isso criará as tabelas:
 Adicione as seguintes chaves ao seu arquivo `.env.local` (ou configure na Vercel):
 
 ```env
-# Configurações SMTP (Ex: Brevo, SendGrid, Gmail)
-SMTP_HOST=smtp-relay.brevo.com
+# Configurações SMTP (Gmail)
+# Nota: Para Gmail, você DEVE usar uma "Senha de Aplicativo" (App Password), não sua senha de login normal.
+# Ative a autenticação de dois fatores (2FA) na sua conta Google e gere uma senha de app em:
+# https://myaccount.google.com/apppasswords
+SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USER=seu_email_login@brevo.com
-SMTP_PASS=sua_chave_api_smtp
+SMTP_USER=balaocastelo@gmail.com
+SMTP_PASS=xxxx xxxx xxxx xxxx
 
 # URL do Site (para links nos e-mails)
 NEXT_PUBLIC_SITE_URL=https://balaocastelo.com.br

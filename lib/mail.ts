@@ -1,11 +1,11 @@
 import nodemailer from 'nodemailer';
 import { supabaseAdmin } from './supabase-admin';
 
-// Configuração SMTP do Brevo
+// Configuração SMTP (Padrão: Gmail)
 const smtpConfig = {
-    host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: false, // Geralmente false para porta 587 (STARTTLS)
+    secure: process.env.SMTP_PORT === '465', // True para 465, false para outras
     auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
@@ -46,7 +46,7 @@ export async function sendEmail({ to, subject, html, eventType = 'general', camp
         }
 
         const info = await transporter.sendMail({
-            from: `"Balão Castelo" <${process.env.SMTP_USER}>`, // Remetente padrão
+            from: `"Balão Castelo" <${process.env.SMTP_USER}>`, // Remetente padrão: balaocastelo@gmail.com
             to,
             subject,
             html,
@@ -87,7 +87,7 @@ export async function sendSystemNotification(event: string, data: any) {
     `;
 
     return sendEmail({
-        to: 'balaocastelo@gmail.com',
+        to: process.env.ADMIN_EMAIL || 'balaocastelo@gmail.com',
         subject,
         html,
         eventType: `system_${event}`
