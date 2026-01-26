@@ -34,17 +34,25 @@ export default async function PcGamerPage() {
 
       <SeoContent title="Loja de PC Gamer em Campinas: Monte sua Máquina dos Sonhos">
           <p className="text-gray-600 mb-4">
-            O Balão da Informática é a sua <strong>loja de PC Gamer em Campinas</strong>. Trabalhamos com as melhores marcas do mundo hardware: ASUS, Gigabyte, MSI, Galax, Intel, AMD, Corsair e Kingston. Se você quer rodar os jogos mais recentes em 4K ou precisa de alta taxa de FPS para o competitivo (CS2, Valorant, Fortnite), nós temos o setup ideal.
+            O Balão da Informática é referência em <strong>PC Gamer em Campinas</strong>, trabalhando com as melhores marcas globais como ASUS, MSI, Intel e AMD.
           </p>
-          <p className="text-gray-600 mb-4">
-            Além de computadores prontos, oferecemos o serviço de <em>montagem de PC Gamer personalizada</em>. Você escolhe as peças e nossos técnicos especialistas montam com cable management profissional e testes de stress. Entregamos em toda a região de Campinas, Sumaré, Hortolândia e Paulínia.
-          </p>
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">Hardware High-End Disponível:</h3>
-          <ul className="list-disc pl-5 text-gray-600 space-y-2">
-            <li>Placas de Vídeo NVIDIA RTX 4060, 4070, 4080 e 4090</li>
-            <li>Processadores Intel Core i5, i7, i9 e AMD Ryzen 5, 7, 9</li>
-            <li>Water Coolers e Gabinetes Gamer com RGB</li>
-            <li>Monitores 144Hz, 165Hz e 240Hz</li>
+          <ul className="list-none pl-0 text-gray-600 space-y-3">
+            <li className="flex items-start gap-2">
+              <span className="text-xl">🚀</span>
+              <span><strong>Alta Performance:</strong> Setups para rodar jogos em 4K ou Competitivo (CS2, Valorant, Fortnite) com alto FPS.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-xl">🛠️</span>
+              <span><strong>Montagem Personalizada:</strong> Escolha as peças e nossos especialistas montam com cable management profissional.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-xl">💎</span>
+              <span><strong>Hardware High-End:</strong> RTX 4060/4090, Ryzen 9, Core i9, Water Coolers e Gabinetes RGB.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-xl">🚚</span>
+              <span><strong>Entrega Regional:</strong> Campinas, Sumaré, Hortolândia e Paulínia.</span>
+            </li>
           </ul>
       </SeoContent>
     </>

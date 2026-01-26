@@ -96,11 +96,26 @@ export default async function ServicosOfertasPage() {
 
       <SeoContent title="Central de Serviços e Ofertas de TI em Campinas">
           <p className="text-gray-600 mb-4">
-            O Balão da Informática não é apenas uma loja, é um centro completo de soluções em tecnologia. Aqui você encontra tudo o que precisa: venda de equipamentos novos, <strong>assistência técnica em Campinas</strong>, montagem de PC Gamer e até compra e venda de usados.
+            O Balão da Informática é seu centro completo de soluções em tecnologia na RMC.
           </p>
-          <p className="text-gray-600 mb-4">
-            Nossa missão é facilitar sua vida digital. Seja para consertar um computador lento, fazer um upgrade para rodar jogos novos ou encontrar aquela peça específica que falta no seu setup, conte com a gente. Atendemos com agilidade em toda a RMC.
-          </p>
+          <ul className="list-none pl-0 text-gray-600 space-y-3">
+            <li className="flex items-start gap-2">
+              <span className="text-xl">🛠️</span>
+              <span><strong>Assistência Técnica:</strong> Conserto de computadores lentos, notebooks e equipamentos em geral.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-xl">🚀</span>
+              <span><strong>Upgrades:</strong> Melhore seu setup para rodar jogos novos ou softwares pesados.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-xl">🛒</span>
+              <span><strong>Vendas:</strong> Equipamentos novos, usados e peças específicas.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-xl">📍</span>
+              <span><strong>Localização:</strong> Atendimento ágil em Campinas e toda a Região Metropolitana.</span>
+            </li>
+          </ul>
       </SeoContent>
     </>
   );

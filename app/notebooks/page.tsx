@@ -34,17 +34,25 @@ export default async function NotebooksPage() {
 
       <SeoContent title="Notebooks em Campinas: Performance e Mobilidade">
           <p className="text-gray-600 mb-4">
-            Encontrar o <strong>melhor preço de notebook em Campinas</strong> ficou fácil. No Balão da Informática, oferecemos uma linha completa de laptops para todas as necessidades. Temos desde notebooks básicos para estudo e escritório (Core i3, Ryzen 3) até máquinas potentes para arquitetura, engenharia e design gráfico (Core i7, Ryzen 7, Placa de Vídeo Dedicada).
+            Encontrar o <strong>melhor preço de notebook em Campinas</strong> é no Balão da Informática. Oferecemos laptops para estudo, escritório e alta performance.
           </p>
-          <p className="text-gray-600 mb-4">
-            Trabalhamos com marcas renomadas como <em>Dell, Lenovo, Acer, Asus e Samsung</em>. Todos os nossos notebooks possuem garantia e nota fiscal. Além disso, se você precisa turbinar seu equipamento novo, já realizamos o upgrade de memória RAM e SSD na hora da compra.
-          </p>
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">Categorias de Notebooks:</h3>
-          <ul className="list-disc pl-5 text-gray-600 space-y-2">
-            <li>Notebooks Gamer (Acer Nitro, Dell G15, Lenovo Legion)</li>
-            <li>Ultrabooks leves e finos</li>
-            <li>Notebooks empresariais com Windows Pro</li>
-            <li>Chromebooks para estudantes</li>
+          <ul className="list-none pl-0 text-gray-600 space-y-3">
+            <li className="flex items-start gap-2">
+              <span className="text-xl">🎮</span>
+              <span><strong>Notebooks Gamer:</strong> Modelos Acer Nitro, Dell G15 e Lenovo Legion para jogos e renderização.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-xl">💼</span>
+              <span><strong>Trabalho e Estudo:</strong> Ultrabooks leves, máquinas empresariais com Windows Pro e Chromebooks.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-xl">⚡</span>
+              <span><strong>Upgrade Imediato:</strong> Turbinamos seu notebook novo com mais RAM e SSD na hora da compra.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-xl">🏆</span>
+              <span><strong>Marcas Confiáveis:</strong> Dell, Lenovo, Acer, Asus e Samsung com garantia e nota fiscal.</span>
+            </li>
           </ul>
       </SeoContent>
     </>

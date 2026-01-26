@@ -37,17 +37,25 @@ export default async function ConsignacaoPage() {
 
       <SeoContent title="Venda seu Computador ou Notebook Usado em Campinas">
           <p className="text-gray-600 mb-4">
-            Quer vender seu PC usado mas não quer ter dor de cabeça com anúncios e negociações inseguras? O sistema de <strong>consignação de informática em Campinas</strong> do Balão da Informática é a solução ideal. Nós avaliamos seu equipamento, higienizamos e o expomos em nossa loja física e site, garantindo a melhor visibilidade para uma venda rápida.
+            Quer vender seu PC usado sem dor de cabeça? O sistema de <strong>consignação de informática em Campinas</strong> do Balão da Informática é a solução ideal.
           </p>
-          <p className="text-gray-600 mb-4">
-            Somos a melhor opção de <em>compra e venda de usados em Campinas</em>. Aceitamos notebooks, computadores completos, monitores e peças de hardware (placas de vídeo, processadores). Traga seu equipamento para uma avaliação gratuita em nossa loja.
-          </p>
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">Por que consignar com a gente?</h3>
-          <ul className="list-disc pl-5 text-gray-600 space-y-2">
-            <li>Avaliação de mercado justa e transparente</li>
-            <li>Segurança total: nós lidamos com os curiosos e golpistas</li>
-            <li>Exposição para milhares de clientes locais na RMC</li>
-            <li>Pagamento garantido assim que o produto for vendido</li>
+          <ul className="list-none pl-0 text-gray-600 space-y-3">
+            <li className="flex items-start gap-2">
+              <span className="text-xl">🤝</span>
+              <span><strong>Segurança Total:</strong> Nós lidamos com os curiosos e garantimos a negociação segura.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-xl">📢</span>
+              <span><strong>Visibilidade:</strong> Exposição na loja física e no site para milhares de clientes locais.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-xl">💰</span>
+              <span><strong>Pagamento Garantido:</strong> Receba assim que o produto for vendido. Avaliação justa e transparente.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-xl">♻️</span>
+              <span><strong>O que Aceitamos:</strong> Notebooks, PCs completos, monitores e peças de hardware (placas de vídeo, processadores).</span>
+            </li>
           </ul>
       </SeoContent>
     </>

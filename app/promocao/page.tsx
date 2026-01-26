@@ -41,17 +41,25 @@ export default async function PromocaoPage() {
 
       <SeoContent title="Ofertas de Informática em Campinas e Região">
           <p className="text-gray-600 mb-4">
-            Não perca as melhores <strong>promoções de peças de computador em Campinas</strong>. Nossa página de ofertas é atualizada diariamente com descontos reais em processadores, placas de vídeo, SSDs e periféricos. Cobrimos qualquer oferta anunciada pela concorrência local (sob consulta).
+            As melhores <strong>promoções de peças de computador em Campinas</strong> estão aqui. Cobrimos ofertas da concorrência local (sob consulta).
           </p>
-          <p className="text-gray-600 mb-4">
-            Fique atento aos nossos saldões de estoque e ofertas de Black Friday o ano todo. Se você mora em Campinas, Sumaré, Hortolândia ou Valinhos, aproveite a comodidade de comprar online e retirar na loja física, economizando no frete.
-          </p>
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">Itens frequentemente em promoção:</h3>
-          <ul className="list-disc pl-5 text-gray-600 space-y-2">
-            <li>SSDs NVMe 500GB e 1TB</li>
-            <li>Memória RAM DDR4 e DDR5 Gamer</li>
-            <li>Fontes Corsair e MSI com certificação 80 Plus</li>
-            <li>Kits Upgrade (Placa-mãe + Processador + Memória)</li>
+          <ul className="list-none pl-0 text-gray-600 space-y-3">
+            <li className="flex items-start gap-2">
+              <span className="text-xl">🔥</span>
+              <span><strong>Ofertas Diárias:</strong> Descontos reais em processadores, placas de vídeo, SSDs e periféricos.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-xl">📦</span>
+              <span><strong>Retirada Local:</strong> Compre online e retire na loja em Campinas para economizar o frete.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-xl">🏷️</span>
+              <span><strong>Destaques:</strong> SSDs NVMe, Memória RAM DDR4/DDR5, Fontes Corsair/MSI e Kits Upgrade.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-xl">📍</span>
+              <span><strong>Região:</strong> Atendemos Campinas, Sumaré, Hortolândia e Valinhos.</span>
+            </li>
           </ul>
       </SeoContent>
     </>
