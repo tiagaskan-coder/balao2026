@@ -181,7 +181,7 @@ export default function Header() {
 
           <Link href="/login" className="flex items-center gap-3 group active:scale-95 transition-transform">
             <div className="p-2 bg-gray-100 rounded-full text-gray-600 group-hover:bg-[#E60012] group-hover:text-white transition-colors shadow-sm">
-                <User size={24} className="md:w-6 md:h-6" strokeWidth={2.5} />
+                <User size={20} className="md:w-5 md:h-5" strokeWidth={2.5} />
             </div>
             <div className="hidden lg:flex flex-col text-sm leading-tight">
                 <span className="text-gray-500">
@@ -195,7 +195,7 @@ export default function Header() {
           
           <Link href="/cart" className="relative group flex items-center gap-3 active:scale-95 transition-transform">
              <div className="p-2 bg-gray-100 rounded-full text-gray-600 group-hover:bg-[#E60012] group-hover:text-white transition-colors shadow-sm">
-                <ShoppingCart size={24} className="md:w-6 md:h-6" strokeWidth={2.5} />
+                <ShoppingCart size={20} className="md:w-5 md:h-5" strokeWidth={2.5} />
              </div>
              <div className="hidden lg:flex flex-col text-sm leading-tight">
                 <span className="text-gray-500">Meu</span>
