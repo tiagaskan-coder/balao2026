@@ -34,7 +34,7 @@ export default async function ConsignacaoPage() {
         <ProductCarousel title="Equipamentos em Destaque" products={related} />
       </div>
 
-      <section className="bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 border-t border-gray-200">
+      <section className="sr-only">
         <div className="max-w-7xl mx-auto prose prose-blue">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">Venda seu Computador ou Notebook Usado em Campinas</h2>
           <p className="text-gray-600 mb-4">
