@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation';
 import ShareButton from '@/components/ShareButton';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import ProductActions from '@/components/ProductActions';
+import ShippingCalculator from '@/components/ShippingCalculator';
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -150,6 +151,8 @@ export default async function ProductPage({ params }: Props) {
                          </div>
 
                          <ProductActions product={product} />
+                         
+                         <ShippingCalculator />
                     </div>
 
                     <div className="mt-6 flex flex-row items-center justify-end gap-2">
