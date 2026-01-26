@@ -1,6 +1,6 @@
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
-import PCBuilder from "@/components/PCBuilder";
+import PCBuilder from "@/src/components/PCBuilder";
 import { getProducts, getCategories } from "@/lib/db";
 
 // Revalidate data every 60 seconds
