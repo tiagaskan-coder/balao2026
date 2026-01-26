@@ -40,6 +40,10 @@ export default function ProductList({ products }: { products: Product[] }) {
     }
   };
 
+  const [visibleCount, setVisibleCount] = useState(30);
+  const visibleProducts = filteredAndSortedProducts.slice(0, visibleCount);
+  const loadMore = () => { setVisibleCount((prev) => prev + 30); };
+
   return (
     <div className="flex flex-col gap-6">
       {/* Controls */}
