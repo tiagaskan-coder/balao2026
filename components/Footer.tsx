@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Facebook, Instagram, Youtube, Mail, Phone, MapPin, ChevronDown, ChevronUp } from "lucide-react";
+import { Facebook, Instagram, Youtube, Mail, Phone, MapPin, ChevronDown, ChevronUp, CreditCard } from "lucide-react";
 
 export default function Footer() {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
@@ -123,13 +123,11 @@ export default function Footer() {
         <div className="border-t border-gray-200 pt-8 pb-8">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className="text-sm">Formas de Pagamento</div>
-                <div className="relative w-full max-w-[300px] h-10">
-                    <Image 
-                        src="/formas-pagamento.png" 
-                        alt="Formas de Pagamento: American Express, Visa, Mastercard, Elo, Pix" 
-                        fill
-                        className="object-contain"
-                    />
+                <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 text-gray-400" title="Formas de Pagamento: Pix e Cartões">
+                        <CreditCard size={32} />
+                        <span className="text-sm">Pix, Visa, Master, Elo, Amex</span>
+                    </div>
                 </div>
                 <div className="text-sm flex items-center gap-2">
                     <span className="text-green-600">Site Seguro</span>
