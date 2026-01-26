@@ -86,6 +86,7 @@ export default function Carousel({ images }: { images: CarouselImage[] }) {
                 className="object-contain w-full h-full"
                 priority={currentIndex === 0}
                 sizes="100vw"
+                unoptimized
              />
              {/* Title removed as requested */}
           </div>
