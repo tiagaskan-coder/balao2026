@@ -83,9 +83,9 @@ export default function Carousel({ images }: { images: CarouselImage[] }) {
                 src={image.image_url}
                 alt={image.title || "Banner"}
                 fill
-                className="object-contain w-full h-full"
+                className="object-cover w-full h-full"
                 priority={currentIndex === 0}
-                sizes="100vw"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
                 unoptimized
              />
              {/* Title removed as requested */}

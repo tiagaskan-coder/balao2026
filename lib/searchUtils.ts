@@ -144,33 +144,65 @@ export function searchProducts<T extends Product>(
     const specs = product.specs ? Object.values(product.specs).join(" ") : "";
     const normSpecs = normalizeText(specs);
 
-    // Estratégia de Pontuação:
-    
-    // 1. Match Exato no Nome (Peso Alto)
-    if (name.includes(primaryTerm)) score += 10;
-    
-    // 2. Match Exato na Categoria (Peso Médio)
-    if (category.includes(primaryTerm)) score += 5;
+    // Estratégia de Pontuação "AND" (Todos os termos devem dar match)
+    // Se a query tem multiplas palavras (ex: "rtx 4060"), o produto tem que ter "rtx" E "4060"
+    const queryTokens = primaryTerm.split(/\s+/);
+    let matchesAllTokens = true;
+    let tokenScoreSum = 0;
 
-    // 3. Match Exato nas Specs/Tags (Peso Baixo)
-    if (normSpecs.includes(primaryTerm)) score += 3;
-
-    // 4. Fuzzy Match e Sinônimos
-    terms.forEach(term => {
-        if (term === primaryTerm) return; // Já verificado acima
-
-        if (name.includes(term)) score += 8; // Sinônimo no nome
-        else if (fuzzyMatch(name, term)) score += 6; // Typos no nome
-
-        if (category.includes(term)) score += 4; // Sinônimo na categoria
+    for (const token of queryTokens) {
+        if (!token) continue;
         
-        if (normSpecs.includes(term)) score += 2;
-    });
+        let tokenMatched = false;
+        let bestTokenScore = 0;
 
-    // Fuzzy Search no termo principal se não houve match exato
-    if (score === 0) {
-        if (fuzzyMatch(name, primaryTerm)) score += 5;
-        if (fuzzyMatch(category, primaryTerm)) score += 3;
+        // 1. Verificação Exata (Nome, Categoria, Specs)
+        if (name.includes(token)) {
+            tokenMatched = true;
+            bestTokenScore = Math.max(bestTokenScore, 10);
+        }
+        if (category.includes(token)) {
+            tokenMatched = true;
+            bestTokenScore = Math.max(bestTokenScore, 6); // Categoria tem peso menor que nome direto
+        }
+        if (normSpecs.includes(token)) {
+            tokenMatched = true;
+            bestTokenScore = Math.max(bestTokenScore, 4);
+        }
+
+        // 2. Verificação Fuzzy/Sinônimos (apenas se não deu match exato ainda)
+        if (!tokenMatched) {
+             // Expande sinônimos do token atual
+             const tokenSynonyms = expandSearchTerms(token).filter(t => t !== token);
+             
+             // Check synonyms
+             for (const syn of tokenSynonyms) {
+                 if (name.includes(syn) || category.includes(syn)) {
+                     tokenMatched = true;
+                     bestTokenScore = Math.max(bestTokenScore, 8);
+                     break;
+                 }
+             }
+
+             // Check fuzzy se ainda não deu match
+             if (!tokenMatched && fuzzyMatch(name, token)) {
+                 tokenMatched = true;
+                 bestTokenScore = Math.max(bestTokenScore, 5);
+             }
+        }
+
+        if (!tokenMatched) {
+            matchesAllTokens = false;
+            break;
+        }
+        
+        tokenScoreSum += bestTokenScore;
+    }
+
+    if (matchesAllTokens) {
+        score = tokenScoreSum;
+    } else {
+        score = 0;
     }
 
     return { item: product, score };
