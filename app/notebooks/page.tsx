@@ -1,5 +1,6 @@
 import React from "react";
 import LandingPage from "@/components/LandingPage";
+import SeoContent from "@/components/SeoContent";
 import { Laptop } from "lucide-react";
 import ProductCarousel from "@/components/ProductCarousel";
 import { getProducts } from "@/lib/db";
@@ -31,9 +32,7 @@ export default async function NotebooksPage() {
         <ProductCarousel title="Notebooks em Destaque" products={related} />
       </div>
 
-      <section className="sr-only">
-        <div className="max-w-7xl mx-auto prose prose-blue">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Notebooks em Campinas: Performance e Mobilidade</h2>
+      <SeoContent title="Notebooks em Campinas: Performance e Mobilidade">
           <p className="text-gray-600 mb-4">
             Encontrar o <strong>melhor preço de notebook em Campinas</strong> ficou fácil. No Balão da Informática, oferecemos uma linha completa de laptops para todas as necessidades. Temos desde notebooks básicos para estudo e escritório (Core i3, Ryzen 3) até máquinas potentes para arquitetura, engenharia e design gráfico (Core i7, Ryzen 7, Placa de Vídeo Dedicada).
           </p>
@@ -47,8 +46,7 @@ export default async function NotebooksPage() {
             <li>Notebooks empresariais com Windows Pro</li>
             <li>Chromebooks para estudantes</li>
           </ul>
-        </div>
-      </section>
+      </SeoContent>
     </>
   );
 }

@@ -1,5 +1,6 @@
 import React from "react";
 import LandingPage from "@/components/LandingPage";
+import SeoContent from "@/components/SeoContent";
 import { Gamepad } from "lucide-react";
 import ProductCarousel from "@/components/ProductCarousel";
 import { getProducts } from "@/lib/db";
@@ -31,9 +32,7 @@ export default async function PcGamerPage() {
         <ProductCarousel title="Mais Procurados em PC Gamer" products={related} />
       </div>
 
-      <section className="sr-only">
-        <div className="max-w-7xl mx-auto prose prose-blue">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Loja de PC Gamer em Campinas: Monte sua Máquina dos Sonhos</h2>
+      <SeoContent title="Loja de PC Gamer em Campinas: Monte sua Máquina dos Sonhos">
           <p className="text-gray-600 mb-4">
             O Balão da Informática é a sua <strong>loja de PC Gamer em Campinas</strong>. Trabalhamos com as melhores marcas do mundo hardware: ASUS, Gigabyte, MSI, Galax, Intel, AMD, Corsair e Kingston. Se você quer rodar os jogos mais recentes em 4K ou precisa de alta taxa de FPS para o competitivo (CS2, Valorant, Fortnite), nós temos o setup ideal.
           </p>
@@ -47,8 +46,7 @@ export default async function PcGamerPage() {
             <li>Water Coolers e Gabinetes Gamer com RGB</li>
             <li>Monitores 144Hz, 165Hz e 240Hz</li>
           </ul>
-        </div>
-      </section>
+      </SeoContent>
     </>
   );
 }

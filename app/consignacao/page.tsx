@@ -1,5 +1,6 @@
 import React from "react";
 import LandingPage from "@/components/LandingPage";
+import SeoContent from "@/components/SeoContent";
 import { Handshake } from "lucide-react";
 import ProductCarousel from "@/components/ProductCarousel";
 import { getProducts } from "@/lib/db";
@@ -34,9 +35,7 @@ export default async function ConsignacaoPage() {
         <ProductCarousel title="Equipamentos em Destaque" products={related} />
       </div>
 
-      <section className="sr-only">
-        <div className="max-w-7xl mx-auto prose prose-blue">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Venda seu Computador ou Notebook Usado em Campinas</h2>
+      <SeoContent title="Venda seu Computador ou Notebook Usado em Campinas">
           <p className="text-gray-600 mb-4">
             Quer vender seu PC usado mas não quer ter dor de cabeça com anúncios e negociações inseguras? O sistema de <strong>consignação de informática em Campinas</strong> do Balão da Informática é a solução ideal. Nós avaliamos seu equipamento, higienizamos e o expomos em nossa loja física e site, garantindo a melhor visibilidade para uma venda rápida.
           </p>
@@ -50,8 +49,7 @@ export default async function ConsignacaoPage() {
             <li>Exposição para milhares de clientes locais na RMC</li>
             <li>Pagamento garantido assim que o produto for vendido</li>
           </ul>
-        </div>
-      </section>
+      </SeoContent>
     </>
   );
 }

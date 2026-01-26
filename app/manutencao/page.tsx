@@ -1,5 +1,6 @@
 import React from "react";
 import LandingPage from "@/components/LandingPage";
+import SeoContent from "@/components/SeoContent";
 import { Wrench } from "lucide-react";
 import ProductCarousel from "@/components/ProductCarousel";
 import { getProducts } from "@/lib/db";
@@ -35,9 +36,7 @@ export default async function ManutencaoPage() {
         <ProductCarousel title="Peças para Upgrade Rápido" products={upgrade} />
       </div>
 
-      <section className="sr-only">
-        <div className="max-w-7xl mx-auto prose prose-blue">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Assistência Técnica de Informática Especializada em Campinas</h2>
+      <SeoContent title="Assistência Técnica de Informática Especializada em Campinas">
           <p className="text-gray-600 mb-4">
             Procurando por <strong>conserto de notebook em Campinas</strong> ou manutenção de computadores? O Balão da Informática oferece serviços técnicos de alta qualidade para resolver qualquer problema do seu equipamento. Nossa equipe é especializada em reparos de placas-mãe, troca de telas de notebook, upgrade de SSD e memória RAM, além de remoção de vírus e formatação.
           </p>
@@ -52,8 +51,7 @@ export default async function ManutencaoPage() {
             <li>Instalação de Windows e drivers</li>
             <li>Recuperação de dados de HD e SSD</li>
           </ul>
-        </div>
-      </section>
+      </SeoContent>
     </>
   );
 }

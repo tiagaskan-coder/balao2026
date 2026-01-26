@@ -1,5 +1,6 @@
 import React from "react";
 import LandingPage from "@/components/LandingPage";
+import SeoContent from "@/components/SeoContent";
 import { Tag } from "lucide-react";
 import ProductCarousel from "@/components/ProductCarousel";
 import { getProducts } from "@/lib/db";
@@ -38,9 +39,7 @@ export default async function PromocaoPage() {
         <ProductCarousel title="Ofertas em Destaque" products={related} />
       </div>
 
-      <section className="sr-only">
-        <div className="max-w-7xl mx-auto prose prose-blue">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Ofertas de Informática em Campinas e Região</h2>
+      <SeoContent title="Ofertas de Informática em Campinas e Região">
           <p className="text-gray-600 mb-4">
             Não perca as melhores <strong>promoções de peças de computador em Campinas</strong>. Nossa página de ofertas é atualizada diariamente com descontos reais em processadores, placas de vídeo, SSDs e periféricos. Cobrimos qualquer oferta anunciada pela concorrência local (sob consulta).
           </p>
@@ -54,8 +53,7 @@ export default async function PromocaoPage() {
             <li>Fontes Corsair e MSI com certificação 80 Plus</li>
             <li>Kits Upgrade (Placa-mãe + Processador + Memória)</li>
           </ul>
-        </div>
-      </section>
+      </SeoContent>
     </>
   );
 }
