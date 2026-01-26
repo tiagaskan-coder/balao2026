@@ -25,8 +25,12 @@ export default async function CategoriaPage({
   const findBySlug = (s: string, all: Category[]) =>
     all.find((c) => c.slug === s);
   const selectedCat = findBySlug(slug, categories);
-  const categoryName = selectedCat?.name;
- 
+  
+  let categoryName = selectedCat?.name;
+  if (slug === 'todos-os-produtos') {
+      categoryName = 'Todos os Produtos';
+  }
+
   const getDescendantNames = (root: Category | undefined, all: Category[]) => {
     if (!root) return [];
     const descendants: string[] = [];

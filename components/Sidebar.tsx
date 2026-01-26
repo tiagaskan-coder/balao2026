@@ -95,7 +95,21 @@ const iconMap: Record<string, any> = {
 };
 
 export default function Sidebar({ categories, mobileOnly = false }: { categories: Category[], mobileOnly?: boolean }) {
-  const tree = buildCategoryTree(categories);
+  const dbTree = buildCategoryTree(categories);
+  
+  const allProductsItem: Category = {
+    id: "all-products",
+    name: "Todos os Produtos",
+    slug: "todos-os-produtos",
+    parent_id: null,
+    display_order: -1,
+    active: true,
+    children: [],
+    icon: "List"
+  };
+
+  const tree = [allProductsItem, ...dbTree];
+
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const currentCategory = searchParams.get("category");
