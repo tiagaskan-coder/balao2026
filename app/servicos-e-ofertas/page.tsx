@@ -90,10 +90,6 @@ export default async function ServicosOfertasPage() {
             <h3 className="text-lg font-bold text-gray-800">Consignação</h3>
             <p className="text-sm text-gray-600 mt-1">Venda seu usado com segurança.</p>
           </a>
-          <a href="/monteseupc" className="block bg-white border rounded-lg p-6 hover:shadow-md transition">
-            <h3 className="text-lg font-bold text-gray-800">Monte seu PC</h3>
-            <p className="text-sm text-gray-600 mt-1">Ferramenta guiada com compatibilidade automática.</p>
-          </a>
         </div>
       </div>
     </>
