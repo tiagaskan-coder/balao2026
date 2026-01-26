@@ -212,41 +212,51 @@ export default function Header() {
 
       {/* Mobile Search Bar (Full width below header on mobile) */}
       <div className="md:hidden px-4 pb-4" ref={mobileSearchContainerRef}>
-          <form onSubmit={handleSearch} className="relative">
-            <input
-                type="text"
-                placeholder="Buscar produtos..."
-                className="w-full pl-5 pr-12 py-3 border border-gray-300 rounded-full focus:outline-none focus:border-[#E60012] focus:ring-1 focus:ring-[#E60012] shadow-sm text-base"
-                value={searchQuery}
-                onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setShowPreview(true);
-                }}
-                onFocus={() => setShowPreview(true)}
-            />
-             <button 
-               type="button" 
-               onClick={performSearch}
-               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 p-2 z-10"
-             >
-                <Search size={22} />
-            </button>
+          <div className="flex items-center gap-3">
+            <form onSubmit={handleSearch} className="relative flex-1">
+              <input
+                  type="text"
+                  placeholder="Buscar produtos..."
+                  className="w-full pl-5 pr-12 py-3 border border-gray-300 rounded-full focus:outline-none focus:border-[#E60012] focus:ring-1 focus:ring-[#E60012] shadow-sm text-base"
+                  value={searchQuery}
+                  onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setShowPreview(true);
+                  }}
+                  onFocus={() => setShowPreview(true)}
+              />
+               <button 
+                 type="button" 
+                 onClick={performSearch}
+                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 p-2 z-10"
+               >
+                  <Search size={22} />
+              </button>
 
-            {/* Mobile Search Preview */}
-            {showPreview && searchQuery.length >= 2 && (
-                <div className="absolute top-full left-0 right-0 mt-1 z-50">
-                    <SearchPreview 
-                        products={previewProducts}
-                        onSelect={(product) => {
-                            router.push(`/product/${product.id}`);
-                            setShowPreview(false);
-                            setSearchQuery("");
-                        }}
-                        onClose={() => setShowPreview(false)}
-                    />
-                </div>
-            )}
-          </form>
+              {showPreview && searchQuery.length >= 2 && (
+                  <div className="absolute top-full left-0 right-0 mt-1 z-50">
+                      <SearchPreview 
+                          products={previewProducts}
+                          onSelect={(product) => {
+                              router.push(`/product/${product.id}`);
+                              setShowPreview(false);
+                              setSearchQuery("");
+                          }}
+                          onClose={() => setShowPreview(false)}
+                      />
+                  </div>
+              )}
+            </form>
+            <Link
+              href="https://wa.me/5519987510267"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Falar no WhatsApp"
+              className="flex items-center justify-center h-12 w-12 rounded-full bg-[#25D366] text-white shadow-md hover:bg-[#128C7E] transition-colors"
+            >
+              <MessageCircle size={22} strokeWidth={2.5} />
+            </Link>
+          </div>
       </div>
     </header>
   );
