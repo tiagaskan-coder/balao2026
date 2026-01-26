@@ -13,12 +13,32 @@ export default function FaleConoscoPage() {
     e.preventDefault();
     setLoading(true);
 
-    // Simulating API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    // Send to API
+    try {
+      const formData = new FormData(e.target as HTMLFormElement);
+      const data = {
+        name: formData.get("name"),
+        email: formData.get("email"),
+        phone: formData.get("phone"),
+        message: formData.get("message"),
+      };
 
-    showToast("Mensagem enviada com sucesso! Entraremos em contato em breve.", "success");
-    setLoading(false);
-    (e.target as HTMLFormElement).reset();
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) throw new Error("Falha ao enviar mensagem");
+
+      showToast("Mensagem enviada com sucesso! Entraremos em contato em breve.", "success");
+      (e.target as HTMLFormElement).reset();
+    } catch (error) {
+      console.error(error);
+      showToast("Erro ao enviar mensagem. Tente novamente.", "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -86,6 +106,7 @@ export default function FaleConoscoPage() {
                   <input 
                     type="text" 
                     id="name" 
+                    name="name"
                     required 
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent outline-none transition-all"
                     placeholder="Seu nome completo"
@@ -96,6 +117,7 @@ export default function FaleConoscoPage() {
                   <input 
                     type="tel" 
                     id="phone" 
+                    name="phone"
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent outline-none transition-all"
                     placeholder="(00) 00000-0000"
                   />
@@ -107,6 +129,7 @@ export default function FaleConoscoPage() {
                 <input 
                   type="email" 
                   id="email" 
+                  name="email"
                   required 
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent outline-none transition-all"
                   placeholder="seu@email.com"
@@ -131,6 +154,7 @@ export default function FaleConoscoPage() {
                 <label htmlFor="message" className="text-sm font-medium text-gray-700">Mensagem</label>
                 <textarea 
                   id="message" 
+                  name="message"
                   required 
                   rows={5}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent outline-none transition-all resize-none"

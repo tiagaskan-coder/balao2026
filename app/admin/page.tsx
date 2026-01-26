@@ -3,15 +3,16 @@
 import { useState, useEffect } from "react";
 import { parseProducts, Product, Category, buildCategoryTree, CATEGORIES } from "@/lib/utils";
 import Link from "next/link";
-import { ArrowLeft, Upload, CheckCircle, AlertCircle, Layout, Layers, Save, Search, Settings, ShoppingBag } from "lucide-react";
+import { ArrowLeft, Upload, CheckCircle, AlertCircle, Layout, Layers, Save, Search, Settings, ShoppingBag, Mail } from "lucide-react";
 import CarouselManager from "@/components/admin/CarouselManager";
 import CategoryManager from "@/components/admin/CategoryManager";
 import OrderManager from "@/components/admin/OrderManager";
 import ProductManager from "@/components/admin/ProductManager";
 import HomeBlocksManager from "@/components/admin/HomeBlocksManager";
+import MarketingManager from "@/components/admin/MarketingManager";
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState<"import" | "carousel" | "products" | "categories" | "orders" | "home_blocks">("import");
+  const [activeTab, setActiveTab] = useState<"import" | "carousel" | "products" | "categories" | "orders" | "home_blocks" | "marketing">("import");
 
   // Product List State
   const [products, setProducts] = useState<Product[]>([]);
@@ -319,6 +320,13 @@ export default function AdminPage() {
                         Blocos da Home
                     </button>
                     <button
+                        onClick={() => setActiveTab("marketing")}
+                        className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${activeTab === "marketing" ? "bg-red-50 text-[#E60012] border-l-4 border-[#E60012]" : "text-gray-600 hover:bg-gray-50"}`}
+                    >
+                        <Mail size={18} />
+                        Marketing & E-mail
+                    </button>
+                    <button
                         disabled
                         className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 cursor-not-allowed"
                     >
@@ -336,6 +344,13 @@ export default function AdminPage() {
                     {activeTab === "home_blocks" && (
                          <div className="animate-in fade-in duration-300">
                              <HomeBlocksManager categories={categories} />
+                         </div>
+                    )}
+
+                    {/* MARKETING TAB */}
+                    {activeTab === "marketing" && (
+                         <div className="animate-in fade-in duration-300">
+                             <MarketingManager />
                          </div>
                     )}
 

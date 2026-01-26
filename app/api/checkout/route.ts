@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { createOrder } from "@/lib/db";
-import { Resend } from "resend";
-
-const resend = new Resend(process.env.RESEND_API_KEY || "re_123456789"); // Fallback to avoid crash if key missing, but will fail to send
+import { sendEmail, sendSystemNotification } from "@/lib/mail";
+import { getOrderConfirmationTemplate } from "@/lib/mail-templates";
 
 export async function POST(req: Request) {
   try {
@@ -39,53 +38,27 @@ export async function POST(req: Request) {
 
     const order = await createOrder(orderData, orderItems);
 
-    // 2. Send Email
-    // If no API key is configured, this part might fail or needs a check.
-    // We will attempt it and log error if it fails, but not block the response (or maybe we should?)
-    // Ideally we want to confirm order placement even if email fails, but warn user.
-    // For this task, we'll try to send.
+    // 2. Send Emails (Customer + Admin Notification)
+    
+    // E-mail para o Cliente usando Template
+    const emailHtml = getOrderConfirmationTemplate({ ...orderData, id: order.id }, orderItems);
 
-    if (process.env.RESEND_API_KEY) {
-        try {
-            const emailContent = `
-                <h1>Obrigado pelo seu pedido, ${customer.name}!</h1>
-                <p>Recebemos seu pedido e ele está sendo processado.</p>
-                
-                <h2>Detalhes do Pedido #${order.id.slice(0, 8)}</h2>
-                <ul>
-                    ${items.map((item: any) => `
-                        <li>${item.quantity}x ${item.name} - ${item.price}</li>
-                    `).join('')}
-                </ul>
-                
-                <p><strong>Total: R$ ${total.toFixed(2)}</strong></p>
-                
-                <h3>Dados de Entrega:</h3>
-                <p>
-                    ${customer.address}, ${customer.number}<br>
-                    ${customer.complement ? customer.complement + '<br>' : ''}
-                    ${customer.city} - ${customer.state}<br>
-                    CEP: ${customer.cep}
-                </p>
-                
-                <p>Entraremos em contato via WhatsApp (${customer.phone}) se necessário.</p>
-            `;
+    // Envio assíncrono para não bloquear resposta (ou síncrono se crítico)
+    // Aqui fazemos síncrono para garantir
+    await sendEmail({
+        to: customer.email,
+        subject: `Confirmação de Pedido #${order.id.slice(0, 8)}`,
+        html: emailHtml,
+        eventType: 'order_confirmation'
+    });
 
-            await resend.emails.send({
-                from: 'Balão da Informática <onboarding@resend.dev>', // Default Resend testing domain or configured domain
-                to: [customer.email],
-                bcc: ['balaocastelo@gmail.com'],
-                subject: `Confirmação de Pedido #${order.id.slice(0, 8)}`,
-                html: emailContent,
-            });
-            console.log("Email sent successfully");
-        } catch (emailError) {
-            console.error("Failed to send email:", emailError);
-            // Continue execution, don't fail the request just because email failed
-        }
-    } else {
-        console.warn("RESEND_API_KEY is missing. Email sending skipped.");
-    }
+    // Notificação para Admin
+    await sendSystemNotification('Novo Pedido Realizado', {
+        orderId: order.id,
+        customer: customer.name,
+        total: total,
+        email: customer.email
+    });
 
     return NextResponse.json({ success: true, orderId: order.id });
 

@@ -36,7 +36,7 @@ export default function LoginPage() {
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -44,6 +44,16 @@ export default function LoginPage() {
           },
         });
         if (error) throw error;
+
+        // Notify system
+        if (data?.user) {
+          fetch('/api/notify-signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, id: data.user.id })
+          }).catch(console.error);
+        }
+
         showToast("Verifique seu email para confirmar o cadastro!", "success");
       } else {
         const { error } = await supabase.auth.signInWithPassword({
