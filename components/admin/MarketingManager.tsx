@@ -170,11 +170,76 @@ export default function MarketingManager() {
                 <a href="${window.location.origin}/product/${product.id}" style="display: inline-block; background-color: #E60012; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; margin-top: 8px;">Ver Oferta</a>
             </div>
         `;
-        setEditingCampaign(prev => ({
+        setEditingCampaign((prev: Partial<Campaign>) => ({
             ...prev,
             content: (prev.content || "") + productHtml
         }));
         setShowProductSelector(false);
+    };
+
+    // Subscribers Actions
+    const fetchSubscribers = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch("/api/marketing/subscribers");
+            if (res.ok) setSubscribers(await res.json());
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteSubscriber = async (id: string) => {
+        if (!confirm("Remover inscrito?")) return;
+        try {
+            await fetch(`/api/marketing/subscribers?id=${id}`, { method: "DELETE" });
+            fetchSubscribers();
+            showToast("Inscrito removido", "success");
+        } catch (e) {
+            showToast("Erro ao remover", "error");
+        }
+    };
+
+    const handleImportCSV = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const text = await file.text();
+        const lines = text.split('\n');
+        // Assume header: email,name,source
+        const newSubscribers = lines.slice(1)
+            .filter((line: string) => line.trim())
+            .map((line: string) => {
+                const [email, name, source] = line.split(',').map((s: string) => s.trim());
+                return { email, name, source: source || 'import' };
+            })
+            .filter((s: { email: string }) => s.email && s.email.includes('@'));
+
+        if (newSubscribers.length === 0) {
+            showToast("Nenhum contato válido encontrado no CSV", "error");
+            return;
+        }
+
+        try {
+            const res = await fetch("/api/marketing/subscribers", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newSubscribers),
+            });
+
+            if (res.ok) {
+                showToast(`${newSubscribers.length} contatos importados!`, "success");
+                fetchSubscribers();
+            } else {
+                throw new Error();
+            }
+        } catch (e) {
+            showToast("Erro na importação", "error");
+        }
+        
+        // Reset input
+        e.target.value = '';
     };
 
     return (
