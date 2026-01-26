@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { Product } from "@/lib/utils";
 import ProductCard from "./ProductCard";
-import { LayoutGrid, Grid2x2, List, ArrowUpDown, Filter } from "lucide-react";
+import { LayoutGrid, Grid2x2, List, ArrowUpDown, Filter, ChevronDown } from "lucide-react";
 
 type ViewMode = "small" | "large" | "list";
 type SortMode = "default" | "price-asc" | "price-desc";
@@ -94,14 +94,27 @@ export default function ProductList({ products }: { products: Product[] }) {
 
       {/* Grid */}
       <div className={`grid gap-6 ${getGridClasses()}`}>
-        {filteredAndSortedProducts.map((product) => (
+        {visibleProducts.map((product) => (
           <ProductCard 
             key={product.id} 
             product={product} 
-            variant="grid"
+            variant={viewMode === "list" ? "list" : "grid"}
           />
         ))}
       </div>
+
+      {/* Load More Button */}
+      {visibleCount < filteredAndSortedProducts.length && (
+        <div className="flex justify-center mt-8">
+          <button
+            onClick={loadMore}
+            className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 text-gray-700 font-medium rounded-full shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-all group"
+          >
+            <span className="group-hover:text-[#E60012] transition-colors">Carregar mais produtos</span>
+            <ChevronDown size={20} className="text-gray-400 group-hover:text-[#E60012] transition-colors" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

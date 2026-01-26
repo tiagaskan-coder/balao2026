@@ -56,11 +56,11 @@ export default function ProductCarousel({ title, products, categoryId }: Product
       
       <div 
         ref={scrollContainerRef}
-        className="flex gap-4 overflow-x-auto pb-4 px-4 lg:px-0 scrollbar-hide snap-x snap-mandatory"
+        className="grid grid-rows-2 grid-flow-col auto-cols-[200px] md:auto-cols-[240px] gap-4 overflow-x-auto pb-4 px-4 lg:px-0 scrollbar-hide snap-x snap-mandatory"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {products.map((product) => (
-          <div key={product.id} className="flex-none w-[200px] md:w-[240px] snap-start">
+          <div key={product.id} className="snap-start h-full">
             <ProductCard product={product} variant="grid" />
           </div>
         ))}
