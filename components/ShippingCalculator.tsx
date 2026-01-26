@@ -45,11 +45,12 @@ export default function ShippingCalculator() {
       const isSP = data.uf === "SP";
       const isSoutheast = ["RJ", "MG", "ES", "PR", "SC", "RS"].includes(data.uf);
 
-      let options = [];
+      let options: { name: string; days: string; price?: string; emoji: string }[] = [];
 
       if (isCampinas) {
         options.push({
           name: "Entrega Flash",
+          emoji: "⚡",
           days: "24 horas (podendo ser entregue no mesmo dia)",
           price: "Grátis",
         });
@@ -57,18 +58,18 @@ export default function ShippingCalculator() {
         // Simulação baseada em zonas (Origem: Campinas/SP 13070-000)
         if (isSP) {
             options.push(
-                { name: "SEDEX", days: "1 a 2 dias úteis", price: "R$ 18,90" },
-                { name: "PAC", days: "4 a 5 dias úteis", price: "R$ 12,50" }
+                { name: "SEDEX", emoji: "🚀", days: "1 a 2 dias úteis", price: "R$ 18,90" },
+                { name: "PAC", emoji: "📦", days: "4 a 5 dias úteis", price: "R$ 12,50" }
             );
         } else if (isSoutheast) {
             options.push(
-                { name: "SEDEX", days: "2 a 4 dias úteis", price: "R$ 28,90" },
-                { name: "PAC", days: "6 a 8 dias úteis", price: "R$ 19,50" }
+                { name: "SEDEX", emoji: "🚀", days: "2 a 4 dias úteis", price: "R$ 28,90" },
+                { name: "PAC", emoji: "📦", days: "6 a 8 dias úteis", price: "R$ 19,50" }
             );
         } else {
             options.push(
-                { name: "SEDEX", days: "3 a 6 dias úteis", price: "R$ 45,90" },
-                { name: "PAC", days: "8 a 15 dias úteis", price: "R$ 29,90" }
+                { name: "SEDEX", emoji: "🚀", days: "3 a 6 dias úteis", price: "R$ 45,90" },
+                { name: "PAC", emoji: "📦", days: "8 a 15 dias úteis", price: "R$ 29,90" }
             );
         }
       }
