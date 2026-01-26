@@ -65,11 +65,11 @@ export default async function Home(props: {
       
       {/* Carousel Banner */}
       {!search && !category && (
-          <div className="w-full">
+          <div className="container mx-auto px-4 mt-6">
               {carouselImages.length > 0 ? (
                   <Carousel images={carouselImages} />
               ) : (
-                  <div className="w-full h-48 md:h-64 bg-gradient-to-r from-[#E60012] to-red-800 flex items-center justify-center text-white text-3xl font-bold shadow-md">
+                  <div className="w-full h-40 md:h-64 lg:h-80 bg-gradient-to-r from-[#E60012] to-red-800 rounded-xl flex items-center justify-center text-white text-3xl font-bold shadow-md">
                       Ofertas Imperdíveis
                   </div>
               )}

@@ -65,7 +65,7 @@ export default function Carousel({ images }: { images: CarouselImage[] }) {
 
   return (
     <div 
-      className="relative w-full h-48 md:h-80 lg:h-96 overflow-hidden group"
+      className="relative w-full h-40 md:h-64 lg:h-80 overflow-hidden rounded-xl shadow-lg group"
       onMouseEnter={() => setIsAutoPlay(false)}
       onMouseLeave={() => setIsAutoPlay(true)}
       onTouchStart={onTouchStart}
@@ -83,7 +83,7 @@ export default function Carousel({ images }: { images: CarouselImage[] }) {
                 src={image.image_url}
                 alt={image.title || "Banner"}
                 fill
-                className="object-fill w-full h-full"
+                className="object-cover w-full h-full"
                 priority={currentIndex === 0}
                 sizes="100vw"
              />
