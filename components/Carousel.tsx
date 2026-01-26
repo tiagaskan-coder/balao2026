@@ -83,7 +83,7 @@ export default function Carousel({ images }: { images: CarouselImage[] }) {
                 src={image.image_url}
                 alt={image.title || "Banner"}
                 fill
-                className="object-cover w-full h-full"
+                className="object-contain md:object-cover w-full h-full"
                 priority={currentIndex === 0}
                 sizes="100vw"
              />
