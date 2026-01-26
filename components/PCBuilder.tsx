@@ -157,7 +157,15 @@ export default function PCBuilder({ products: initialProducts, categories }: PCB
         const slugMatchStrict = strictSlugs.length > 0 && strictSlugs.includes(normalizedProductCat);
         const idMatchStrict = !!(catObj && allowedCategoryIds.includes(catObj.id));
         const baseMatch = nameMatchStrict || slugMatchStrict || idMatchStrict;
-        if (!baseMatch) return false;
+        if (!baseMatch) {
+          const nameMatchesStep = currentStep.categoryKeywords.some(k => normalizedProductName.includes(normalizeText(k)));
+          if (!nameMatchesStep) return false;
+        }
+        if (currentStep.id !== "storage") {
+          const storageTerms = ["ssd","hd","nvme","m2","m.2","sata","disco","armazenamento"];
+          const hasStorageTerm = storageTerms.some(t => normalizedProductName.includes(normalizeText(t)));
+          if (hasStorageTerm) return false;
+        }
         if (currentStep.filterKeywords && !currentStep.filterKeywords.some(k => normalizedProductName.includes(normalizeText(k)))) {
           return false;
         }
