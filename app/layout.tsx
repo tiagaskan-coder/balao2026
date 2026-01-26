@@ -16,8 +16,71 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Balão da Informática | Hardware, PCs Gamer e Mais",
-  description: "Sua loja de confiança para hardware, PCs gamer, notebooks e periféricos.",
+  title: {
+    template: "%s | Balão da Informática Campinas",
+    default: "Balão da Informática | Loja de Informática em Campinas e Região",
+  },
+  description: "A melhor loja de informática em Campinas e região. Encontre PCs Gamer, Notebooks, Placas de Vídeo, Hardware e Periféricos com o melhor preço. Entregas em Sumaré, Hortolândia, Paulínia, Valinhos e Vinhedo.",
+  keywords: ["informatica campinas", "loja de informatica campinas", "pc gamer campinas", "peças de pc campinas", "notebook campinas", "hardware campinas", "sumare", "hortolandia", "paulinia", "valinhos", "vinhedo"],
+  authors: [{ name: "Balão da Informática" }],
+  creator: "Balão da Informática",
+  publisher: "Balão da Informática",
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    url: "https://www.balaodainformatica.com.br",
+    title: "Balão da Informática | Loja de Informática em Campinas e Região",
+    description: "Hardware de alta performance, PCs Gamer e assistência técnica em Campinas. As melhores marcas e preços da RMC.",
+    siteName: "Balão da Informática",
+  },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ComputerStore",
+  "name": "Balão da Informática",
+  "image": "https://www.balaodainformatica.com.br/logo.png",
+  "description": "Loja de informática em Campinas especializada em hardware, PC Gamer e periféricos.",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Av. Brasil, 1234",
+    "addressLocality": "Campinas",
+    "addressRegion": "SP",
+    "postalCode": "13000-000",
+    "addressCountry": "BR"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": -22.9099,
+    "longitude": -47.0626
+  },
+  "url": "https://www.balaodainformatica.com.br",
+  "telephone": "+551930000000",
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday"
+      ],
+      "opens": "09:00",
+      "closes": "18:00"
+    },
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": "Saturday",
+      "opens": "09:00",
+      "closes": "13:00"
+    }
+  ],
+  "priceRange": "$$"
 };
 
 export default async function RootLayout({
@@ -32,6 +95,10 @@ export default async function RootLayout({
       <body
         className={`antialiased flex flex-col min-h-screen overflow-x-hidden`}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <AuthProvider>
           <ToastProvider>
             <CartProvider>
