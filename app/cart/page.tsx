@@ -481,6 +481,18 @@ export default function CartPage() {
                         Continuar Comprando
                     </button>
 
+                    <button 
+                        onClick={() => {
+                            if (confirm('Tem certeza que deseja limpar todo o carrinho?')) {
+                                clearCart();
+                            }
+                        }}
+                        className="w-full mt-3 flex items-center justify-center gap-2 text-red-600 hover:text-red-700 text-sm font-medium py-2 transition-colors"
+                    >
+                        <Trash2 size={16} />
+                        Limpar Carrinho
+                    </button>
+
                     <p className="text-xs text-gray-400 text-center mt-4">
                         Ambiente seguro. Seus dados estão protegidos.
                     </p>

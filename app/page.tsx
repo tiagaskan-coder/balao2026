@@ -8,10 +8,10 @@ import { searchProducts } from "@/lib/searchUtils";
 
 export const dynamic = 'force-dynamic';
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams?: { category?: string; search?: string };
+type SearchParams = Promise<{ category?: string; search?: string }>;
+
+export default async function Home(props: {
+  searchParams: SearchParams;
 }) {
   const [products, carouselImages, categories, homeBlocks] = await Promise.all([
     getProducts(),
@@ -20,6 +20,7 @@ export default async function Home({
     getHomeBlocks(true)
   ]);
   
+  const searchParams = await props.searchParams;
   const category = searchParams?.category;
   const search = searchParams?.search;
 

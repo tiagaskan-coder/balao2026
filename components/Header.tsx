@@ -143,7 +143,11 @@ export default function Header() {
                 }}
                 onFocus={() => setShowPreview(true)}
             />
-            <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#E60012] text-white p-2 rounded-full hover:bg-red-700 transition-colors shadow-md hover:shadow-lg z-10">
+            <button 
+              type="button" 
+              onClick={performSearch}
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#E60012] text-white p-2 rounded-full hover:bg-red-700 transition-colors shadow-md hover:shadow-lg z-10 cursor-pointer"
+            >
                 <Search size={20} strokeWidth={2.5} />
             </button>
           </div>
@@ -212,7 +216,11 @@ export default function Header() {
                 }}
                 onFocus={() => setShowPreview(true)}
             />
-             <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 p-2 z-10">
+             <button 
+               type="button" 
+               onClick={performSearch}
+               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 p-2 z-10"
+             >
                 <Search size={22} />
             </button>
 
