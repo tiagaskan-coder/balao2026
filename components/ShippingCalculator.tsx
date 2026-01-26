@@ -9,7 +9,7 @@ export default function ShippingCalculator() {
   const [result, setResult] = useState<{
     city: string;
     uf: string;
-    options: { name: string; days: string; price?: string }[];
+    options: { name: string; days: string; price?: string; emoji: string }[];
   } | null>(null);
   const [error, setError] = useState("");
 
@@ -123,12 +123,20 @@ export default function ShippingCalculator() {
           
           <div className="space-y-3">
             {result.options.map((opt, idx) => (
-              <div key={idx} className="flex justify-between items-center border-b border-gray-100 last:border-0 pb-3 last:pb-0">
-                <div>
-                  <div className="font-bold text-gray-800 text-base">{opt.name}</div>
-                  <div className="text-gray-600 text-sm">Prazo: {opt.days}</div>
+              <div key={idx} className="flex justify-between items-start border-b border-gray-100 last:border-0 pb-3 last:pb-0">
+                <div className="flex items-start gap-3">
+                    <span className="text-2xl select-none">{opt.emoji}</span>
+                    <div>
+                        <div className="font-bold text-gray-800 text-base flex items-center gap-2">
+                            {opt.name}
+                        </div>
+                        <div className="text-gray-600 text-sm flex items-center gap-1 mt-1">
+                            <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                            Prazo: {opt.days}
+                        </div>
+                    </div>
                 </div>
-                {opt.price && <div className="font-bold text-gray-700 text-lg">{opt.price}</div>}
+                {opt.price && <div className="font-bold text-gray-700 text-lg whitespace-nowrap">{opt.price}</div>}
               </div>
             ))}
           </div>

@@ -3,6 +3,7 @@ import Sidebar from "@/components/Sidebar";
 import ProductList from "@/components/ProductList";
 import Carousel from "@/components/Carousel";
 import ProductCarousel from "@/components/ProductCarousel";
+import SeoContent from "@/components/SeoContent";
 import { getProducts, getCarouselImages, getCategories, getHomeBlocks } from "@/lib/db";
 import { searchProducts } from "@/lib/searchUtils";
 
@@ -122,46 +123,29 @@ export default async function Home(props: {
 
             {/* SEO Content Section */}
             {!search && !category && (
-                <section className="bg-white p-8 rounded-xl shadow-sm mt-8 mb-8">
-                    <h1 className="text-3xl font-bold text-gray-800 mb-6">Balão da Informática: Sua Loja de Informática em Campinas e Região</h1>
-                    
-                    <div className="prose max-w-none text-gray-600 space-y-4">
-                        <p>
-                            Bem-vindo ao <strong>Balão da Informática</strong>, a sua principal referência em tecnologia e hardware em <strong>Campinas</strong> e toda a região. Se você procura onde comprar peças de computador, notebooks, ou montar aquele PC Gamer dos sonhos, você chegou ao lugar certo. Nossa loja de informática em Campinas oferece um catálogo completo com as melhores marcas do mercado, incluindo placas de vídeo NVIDIA GeForce e AMD Radeon, processadores Intel Core e AMD Ryzen, além de uma vasta linha de periféricos como teclados mecânicos, mouses gamers e monitores de alta frequência.
-                        </p>
-
-                        <h2 className="text-2xl font-semibold text-gray-800 mt-6">Atendemos Toda a Região Metropolitana de Campinas (RMC)</h2>
-                        <p>
-                            Com logística privilegiada, atendemos com agilidade não apenas Campinas, mas toda a Região Metropolitana (RMC). Se você está em <strong>Sumaré, Hortolândia, Paulínia, Valinhos, Vinhedo, Indaiatuba, Americana ou Jaguariúna</strong>, conte com a nossa eficiência. Sabemos que quem busca informática em Campinas exige qualidade, garantia e preço justo. Por isso, cobrimos ofertas e garantimos a melhor experiência de compra, unindo a conveniência do online com a confiança de uma empresa local sólida.
-                        </p>
-
-                        <h2 className="text-2xl font-semibold text-gray-800 mt-6">Especialistas em PC Gamer e Workstations</h2>
-                        <p>
-                            Não importa se você é um entusiasta de hardware procurando o último lançamento ou uma empresa em busca de workstations potentes para renderização e design, o Balão da Informática em Campinas tem a solução. Oferecemos também serviços de consultoria para <strong>montagem de computadores personalizados</strong>, garantindo que você leve para casa a máquina exata para sua necessidade, seja para jogos competitivos (eSports), edição de vídeo profissional ou uso corporativo em escritório.
-                        </p>
-
-                        <h2 className="text-2xl font-semibold text-gray-800 mt-6">Por que escolher o Balão da Informática?</h2>
-                        <ul className="list-disc pl-5 space-y-2">
-                            <li><strong>Variedade:</strong> O maior estoque de peças de PC da região de Campinas.</li>
-                            <li><strong>Preço Competitivo:</strong> Ofertas agressivas em hardware high-end e entrada.</li>
-                            <li><strong>Entrega Rápida:</strong> Receba seus produtos rapidamente em qualquer bairro de Campinas (Centro, Cambuí, Barão Geraldo, Taquaral, Ouro Verde, etc) e cidades vizinhas.</li>
-                            <li><strong>Suporte Especializado:</strong> Equipe técnica pronta para tirar suas dúvidas sobre compatibilidade e desempenho.</li>
-                        </ul>
-
-                        <p className="mt-6">
-                            Procurando <em>loja de informática no centro de Campinas</em> ou delivery de peças de computador? Esqueça a demora de comprar em sites distantes. Valorize o comércio local de Campinas e tenha seu produto em mãos muito mais rápido. Confira nossas promoções de SSDs NVMe, memórias RAM DDR4 e DDR5, gabinetes, fontes certificadas e cadeiras gamer ergonômicas.
-                        </p>
-
-                        <h2 className="text-2xl font-semibold text-gray-800 mt-6">Entrega Flash em Campinas</h2>
-                        <p>
-                            Precisa de urgência? Utilize nosso serviço de <strong>Entrega Flash</strong>. Para pedidos confirmados, conseguimos entregar no mesmo dia em diversos bairros de Campinas. Consulte a disponibilidade pelo nosso calculador de frete na página do produto.
-                        </p>
-                        
-                        <p className="font-semibold text-[#E60012] mt-4">
-                            Balão da Informática: A escolha número 1 em tecnologia em Campinas, Sumaré, Hortolândia e região. Venha conferir!
-                        </p>
-                    </div>
-                </section>
+                <SeoContent title="Balão da Informática: Sua Loja de Informática em Campinas e Região">
+                    <p className="text-gray-600 mb-4">
+                        Bem-vindo ao <strong>Balão da Informática</strong>, sua referência em tecnologia e hardware em <strong>Campinas e RMC</strong>. Encontre as melhores marcas de peças, notebooks e PC Gamer com preço justo e garantia.
+                    </p>
+                    <ul className="list-none pl-0 text-gray-600 space-y-3">
+                        <li className="flex items-start gap-2">
+                            <span className="text-xl">📍</span>
+                            <span><strong>Região RMC:</strong> Atendemos Campinas, Sumaré, Hortolândia, Paulínia, Valinhos, Vinhedo, Indaiatuba e Jaguariúna.</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <span className="text-xl">🚀</span>
+                            <span><strong>Especialistas:</strong> Montagem de PC Gamer High-End, Workstations para renderização e computadores para escritório.</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <span className="text-xl">⚡</span>
+                            <span><strong>Entrega Flash:</strong> Receba no mesmo dia em Campinas (consulte disponibilidade). Delivery rápido e seguro.</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <span className="text-xl">🏆</span>
+                            <span><strong>Por que escolher:</strong> Maior estoque da região, preços agressivos em SSD/RAM/Video e suporte técnico especializado.</span>
+                        </li>
+                    </ul>
+                </SeoContent>
             )}
         </main>
       </div>
