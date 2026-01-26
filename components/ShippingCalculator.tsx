@@ -88,7 +88,7 @@ export default function ShippingCalculator() {
   return (
     <div className="mt-6 border-t border-gray-200 pt-4">
       <div className="flex items-center gap-2 mb-2 text-gray-700 font-medium">
-        <Truck className="w-5 h-5 text-blue-600" />
+        <Truck className="w-5 h-5 text-red-600" />
         <span>Calcular Frete e Prazo</span>
       </div>
       
@@ -99,14 +99,14 @@ export default function ShippingCalculator() {
             value={cep}
             onChange={(e) => setCep(formatCep(e.target.value))}
             placeholder="00000-000"
-            className="w-full pl-3 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            className="w-full pl-3 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
             maxLength={9}
             />
         </div>
         <button
           onClick={handleCalculate}
           disabled={loading || cep.length < 9}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {loading ? "..." : "OK"}
         </button>
@@ -115,25 +115,25 @@ export default function ShippingCalculator() {
       {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
 
       {result && (
-        <div className="mt-4 bg-gray-50 rounded-md p-3 text-sm animate-in fade-in slide-in-from-top-2">
-          <div className="flex items-center gap-1 text-gray-500 mb-2 text-xs">
-            <MapPin className="w-3 h-3" />
+        <div className="mt-4 bg-gray-50 rounded-md p-4 animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center gap-1 text-gray-500 mb-3 text-sm">
+            <MapPin className="w-4 h-4" />
             <span>Destino: {result.city}/{result.uf}</span>
           </div>
           
-          <div className="space-y-2">
+          <div className="space-y-3">
             {result.options.map((opt, idx) => (
-              <div key={idx} className="flex justify-between items-center border-b border-gray-100 last:border-0 pb-2 last:pb-0">
+              <div key={idx} className="flex justify-between items-center border-b border-gray-100 last:border-0 pb-3 last:pb-0">
                 <div>
-                  <div className="font-semibold text-gray-800">{opt.name}</div>
-                  <div className="text-gray-600 text-xs">Prazo: {opt.days}</div>
+                  <div className="font-bold text-gray-800 text-base">{opt.name}</div>
+                  <div className="text-gray-600 text-sm">Prazo: {opt.days}</div>
                 </div>
-                {opt.price && <div className="font-bold text-gray-700">{opt.price}</div>}
+                {opt.price && <div className="font-bold text-gray-700 text-lg">{opt.price}</div>}
               </div>
             ))}
           </div>
           
-          <div className="mt-2 text-[10px] text-gray-400 text-center">
+          <div className="mt-3 text-xs text-gray-400 text-center">
             * Prazos estimados a partir de Campinas/SP (13070-000)
           </div>
         </div>
@@ -144,7 +144,7 @@ export default function ShippingCalculator() {
             href="https://buscacepinter.correios.com.br/app/endereco/index.php" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="text-xs text-blue-500 hover:underline"
+            className="text-xs text-red-500 hover:underline"
         >
             Não sei meu CEP
         </a>

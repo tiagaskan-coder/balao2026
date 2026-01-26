@@ -151,6 +151,11 @@ export default async function Home(props: {
                         <p className="mt-6">
                             Procurando <em>loja de informática no centro de Campinas</em> ou delivery de peças de computador? Esqueça a demora de comprar em sites distantes. Valorize o comércio local de Campinas e tenha seu produto em mãos muito mais rápido. Confira nossas promoções de SSDs NVMe, memórias RAM DDR4 e DDR5, gabinetes, fontes certificadas e cadeiras gamer ergonômicas.
                         </p>
+
+                        <h2 className="text-2xl font-semibold text-gray-800 mt-6">Entrega Flash em Campinas</h2>
+                        <p>
+                            Precisa de urgência? Utilize nosso serviço de <strong>Entrega Flash</strong>. Para pedidos confirmados, conseguimos entregar no mesmo dia em diversos bairros de Campinas. Consulte a disponibilidade pelo nosso calculador de frete na página do produto.
+                        </p>
                         
                         <p className="font-semibold text-[#E60012] mt-4">
                             Balão da Informática: A escolha número 1 em tecnologia em Campinas, Sumaré, Hortolândia e região. Venha conferir!

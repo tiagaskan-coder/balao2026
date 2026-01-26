@@ -83,6 +83,26 @@ export default async function CategoriaPage({
           ) : (
             <ProductList products={filteredProducts} />
           )}
+
+          {/* SEO Section for Categories */}
+          {categoryName && categoryName !== "Todos os Produtos" && (
+             <section className="bg-white p-6 rounded-lg shadow-sm mt-8 border-t border-gray-100">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">
+                    Comprar {categoryName} em Campinas e Região
+                </h2>
+                <div className="prose prose-sm text-gray-600 max-w-none">
+                    <p>
+                        Procurando por <strong>{categoryName}</strong> com o melhor preço de Campinas? No Balão da Informática você encontra uma seleção completa de {categoryName.toLowerCase()} das melhores marcas do mercado. Somos especialistas em hardware e periféricos, oferecendo garantia e suporte técnico especializado.
+                    </p>
+                    <p className="mt-2">
+                        Atendemos toda a Região Metropolitana de Campinas (RMC). Compre online e receba com rapidez em <strong>Sumaré, Hortolândia, Paulínia, Valinhos, Vinhedo e Indaiatuba</strong>. Se preferir, retire seu produto em nossa loja física.
+                    </p>
+                    <p className="mt-2">
+                        Não sabe qual {categoryName.toLowerCase()} escolher? Nossa equipe pode te ajudar a montar o setup ideal para suas necessidades, seja para PC Gamer, estação de trabalho ou uso doméstico. Aproveite nossas promoções de <strong>{categoryName}</strong> e faça um upgrade no seu computador hoje mesmo.
+                    </p>
+                </div>
+             </section>
+          )}
         </main>
       </div>
     </div>

@@ -33,6 +33,25 @@ export default async function ConsignacaoPage() {
       <div className="px-4 sm:px-6 lg:px-8 my-8">
         <ProductCarousel title="Equipamentos em Destaque" products={related} />
       </div>
+
+      <section className="bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 border-t border-gray-200">
+        <div className="max-w-7xl mx-auto prose prose-blue">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Venda seu Computador ou Notebook Usado em Campinas</h2>
+          <p className="text-gray-600 mb-4">
+            Quer vender seu PC usado mas não quer ter dor de cabeça com anúncios e negociações inseguras? O sistema de <strong>consignação de informática em Campinas</strong> do Balão da Informática é a solução ideal. Nós avaliamos seu equipamento, higienizamos e o expomos em nossa loja física e site, garantindo a melhor visibilidade para uma venda rápida.
+          </p>
+          <p className="text-gray-600 mb-4">
+            Somos a melhor opção de <em>compra e venda de usados em Campinas</em>. Aceitamos notebooks, computadores completos, monitores e peças de hardware (placas de vídeo, processadores). Traga seu equipamento para uma avaliação gratuita em nossa loja.
+          </p>
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">Por que consignar com a gente?</h3>
+          <ul className="list-disc pl-5 text-gray-600 space-y-2">
+            <li>Avaliação de mercado justa e transparente</li>
+            <li>Segurança total: nós lidamos com os curiosos e golpistas</li>
+            <li>Exposição para milhares de clientes locais na RMC</li>
+            <li>Pagamento garantido assim que o produto for vendido</li>
+          </ul>
+        </div>
+      </section>
     </>
   );
 }
