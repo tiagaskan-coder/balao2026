@@ -14,11 +14,10 @@ export default async function CategoriaPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams?: { search?: string; tags?: string };
+  searchParams: Promise<{ search?: string; tags?: string }>;
 }) {
   const { slug } = await params;
-  const search = searchParams?.search;
-  const tagsParam = searchParams?.tags;
+  const { search, tags: tagsParam } = await searchParams;
   const selectedTags = tagsParam ? tagsParam.split(',') : [];
  
   const [products, categories] = await Promise.all([
