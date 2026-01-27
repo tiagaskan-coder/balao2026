@@ -140,6 +140,40 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags,
     setExpanded((prev: Record<string, boolean>) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const handleTagToggle = (tagName: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    const currentTags = params.get('tags')?.split(',') || [];
+    
+    let newTags: string[];
+    if (currentTags.includes(tagName)) {
+        newTags = currentTags.filter(t => t !== tagName);
+    } else {
+        newTags = [...currentTags, tagName];
+    }
+    
+    if (newTags.length > 0) {
+        params.set('tags', newTags.join(','));
+    } else {
+        params.delete('tags');
+    }
+    
+    // Reset page when filtering
+    if (params.has('page')) {
+        params.set('page', '1');
+    }
+    
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const clearFilters = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('tags');
+    if (params.has('page')) {
+        params.set('page', '1');
+    }
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
   const getIcon = (iconName?: string) => {
     if (!iconName) return null;
     const IconComponent = iconMap[iconName] || iconMap[Object.keys(iconMap).find(k => iconName.includes(k)) || ""] || null;
