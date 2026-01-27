@@ -168,15 +168,20 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
         <div className="text-center">
-            <Link href="/" className="inline-block mb-6 relative w-[200px] h-[60px]">
-                <Image 
-                    src="/logo.png" 
-                    alt="Balão da Informática" 
-                    fill
-                    className="object-contain"
-                    priority
-                />
-            </Link>
+            <a href="http://www.balao.info" className="inline-flex flex-col items-center mb-6 group no-underline">
+                <div className="relative w-[200px] h-[60px]">
+                    <Image 
+                        src="/logo.png" 
+                        alt="Balão da Informática" 
+                        fill
+                        className="object-contain"
+                        priority
+                    />
+                </div>
+                <span className="text-xs font-bold text-[#E60012] tracking-widest mt-[-4px] uppercase font-sans">
+                    Unidade Anchieta
+                </span>
+            </a>
           <h2 className="text-3xl font-extrabold text-gray-900">
             {isSignUp ? "Crie sua conta" : "Acesse sua conta"}
           </h2>

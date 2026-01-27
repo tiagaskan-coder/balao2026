@@ -24,14 +24,19 @@ export default function Footer() {
           
           {/* About Section */}
           <div className="mb-6 md:mb-0">
-            <div className="relative w-[160px] h-[50px] mb-6">
-                <Image 
-                    src="/logo.png" 
-                    alt="Balão da Informática" 
-                    fill
-                    className="object-contain"
-                />
-            </div>
+            <a href="http://www.balao.info" className="block mb-6 group no-underline w-fit">
+                <div className="relative w-[160px] h-[50px]">
+                    <Image 
+                        src="/logo.png" 
+                        alt="Balão da Informática" 
+                        fill
+                        className="object-contain"
+                    />
+                </div>
+                <span className="block text-xs font-bold text-[#E60012] tracking-widest mt-1 uppercase font-sans pl-1">
+                    Unidade Anchieta
+                </span>
+            </a>
             <p className="text-sm leading-relaxed mb-6">
               Comércio e assistência técnica em informática. Tudo o que sua empresa e sua casa precisa em tecnologia.
             </p>

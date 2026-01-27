@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Search, ShoppingCart, User, Menu, MessageCircle } from "lucide-react";
+import { Search, ShoppingCart, User, Menu } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
@@ -109,10 +109,10 @@ export default function Header() {
         </button>
 
         {/* Logo Section */}
-        <div 
-          onClick={handleLogoClick}
-          className="cursor-pointer select-none flex-shrink-0 drop-shadow-sm transition-transform hover:scale-105 active:scale-95"
-          title="Clique 5 vezes para acesso administrativo"
+        <a 
+          href="http://www.balao.info"
+          className="flex flex-col items-center cursor-pointer select-none flex-shrink-0 drop-shadow-sm transition-transform hover:scale-105 active:scale-95 no-underline"
+          title="Ir para página inicial"
         >
              <div className="relative w-[140px] h-[45px] md:w-[200px] md:h-[65px]">
                 <Image 
@@ -123,15 +123,18 @@ export default function Header() {
                     priority
                 />
              </div>
-        </div>
+             <span className="text-[10px] md:text-xs font-bold text-[#E60012] tracking-widest mt-[-4px] md:mt-[-6px] uppercase font-sans">
+                Unidade Anchieta
+             </span>
+        </a>
 
         {/* Search Bar (Desktop) */}
         <form 
             ref={searchContainerRef}
             onSubmit={handleSearch} 
-            className="flex-1 max-w-3xl relative hidden md:flex items-center gap-3"
+            className="flex-1 max-w-3xl relative hidden md:block"
         >
-          <div className="relative flex-1 group">
+          <div className="relative group">
             <input
                 type="text"
                 placeholder="O que você procura hoje?"
@@ -150,28 +153,20 @@ export default function Header() {
             >
                 <Search size={20} strokeWidth={2.5} />
             </button>
-
-            {showPreview && searchQuery.length >= 2 && (
-                <SearchPreview 
-                    products={previewProducts}
-                    onSelect={(product) => {
-                        router.push(`/product/${product.id}`);
-                        setShowPreview(false);
-                        setSearchQuery("");
-                    }}
-                    onClose={() => setShowPreview(false)}
-                />
-            )}
           </div>
-          <Link
-            href="https://wa.me/5519987510267"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Falar no WhatsApp"
-            className="flex items-center justify-center h-12 w-12 rounded-full bg-[#25D366] text-white shadow-md hover:bg-[#128C7E] transition-colors"
-          >
-            <MessageCircle size={22} strokeWidth={2.5} />
-          </Link>
+
+          {/* Search Preview */}
+          {showPreview && searchQuery.length >= 2 && (
+              <SearchPreview 
+                  products={previewProducts}
+                  onSelect={(product) => {
+                      router.push(`/product/${product.id}`);
+                      setShowPreview(false);
+                      setSearchQuery("");
+                  }}
+                  onClose={() => setShowPreview(false)}
+              />
+          )}
         </form>
 
 
@@ -212,51 +207,41 @@ export default function Header() {
 
       {/* Mobile Search Bar (Full width below header on mobile) */}
       <div className="md:hidden px-4 pb-4" ref={mobileSearchContainerRef}>
-          <div className="flex items-center gap-3">
-            <form onSubmit={handleSearch} className="relative flex-1">
-              <input
-                  type="text"
-                  placeholder="Buscar produtos..."
-                  className="w-full pl-5 pr-12 py-3 border border-gray-300 rounded-full focus:outline-none focus:border-[#E60012] focus:ring-1 focus:ring-[#E60012] shadow-sm text-base"
-                  value={searchQuery}
-                  onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setShowPreview(true);
-                  }}
-                  onFocus={() => setShowPreview(true)}
-              />
-               <button 
-                 type="button" 
-                 onClick={performSearch}
-                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 p-2 z-10"
-               >
-                  <Search size={22} />
-              </button>
+          <form onSubmit={handleSearch} className="relative">
+            <input
+                type="text"
+                placeholder="Buscar produtos..."
+                className="w-full pl-5 pr-12 py-3 border border-gray-300 rounded-full focus:outline-none focus:border-[#E60012] focus:ring-1 focus:ring-[#E60012] shadow-sm text-base"
+                value={searchQuery}
+                onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setShowPreview(true);
+                }}
+                onFocus={() => setShowPreview(true)}
+            />
+             <button 
+               type="button" 
+               onClick={performSearch}
+               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 p-2 z-10"
+             >
+                <Search size={22} />
+            </button>
 
-              {showPreview && searchQuery.length >= 2 && (
-                  <div className="absolute top-full left-0 right-0 mt-1 z-50">
-                      <SearchPreview 
-                          products={previewProducts}
-                          onSelect={(product) => {
-                              router.push(`/product/${product.id}`);
-                              setShowPreview(false);
-                              setSearchQuery("");
-                          }}
-                          onClose={() => setShowPreview(false)}
-                      />
-                  </div>
-              )}
-            </form>
-            <Link
-              href="https://wa.me/5519987510267"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Falar no WhatsApp"
-              className="flex items-center justify-center h-12 w-12 rounded-full bg-[#25D366] text-white shadow-md hover:bg-[#128C7E] transition-colors"
-            >
-              <MessageCircle size={22} strokeWidth={2.5} />
-            </Link>
-          </div>
+            {/* Mobile Search Preview */}
+            {showPreview && searchQuery.length >= 2 && (
+                <div className="absolute top-full left-0 right-0 mt-1 z-50">
+                    <SearchPreview 
+                        products={previewProducts}
+                        onSelect={(product) => {
+                            router.push(`/product/${product.id}`);
+                            setShowPreview(false);
+                            setSearchQuery("");
+                        }}
+                        onClose={() => setShowPreview(false)}
+                    />
+                </div>
+            )}
+          </form>
       </div>
     </header>
   );
