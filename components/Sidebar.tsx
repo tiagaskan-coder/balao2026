@@ -102,10 +102,23 @@ interface SidebarProps {
   selectedTags?: string[];
 }
 
-export default function Sidebar({ categories, mobileOnly = false, availableTags, selectedTags = [] }: SidebarProps) {
+export default function Sidebar({ categories, mobileOnly = false, availableTags: propTags, selectedTags: propSelectedTags }: SidebarProps) {
   const dbTree = buildCategoryTree(categories);
   const router = useRouter();
+  const { availableTags: contextTags } = useSidebar();
   
+  // Use props if provided, otherwise fallback to context
+  const availableTags = propTags || contextTags;
+  
+  // Get selected tags from URL if not provided via props
+  const searchParams = useSearchParams();
+  const urlTags = searchParams.get('tags')?.split(',').filter(Boolean) || [];
+  const selectedTags = propSelectedTags || urlTags;
+
+  const pathname = usePathname();
+  const currentCategory = searchParams.get("category");
+  const { isOpen, closeSidebar } = useSidebar();
+
   const allProductsItem: Category = {
     id: "all-products",
     name: "Todos os Produtos",
@@ -118,11 +131,6 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags,
   };
 
   const tree = [allProductsItem, ...dbTree];
-
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const currentCategory = searchParams.get("category");
-  const { isOpen, closeSidebar } = useSidebar();
 
   // Custom tool item
   const monteSeuPcItem = {

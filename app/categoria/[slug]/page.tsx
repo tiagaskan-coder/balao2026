@@ -1,8 +1,10 @@
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import ProductList from "@/components/ProductList";
+import FilterSyncer from "@/components/FilterSyncer";
 import { getProducts, getCategories } from "@/lib/db";
 import { searchProducts } from "@/lib/searchUtils";
+import { extractTags, filterProductsByTags } from "@/lib/product-filters";
 import type { Category } from "@/lib/utils";
  
 export const dynamic = "force-dynamic";
@@ -12,10 +14,12 @@ export default async function CategoriaPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams?: { search?: string };
+  searchParams?: { search?: string; tags?: string };
 }) {
   const { slug } = await params;
   const search = searchParams?.search;
+  const tagsParam = searchParams?.tags;
+  const selectedTags = tagsParam ? tagsParam.split(',') : [];
  
   const [products, categories] = await Promise.all([
     getProducts(),
@@ -61,13 +65,20 @@ export default async function CategoriaPage({
   if (search) {
     filteredProducts = searchProducts(filteredProducts, search);
   }
+
+  // Extract tags from current filtered products (before tag filtering)
+  const availableTags = extractTags(filteredProducts);
+
+  // Apply tag filter
+  filteredProducts = filterProductsByTags(filteredProducts, selectedTags);
  
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+      <FilterSyncer tags={availableTags} />
       <Header />
       <div className="flex container mx-auto flex-1 py-6 gap-6 px-4 lg:px-0">
         <div className="hidden lg:block">
-          <Sidebar categories={categories} />
+          <Sidebar categories={categories} availableTags={availableTags} selectedTags={selectedTags} />
         </div>
         <main className="flex-1 w-full min-w-0">
           <div className="flex items-center justify-between mb-4">
