@@ -432,30 +432,72 @@ export default function MarketingManager() {
 
                     <div>
                         <div className="flex justify-between items-center mb-2">
-                            <label className="block text-sm font-medium text-gray-700">Conteúdo (HTML)</label>
+                            <label className="block text-sm font-medium text-gray-700">Conteúdo do E-mail (HTML)</label>
                             <button 
                                 onClick={() => {
-                                    if (products.length === 0) fetchProducts();
                                     setShowProductSelector(true);
+                                    fetchProducts();
                                 }}
-                                className="text-sm text-[#E60012] flex items-center gap-1 hover:underline"
+                                className="text-sm px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border flex items-center gap-1"
                             >
                                 <ShoppingBag size={14} /> Inserir Produto
                             </button>
                         </div>
                         <textarea 
-                            rows={15}
-                            className="w-full px-3 py-2 border rounded-md font-mono text-sm"
+                            className="mt-1 w-full px-3 py-2 border rounded-md h-64 font-mono text-sm"
                             value={editingCampaign.content}
                             onChange={e => setEditingCampaign({...editingCampaign, content: e.target.value})}
-                            placeholder="<h1>Olá!</h1><p>Escreva seu e-mail aqui...</p>"
-                        ></textarea>
-                        <p className="text-xs text-gray-500 mt-1">Dica: Você pode usar HTML básico.</p>
+                            placeholder="<h1>Olá!</h1><p>Confira nossas ofertas...</p>"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                            Dica: Use HTML para formatar. O template base já inclui cabeçalho e rodapé.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Público Alvo</label>
+                            <select 
+                                className="mt-1 w-full px-3 py-2 border rounded-md"
+                                value={editingCampaign.target_audience}
+                                onChange={e => setEditingCampaign({...editingCampaign, target_audience: e.target.value})}
+                            >
+                                <option value="all">Todos os Inscritos</option>
+                                <option value="buyers">Clientes que já compraram</option>
+                                <option value="leads">Apenas Leads (Newsletter)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Agendar Envio (Opcional)</label>
+                            <input 
+                                type="datetime-local" 
+                                className="mt-1 w-full px-3 py-2 border rounded-md"
+                                value={editingCampaign.scheduled_at ? new Date(editingCampaign.scheduled_at).toISOString().slice(0, 16) : ""}
+                                onChange={e => setEditingCampaign({...editingCampaign, scheduled_at: e.target.value})}
+                            />
+                        </div>
                     </div>
 
                     <div className="flex justify-end gap-3 pt-4 border-t">
-                        <button onClick={() => setView("list")} className="px-4 py-2 border rounded-md text-gray-600">Cancelar</button>
-                        <button onClick={handleSaveCampaign} className="px-4 py-2 bg-[#E60012] text-white rounded-md hover:bg-red-700">Salvar Campanha</button>
+                        <button 
+                            onClick={() => setView("list")}
+                            className="px-4 py-2 border rounded-md hover:bg-gray-50 text-gray-700"
+                        >
+                            Cancelar
+                        </button>
+                        <button 
+                            onClick={() => setShowPreview(true)}
+                            className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 flex items-center gap-2"
+                        >
+                            <Eye size={18} /> Pré-visualizar
+                        </button>
+                        <button 
+                            onClick={handleSaveCampaign}
+                            disabled={!editingCampaign.title || !editingCampaign.subject}
+                            className="px-4 py-2 bg-[#E60012] text-white rounded-md hover:bg-red-700 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <Send size={18} /> Salvar Campanha
+                        </button>
                     </div>
                 </div>
             )}
@@ -464,18 +506,21 @@ export default function MarketingManager() {
             {showPreview && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-                        <div className="p-4 border-b flex justify-between items-center bg-[#E60012] text-white rounded-t-lg">
-                            <h3 className="font-bold">Preview: {editingCampaign.subject || "Sem assunto"}</h3>
-                            <button onClick={() => setShowPreview(false)} className="text-white hover:text-gray-200"><X size={20} /></button>
+                        <div className="p-4 border-b flex justify-between items-center">
+                            <h3 className="font-bold text-lg">Pré-visualização</h3>
+                            <button onClick={() => setShowPreview(false)} className="text-gray-500 hover:text-gray-700">
+                                <X size={24} />
+                            </button>
                         </div>
-                        <div className="flex-1 overflow-y-auto bg-gray-100 p-4">
-                            <div className="bg-white max-w-[600px] mx-auto shadow-sm rounded-lg overflow-hidden">
-                                <div className="bg-[#E60012] p-5 text-center">
-                                    <h1 className="text-white text-xl m-0">Balão Castelo</h1>
+                        <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+                            <div className="bg-white border rounded-lg shadow-sm max-w-lg mx-auto overflow-hidden">
+                                <div className="bg-[#E60012] p-4 text-center">
+                                    <img src="https://balao2026.vercel.app/logo-white.png" alt="Logo" className="h-8 mx-auto" />
                                 </div>
-                                <div className="p-6" dangerouslySetInnerHTML={{ __html: editingCampaign.content || "<p>Conteúdo vazio...</p>" }} />
+                                <div className="p-6" dangerouslySetInnerHTML={{ __html: editingCampaign.content || "" }} />
                                 <div className="bg-gray-100 p-4 text-center text-xs text-gray-500">
-                                    <p>&copy; {new Date().getFullYear()} Balão Castelo. Todos os direitos reservados.</p>
+                                    <p>© 2026 Balão da Informática. Todos os direitos reservados.</p>
+                                    <p>Campinas - SP</p>
                                 </div>
                             </div>
                         </div>
@@ -489,33 +534,56 @@ export default function MarketingManager() {
                     <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col">
                         <div className="p-4 border-b flex justify-between items-center">
                             <h3 className="font-bold text-lg">Selecionar Produto</h3>
-                            <button onClick={() => setShowProductSelector(false)}><X size={20} /></button>
+                            <button onClick={() => setShowProductSelector(false)} className="text-gray-500 hover:text-gray-700">
+                                <X size={24} />
+                            </button>
                         </div>
                         <div className="p-4 border-b">
-                            <input 
-                                type="text" 
-                                placeholder="Buscar produto..." 
-                                className="w-full px-3 py-2 border rounded-md"
-                                value={productSearch}
-                                onChange={e => setProductSearch(e.target.value)}
-                            />
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                                <input 
+                                    type="text" 
+                                    placeholder="Buscar produto..." 
+                                    className="w-full pl-10 pr-4 py-2 border rounded-md"
+                                    value={productSearch}
+                                    onChange={e => setProductSearch(e.target.value)}
+                                />
+                            </div>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-4 space-y-2">
-                            {products
-                                .filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase()))
-                                .map(product => (
-                                    <div key={product.id} className="flex items-center gap-4 p-2 border rounded hover:bg-gray-50 cursor-pointer" onClick={() => insertProduct(product)}>
-                                        <div className="w-12 h-12 relative flex-shrink-0">
-                                            <Image src={product.image} alt={product.name} fill className="object-contain" />
+                        <div className="flex-1 overflow-y-auto p-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                {products
+                                    .filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase()))
+                                    .slice(0, 20)
+                                    .map(product => (
+                                    <div 
+                                        key={product.id} 
+                                        className="border rounded-md p-3 hover:border-[#E60012] cursor-pointer flex gap-3 items-center group transition-colors"
+                                        onClick={() => insertProduct(product)}
+                                    >
+                                        <div className="w-16 h-16 bg-gray-100 rounded flex-shrink-0 relative overflow-hidden">
+                                            {product.image && (
+                                                <Image 
+                                                    src={product.image} 
+                                                    alt={product.name} 
+                                                    fill
+                                                    className="object-cover"
+                                                />
+                                            )}
                                         </div>
-                                        <div className="flex-1">
-                                            <div className="font-medium line-clamp-1">{product.name}</div>
-                                            <div className="text-[#E60012] font-bold">{product.price}</div>
+                                        <div className="flex-1 min-w-0">
+                                            <h4 className="text-sm font-medium text-gray-900 truncate group-hover:text-[#E60012]">{product.name}</h4>
+                                            <p className="text-sm font-bold text-gray-700">{product.price}</p>
                                         </div>
-                                        <Plus size={20} className="text-gray-400" />
+                                        <Plus size={20} className="text-gray-400 group-hover:text-[#E60012]" />
                                     </div>
-                                ))
-                            }
+                                ))}
+                            </div>
+                            {products.length === 0 && (
+                                <div className="text-center py-8 text-gray-500">
+                                    Carregando produtos...
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

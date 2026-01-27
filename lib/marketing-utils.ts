@@ -17,10 +17,26 @@ export async function processCampaignSend(campaignId: string) {
     let query = supabaseAdmin.from('marketing_subscribers').select('email');
     
     // Filtros de audiência
-    if (campaign.target_audience === 'buyers') {
-        // query = query.eq('is_buyer', true); 
+    if (campaign.target_audience === 'buyers' || campaign.target_audience === 'leads') {
+        const { data: orders } = await supabaseAdmin
+            .from('orders')
+            .select('customer_email');
+            
+        const buyerEmails = orders ? [...new Set(orders.map((o: any) => o.customer_email))] : [];
+        
+        if (campaign.target_audience === 'buyers') {
+             if (buyerEmails.length > 0) {
+                 query = query.in('email', buyerEmails);
+             } else {
+                 return { success: true, sent: 0, failed: 0, campaignId, message: "Nenhum comprador encontrado." };
+             }
+        } else if (campaign.target_audience === 'leads') {
+             if (buyerEmails.length > 0) {
+                 // Filtra quem NÃO está na lista de compradores
+                 query = query.filter('email', 'not.in', `(${buyerEmails.map(e => `"${e}"`).join(',')})`);
+             }
+        }
     }
-    // TODO: Adicionar mais filtros conforme necessidade
 
     const { data: subscribers, error: subError } = await query;
     if (subError) throw subError;
@@ -41,7 +57,7 @@ export async function processCampaignSend(campaignId: string) {
     let successCount = 0;
     let failCount = 0;
 
-    const promises = subscribers.map(sub => 
+    const promises = (subscribers || []).map((sub: { email: string }) => 
         sendEmail({
             to: sub.email,
             subject: campaign.subject,
