@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Product, Category } from "@/lib/utils";
+import { Product, Category, buildCategoryTree } from "@/lib/utils";
 import { searchProducts } from "@/lib/searchUtils";
 import { Edit, Trash2, Plus, Save, X, Search, CheckSquare, Square, Upload, Copy, AlertTriangle, ImageOff, Image as ImageIcon, Video, DollarSign, Package, ChevronDown, Percent } from "lucide-react";
 import Image from "next/image";
@@ -11,9 +11,28 @@ const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 };
 
+// Helper to flatten category tree with level info
+const flattenCategoryTree = (categories: Category[], level = 0): { category: Category, level: number }[] => {
+  let result: { category: Category, level: number }[] = [];
+  categories.forEach(cat => {
+    result.push({ category: cat, level });
+    if (cat.children && cat.children.length > 0) {
+      result = result.concat(flattenCategoryTree(cat.children, level + 1));
+    }
+  });
+  return result;
+};
+
 export default function ProductManager() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  
+  // Create sorted and flattened categories for display
+  const sortedCategories = React.useMemo(() => {
+    const tree = buildCategoryTree(categories);
+    return flattenCategoryTree(tree);
+  }, [categories]);
+
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
@@ -454,7 +473,11 @@ export default function ProductManager() {
                         className="text-sm border-red-200 rounded-md py-1.5 px-2 focus:ring-2 focus:ring-red-500 outline-none"
                     >
                         <option value="">Alterar Categoria...</option>
-                        {categories.map((c: Category) => <option key={c.id} value={c.name}>{c.name}</option>)}
+                        {sortedCategories.map((item) => (
+                            <option key={item.category.id} value={item.category.name}>
+                                {Array(item.level).fill('\u00A0\u00A0').join('')}{item.category.name}
+                            </option>
+                        ))}
                     </select>
                     <button 
                         onClick={handleBulkUpdateCategory}
@@ -529,8 +552,10 @@ export default function ProductManager() {
                         className="w-full pl-4 pr-10 py-2 border rounded-lg appearance-none bg-white focus:ring-2 focus:ring-red-500 outline-none cursor-pointer"
                     >
                         <option value="">Todas Categorias</option>
-                        {categories.map((c) => (
-                            <option key={c.id} value={c.name}>{c.name}</option>
+                        {sortedCategories.map((item) => (
+                            <option key={item.category.id} value={item.category.name}>
+                                {Array(item.level).fill('\u00A0\u00A0').join('')}{item.category.name}
+                            </option>
                         ))}
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
@@ -740,11 +765,13 @@ export default function ProductManager() {
                                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCurrentProduct({...currentProduct, category: e.target.value})}
                                 >
                                     <option value="">Selecione...</option>
-                                    {categories.map(c => (
-                                        <option key={c.id} value={c.name}>{c.name}</option>
+                                    {sortedCategories.map(item => (
+                                        <option key={item.category.id} value={item.category.name}>
+                                            {Array(item.level).fill('\u00A0\u00A0').join('')}{item.category.name}
+                                        </option>
                                     ))}
                                     {/* Fallback */}
-                                    {!categories.length && (
+                                    {!sortedCategories.length && (
                                         <>
                                             <option value="Hardware">Hardware</option>
                                             <option value="Periféricos">Periféricos</option>
