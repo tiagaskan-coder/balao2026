@@ -123,9 +123,6 @@ export default function Header() {
                     priority
                 />
              </div>
-             <span className="text-[10px] md:text-xs font-bold text-[#E60012] tracking-widest mt-[-4px] md:mt-[-6px] uppercase font-sans">
-                Unidade Anchieta
-             </span>
         </a>
 
         {/* Search Bar (Desktop) */}

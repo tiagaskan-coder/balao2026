@@ -178,9 +178,6 @@ export default function LoginPage() {
                         priority
                     />
                 </div>
-                <span className="text-xs font-bold text-[#E60012] tracking-widest mt-[-4px] uppercase font-sans">
-                    Unidade Anchieta
-                </span>
             </a>
           <h2 className="text-3xl font-extrabold text-gray-900">
             {isSignUp ? "Crie sua conta" : "Acesse sua conta"}

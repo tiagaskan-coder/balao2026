@@ -33,9 +33,6 @@ export default function Footer() {
                         className="object-contain"
                     />
                 </div>
-                <span className="block text-xs font-bold text-[#E60012] tracking-widest mt-1 uppercase font-sans pl-1">
-                    Unidade Anchieta
-                </span>
             </a>
             <p className="text-sm leading-relaxed mb-6">
               Comércio e assistência técnica em informática. Tudo o que sua empresa e sua casa precisa em tecnologia.
