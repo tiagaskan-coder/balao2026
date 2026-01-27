@@ -8,7 +8,8 @@ import {
   Monitor, Smartphone, Gamepad, Speaker, Tv, Wifi, Printer, Home, Plug, HardDrive, Briefcase, Shield, List,
   Laptop, Cpu, Keyboard, Mouse, Watch, Tablet, Headphones, Camera,
   Tag, Wrench, Handshake,
-  Lock, Ghost, Key, Armchair, Square, Disc, Mic, Cable, RefreshCcw, Usb, Backpack, Lightbulb, Zap, Video, Bell, Radio, Power, ToggleLeft, User, Star, Smile, Shirt, Coffee, Image, Gift, FileText, PenTool, Table, Move, CreditCard, Copy, Droplet, Cylinder, Scan, Gamepad2, Box, Server, Book, Feather, Aperture, CircuitBoard, MemoryStick, Fan, Network, Battery
+  Lock, Ghost, Key, Armchair, Square, Disc, Mic, Cable, RefreshCcw, Usb, Backpack, Lightbulb, Zap, Video, Bell, Radio, Power, ToggleLeft, User, Star, Smile, Shirt, Coffee, Image, Gift, FileText, PenTool, Table, Move, CreditCard, Copy, Droplet, Cylinder, Scan, Gamepad2, Box, Server, Book, Feather, Aperture, CircuitBoard, MemoryStick, Fan, Network, Battery,
+  Filter as FilterIcon, Check, XCircle
 } from "lucide-react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useSidebar } from "@/context/SidebarContext";
@@ -94,8 +95,16 @@ const iconMap: Record<string, any> = {
   "Battery": Battery
 };
 
-export default function Sidebar({ categories, mobileOnly = false }: { categories: Category[], mobileOnly?: boolean }) {
+interface SidebarProps {
+  categories: Category[];
+  mobileOnly?: boolean;
+  availableTags?: { name: string; count: number }[];
+  selectedTags?: string[];
+}
+
+export default function Sidebar({ categories, mobileOnly = false, availableTags, selectedTags = [] }: SidebarProps) {
   const dbTree = buildCategoryTree(categories);
+  const router = useRouter();
   
   const allProductsItem: Category = {
     id: "all-products",
@@ -216,6 +225,52 @@ export default function Sidebar({ categories, mobileOnly = false }: { categories
                     <X size={20} />
                 </button>
             </div>
+
+            {/* FILTERS SECTION */}
+            {availableTags && availableTags.length > 0 && (
+                <div className="border-b border-gray-100">
+                    <div className="px-4 py-3 bg-white font-bold text-gray-700 flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-sm">
+                            <FilterIcon size={16} className="text-[#E60012]" />
+                            <span>Filtrar</span>
+                        </div>
+                        {selectedTags.length > 0 && (
+                            <button 
+                                onClick={clearFilters}
+                                className="text-xs text-red-600 hover:text-red-800 flex items-center gap-1 font-medium transition-colors"
+                                title="Limpar todos os filtros"
+                            >
+                                <XCircle size={14} /> Limpar
+                            </button>
+                        )}
+                    </div>
+                    <div className="px-4 pb-4 space-y-2">
+                        {availableTags.map(tag => {
+                            const isSelected = selectedTags.includes(tag.name);
+                            return (
+                                <div 
+                                    key={tag.name} 
+                                    className="flex items-center gap-2 cursor-pointer group"
+                                    onClick={() => handleTagToggle(tag.name)}
+                                >
+                                    <div className={`
+                                        w-4 h-4 rounded border flex items-center justify-center transition-all duration-200
+                                        ${isSelected ? 'bg-[#E60012] border-[#E60012]' : 'bg-white border-gray-300 group-hover:border-red-400'}
+                                    `}>
+                                        {isSelected && <Check size={12} className="text-white" strokeWidth={3} />}
+                                    </div>
+                                    <span className={`text-sm flex-1 truncate ${isSelected ? 'font-medium text-gray-900' : 'text-gray-600 group-hover:text-gray-900'}`}>
+                                        {tag.name}
+                                    </span>
+                                    <span className="text-xs text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded-full">
+                                        {tag.count}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
             
             <div className="py-2 overflow-y-auto max-h-[calc(100vh-60px)] lg:max-h-none custom-scrollbar">
                 {tree.map(node => (
