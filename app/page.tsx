@@ -6,6 +6,7 @@ import ProductCarousel from "@/components/ProductCarousel";
 import SeoContent from "@/components/SeoContent";
 import { getProducts, getCarouselImages, getCategories, getHomeBlocks } from "@/lib/db";
 import { searchProducts } from "@/lib/searchUtils";
+import CarnavalCountdownPopup from '@/components/CarnavalCountdownPopup';
 
 export const dynamic = 'force-dynamic';
 
@@ -147,6 +148,10 @@ export default async function Home(props: {
                     </ul>
                 </SeoContent>
             )}
+<CarnavalCountdownPopup 
+        delayMs={2000}
+        promoEndDate="2026-03-05"
+      />       
         </main>
       </div>
     </div>
