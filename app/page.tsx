@@ -147,11 +147,7 @@ export default async function Home(props: {
                         </li>
                     </ul>
                 </SeoContent>
-            )}
-<CarnavalCountdownPopup 
-        delayMs={2000}
-        promoEndDate="2026-03-05"
-      />       
+            )}      
         </main>
       </div>
     </div>
