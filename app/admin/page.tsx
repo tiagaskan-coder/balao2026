@@ -474,23 +474,23 @@ export default function AdminPage() {
 
                                         <div>
                                             <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Opções Extras</label>
-                                            <div className="flex items-center gap-2 mt-2">
-                                                <input 
-                                                    type="checkbox" 
-                                                    id="migrateImages"
-                                                    checked={migrateImages}
-                                                    onChange={(e) => setMigrateImages(e.target.checked)}
-                                                    className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
-                                                />
-                                                <label htmlFor="migrateImages" className="text-sm text-gray-700 select-none cursor-pointer">
-                                                    Migrar imagens para Supabase
+                                            <div className="flex items-center h-[38px]">
+                                                <label className="flex items-center gap-2 cursor-pointer select-none">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        checked={migrateImages} 
+                                                        onChange={(e) => setMigrateImages(e.target.checked)}
+                                                        className="w-4 h-4 text-[#E60012] rounded border-gray-300 focus:ring-[#E60012]"
+                                                    />
+                                                    <span className="text-sm text-gray-700 font-medium">
+                                                        Migrar imagens para Supabase
+                                                    </span>
                                                 </label>
                                             </div>
-                                            <p className="text-xs text-gray-500 mt-1 ml-6">
-                                                Faz download e upload automático (mais lento).
-                                            </p>
                                         </div>
                                     </div>
+
+                                    {/* Action Buttons */}
 
                                     <div className="mb-6 overflow-x-auto">
                                         <table className="w-full text-sm text-left text-gray-500">

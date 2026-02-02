@@ -435,6 +435,92 @@ export default function ProductManager() {
         setSaving(false);
     }
   };
+
+  const handleMigration = async () => {
+    // 1. Filter candidates: Products with image that is NOT supabase
+    const candidates = products.filter(p => p.image && !p.image.includes('supabase.co'));
+
+    if (candidates.length === 0) {
+        return alert("Todas as imagens já estão no Supabase (ou não possuem imagem).");
+    }
+
+    if (!confirm(`Deseja migrar ${candidates.length} imagens para o Supabase? Isso pode demorar.`)) return;
+
+    setIsMigrating(true);
+    setMigrationProgress({ total: candidates.length, current: 0, success: 0, error: 0 });
+    setMigrationLogs([]);
+    setShowMigration(true);
+
+    // Extract IDs
+    const ids = candidates.map(p => p.id);
+    
+    // Chunk processing handled by backend? 
+    // The backend /api/products/migrate-images handles a list of IDs.
+    // However, for UI progress, we might want to send chunks to backend so we can update progress bar.
+    // If we send all 1000 IDs, the request might timeout.
+    
+    const chunkSize = 5; // Small chunk for better progress feedback
+    let successCount = 0;
+    let errorCount = 0;
+
+    try {
+        for (let i = 0; i < ids.length; i += chunkSize) {
+            const chunkIds = ids.slice(i, i + chunkSize);
+            
+            // Update Log
+            setMigrationLogs(prev => [...prev, `Processando lote ${Math.floor(i/chunkSize) + 1}...`]);
+
+            const res = await fetch("/api/products/migrate-images", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ ids: chunkIds })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                const results = data.results || [];
+                
+                // Count success/error
+                const successes = results.filter((r: any) => r.status === 'success' || r.status === 'skipped').length;
+                const errors = results.filter((r: any) => r.status === 'error').length;
+                
+                successCount += successes;
+                errorCount += errors;
+
+                // Log details
+                results.forEach((r: any) => {
+                    if (r.status === 'error') {
+                        setMigrationLogs(prev => [...prev, `Erro (ID: ${r.id}): ${r.error}`]);
+                    }
+                });
+
+            } else {
+                setMigrationLogs(prev => [...prev, `Erro na requisição do lote.`]);
+                errorCount += chunkIds.length;
+            }
+
+            // Update Progress
+            setMigrationProgress({
+                total: candidates.length,
+                current: Math.min(i + chunkSize, candidates.length),
+                success: successCount,
+                error: errorCount
+            });
+        }
+        
+        setMigrationLogs(prev => [...prev, `Concluído! Sucesso: ${successCount}, Erros: ${errorCount}`]);
+        alert(`Migração concluída!\nSucesso: ${successCount}\nErros: ${errorCount}`);
+        fetchProducts(); // Refresh to see new URLs
+
+    } catch (error: any) {
+        console.error("Migration error:", error);
+        setMigrationLogs(prev => [...prev, `Erro fatal: ${error.message}`]);
+        alert("Erro durante a migração.");
+    } finally {
+        setIsMigrating(false);
+    }
+  };
+
   // Filter Products
   const filteredProducts = React.useMemo(() => {
     let result = products;
