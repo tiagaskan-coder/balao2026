@@ -30,6 +30,7 @@ export default function AdminPage() {
   const [priceAdjustment, setPriceAdjustment] = useState<number>(0);
   const [adjustmentScope, setAdjustmentScope] = useState<"all" | "high_value" | "low_value">("all");
   const [scopeThreshold, setScopeThreshold] = useState<number>(1000);
+  const [migrateImages, setMigrateImages] = useState(false);
   
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
@@ -469,6 +470,25 @@ export default function AdminPage() {
                                                      />
                                                 </div>
                                             )}
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Opções Extras</label>
+                                            <div className="flex items-center gap-2 mt-2">
+                                                <input 
+                                                    type="checkbox" 
+                                                    id="migrateImages"
+                                                    checked={migrateImages}
+                                                    onChange={(e) => setMigrateImages(e.target.checked)}
+                                                    className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                                                />
+                                                <label htmlFor="migrateImages" className="text-sm text-gray-700 select-none cursor-pointer">
+                                                    Migrar imagens para Supabase
+                                                </label>
+                                            </div>
+                                            <p className="text-xs text-gray-500 mt-1 ml-6">
+                                                Faz download e upload automático (mais lento).
+                                            </p>
                                         </div>
                                     </div>
 

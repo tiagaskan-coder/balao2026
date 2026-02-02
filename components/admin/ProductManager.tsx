@@ -52,6 +52,12 @@ export default function ProductManager() {
   const [imagePreview, setImagePreview] = useState<string>("");
   const [saving, setSaving] = useState(false);
 
+  // Migration State
+  const [showMigration, setShowMigration] = useState(false);
+  const [migrationProgress, setMigrationProgress] = useState({ total: 0, current: 0, success: 0, error: 0 });
+  const [isMigrating, setIsMigrating] = useState(false);
+  const [migrationLogs, setMigrationLogs] = useState<string[]>([]);
+
   useEffect(() => {
     fetchProducts();
     fetchCategories();
@@ -564,6 +570,16 @@ export default function ProductManager() {
             
             <div className="flex items-center gap-2 w-full md:w-auto justify-end">
                 {/* Maintenance Buttons */}
+                <button 
+                    onClick={handleMigration}
+                    disabled={isMigrating}
+                    className="bg-blue-600 text-white px-3 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors disabled:opacity-50"
+                    title="Migrar Imagens"
+                >
+                    <Upload size={18} />
+                    <span className="hidden lg:inline">Migrar Imagens</span>
+                </button>
+
                 <button
                     onClick={handleDeleteNoImage}
                     className="bg-white text-gray-700 px-3 py-2 rounded-lg flex items-center gap-2 hover:bg-red-50 hover:text-red-600 border border-gray-300 transition-colors"
@@ -596,6 +612,37 @@ export default function ProductManager() {
                 </button>
             </div>
         </div>
+
+        {/* Migration Progress */}
+        {showMigration && (
+            <div className="bg-white border rounded-lg p-6 mb-6 shadow-sm animate-in fade-in slide-in-from-top-4">
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-bold text-lg">Migração de Imagens</h3>
+                    <button onClick={() => setShowMigration(false)} className="text-gray-400 hover:text-gray-600">
+                        <X size={20} />
+                    </button>
+                </div>
+                
+                <div className="mb-2 flex justify-between text-sm text-gray-600">
+                    <span>Processando: {migrationProgress.current} / {migrationProgress.total}</span>
+                    <span>Sucesso: {migrationProgress.success} | Erros: {migrationProgress.error}</span>
+                </div>
+                
+                <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                    <div 
+                        className="bg-blue-600 h-2.5 rounded-full transition-all duration-300" 
+                        style={{ width: `${(migrationProgress.current / Math.max(migrationProgress.total, 1)) * 100}%` }}
+                    ></div>
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded-md h-40 overflow-y-auto text-xs font-mono border">
+                    {migrationLogs.length === 0 && <span className="text-gray-400">Aguardando início...</span>}
+                    {migrationLogs.map((log, i) => (
+                        <div key={i} className="mb-1">{log}</div>
+                    ))}
+                </div>
+            </div>
+        )}
 
         {/* List */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
