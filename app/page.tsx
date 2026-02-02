@@ -6,7 +6,6 @@ import ProductCarousel from "@/components/ProductCarousel";
 import SeoContent from "@/components/SeoContent";
 import { getProducts, getCarouselImages, getCategories, getHomeBlocks } from "@/lib/db";
 import { searchProducts } from "@/lib/searchUtils";
-import CarnavalCountdownPopup from '@/components/CarnavalCountdownPopup';
 
 export const dynamic = 'force-dynamic';
 
