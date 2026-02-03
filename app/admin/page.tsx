@@ -335,6 +335,13 @@ export default function AdminPage() {
                         <Settings size={18} />
                         Configurações (Em breve)
                     </button>
+                    <button
+                        onClick={() => setActiveTab("coupons")}
+                        className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${activeTab === "coupons" ? "bg-red-50 text-[#E60012] border-l-4 border-[#E60012]" : "text-gray-600 hover:bg-gray-50"}`}
+                    >
+                        <Settings size={18} />
+                        Cupons
+                    </button>
                 </nav>
             </aside>
 
