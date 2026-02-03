@@ -46,7 +46,7 @@ export async function sendEmail({ to, subject, html, eventType = 'general', camp
         }
 
         const info = await transporter.sendMail({
-            from: `"Balão Castelo" <${process.env.SMTP_USER}>`, // Remetente padrão: balaocastelo@gmail.com
+            from: `"Balão Castelo" <${process.env.SMTP_USER || 'balaocastelo@gmail.com'}>`, // Remetente principal
             to,
             subject,
             html,
@@ -87,7 +87,7 @@ export async function sendSystemNotification(event: string, data: any) {
     `;
 
     return sendEmail({
-        to: process.env.ADMIN_EMAIL || 'balaocastelo@gmail.com',
+        to: 'balaocastelo@gmail.com', // E-mail principal da loja para notificações
         subject,
         html,
         eventType: `system_${event}`
