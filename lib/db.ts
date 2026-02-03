@@ -428,6 +428,29 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'created_at' | '
     }
 }
 
+export async function getOrder(id: string): Promise<Order | null> {
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('orders')
+            .select(`
+                *,
+                items:order_items(*)
+            `)
+            .eq('id', id)
+            .single();
+
+        if (error) {
+            console.error("Supabase error (order):", error);
+            return null;
+        }
+
+        return data as Order;
+    } catch (error) {
+        console.error("Error fetching order:", error);
+        return null;
+    }
+}
+
 export async function getOrders(): Promise<Order[]> {
     try {
         const { data, error } = await supabaseAdmin

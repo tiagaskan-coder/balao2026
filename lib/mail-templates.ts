@@ -16,7 +16,13 @@ export const emailStyles = `
   </style>
 `;
 
-export const getBaseTemplate = (content: string, title: string = "Balão Castelo") => `
+const getUnsubscribeLink = (email?: string) => {
+  if (!email) return "#";
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://balaocastelo.com.br";
+  return `${baseUrl}/unsubscribe?email=${encodeURIComponent(email)}`;
+};
+
+export const getBaseTemplate = (content: string, title: string = "Balão Castelo", email?: string) => `
 <!DOCTYPE html>
 <html>
 <head>
@@ -36,11 +42,51 @@ export const getBaseTemplate = (content: string, title: string = "Balão Castelo
     <div class="footer">
       <p>&copy; ${new Date().getFullYear()} Balão Castelo. Todos os direitos reservados.</p>
       <p>Este e-mail foi enviado automaticamente. Por favor, não responda.</p>
+      ${email ? `<p><a href="${getUnsubscribeLink(email)}" style="color: #888; text-decoration: underline;">Descadastrar-se</a></p>` : ''}
     </div>
   </div>
 </body>
 </html>
 `;
+
+export const getOrderStatusUpdateTemplate = (order: any, status: string) => {
+  const statusMap: Record<string, string> = {
+    pending: "Pendente",
+    paid: "Pago / Em Separação",
+    shipped: "Enviado / Pronto para Retirada",
+    delivered: "Entregue",
+    canceled: "Cancelado"
+  };
+
+  const statusColor: Record<string, string> = {
+    pending: "#f59e0b",
+    paid: "#3b82f6",
+    shipped: "#8b5cf6",
+    delivered: "#10b981",
+    canceled: "#ef4444"
+  };
+
+  const statusLabel = statusMap[status] || status;
+  const color = statusColor[status] || "#333";
+
+  const content = `
+    <h2>Atualização do Pedido #${order.id.slice(0, 8)}</h2>
+    <p>Olá, ${order.customer_name}!</p>
+    <p>O status do seu pedido foi atualizado.</p>
+    
+    <div class="info-box" style="border-left-color: ${color};">
+      <strong>Novo Status:</strong> <span style="color: ${color}; font-weight: bold; text-transform: uppercase;">${statusLabel}</span>
+    </div>
+
+    <p>Se você tiver alguma dúvida, entre em contato conosco.</p>
+
+    <p style="text-align: center;">
+      <a href="https://balaocastelo.com.br/meus-pedidos" class="button">Ver Detalhes do Pedido</a>
+    </p>
+  `;
+
+  return getBaseTemplate(content, `Atualização de Pedido #${order.id.slice(0, 8)}`, order.customer_email);
+};
 
 export const getOrderConfirmationTemplate = (order: any, items: any[]) => {
   const itemsHtml = items.map(item => `
@@ -94,10 +140,10 @@ export const getOrderConfirmationTemplate = (order: any, items: any[]) => {
     </p>
   `;
 
-  return getBaseTemplate(content, "Confirmação de Pedido");
+  return getBaseTemplate(content, "Confirmação de Pedido", order.customer_email);
 };
 
-export const getWelcomeTemplate = (name: string) => {
+export const getWelcomeTemplate = (name: string, email?: string) => {
   const content = `
     <h2>Bem-vindo(a) à Balão Castelo, ${name}!</h2>
     <p>Estamos muito felizes em ter você conosco. Agora você faz parte da nossa comunidade e receberá ofertas exclusivas em primeira mão.</p>
@@ -114,7 +160,7 @@ export const getWelcomeTemplate = (name: string) => {
     </p>
   `;
 
-  return getBaseTemplate(content, "Bem-vindo!");
+  return getBaseTemplate(content, "Bem-vindo!", email);
 };
 
 export const getAdminNotificationTemplate = (title: string, data: any) => {
