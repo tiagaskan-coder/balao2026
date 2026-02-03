@@ -11,8 +11,8 @@ import { NextResponse } from "next/server";
 // If RLS is enabled and policies are strict, this might fail without a logged in user.
 // But the SQL script creates policies allowing authenticated users to manage.
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co";
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder_key";
 // Use service role key if available for seeding to bypass RLS
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseKey;
 

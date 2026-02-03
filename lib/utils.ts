@@ -49,6 +49,22 @@ export interface HomeBlock {
   created_at: string;
 }
 
+export interface Coupon {
+  id: string;
+  code: string;
+  discount_type: 'percentage' | 'fixed';
+  discount_value: number;
+  expiration_date?: string;
+  max_uses?: number;
+  current_uses: number;
+  status: 'active' | 'inactive';
+  min_purchase_value: number;
+  applicable_products?: string[]; // IDs
+  applicable_categories?: string[]; // Slugs or Names
+  created_at?: string;
+  updated_at?: string;
+}
+
 export const CATEGORIES = [
   "Todos os Produtos",
   "Computadores & Informática",

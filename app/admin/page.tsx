@@ -10,9 +10,10 @@ import OrderManager from "@/components/admin/OrderManager";
 import ProductManager from "@/components/admin/ProductManager";
 import HomeBlocksManager from "@/components/admin/HomeBlocksManager";
 import MarketingManager from "@/components/admin/MarketingManager";
+import CouponManager from "@/components/admin/CouponManager";
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState<"import" | "carousel" | "products" | "categories" | "orders" | "home_blocks" | "marketing">("import");
+  const [activeTab, setActiveTab] = useState<"import" | "carousel" | "products" | "categories" | "orders" | "home_blocks" | "marketing" | "coupons">("import");
 
   // Product List State
   const [products, setProducts] = useState<Product[]>([]);
@@ -352,6 +353,13 @@ export default function AdminPage() {
                     {activeTab === "marketing" && (
                          <div className="animate-in fade-in duration-300">
                              <MarketingManager />
+                         </div>
+                    )}
+
+                    {/* COUPONS TAB */}
+                    {activeTab === "coupons" && (
+                         <div className="animate-in fade-in duration-300">
+                             <CouponManager />
                          </div>
                     )}
 

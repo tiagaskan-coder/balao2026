@@ -6,6 +6,7 @@ import { Trash2, Minus, Plus, ArrowRight, ShoppingBag, Truck, CreditCard, User, 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import ApplyCoupon from "@/components/ApplyCoupon";
 
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, cartTotal, clearCart } = useCart();
@@ -14,6 +15,16 @@ export default function CartPage() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [cepLoading, setCepLoading] = useState(false);
+
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [appliedCouponCode, setAppliedCouponCode] = useState("");
+
+  const finalTotal = Math.max(0, cartTotal - couponDiscount);
+
+  const handleApplyCoupon = (discount: number, code: string) => {
+      setCouponDiscount(discount);
+      setAppliedCouponCode(code);
+  };
 
   const [formData, setFormData] = useState({
     name: "",
@@ -129,7 +140,9 @@ export default function CartPage() {
                     price: price
                  };
             }),
-            total: cartTotal
+            total: finalTotal,
+            couponCode: appliedCouponCode,
+            discountValue: couponDiscount
         };
 
         const response = await fetch('/api/checkout', {
@@ -444,18 +457,30 @@ export default function CartPage() {
                         Resumo
                     </h3>
                     
+                    <div className="mb-6">
+                        <ApplyCoupon cartTotal={cartTotal} items={items} onApply={handleApplyCoupon} />
+                    </div>
+
                     <div className="space-y-3 mb-6">
                         <div className="flex justify-between text-gray-600">
                             <span>Subtotal ({items.reduce((acc, i) => acc + i.quantity, 0)} itens)</span>
                             <span>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cartTotal)}</span>
                         </div>
+                        
+                        {couponDiscount > 0 && (
+                            <div className="flex justify-between text-green-600 font-medium">
+                                <span>Desconto ({appliedCouponCode})</span>
+                                <span>- {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(couponDiscount)}</span>
+                            </div>
+                        )}
+
                         <div className="flex justify-between text-gray-600">
                             <span>Frete</span>
                             <span className="text-green-600">Grátis</span>
                         </div>
                         <div className="border-t pt-3 flex justify-between font-bold text-lg text-gray-900">
                             <span>Total</span>
-                            <span>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cartTotal)}</span>
+                            <span>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(finalTotal)}</span>
                         </div>
                     </div>
 

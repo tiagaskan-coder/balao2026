@@ -425,6 +425,16 @@ STATUS: ${getStatusLabel(order.status)}
                       ))}
                     </tbody>
                     <tfoot className="bg-gray-50">
+                      {selectedOrder.coupon_code && (
+                        <tr>
+                          <td colSpan={3} className="px-6 py-4 text-right font-medium text-green-600">
+                            Desconto (Cupom: {selectedOrder.coupon_code}):
+                          </td>
+                          <td className="px-6 py-4 text-right font-medium text-green-600">
+                            - {formatCurrency(selectedOrder.discount_value || 0)}
+                          </td>
+                        </tr>
+                      )}
                       <tr>
                         <td colSpan={3} className="px-6 py-4 text-right font-bold text-gray-900">Total do Pedido:</td>
                         <td className="px-6 py-4 text-right font-bold text-xl text-[#E60012]">

@@ -1,20 +1,41 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { Product } from '@/lib/utils';
+import sharp from 'sharp';
 
 export const dynamic = 'force-dynamic';
 
-// Helper to download image
-async function downloadImage(url: string): Promise<{ buffer: Buffer; contentType: string } | null> {
+// Helper to download and process image
+async function processImage(url: string): Promise<{ buffer: Buffer; contentType: string; extension: string } | null> {
   try {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`);
     
-    const contentType = response.headers.get('content-type') || 'image/jpeg';
     const arrayBuffer = await response.arrayBuffer();
-    return { buffer: Buffer.from(arrayBuffer), contentType };
+    let buffer = Buffer.from(arrayBuffer);
+
+    // Validate with Sharp
+    const image = sharp(buffer);
+    const metadata = await image.metadata();
+
+    if (!metadata.format) {
+        throw new Error('Invalid image format');
+    }
+
+    // Compress and Resize
+    // Resize to max width 1200px, convert to WebP for better compression
+    const processedBuffer = await image
+        .resize({ width: 1200, withoutEnlargement: true })
+        .webp({ quality: 80 })
+        .toBuffer();
+
+    return { 
+        buffer: processedBuffer, 
+        contentType: 'image/webp',
+        extension: 'webp'
+    };
   } catch (error) {
-    console.error(`Error downloading image ${url}:`, error);
+    console.error(`Error processing image ${url}:`, error);
     return null;
   }
 }
@@ -55,38 +76,32 @@ export async function POST(request: Request) {
            continue;
         }
 
-        // 2. Download image
-        const downloadResult = await downloadImage(product.image);
-        if (!downloadResult) {
+        // 2. Download and Process image
+        const processResult = await processImage(product.image);
+        if (!processResult) {
           // Log error in DB
            await supabaseAdmin.from('products').update({
               migration_status: 'error',
-              migration_error: 'Download failed'
+              migration_error: 'Download/Process failed'
            }).eq('id', id);
 
-           results.push({ id, status: 'error', error: 'Download failed' });
+           results.push({ id, status: 'error', error: 'Download/Process failed' });
            continue;
         }
 
-        const { buffer, contentType } = downloadResult;
+        const { buffer, contentType, extension } = processResult;
 
-        // Size Validation (5MB)
+        // Size Validation (5MB limit still applies, though compression should help)
         if (buffer.length > 5 * 1024 * 1024) {
             await supabaseAdmin.from('products').update({
                 migration_status: 'error',
-                migration_error: 'Image too large (>5MB)'
+                migration_error: 'Image too large (>5MB after compression)'
             }).eq('id', id);
-            results.push({ id, status: 'error', error: 'Image too large (>5MB)' });
+            results.push({ id, status: 'error', error: 'Image too large (>5MB after compression)' });
             continue;
         }
         
-        // Extension
-        let ext = 'jpg';
-        if (contentType.includes('png')) ext = 'png';
-        if (contentType.includes('webp')) ext = 'webp';
-        if (contentType.includes('gif')) ext = 'gif';
-
-        const fileName = `produtos/${id}/imagem.${ext}`;
+        const fileName = `produtos/${id}/imagem.${extension}`;
 
         // 3. Upload to Supabase Storage
         const { error: uploadError } = await supabaseAdmin

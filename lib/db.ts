@@ -394,6 +394,8 @@ export interface Order {
     address: any;
     created_at: string;
     items?: OrderItem[];
+    coupon_code?: string;
+    discount_value?: number;
 }
 
 export async function createOrder(orderData: Omit<Order, 'id' | 'created_at' | 'updated_at'>, items: Omit<OrderItem, 'id' | 'order_id'>[]) {

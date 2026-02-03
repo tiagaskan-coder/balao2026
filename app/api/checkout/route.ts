@@ -6,7 +6,7 @@ import { getOrderConfirmationTemplate } from "@/lib/mail-templates";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { customer, items, total } = body;
+    const { customer, items, total, couponCode, discountValue } = body;
 
     if (!customer || !items || items.length === 0) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -26,7 +26,9 @@ export async function POST(req: Request) {
         complement: customer.complement
       },
       total: total,
-      status: 'pending' as const
+      status: 'pending' as const,
+      coupon_code: couponCode || null,
+      discount_value: discountValue || 0
     };
 
     const orderItems = items.map((item: any) => ({
