@@ -1,10 +1,31 @@
 import { NextResponse } from 'next/server';
-import { getProducts, saveProducts, createProduct } from '@/lib/db';
+import { getProducts, saveProducts, createProduct, getPaginatedProducts } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
 
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  
+  const page = searchParams.get('page');
+  const limit = searchParams.get('limit');
+  const categories = searchParams.getAll('category'); // Support multiple categories
+  const search = searchParams.get('search');
+  const tags = searchParams.get('tags');
+
+  // Check if any pagination or filtering params are present
+  if (page || limit || categories.length > 0 || search || tags) {
+      const pageNum = parseInt(page || '1');
+      const limitNum = parseInt(limit || '20');
+      
+      const data = await getPaginatedProducts(pageNum, limitNum, { 
+          categories: categories.length > 0 ? categories : undefined,
+          search: search || undefined,
+          tags: tags ? tags.split(',') : undefined
+      });
+      return NextResponse.json(data);
+  }
+
   const products = await getProducts();
   return NextResponse.json(products);
 }
