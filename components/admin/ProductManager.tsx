@@ -14,6 +14,10 @@ interface EnrichmentPreview {
     new_specs: Record<string, any>;
     original_description: string;
     new_description: string;
+    seo_title?: string;
+    seo_description?: string;
+    bullet_points?: string[];
+    json_ld?: any;
     status: 'success' | 'error';
     error?: string;
 }
@@ -184,7 +188,13 @@ export default function ProductManager() {
             .filter(p => p.status === 'success')
             .map(p => ({
                 id: p.id,
-                specs: p.new_specs,
+                specs: {
+                    ...p.new_specs,
+                    seo_title: p.seo_title,
+                    seo_description: p.seo_description,
+                    bullet_points: p.bullet_points,
+                    json_ld: p.json_ld
+                },
                 description: p.new_description
             }));
 
@@ -977,15 +987,47 @@ export default function ProductManager() {
                                             <div className="p-3 text-sm grid grid-cols-2 gap-4">
                                                 <div>
                                                     <h4 className="font-semibold text-gray-500 mb-1">Especificações Novas</h4>
-                                                    <pre className="text-xs bg-gray-50 p-2 rounded border overflow-x-auto">
+                                                    <pre className="text-xs bg-gray-50 p-2 rounded border overflow-x-auto max-h-40">
                                                         {JSON.stringify(item.new_specs, null, 2)}
                                                     </pre>
+                                                    
+                                                    {item.seo_title && (
+                                                        <div className="mt-3">
+                                                            <h4 className="font-semibold text-gray-500 mb-1">SEO Title</h4>
+                                                            <div className="text-xs bg-gray-50 p-2 rounded border">{item.seo_title}</div>
+                                                        </div>
+                                                    )}
+                                                    
+                                                    {item.seo_description && (
+                                                        <div className="mt-2">
+                                                            <h4 className="font-semibold text-gray-500 mb-1">Meta Description</h4>
+                                                            <div className="text-xs bg-gray-50 p-2 rounded border">{item.seo_description}</div>
+                                                        </div>
+                                                    )}
+
+                                                    {item.json_ld && (
+                                                        <div className="mt-2">
+                                                            <h4 className="font-semibold text-gray-500 mb-1">JSON-LD (Schema)</h4>
+                                                            <pre className="text-xs bg-gray-50 p-2 rounded border overflow-x-auto max-h-24">
+                                                                {JSON.stringify(item.json_ld, null, 2)}
+                                                            </pre>
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <div>
-                                                    <h4 className="font-semibold text-gray-500 mb-1">Descrição Nova</h4>
-                                                    <div className="text-xs bg-gray-50 p-2 rounded border h-24 overflow-y-auto">
-                                                        {item.new_description}
+                                                    <h4 className="font-semibold text-gray-500 mb-1">Descrição Nova (HTML)</h4>
+                                                    <div className="text-xs bg-gray-50 p-2 rounded border h-64 overflow-y-auto">
+                                                        <div dangerouslySetInnerHTML={{ __html: item.new_description }} />
                                                     </div>
+
+                                                    {item.bullet_points && item.bullet_points.length > 0 && (
+                                                        <div className="mt-3">
+                                                            <h4 className="font-semibold text-gray-500 mb-1">Destaques</h4>
+                                                            <ul className="list-disc list-inside text-xs text-gray-700 bg-gray-50 p-2 rounded border">
+                                                                {item.bullet_points.map((bp, i) => <li key={i}>{bp}</li>)}
+                                                            </ul>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         )}

@@ -32,6 +32,10 @@ export async function POST(req: Request) {
                     original_description: product.description || "",
                     new_specs: enrichment.specs,
                     new_description: enrichment.description,
+                    seo_title: enrichment.seo_title,
+                    seo_description: enrichment.seo_description,
+                    bullet_points: enrichment.bullet_points,
+                    json_ld: enrichment.json_ld,
                     status: 'success'
                 });
 
