@@ -3,8 +3,20 @@
 import React, { useState, useEffect } from "react";
 import { Product, Category, buildCategoryTree } from "@/lib/utils";
 import { searchProducts } from "@/lib/searchUtils";
-import { Edit, Trash2, Plus, Save, X, Search, CheckSquare, Square, Upload, Copy, AlertTriangle, ImageOff, Image as ImageIcon, Video, DollarSign, Package, ChevronDown, Percent } from "lucide-react";
+import { Edit, Trash2, Plus, Save, X, Search, CheckSquare, Square, Upload, Copy, AlertTriangle, ImageOff, Image as ImageIcon, Video, DollarSign, Package, ChevronDown, Percent, Sparkles, BrainCircuit, FileText } from "lucide-react";
 import Image from "next/image";
+
+// Types for AI Enrichment
+interface EnrichmentPreview {
+    id: string;
+    name: string;
+    original_specs: Record<string, any>;
+    new_specs: Record<string, any>;
+    original_description: string;
+    new_description: string;
+    status: 'success' | 'error';
+    error?: string;
+}
 
 // Helper to format currency
 const formatCurrency = (value: number) => {
@@ -44,6 +56,12 @@ export default function ProductManager() {
   const [bulkCategory, setBulkCategory] = useState("");
   const [bulkPricePercent, setBulkPricePercent] = useState<number>(0);
   const [isProcessingBulk, setIsProcessingBulk] = useState(false);
+
+  // AI Enrichment State
+  const [showEnrichmentModal, setShowEnrichmentModal] = useState(false);
+  const [enrichmentStep, setEnrichmentStep] = useState<'loading' | 'preview' | 'complete'>('loading');
+  const [enrichmentPreviews, setEnrichmentPreviews] = useState<EnrichmentPreview[]>([]);
+  const [enrichmentProgress, setEnrichmentProgress] = useState(0);
 
   // Edit/Create State
   const [isEditing, setIsEditing] = useState(false);
@@ -87,6 +105,70 @@ export default function ProductManager() {
       img.onerror = () => resolve(false);
       img.src = url;
     });
+  };
+
+  // AI Enrichment Functions
+  const handleEnrichSelected = async () => {
+    if (selectedIds.size === 0) return;
+    
+    setShowEnrichmentModal(true);
+    setEnrichmentStep('loading');
+    setEnrichmentPreviews([]);
+    setEnrichmentProgress(0);
+
+    const selectedProducts = products.filter(p => selectedIds.has(p.id));
+    
+    try {
+        const res = await fetch('/api/admin/enrich-product', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                products: selectedProducts.map(p => ({ id: p.id, name: p.name, specs: p.specs, description: p.description }))
+            })
+        });
+
+        if (!res.ok) throw new Error("Failed to fetch enrichment data");
+
+        const data = await res.json();
+        setEnrichmentPreviews(data.results);
+        setEnrichmentStep('preview');
+
+    } catch (error) {
+        console.error(error);
+        alert("Erro ao processar enriquecimento IA");
+        setShowEnrichmentModal(false);
+    }
+  };
+
+  const confirmEnrichment = async () => {
+      setEnrichmentStep('loading');
+      try {
+          // Filter only successful ones
+          const updates = enrichmentPreviews
+            .filter(p => p.status === 'success')
+            .map(p => ({
+                id: p.id,
+                specs: p.new_specs,
+                description: p.new_description
+            }));
+
+          const res = await fetch('/api/admin/enrich-product', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ updates })
+          });
+
+          if (res.ok) {
+              setEnrichmentStep('complete');
+              fetchProducts(); // Refresh list
+              setSelectedIds(new Set()); // Clear selection
+          } else {
+              throw new Error("Failed to save updates");
+          }
+      } catch (error) {
+          alert("Erro ao salvar alterações");
+          setEnrichmentStep('preview');
+      }
   };
 
   // Maintenance Functions
@@ -666,6 +748,16 @@ export default function ProductManager() {
                     <span className="hidden lg:inline">Migrar Imagens</span>
                 </button>
 
+                {selectedIds.size > 0 && (
+                    <button
+                        onClick={handleEnrichSelected}
+                        className="bg-purple-600 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-purple-700 transition-colors shadow-sm"
+                        title="Enriquecer produtos selecionados com IA"
+                    >
+                        <Sparkles size={18} />
+                        <span className="hidden md:inline">Enriquecer com IA ({selectedIds.size})</span>
+                    </button>
+                )}
                 <button
                     onClick={handleDeleteNoImage}
                     className="bg-white text-gray-700 px-3 py-2 rounded-lg flex items-center gap-2 hover:bg-red-50 hover:text-red-600 border border-gray-300 transition-colors"
@@ -756,8 +848,11 @@ export default function ProductManager() {
                         filteredProducts.map((product: Product) => (
                             <tr key={product.id} className={`hover:bg-gray-50 ${selectedIds.has(product.id) ? "bg-red-50" : ""}`}>
                                 <td className="p-4">
-                                    <button onClick={() => toggleSelect(product.id)} className={`text-gray-400 hover:text-gray-600 ${selectedIds.has(product.id) ? "text-red-600" : ""}`}>
-                                        {selectedIds.has(product.id) ? <CheckSquare size={20} /> : <Square size={20} />}
+                                    <button
+                                        onClick={() => toggleSelect(product.id)}
+                                        className="text-gray-400 hover:text-[#E60012]"
+                                    >
+                                        {selectedIds.has(product.id) ? <CheckSquare className="text-[#E60012]" size={20} /> : <Square size={20} />}
                                     </button>
                                 </td>
                                 <td className="p-4 flex items-center gap-3">
