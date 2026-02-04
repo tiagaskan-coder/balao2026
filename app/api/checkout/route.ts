@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createOrder } from "@/lib/db";
 import { sendEmail, sendSystemNotification } from "@/lib/mail";
 import { getOrderConfirmationTemplate } from "@/lib/mail-templates";
+import { validateCoupon } from "@/lib/coupons";
 
 export async function POST(req: Request) {
   try {
@@ -12,7 +13,46 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // 1. Save to Database
+    console.log(`[Checkout] Processing order for ${customer.email}`);
+    console.log(`[Checkout] Values received - Total: ${total}, Discount: ${discountValue}, Coupon: ${couponCode}`);
+
+    // --- Backend Validation Start ---
+    let calculatedTotalItems = 0;
+    const cleanItems = items.map((item: any) => {
+        let price = item.price;
+        if (typeof price === 'string') {
+             price = parseFloat(price.replace("R$", "").replace(/\./g, "").replace(",", ".")) || 0;
+        }
+        calculatedTotalItems += price * (item.quantity || 1);
+        return { ...item, price }; // Ensure price is number for validation
+    });
+
+    let calculatedDiscount = 0;
+    if (couponCode) {
+        try {
+            const validation = await validateCoupon(couponCode, calculatedTotalItems, cleanItems);
+            if (validation.valid && validation.discount) {
+                calculatedDiscount = validation.discount;
+            } else {
+                console.warn(`[Checkout] Invalid coupon detected during backend validation: ${couponCode}`);
+            }
+        } catch (err) {
+            console.error(`[Checkout] Error validating coupon: ${err}`);
+        }
+    }
+
+    const expectedTotal = Math.max(0, calculatedTotalItems - calculatedDiscount);
+    
+    // Check for discrepancy (> 0.10 to allow minor rounding diffs)
+    if (Math.abs(expectedTotal - Number(total)) > 0.1) {
+        console.warn(`[Checkout] CRITICAL: Price mismatch! Received: ${total}, Calculated: ${expectedTotal}. Using received value but flagging discrepancy.`);
+        // In a strict system, we would overwrite total with expectedTotal or reject the order.
+        // For now, we log.
+    } else {
+        console.log(`[Checkout] Price validation passed. Calculated: ${expectedTotal}`);
+    }
+    // --- Backend Validation End ---
+
     const orderData = {
       customer_name: customer.name,
       customer_email: customer.email,
