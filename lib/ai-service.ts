@@ -16,6 +16,10 @@ export async function enrichProductWithAI(productName: string): Promise<AIEnrich
     // Simula delay de rede/processamento
     await new Promise(resolve => setTimeout(resolve, 1500));
 
+    if (!productName) {
+        throw new Error("Product name is required");
+    }
+
     const lowerName = productName.toLowerCase();
     
     // Base de Conhecimento Mockada (Simulando o que a LLM "sabe")

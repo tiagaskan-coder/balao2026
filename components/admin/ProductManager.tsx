@@ -123,11 +123,19 @@ export default function ProductManager() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
-                products: selectedProducts.map(p => ({ id: p.id, name: p.name, specs: p.specs, description: p.description }))
+                products: selectedProducts.map(p => ({ 
+                    id: p.id, 
+                    name: p.name, 
+                    specs: p.specs || {}, // Ensure specs is not undefined
+                    description: p.description || "" // Ensure description is not undefined
+                }))
             })
         });
 
-        if (!res.ok) throw new Error("Failed to fetch enrichment data");
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.error || "Failed to fetch enrichment data");
+        }
 
         const data = await res.json();
         setEnrichmentPreviews(data.results);
