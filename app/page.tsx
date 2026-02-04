@@ -4,7 +4,7 @@ import ProductList from "@/components/ProductList";
 import Carousel from "@/components/Carousel";
 import ProductCarousel from "@/components/ProductCarousel";
 import SeoContent from "@/components/SeoContent";
-import { getProducts, getCarouselImages, getCategories, getHomeBlocks, getPaginatedProducts } from "@/lib/db";
+import { getProducts, getCarouselImages, getCategories, getHomeBlocks, getAllFilteredProducts } from "@/lib/db";
 import { searchProducts } from "@/lib/searchUtils";
 import { Product, Category, HomeBlock, CarouselImage } from "@/lib/utils";
 
@@ -49,7 +49,7 @@ export default async function Home(props: {
   }
 
   if (category || search) {
-      // Listing Mode: Fetch paginated
+      // Listing Mode: Fetch ALL products matching filters
       
       if (category && category !== "Todos os Produtos") {
           const validCategories = new Set<string>();
@@ -59,11 +59,10 @@ export default async function Home(props: {
           validCategoriesList = Array.from(validCategories);
       }
 
-      const paginatedData = await getPaginatedProducts(1, 20, { 
+      filteredProducts = await getAllFilteredProducts({ 
           categories: validCategoriesList,
           search
       });
-      filteredProducts = paginatedData.products;
   } else {
       // Home Mode: Fetch everything for carousels
       // Note: This is still heavy, but requested changes focused on "Todos os Produtos" listing

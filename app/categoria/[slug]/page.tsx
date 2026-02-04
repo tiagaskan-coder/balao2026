@@ -2,7 +2,7 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import ProductList from "@/components/ProductList";
 import FilterSyncer from "@/components/FilterSyncer";
-import { getCategories, getPaginatedProducts, getProductNames } from "@/lib/db";
+import { getCategories, getAllFilteredProducts, getProductNames } from "@/lib/db";
 import { extractTags } from "@/lib/product-filters";
 import type { Category } from "@/lib/utils";
  
@@ -55,14 +55,17 @@ export default async function CategoriaPage({
  
   const validCategoriesList = Array.from(validCategories);
 
-  // Fetch Products Paginados
-  const { products: filteredProducts } = await getPaginatedProducts(1, 20, {
+  // Fetch ALL Products Matching Filters
+  const filteredProducts = await getAllFilteredProducts({
       categories: validCategoriesList,
       search,
       tags: selectedTags
   });
   
   // Extract tags from a sample of products (to show filters)
+  // Note: We can use filteredProducts here for tags if we want tags based on current result, 
+  // or use getProductNames if we want tags based on category. 
+  // Using getProductNames is safer for consistency with sidebar logic.
   const productsForTags = await getProductNames(validCategoriesList, search);
   const availableTags = extractTags(productsForTags);
 

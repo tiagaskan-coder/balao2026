@@ -41,6 +41,75 @@ export async function getProducts(): Promise<Product[]> {
   }
 }
 
+export async function getAllFilteredProducts(
+    filters?: {
+        categories?: string[];
+        search?: string;
+        tags?: string[];
+    },
+    sort?: {
+        field: string;
+        direction: 'asc' | 'desc';
+    }
+): Promise<Product[]> {
+    try {
+        const pageSize = 1000;
+        let all: Product[] = [];
+        let from = 0;
+
+        while (true) {
+            let query = supabase
+                .from('products')
+                .select('*');
+
+            // Apply filters
+            if (filters?.categories && filters.categories.length > 0) {
+                 if (!filters.categories.includes("Todos os Produtos")) {
+                     query = query.in('category', filters.categories);
+                 }
+            }
+
+            if (filters?.search) {
+                query = query.ilike('name', `%${filters.search}%`);
+            }
+
+            if (filters?.tags && filters.tags.length > 0) {
+                filters.tags.forEach(tag => {
+                    query = query.ilike('name', `%${tag}%`);
+                });
+            }
+
+            // Apply sorting
+            if (sort) {
+                query = query.order(sort.field, { ascending: sort.direction === 'asc' });
+            } else {
+                query = query.order('created_at', { ascending: false });
+            }
+
+            // Pagination chunk
+            query = query.range(from, from + pageSize - 1);
+
+            const { data, error } = await query;
+
+            if (error) {
+                console.error("Error fetching all filtered products (chunk):", error);
+                break;
+            }
+
+            const chunk = (data as Product[]) || [];
+            all = all.concat(chunk);
+
+            if (chunk.length < pageSize) break;
+            from += pageSize;
+        }
+
+        return all;
+    } catch (error) {
+        console.error("Error in getAllFilteredProducts:", error);
+        return [];
+    }
+}
+
 export async function getPaginatedProducts(
     page: number = 1,
     limit: number = 20,

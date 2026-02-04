@@ -1,16 +1,15 @@
 "use client";
 
-import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import React, { useState, useMemo } from "react";
 import { Product } from "@/lib/utils";
 import ProductCard from "./ProductCard";
-import ProductSkeleton from "./ProductSkeleton";
 import { LayoutGrid, Grid2x2, ArrowUpDown } from "lucide-react";
 
 type ViewMode = "small" | "large" | "list";
 type SortMode = "default" | "price-asc" | "price-desc";
 
 export default function ProductList({ 
-    products: initialProducts,
+    products,
     categories,
     searchQuery,
     tags
@@ -23,102 +22,7 @@ export default function ProductList({
   const [viewMode, setViewMode] = useState<ViewMode>("small");
   const [sortMode, setSortMode] = useState<SortMode>("default");
   
-  // Products state - initialized with server data
-  const [products, setProducts] = useState<Product[]>(initialProducts);
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  
-  // Observer for infinite scroll
-  const observerTarget = useRef<HTMLDivElement>(null);
-
-  // Update products when initial props change (e.g. navigation)
-  useEffect(() => {
-    setProducts(initialProducts);
-    setPage(1);
-    // If initial products < 20, probably no more products
-    setHasMore(initialProducts.length >= 20);
-  }, [initialProducts, categories, searchQuery, tags]);
-
-  const loadMore = useCallback(async () => {
-      if (loading || !hasMore) return;
-      setLoading(true);
-      
-      try {
-          const nextPage = page + 1;
-          const params = new URLSearchParams();
-          params.set('page', nextPage.toString());
-          params.set('limit', '20'); // Fetch 20 more
-          
-          if (categories && categories.length > 0) {
-              categories.forEach(c => params.append('category', c));
-          }
-          
-          if (searchQuery) params.set('search', searchQuery);
-
-          if (tags && tags.length > 0) {
-              params.set('tags', tags.join(','));
-          }
-          
-          const res = await fetch(`/api/products?${params.toString()}`);
-          if (!res.ok) throw new Error("Failed to fetch");
-          
-          const data = await res.json();
-          
-          // Handle both array response (legacy) and object response (paginated)
-          let newProducts: Product[] = [];
-          let serverHasMore = false;
-
-          if (Array.isArray(data)) {
-              newProducts = data;
-              serverHasMore = newProducts.length >= 20; // Guessing
-          } else {
-              newProducts = data.products || [];
-              serverHasMore = data.hasMore;
-          }
-          
-          if (newProducts.length > 0) {
-              setProducts(prev => {
-                  // Avoid duplicates
-                  const existingIds = new Set(prev.map(p => p.id));
-                  const uniqueNew = newProducts.filter((p: Product) => !existingIds.has(p.id));
-                  return [...prev, ...uniqueNew];
-              });
-              setPage(nextPage);
-              setHasMore(serverHasMore);
-          } else {
-              setHasMore(false);
-          }
-      } catch (err) {
-          console.error("Error loading more products:", err);
-          setHasMore(false);
-      } finally {
-          setLoading(false);
-      }
-  }, [page, loading, hasMore, categories, searchQuery, tags]);
-
-  useEffect(() => {
-      const observer = new IntersectionObserver(
-          entries => {
-              if (entries[0].isIntersecting && hasMore && !loading) {
-                  loadMore();
-              }
-          },
-          { threshold: 0.1, rootMargin: '200px' } // Load 200px before end
-      );
-
-      if (observerTarget.current) {
-          observer.observe(observerTarget.current);
-      }
-
-      return () => {
-          if (observerTarget.current) {
-              observer.unobserve(observerTarget.current);
-          }
-      };
-  }, [loadMore, hasMore, loading]);
-
-  // Client-side sorting for current list
+  // Client-side sorting
   const sortedProducts = useMemo(() => {
     let result = [...products];
 
@@ -207,18 +111,11 @@ export default function ProductList({
             variant={viewMode === "list" ? "list" : "grid"}
           />
         ))}
-        
-        {/* Skeletons when loading */}
-        {loading && (
-             Array.from({ length: viewMode === "small" ? 5 : 3 }).map((_, i) => (
-                 <ProductSkeleton key={`skeleton-${i}`} />
-             ))
-        )}
       </div>
 
-      {/* Observer Target */}
-      <div ref={observerTarget} className="h-20 w-full flex justify-center items-center mt-4">
-           {!hasMore && products.length > 0 && <span className="text-gray-300 text-sm">Você viu todos os produtos.</span>}
+      {/* Footer message */}
+      <div className="h-20 w-full flex justify-center items-center mt-4">
+           {products.length > 0 && <span className="text-gray-300 text-sm">Mostrando todos os {products.length} produtos.</span>}
       </div>
     </div>
   );
