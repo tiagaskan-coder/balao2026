@@ -117,35 +117,63 @@ export default function ProductManager() {
     setEnrichmentProgress(0);
 
     const selectedProducts = products.filter(p => selectedIds.has(p.id));
-    
-    try {
-        const res = await fetch('/api/admin/enrich-product', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                products: selectedProducts.map(p => ({ 
-                    id: p.id, 
-                    name: p.name, 
-                    specs: p.specs || {}, // Ensure specs is not undefined
-                    description: p.description || "" // Ensure description is not undefined
-                }))
-            })
-        });
+    const total = selectedProducts.length;
+    const results: EnrichmentPreview[] = [];
 
-        if (!res.ok) {
-            const errorData = await res.json();
-            throw new Error(errorData.error || "Failed to fetch enrichment data");
+    // Process sequentially for accurate progress tracking
+    for (let i = 0; i < total; i++) {
+        const p = selectedProducts[i];
+        try {
+            const res = await fetch('/api/admin/enrich-product', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    products: [{ 
+                        id: p.id, 
+                        name: p.name, 
+                        specs: p.specs || {}, 
+                        description: p.description || "" 
+                    }]
+                })
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json();
+                results.push({
+                    id: p.id,
+                    name: p.name,
+                    original_specs: p.specs || {},
+                    new_specs: {},
+                    original_description: p.description || "",
+                    new_description: "",
+                    status: 'error',
+                    error: errorData.error || "Failed"
+                });
+            } else {
+                const data = await res.json();
+                if (data.results && data.results.length > 0) {
+                    results.push(data.results[0]);
+                }
+            }
+        } catch (err: any) {
+             results.push({
+                id: p.id,
+                name: p.name,
+                original_specs: p.specs || {},
+                new_specs: {},
+                original_description: p.description || "",
+                new_description: "",
+                status: 'error',
+                error: err.message
+            });
         }
 
-        const data = await res.json();
-        setEnrichmentPreviews(data.results);
-        setEnrichmentStep('preview');
-
-    } catch (error) {
-        console.error(error);
-        alert("Erro ao processar enriquecimento IA");
-        setShowEnrichmentModal(false);
+        // Update progress
+        setEnrichmentProgress(Math.round(((i + 1) / total) * 100));
+        setEnrichmentPreviews([...results]);
     }
+
+    setEnrichmentStep('preview');
   };
 
   const confirmEnrichment = async () => {
@@ -888,6 +916,129 @@ export default function ProductManager() {
                 </tbody>
             </table>
         </div>
+
+        {/* AI Enrichment Modal */}
+        {showEnrichmentModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+                <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+                    <div className="p-6 border-b flex justify-between items-center bg-purple-50">
+                        <h2 className="text-xl font-bold text-purple-900 flex items-center gap-2">
+                            <Sparkles size={24} />
+                            Enriquecimento com IA
+                        </h2>
+                        {!['loading', 'complete'].includes(enrichmentStep) && (
+                            <button onClick={() => setShowEnrichmentModal(false)}><X size={24} className="text-gray-400 hover:text-gray-600" /></button>
+                        )}
+                    </div>
+
+                    <div className="p-6 flex-1 overflow-y-auto">
+                        {enrichmentStep === 'loading' && (
+                            <div className="text-center py-10">
+                                <BrainCircuit size={64} className="mx-auto text-purple-300 animate-pulse mb-6" />
+                                <h3 className="text-xl font-medium mb-2">Analisando produtos...</h3>
+                                <p className="text-gray-500 mb-8">Consultando base de conhecimento e gerando descrições.</p>
+                                
+                                <div className="max-w-md mx-auto">
+                                    <div className="flex justify-between text-sm text-gray-600 mb-2">
+                                        <span>Progresso</span>
+                                        <span>{enrichmentProgress}%</span>
+                                    </div>
+                                    <div className="w-full bg-gray-200 rounded-full h-3">
+                                        <div 
+                                            className="bg-purple-600 h-3 rounded-full transition-all duration-300 ease-out"
+                                            style={{ width: `${enrichmentProgress}%` }}
+                                        ></div>
+                                    </div>
+                                    <p className="mt-2 text-xs text-gray-400">
+                                        Processados: {enrichmentPreviews.length} / {selectedIds.size}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                        {enrichmentStep === 'preview' && (
+                            <div className="space-y-4">
+                                <div className="bg-blue-50 text-blue-800 p-4 rounded-lg text-sm mb-4">
+                                    Revise as alterações sugeridas abaixo antes de aplicar.
+                                </div>
+                                
+                                {enrichmentPreviews.map((item, idx) => (
+                                    <div key={idx} className="border rounded-lg overflow-hidden">
+                                        <div className="bg-gray-50 p-3 flex justify-between items-center border-b">
+                                            <span className="font-medium">{item.name}</span>
+                                            {item.status === 'success' ? (
+                                                <span className="text-green-600 text-xs font-bold px-2 py-1 bg-green-100 rounded-full">SUCESSO</span>
+                                            ) : (
+                                                <span className="text-red-600 text-xs font-bold px-2 py-1 bg-red-100 rounded-full">ERRO</span>
+                                            )}
+                                        </div>
+                                        
+                                        {item.status === 'success' && (
+                                            <div className="p-3 text-sm grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <h4 className="font-semibold text-gray-500 mb-1">Especificações Novas</h4>
+                                                    <pre className="text-xs bg-gray-50 p-2 rounded border overflow-x-auto">
+                                                        {JSON.stringify(item.new_specs, null, 2)}
+                                                    </pre>
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-semibold text-gray-500 mb-1">Descrição Nova</h4>
+                                                    <div className="text-xs bg-gray-50 p-2 rounded border h-24 overflow-y-auto">
+                                                        {item.new_description}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {item.status === 'error' && (
+                                            <div className="p-3 text-sm text-red-600">
+                                                Erro: {item.error}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {enrichmentStep === 'complete' && (
+                            <div className="text-center py-10">
+                                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <CheckSquare size={32} className="text-green-600" />
+                                </div>
+                                <h3 className="text-2xl font-bold text-gray-800 mb-2">Concluído!</h3>
+                                <p className="text-gray-600">Os produtos foram atualizados com sucesso.</p>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="p-6 border-t bg-gray-50 flex justify-end gap-3">
+                        {enrichmentStep === 'preview' && (
+                            <>
+                                <button 
+                                    onClick={() => setShowEnrichmentModal(false)}
+                                    className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+                                >
+                                    Cancelar
+                                </button>
+                                <button 
+                                    onClick={confirmEnrichment}
+                                    className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
+                                >
+                                    <Save size={18} /> Confirmar e Salvar
+                                </button>
+                            </>
+                        )}
+                        {enrichmentStep === 'complete' && (
+                            <button 
+                                onClick={() => setShowEnrichmentModal(false)}
+                                className="px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900"
+                            >
+                                Fechar
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
+        )}
 
         {/* Modal */}
         {isEditing && (
