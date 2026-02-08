@@ -7,7 +7,7 @@
     link.href = '/voice-widget/style.css';
     document.head.appendChild(link);
 
-    // Hide default floating button (we use header button now)
+    // Hide default floating button if exists
     const style = document.createElement('style');
     style.innerHTML = `
         #voice-trigger-btn { display: none !important; }
@@ -112,8 +112,9 @@
     let currentAudio = null; // Track audio element to pause it
 
     // Constants
-    const SILENCE_THRESHOLD = 1000; // 1.0s silence to stop (faster response)
-    const SPEECH_THRESHOLD = 20; // Volume threshold (0-255)
+    const SILENCE_THRESHOLD = 1200; // Time of silence to consider end of turn
+    const SPEECH_THRESHOLD = 25; // Volume threshold (0-255)
+    const INTERRUPTION_THRESHOLD = 30; // Slightly higher than speech to avoid echo, but responsive
 
     // Event Listeners
     window.addEventListener('open-voice-widget', openWidget);
@@ -140,8 +141,7 @@
             }
         }
         isAIPlaying = false;
-        // Force reload to clear audio context issues if any
-        // window.location.reload(); 
+        conversationHistory = []; // Reset history on close? Or keep it? Let's reset for new session.
     }
 
     function stopAudioContext() {
@@ -180,29 +180,40 @@
             scriptProcessor.connect(audioContext.destination);
 
             scriptProcessor.onaudioprocess = () => {
-                if (!isRecording || isAIPlaying) return;
-
                 const array = new Uint8Array(analyser.frequencyBinCount);
                 analyser.getByteFrequencyData(array);
                 let values = 0;
                 for (let i = 0; i < array.length; i++) values += array[i];
                 const average = values / array.length;
 
+                // 1. Interruption Logic (Barge-in)
+                if (isAIPlaying) {
+                    if (average > INTERRUPTION_THRESHOLD) {
+                        console.log("Interruption detected! Level:", average);
+                        // Stop AI
+                        if (currentAudio) {
+                            currentAudio.pause();
+                            currentAudio = null;
+                        }
+                        isAIPlaying = false;
+                        window.speechSynthesis.cancel();
+                        
+                        // Start recording immediately if not already
+                        if (!isRecording) {
+                            startRecording();
+                        }
+                    }
+                    return; // Don't process recording logic while AI is theoretically playing (unless we just interrupted)
+                }
+
+                // 2. Normal Recording Logic
+                if (!isRecording) return;
+
                 if (average > SPEECH_THRESHOLD) {
                     // Speech detected
                     if (!speechDetected) {
                         speechDetected = true;
-                        console.log("Speech detected");
-                        
-                        // Interrupt AI if speaking
-                        if (isAIPlaying && currentAudio) {
-                            console.log("Interrupting AI...");
-                            currentAudio.pause();
-                            currentAudio = null;
-                            isAIPlaying = false;
-                            window.speechSynthesis.cancel(); // Just in case
-                        }
-
+                        console.log("Speech started");
                         statusText.textContent = "Ouvindo...";
                         visualizer.className = 'voice-visualizer listening';
                     }
@@ -210,7 +221,7 @@
                     clearTimeout(silenceTimer);
                     silenceTimer = setTimeout(() => {
                         if (speechDetected) {
-                            console.log("Silence detected, stopping...");
+                            console.log("Silence detected (End of turn)");
                             stopRecording();
                         }
                     }, SILENCE_THRESHOLD);
@@ -229,6 +240,9 @@
     function startRecording() {
         if (!isOpen || isAIPlaying) return;
         
+        // Avoid starting multiple recorders
+        if (isRecording && mediaRecorder && mediaRecorder.state === 'recording') return;
+
         audioChunks = [];
         speechDetected = false;
         
@@ -244,8 +258,7 @@
                     const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
                     await sendAudio(audioBlob);
                 } else {
-                    // If no speech was detected (e.g. false alarm or just noise), restart?
-                    // Only restart if we are still open and not playing
+                    // False alarm or noise, restart listening
                     if (isOpen && !isAIPlaying) {
                         startRecording(); 
                     }
@@ -255,7 +268,7 @@
             mediaRecorder.start();
             isRecording = true;
             statusText.textContent = "Pode falar...";
-            visualizer.className = 'voice-visualizer idle'; // Idle until speech detected
+            visualizer.className = 'voice-visualizer idle'; 
 
         } catch (e) {
             console.error(e);
@@ -303,8 +316,6 @@
                 console.log("Action received:", data.action);
                 
                 if (data.action.type === 'view_product') {
-                    // Trigger ProductPreview component event
-                    // Payload is now the full product object (or at least contains slug)
                     if (data.action.payload) {
                          const event = new CustomEvent('balao-preview-product', { 
                             detail: data.action.payload 
@@ -313,8 +324,6 @@
                     }
                 } 
                 else if (data.action.type === 'add_to_cart') {
-                    // Add to cart
-                    // We use the exposed global function from CartContext
                     if (window.balao_addToCart && data.action.payload) {
                         window.balao_addToCart(data.action.payload);
                     } else {

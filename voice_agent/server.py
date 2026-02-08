@@ -3,6 +3,7 @@ import json
 import logging
 import base64
 import asyncio
+import re
 from typing import Optional, List, Dict, Any
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
@@ -38,14 +39,27 @@ Seu objetivo é ajudar o cliente a encontrar o melhor produto de tecnologia.
 Seja breve, amigável e persuasivo. Fale sempre em Português do Brasil.
 Use emojis ocasionalmente.
 
-REGRAS RÍGIDAS:
-1. NUNCA invente produtos. Use APENAS os produtos fornecidos no contexto (resultados da busca).
-2. Se o cliente pedir algo que não está na lista, diga que não encontrou.
-3. NUNCA forneça links externos ou sugira outros sites.
-4. Para mostrar um produto, USE a ferramenta `view_product` com o slug correto.
-5. Para adicionar ao carrinho, USE a ferramenta `add_to_cart` APENAS com permissão explícita.
-6. Mantenha as respostas curtas (máximo 2 frases) para uma conversa fluida.""",
-    "temperature": 0.5,
+REGRAS RÍGIDAS DE OPERAÇÃO:
+1. **INTEGRIDADE DE PRODUTOS**:
+   - NUNCA invente produtos.
+   - NUNCA invente preços ou especificações.
+   - Use APENAS os produtos listados explicitamente no contexto "Produtos encontrados no catálogo".
+   - Se o produto solicitado não estiver na lista, informe educadamente que não encontrou exatamente aquele modelo, mas ofereça as alternativas listadas (se houver).
+
+2. **LINKS E NAVAGAÇÃO**:
+   - NUNCA forneça URLs ou links externos.
+   - Para mostrar um produto ao cliente, USE a ferramenta `view_product` passando o `product_slug` correto da lista.
+   - NÃO descreva o produto exaustivamente; mostre-o usando a ferramenta e convide o cliente a ver os detalhes.
+
+3. **COMPRA**:
+   - Se o cliente demonstrar interesse claro em comprar, use a ferramenta `add_to_cart`.
+   - Peça confirmação antes de adicionar ao carrinho.
+
+4. **ESTILO DE RESPOSTA**:
+   - Respostas curtas (máximo 2-3 frases) para manter a fluidez da conversa por voz.
+   - Na PRIMEIRA interação, apresente-se EXATAMENTE assim: "Olá! Sou o assistente virtual da Balão. Como posso ajudar você hoje?"
+""",
+    "temperature": 0.2, # Low temperature for factual accuracy
     "model_name": "gpt-4o-mini",
     "voice_id": "alloy"
 }
@@ -103,9 +117,6 @@ class ConfigUpdate(BaseModel):
     model_name: Optional[str] = None
     voice_id: Optional[str] = None
 
-class ChatRequest(BaseModel):
-    message: str
-
 # --- OpenAI Tools ---
 
 TOOLS = [
@@ -113,13 +124,13 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "view_product",
-            "description": "Show/navigate to a specific product page on the website. Use this when recommending a specific product.",
+            "description": "Exibe um card de visualização do produto na tela do usuário. Use isso sempre que sugerir ou mencionar um produto específico disponível.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "product_slug": {
                         "type": "string",
-                        "description": "The slug of the product to display (e.g., 'placa-de-video-rtx-3060')"
+                        "description": "O slug exato do produto encontrado na busca."
                     }
                 },
                 "required": ["product_slug"]
@@ -130,25 +141,25 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "add_to_cart",
-            "description": "Add a product to the shopping cart. Use this ONLY when the user explicitly agrees to add it.",
+            "description": "Adiciona o produto ao carrinho de compras.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "product_id": {
                         "type": "string",
-                        "description": "The ID of the product to add to cart"
+                        "description": "O ID do produto."
                     },
                      "product_name": {
                         "type": "string",
-                        "description": "The name of the product"
+                        "description": "O nome do produto"
                     },
                      "product_price": {
                         "type": "string",
-                        "description": "The price of the product"
+                        "description": "O preço do produto"
                     },
                      "product_image": {
                         "type": "string",
-                        "description": "The image URL of the product"
+                        "description": "A URL da imagem do produto"
                     }
                 },
                 "required": ["product_id", "product_name", "product_price", "product_image"]
@@ -156,6 +167,83 @@ TOOLS = [
         }
     }
 ]
+
+# --- Core Logic ---
+
+def normalize_product(p: Dict) -> Dict:
+    """Ensure product has standard fields for frontend."""
+    if not p: return p
+    # Handle image/image_url inconsistency
+    if 'image_url' in p and 'image' not in p:
+        p['image'] = p['image_url']
+    elif 'image' in p and 'image_url' not in p:
+        p['image_url'] = p['image']
+    
+    # Ensure ID is string
+    if 'id' in p:
+        p['id'] = str(p['id'])
+
+    # Format price to BRL string if it's a number
+    if 'price' in p:
+        try:
+            val = float(p['price'])
+            # Only format if it doesn't look like a formatted string already (e.g. starts with R$)
+            if not str(p['price']).strip().startswith("R$"):
+                p['price'] = f"R$ {val:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        except:
+            pass # Keep as is if not a number
+        
+    return p
+
+async def search_products(query: str) -> List[Dict]:
+    """
+    Realiza uma busca robusta no Supabase.
+    Tenta busca exata, depois parcial, depois por palavras-chave.
+    """
+    if not supabase:
+        return []
+    
+    query = query.strip()
+    if not query:
+        return []
+
+    try:
+        # 1. Busca textual direta (ilike)
+        logger.info(f"Searching for: {query}")
+        res = supabase.table("products").select("*").ilike("name", f"%{query}%").limit(5).execute()
+        if res.data:
+            return [normalize_product(p) for p in res.data]
+
+        # 2. Busca por palavras-chave (se a frase for longa)
+        # Remove stop words comuns em PT-BR
+        stop_words = {"eu", "quero", "gostaria", "de", "do", "da", "um", "uma", "comprar", "ver", "preço", "quanto", "custa", "tem", "você", "saber", "sobre", "o", "a", "os", "as", "me", "mostra", "mostre", "olhar", "procurando", "estou"}
+        words = [w.lower() for w in re.split(r'\s+', query) if w.lower() not in stop_words and len(w) > 2]
+        
+        if not words:
+            return []
+
+        # Tenta buscar pela combinação das palavras mais significativas
+        or_filter = ",".join([f"name.ilike.%{w}%" for w in words])
+        if or_filter:
+            res = supabase.table("products").select("*").or_(or_filter).limit(10).execute()
+            if res.data:
+                return [normalize_product(p) for p in res.data]
+
+        return []
+    except Exception as e:
+        logger.error(f"Product search error: {e}")
+        return []
+
+async def get_product_by_slug(slug: str) -> Optional[Dict]:
+    if not supabase: return None
+    try:
+        res = supabase.table("products").select("*").eq("slug", slug).execute()
+        if res.data:
+            return normalize_product(res.data[0])
+        return None
+    except Exception as e:
+        logger.error(f"Get product error: {e}")
+        return None
 
 # --- Routes ---
 
@@ -180,53 +268,12 @@ async def update_config(config: ConfigUpdate):
     save_config()
     return {"status": "updated", "config": agent_config}
 
-@app.get("/test-connection")
-async def test_connection():
-    results = {
-        "supabase": "unknown",
-        "openai": "unknown"
-    }
-    
-    # Test Supabase
-    if supabase:
-        try:
-            supabase.table("products").select("count", count="exact").limit(1).execute()
-            results["supabase"] = "ok"
-        except Exception as e:
-            results["supabase"] = f"error: {str(e)}"
-    else:
-        results["supabase"] = "not_configured"
-
-    # Test OpenAI
-    try:
-        if not os.getenv("OPENAI_API_KEY"):
-            results["openai"] = "missing_key"
-        else:
-            # Simple list models call to verify auth
-            openai.models.list()
-            results["openai"] = "ok"
-    except Exception as e:
-        results["openai"] = f"error: {str(e)}"
-
-    return results
-
-async def search_products(query: str):
-    if not supabase:
-        return []
-    try:
-        # Basic search
-        res = supabase.table("products").select("*").ilike("name", f"%{query}%").limit(5).execute()
-        return res.data
-    except Exception as e:
-        logger.error(f"Product search error: {e}")
-        return []
-
 @app.post("/process-audio")
 async def process_audio(
     file: UploadFile = File(...),
-    conversation_history: str = Form("[]") # Receive history as JSON string
+    conversation_history: str = Form("[]")
 ):
-    # 1. Save temp file (Whisper API needs a file-like object with name or actual file)
+    # 1. Save temp file
     temp_filename = f"temp_{file.filename}"
     with open(temp_filename, "wb") as buffer:
         buffer.write(await file.read())
@@ -260,27 +307,25 @@ async def process_audio(
                 "action": None
             })
 
-        # 3. Search & LLM (GPT)
-        # Improve search query by removing common stop words
-        stop_words = ["eu", "quero", "gostaria", "de", "um", "uma", "comprar", "ver", "preço", "quanto", "custa", "tem", "você", "gostaria", "saber", "sobre", "o", "a", "os", "as", "me", "mostra", "mostre", "olhar"]
-        query_words = [w for w in user_text.lower().split() if w not in stop_words]
-        clean_query = " ".join(query_words)
-        
-        products = []
-        if len(clean_query) > 2:
-            products = await search_products(clean_query)
+        # 3. Search Context
+        # Improve search query
+        products = await search_products(user_text)
             
         context_str = ""
         if products:
-            context_str = "\nProdutos encontrados no catálogo (use estas informações):\n" + "\n".join(
-                [f"- {p['name']} (ID: {p['id']}, Slug: {p['slug']}): R$ {p.get('price', 'N/A')}" for p in products]
-            )
+            context_str = "\nCONTEXTO DE DADOS REAIS (Use APENAS estes produtos):\n"
+            for p in products:
+                price = p.get('price', 'Preço sob consulta')
+                context_str += f"- Nome: {p['name']} | ID: {p['id']} | Slug: {p['slug']} | Preço: {price}\n"
+        else:
+            context_str = "\nCONTEXTO: Nenhum produto encontrado com esses termos na base de dados.\n"
 
         # Build messages with history
-        messages = [{"role": "system", "content": agent_config["system_prompt"] + context_str}]
+        system_msg = agent_config["system_prompt"] + context_str
+        messages = [{"role": "system", "content": system_msg}]
         
-        # Append last 10 messages from history to maintain context but avoid token limit
-        for msg in history[-10:]:
+        # Append recent history (last 6 turns to keep context but save tokens)
+        for msg in history[-6:]:
             if msg.get("role") in ["user", "assistant"]:
                 messages.append({"role": msg["role"], "content": msg["content"]})
         
@@ -290,7 +335,7 @@ async def process_audio(
         llm_response = client.chat.completions.create(
             model=agent_config.get("model_name", "gpt-4o-mini"),
             messages=messages,
-            temperature=agent_config.get("temperature", 0.7),
+            temperature=agent_config.get("temperature", 0.3),
             tools=TOOLS,
             tool_choice="auto"
         )
@@ -308,26 +353,27 @@ async def process_audio(
             logger.info(f"Tool Call: {func_name} args: {func_args}")
             
             if func_name == "view_product":
-                # Find product details from search results to enrich payload
                 slug = func_args.get("product_slug")
+                # Validate if product exists in our passed context OR fetch it
                 product_data = next((p for p in products if p['slug'] == slug), None)
                 
-                # If not in current search context, try to fetch from Supabase
-                if not product_data and supabase:
-                    try:
-                        res = supabase.table("products").select("*").eq("slug", slug).execute()
-                        if res.data:
-                            product_data = res.data[0]
-                    except Exception as e:
-                        logger.error(f"Error fetching product details: {e}")
+                if not product_data:
+                    # Fallback: fetch directly from DB to be sure
+                    product_data = await get_product_by_slug(slug)
+                
+                if product_data:
+                    action_payload = {
+                        "type": "view_product",
+                        "payload": product_data
+                    }
+                    if not ai_text:
+                        ai_text = f"Aqui está: {product_data['name']}."
+                else:
+                    logger.warning(f"AI tried to show non-existent slug: {slug}")
+                    # AI hallucinated a slug? fallback text
+                    if not ai_text:
+                        ai_text = "Desculpe, não consegui carregar os detalhes desse produto."
 
-                action_payload = {
-                    "type": "view_product",
-                    "payload": product_data if product_data else {"slug": slug}
-                }
-                if not ai_text:
-                    ai_text = f"Encontrei este produto para você. Dê uma olhada!"
-                    
             elif func_name == "add_to_cart":
                 action_payload = {
                     "type": "add_to_cart",
@@ -339,28 +385,25 @@ async def process_audio(
                     }
                 }
                 if not ai_text:
-                    ai_text = f"Adicionei {func_args.get('product_name')} ao seu carrinho."
+                    ai_text = f"Adicionado ao carrinho."
 
         logger.info(f"AI replied: {ai_text}")
 
         # 4. TTS (OpenAI TTS)
         voice = agent_config.get("voice_id", "alloy")
-        
-        # If AI text is empty but we have an action, generate a generic response? 
-        # Usually tool call comes with null content. We filled it above.
+        audio_b64 = ""
         
         if ai_text:
-            speech_response = client.audio.speech.create(
-                model="tts-1",
-                voice=voice,
-                input=ai_text
-            )
-            # Get binary data
-            audio_content = speech_response.content
-            # Encode to base64 for frontend
-            audio_b64 = base64.b64encode(audio_content).decode('utf-8')
-        else:
-            audio_b64 = ""
+            try:
+                speech_response = client.audio.speech.create(
+                    model="tts-1",
+                    voice=voice,
+                    input=ai_text
+                )
+                audio_content = speech_response.content
+                audio_b64 = base64.b64encode(audio_content).decode('utf-8')
+            except Exception as e:
+                logger.error(f"TTS Error: {e}")
 
         return JSONResponse(content={
             "user_text": user_text,
