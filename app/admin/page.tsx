@@ -10,7 +10,6 @@ import ProductManager from "@/components/admin/ProductManager";
 import HomeBlocksManager from "@/components/admin/HomeBlocksManager";
 import MarketingManager from "@/components/admin/MarketingManager";
 import CouponManager from "@/components/admin/CouponManager";
-import VoiceAgentManager from "@/components/admin/VoiceAgentManager";
 import { ArrowLeft, Upload, CheckCircle, AlertCircle, Layout, Layers, Save, Search, Settings, ShoppingBag, Mail, Mic } from "lucide-react";
 
 export default function AdminPage() {
@@ -343,13 +342,6 @@ export default function AdminPage() {
                         <Settings size={18} />
                         Cupons
                     </button>
-                    <button
-                        onClick={() => setActiveTab("voice_agent")}
-                        className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${activeTab === "voice_agent" ? "bg-red-50 text-[#E60012] border-l-4 border-[#E60012]" : "text-gray-600 hover:bg-gray-50"}`}
-                    >
-                        <Mic size={18} />
-                        Agente de Voz (IA)
-                    </button>
                 </nav>
             </aside>
 
@@ -375,13 +367,6 @@ export default function AdminPage() {
                     {activeTab === "coupons" && (
                          <div className="animate-in fade-in duration-300">
                              <CouponManager />
-                         </div>
-                    )}
-
-                    {/* VOICE AGENT TAB */}
-                    {activeTab === "voice_agent" && (
-                         <div className="animate-in fade-in duration-300">
-                             <VoiceAgentManager />
                          </div>
                     )}
 

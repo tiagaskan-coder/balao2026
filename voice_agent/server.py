@@ -1,5 +1,4 @@
 import os
-import json
 import logging
 import base64
 import asyncio
@@ -11,7 +10,6 @@ from pydantic import BaseModel
 from supabase import create_client, Client
 from dotenv import load_dotenv
 import openai
-import requests
 
 # Load environment variables
 load_dotenv()
@@ -31,9 +29,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- Configuration & State ---
-CONFIG_FILE = "agent_config.json"
-DEFAULT_CONFIG = {
+# --- Configuration (Hardcoded) ---
+AGENT_CONFIG = {
     "system_prompt": """Você é um vendedor especialista da Balão da Informática.
 Seu objetivo é ajudar o cliente a encontrar o melhor produto de tecnologia.
 Seja breve, amigável e persuasivo. Fale sempre em Português do Brasil.
@@ -41,32 +38,14 @@ Use emojis ocasionalmente.
 Se o cliente perguntar preço, consulte os dados fornecidos.
 Não invente produtos que não estão na lista.""",
     "temperature": 0.7,
-    "model_name": "gpt-4o-mini",  # OpenAI model
-    "voice_id": "alloy" # OpenAI TTS Voice
+    "model_name": "gpt-4o-mini",
+    "voice_id": "alloy"
 }
 
 # Global instances
 supabase: Optional[Client] = None
-agent_config = DEFAULT_CONFIG.copy()
 
 # --- Helper Functions ---
-
-def load_config():
-    global agent_config
-    if os.path.exists(CONFIG_FILE):
-        try:
-            with open(CONFIG_FILE, "r") as f:
-                saved_config = json.load(f)
-                agent_config.update(saved_config)
-        except Exception as e:
-            logger.error(f"Failed to load config: {e}")
-
-def save_config():
-    try:
-        with open(CONFIG_FILE, "w") as f:
-            json.dump(agent_config, f, indent=2)
-    except Exception as e:
-        logger.error(f"Failed to save config: {e}")
 
 def init_services():
     global supabase
@@ -92,12 +71,6 @@ def init_services():
 
 # --- Pydantic Models ---
 
-class ConfigUpdate(BaseModel):
-    system_prompt: Optional[str] = None
-    temperature: Optional[float] = None
-    model_name: Optional[str] = None
-    voice_id: Optional[str] = None
-
 class ChatRequest(BaseModel):
     message: str
 
@@ -105,24 +78,11 @@ class ChatRequest(BaseModel):
 
 @app.on_event("startup")
 async def startup_event():
-    load_config()
     init_services()
 
 @app.get("/")
 async def root():
     return {"status": "online", "agent": "Voice Sales Agent (OpenAI)"}
-
-@app.get("/config")
-async def get_config():
-    return agent_config
-
-@app.post("/config")
-async def update_config(config: ConfigUpdate):
-    global agent_config
-    update_data = config.model_dump(exclude_unset=True)
-    agent_config.update(update_data)
-    save_config()
-    return {"status": "updated", "config": agent_config}
 
 @app.get("/test-connection")
 async def test_connection():
@@ -182,12 +142,12 @@ async def chat_endpoint(request: ChatRequest):
     try:
         client = openai.OpenAI()
         response = client.chat.completions.create(
-            model=agent_config.get("model_name", "gpt-4o-mini"),
+            model=AGENT_CONFIG.get("model_name", "gpt-4o-mini"),
             messages=[
-                {"role": "system", "content": agent_config["system_prompt"] + context_str},
+                {"role": "system", "content": AGENT_CONFIG["system_prompt"] + context_str},
                 {"role": "user", "content": user_msg}
             ],
-            temperature=agent_config.get("temperature", 0.7)
+            temperature=AGENT_CONFIG.get("temperature", 0.7)
         )
         return {"response": response.choices[0].message.content, "products": products}
     except Exception as e:
@@ -212,6 +172,15 @@ async def process_audio(file: UploadFile = File(...)):
             )
         user_text = transcript.text
         logger.info(f"User said: {user_text}")
+        
+        # Short-circuit if empty
+        if not user_text.strip():
+             return JSONResponse(content={
+                "user_text": "",
+                "agent_text": "Não entendi, pode repetir?",
+                "audio_base64": "", # No audio response
+                "products_found": []
+            })
 
         # 3. Search & LLM (GPT)
         products = await search_products(user_text)
@@ -222,19 +191,19 @@ async def process_audio(file: UploadFile = File(...)):
             )
 
         llm_response = client.chat.completions.create(
-            model=agent_config.get("model_name", "gpt-4o-mini"),
+            model=AGENT_CONFIG.get("model_name", "gpt-4o-mini"),
             messages=[
-                {"role": "system", "content": agent_config["system_prompt"] + context_str},
+                {"role": "system", "content": AGENT_CONFIG["system_prompt"] + context_str},
                 {"role": "user", "content": user_text}
             ],
-            temperature=agent_config.get("temperature", 0.7)
+            temperature=AGENT_CONFIG.get("temperature", 0.7)
         )
         ai_text = llm_response.choices[0].message.content
         logger.info(f"AI replied: {ai_text}")
 
         # 4. TTS (OpenAI TTS)
         # alloy, echo, fable, onyx, nova, and shimmer
-        voice = agent_config.get("voice_id", "alloy")
+        voice = AGENT_CONFIG.get("voice_id", "alloy")
         
         speech_response = client.audio.speech.create(
             model="tts-1",
@@ -250,15 +219,13 @@ async def process_audio(file: UploadFile = File(...)):
             
         return JSONResponse(content={
             "user_text": user_text,
-            "agent_text": ai_text, # Frontend expects 'agent_text' based on widget.js
+            "agent_text": ai_text, 
             "audio_base64": audio_b64,
             "products_found": products
         })
 
     except Exception as e:
         logger.error(f"Processing error: {e}")
-        # Return a polite error message in audio if possible? 
-        # For now just 500
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         # Cleanup
