@@ -136,6 +136,18 @@ TOOLS = [
     {
         "type": "function",
         "function": {
+            "name": "list_categories",
+            "description": "Lista todas as categorias de produtos disponíveis na loja.",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "view_product",
             "description": "Exibe um card de visualização do produto na tela do usuário. Use isso sempre que sugerir ou mencionar um produto específico disponível.",
             "parameters": {
@@ -208,6 +220,33 @@ def normalize_product(p: Dict) -> Dict:
         
     return p
 
+def generate_audio_elevenlabs(text: str, voice_id: str, api_key: str) -> str:
+    """Generates audio using ElevenLabs API and returns base64 string."""
+    try:
+        url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
+        headers = {
+            "Accept": "audio/mpeg",
+            "Content-Type": "application/json",
+            "xi-api-key": api_key
+        }
+        data = {
+            "text": text,
+            "model_id": "eleven_multilingual_v2",
+            "voice_settings": {
+                "stability": 0.5,
+                "similarity_boost": 0.75
+            }
+        }
+        response = requests.post(url, json=data, headers=headers)
+        if response.status_code != 200:
+            logger.error(f"ElevenLabs Error: {response.text}")
+            return ""
+        
+        return base64.b64encode(response.content).decode('utf-8')
+    except Exception as e:
+        logger.error(f"ElevenLabs Exception: {e}")
+        return ""
+
 async def search_products(query: str) -> List[Dict]:
     """
     Realiza uma busca robusta no Supabase.
@@ -279,8 +318,6 @@ async def update_config(config: ConfigUpdate):
     update_data = config.model_dump(exclude_unset=True)
     agent_config.update(update_data)
     save_config()
-    # Re-init services to pick up new keys immediately
-    init_services()
     return {"status": "updated", "config": agent_config}
 
 @app.post("/process-audio")
@@ -401,6 +438,14 @@ async def process_audio(
                 }
                 if not ai_text:
                     ai_text = f"Adicionado ao carrinho."
+            
+            elif func_name == "list_categories":
+                categories = await get_all_categories()
+                if categories:
+                    cat_list = ", ".join(categories[:10]) # Limit audio length
+                    ai_text = f"Temos diversas categorias, como: {cat_list}, e muito mais. O que você procura?"
+                else:
+                    ai_text = "Desculpe, não consegui carregar as categorias no momento."
 
         logger.info(f"AI replied: {ai_text}")
 
