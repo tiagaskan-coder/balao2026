@@ -37,9 +37,15 @@ DEFAULT_CONFIG = {
 Seu objetivo é ajudar o cliente a encontrar o melhor produto de tecnologia.
 Seja breve, amigável e persuasivo. Fale sempre em Português do Brasil.
 Use emojis ocasionalmente.
-Se o cliente perguntar preço, consulte os dados fornecidos.
-Não invente produtos que não estão na lista.""",
-    "temperature": 0.7,
+
+REGRAS RÍGIDAS:
+1. NUNCA invente produtos. Use APENAS os produtos fornecidos no contexto (resultados da busca).
+2. Se o cliente pedir algo que não está na lista, diga que não encontrou.
+3. NUNCA forneça links externos ou sugira outros sites.
+4. Para mostrar um produto, USE a ferramenta `view_product` com o slug correto.
+5. Para adicionar ao carrinho, USE a ferramenta `add_to_cart` APENAS com permissão explícita.
+6. Mantenha as respostas curtas (máximo 2 frases) para uma conversa fluida.""",
+    "temperature": 0.5,
     "model_name": "gpt-4o-mini",
     "voice_id": "alloy"
 }
@@ -278,9 +284,22 @@ async def process_audio(file: UploadFile = File(...)):
             logger.info(f"Tool Call: {func_name} args: {func_args}")
             
             if func_name == "view_product":
+                # Find product details from search results to enrich payload
+                slug = func_args.get("product_slug")
+                product_data = next((p for p in products if p['slug'] == slug), None)
+                
+                # If not in current search context, try to fetch from Supabase
+                if not product_data and supabase:
+                    try:
+                        res = supabase.table("products").select("*").eq("slug", slug).execute()
+                        if res.data:
+                            product_data = res.data[0]
+                    except Exception as e:
+                        logger.error(f"Error fetching product details: {e}")
+
                 action_payload = {
                     "type": "view_product",
-                    "payload": func_args.get("product_slug")
+                    "payload": product_data if product_data else {"slug": slug}
                 }
                 if not ai_text:
                     ai_text = f"Encontrei este produto para você. Dê uma olhada!"

@@ -8,6 +8,7 @@ import { SidebarProvider } from "@/context/SidebarContext";
 import Footer from "@/components/Footer";
 import Sidebar from "@/components/Sidebar";
 import VoiceWidget from "@/components/VoiceWidget";
+import ProductPreview from "@/components/ProductPreview";
 import { getCategories } from "@/lib/db";
 
 export const viewport: Viewport = {
@@ -107,6 +108,7 @@ export default async function RootLayout({
                 <SidebarProvider>
                   <Sidebar categories={categories} mobileOnly />
                   {children}
+                  <ProductPreview />
                   <VoiceWidget />
                   <Footer />
                 </SidebarProvider>

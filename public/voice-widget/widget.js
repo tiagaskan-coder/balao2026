@@ -276,10 +276,13 @@
                 console.log("Action received:", data.action);
                 
                 if (data.action.type === 'view_product') {
-                    // Navigate to product page
-                    // We assume the frontend route is /product/:slug
+                    // Trigger ProductPreview component event
+                    // Payload is now the full product object (or at least contains slug)
                     if (data.action.payload) {
-                        window.location.href = `/product/${data.action.payload}`;
+                         const event = new CustomEvent('balao-preview-product', { 
+                            detail: data.action.payload 
+                        });
+                        window.dispatchEvent(event);
                     }
                 } 
                 else if (data.action.type === 'add_to_cart') {
