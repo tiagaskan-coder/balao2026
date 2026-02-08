@@ -348,7 +348,7 @@ export default function AdminPage() {
                         className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${activeTab === "voice_agent" ? "bg-red-50 text-[#E60012] border-l-4 border-[#E60012]" : "text-gray-600 hover:bg-gray-50"}`}
                     >
                         <Mic size={18} />
-                        Agente de Voz (Local)
+                        Agente de Voz (IA)
                     </button>
                 </nav>
             </aside>

@@ -1,11 +1,7 @@
 fastapi
 uvicorn
 python-multipart
-supabase>=2.5.0
+supabase
 python-dotenv
-ollama
-faster-whisper
-kokoro-onnx
-soundfile
-numpy
+openai
 requests
