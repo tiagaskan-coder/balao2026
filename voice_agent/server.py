@@ -13,6 +13,8 @@ from supabase import create_client, Client
 from dotenv import load_dotenv
 import openai
 
+import requests
+
 # Load environment variables
 load_dotenv()
 
@@ -61,7 +63,12 @@ REGRAS RÍGIDAS DE OPERAÇÃO:
 """,
     "temperature": 0.2, # Low temperature for factual accuracy
     "model_name": "gpt-4o-mini",
-    "voice_id": "alloy"
+    "voice_id": "alloy",
+    "voice_provider": "openai", # openai | elevenlabs
+    "openai_api_key": "",
+    "supabase_url": "",
+    "supabase_key": "",
+    "elevenlabs_api_key": ""
 }
 
 # Global instances
@@ -90,9 +97,9 @@ def save_config():
 def init_services():
     global supabase
     
-    # Supabase - Try standard env vars first, then legacy
-    url = os.getenv("NEXT_PUBLIC_SUPABASE_URL") or os.getenv("SUPABASE_URL")
-    key = os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY") or os.getenv("SUPABASE_KEY")
+    # Supabase - Priority: Config > Env Var
+    url = agent_config.get("supabase_url") or os.getenv("NEXT_PUBLIC_SUPABASE_URL") or os.getenv("SUPABASE_URL")
+    key = agent_config.get("supabase_key") or os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY") or os.getenv("SUPABASE_KEY")
     
     if url and key:
         try:
@@ -104,7 +111,7 @@ def init_services():
         logger.warning("Supabase credentials missing.")
 
     # OpenAI
-    openai_key = os.getenv("OPENAI_API_KEY")
+    openai_key = agent_config.get("openai_api_key") or os.getenv("OPENAI_API_KEY")
     if not openai_key:
         logger.warning("OPENAI_API_KEY missing. Voice features will fail.")
     else:
@@ -117,6 +124,11 @@ class ConfigUpdate(BaseModel):
     temperature: Optional[float] = None
     model_name: Optional[str] = None
     voice_id: Optional[str] = None
+    voice_provider: Optional[str] = None
+    openai_api_key: Optional[str] = None
+    supabase_url: Optional[str] = None
+    supabase_key: Optional[str] = None
+    elevenlabs_api_key: Optional[str] = None
 
 # --- OpenAI Tools ---
 
@@ -267,6 +279,8 @@ async def update_config(config: ConfigUpdate):
     update_data = config.model_dump(exclude_unset=True)
     agent_config.update(update_data)
     save_config()
+    # Re-init services to pick up new keys immediately
+    init_services()
     return {"status": "updated", "config": agent_config}
 
 @app.post("/process-audio")
