@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Mic, Save, Volume2, Play, AlertCircle, CheckCircle } from "lucide-react";
+import { Mic, Save, Volume2, Play, AlertCircle, CheckCircle, Settings } from "lucide-react";
 
 interface VoiceConfig {
   system_prompt: string;
