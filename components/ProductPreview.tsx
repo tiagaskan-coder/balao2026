@@ -38,7 +38,10 @@ export default function ProductPreview() {
   if (!product || !isVisible) return null;
 
   return (
-    <div className="fixed bottom-24 right-6 z-50 w-80 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden animate-in slide-in-from-right-10 fade-in duration-300">
+    <div className="fixed bottom-[350px] right-[20px] z-50 w-80 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden animate-in slide-in-from-bottom-10 fade-in duration-300">
+      {/* Speech bubble tail */}
+      <div className="absolute -bottom-2 right-10 w-4 h-4 bg-white border-b border-r border-gray-100 rotate-45 z-10"></div>
+      
       <div className="relative h-48 bg-gray-50">
         <button 
           onClick={() => setIsVisible(false)}

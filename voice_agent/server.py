@@ -4,7 +4,7 @@ import logging
 import base64
 import asyncio
 from typing import Optional, List, Dict, Any
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -222,7 +222,10 @@ async def search_products(query: str):
         return []
 
 @app.post("/process-audio")
-async def process_audio(file: UploadFile = File(...)):
+async def process_audio(
+    file: UploadFile = File(...),
+    conversation_history: str = Form("[]") # Receive history as JSON string
+):
     # 1. Save temp file (Whisper API needs a file-like object with name or actual file)
     temp_filename = f"temp_{file.filename}"
     with open(temp_filename, "wb") as buffer:
@@ -230,6 +233,12 @@ async def process_audio(file: UploadFile = File(...)):
 
     try:
         client = openai.OpenAI()
+        
+        # Load history
+        try:
+            history = json.loads(conversation_history)
+        except:
+            history = []
 
         # 2. STT (Whisper API)
         with open(temp_filename, "rb") as audio_file:
@@ -252,20 +261,35 @@ async def process_audio(file: UploadFile = File(...)):
             })
 
         # 3. Search & LLM (GPT)
-        products = await search_products(user_text)
+        # Improve search query by removing common stop words
+        stop_words = ["eu", "quero", "gostaria", "de", "um", "uma", "comprar", "ver", "preço", "quanto", "custa", "tem", "você", "gostaria", "saber", "sobre", "o", "a", "os", "as", "me", "mostra", "mostre", "olhar"]
+        query_words = [w for w in user_text.lower().split() if w not in stop_words]
+        clean_query = " ".join(query_words)
+        
+        products = []
+        if len(clean_query) > 2:
+            products = await search_products(clean_query)
+            
         context_str = ""
         if products:
-            context_str = "\nProdutos disponíveis no catálogo:\n" + "\n".join(
+            context_str = "\nProdutos encontrados no catálogo (use estas informações):\n" + "\n".join(
                 [f"- {p['name']} (ID: {p['id']}, Slug: {p['slug']}): R$ {p.get('price', 'N/A')}" for p in products]
             )
+
+        # Build messages with history
+        messages = [{"role": "system", "content": agent_config["system_prompt"] + context_str}]
+        
+        # Append last 10 messages from history to maintain context but avoid token limit
+        for msg in history[-10:]:
+            if msg.get("role") in ["user", "assistant"]:
+                messages.append({"role": msg["role"], "content": msg["content"]})
+        
+        messages.append({"role": "user", "content": user_text})
 
         # Call LLM with Tools
         llm_response = client.chat.completions.create(
             model=agent_config.get("model_name", "gpt-4o-mini"),
-            messages=[
-                {"role": "system", "content": agent_config["system_prompt"] + context_str},
-                {"role": "user", "content": user_text}
-            ],
+            messages=messages,
             temperature=agent_config.get("temperature", 0.7),
             tools=TOOLS,
             tool_choice="auto"

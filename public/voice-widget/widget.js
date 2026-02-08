@@ -108,6 +108,8 @@
     let speechDetected = false;
     let isAIPlaying = false;
     let scriptProcessor = null;
+    let conversationHistory = []; // Maintain local history
+    let currentAudio = null; // Track audio element to pause it
 
     // Constants
     const SILENCE_THRESHOLD = 1000; // 1.0s silence to stop (faster response)
@@ -132,7 +134,12 @@
         stopAudioContext();
         if (isAIPlaying) {
             window.speechSynthesis.cancel();
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
         }
+        isAIPlaying = false;
         // Force reload to clear audio context issues if any
         // window.location.reload(); 
     }
@@ -186,6 +193,16 @@
                     if (!speechDetected) {
                         speechDetected = true;
                         console.log("Speech detected");
+                        
+                        // Interrupt AI if speaking
+                        if (isAIPlaying && currentAudio) {
+                            console.log("Interrupting AI...");
+                            currentAudio.pause();
+                            currentAudio = null;
+                            isAIPlaying = false;
+                            window.speechSynthesis.cancel(); // Just in case
+                        }
+
                         statusText.textContent = "Ouvindo...";
                         visualizer.className = 'voice-visualizer listening';
                     }
@@ -259,6 +276,7 @@
     async function sendAudio(blob) {
         const formData = new FormData();
         formData.append('file', blob, 'recording.webm');
+        formData.append('conversation_history', JSON.stringify(conversationHistory));
 
         try {
             const response = await fetch(API_URL, {
@@ -269,6 +287,15 @@
             if (!response.ok) throw new Error('API Error');
 
             const data = await response.json();
+            
+            // Update history
+            if (data.user_text) {
+                conversationHistory.push({ role: 'user', content: data.user_text });
+            }
+            if (data.agent_text) {
+                conversationHistory.push({ role: 'assistant', content: data.agent_text });
+            }
+
             statusText.textContent = data.agent_text;
             
             // Handle Actions
@@ -315,11 +342,12 @@
         isAIPlaying = true;
         visualizer.className = 'voice-visualizer speaking';
         
-        const audio = new Audio("data:audio/mp3;base64," + base64Audio);
-        audio.play().catch(e => console.error("Playback error", e));
+        currentAudio = new Audio("data:audio/mp3;base64," + base64Audio);
+        currentAudio.play().catch(e => console.error("Playback error", e));
         
-        audio.onended = () => {
+        currentAudio.onended = () => {
             isAIPlaying = false;
+            currentAudio = null;
             if (isOpen) {
                 startRecording(); // Auto turn-taking
             }
