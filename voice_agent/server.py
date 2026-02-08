@@ -251,6 +251,7 @@ async def search_products(query: str) -> List[Dict]:
     """
     Realiza uma busca robusta no Supabase.
     Tenta busca exata, depois parcial, depois por palavras-chave.
+    Inclui busca por categoria.
     """
     if not supabase:
         return []
@@ -260,22 +261,34 @@ async def search_products(query: str) -> List[Dict]:
         return []
 
     try:
-        # 1. Busca textual direta (ilike)
+        # 0. Busca ampla se o usuário pedir "tudo" ou "todos"
+        if query.lower() in ["tudo", "todos", "todos os produtos", "lista tudo"]:
+             res = supabase.table("products").select("*").limit(20).execute()
+             if res.data:
+                return [normalize_product(p) for p in res.data]
+
+        # 1. Busca textual direta (ilike) em nome OU categoria
         logger.info(f"Searching for: {query}")
-        res = supabase.table("products").select("*").ilike("name", f"%{query}%").limit(5).execute()
+        # Use .or_ to search in name OR category
+        res = supabase.table("products").select("*").or_(f"name.ilike.%{query}%,category.ilike.%{query}%").limit(10).execute()
         if res.data:
             return [normalize_product(p) for p in res.data]
 
         # 2. Busca por palavras-chave (se a frase for longa)
         # Remove stop words comuns em PT-BR
-        stop_words = {"eu", "quero", "gostaria", "de", "do", "da", "um", "uma", "comprar", "ver", "preço", "quanto", "custa", "tem", "você", "saber", "sobre", "o", "a", "os", "as", "me", "mostra", "mostre", "olhar", "procurando", "estou"}
+        stop_words = {"eu", "quero", "gostaria", "de", "do", "da", "um", "uma", "comprar", "ver", "preço", "quanto", "custa", "tem", "você", "saber", "sobre", "o", "a", "os", "as", "me", "mostra", "mostre", "olhar", "procurando", "estou", "tem", "nessa", "na", "categoria"}
         words = [w.lower() for w in re.split(r'\s+', query) if w.lower() not in stop_words and len(w) > 2]
         
         if not words:
             return []
 
-        # Tenta buscar pela combinação das palavras mais significativas
-        or_filter = ",".join([f"name.ilike.%{w}%" for w in words])
+        # Tenta buscar pela combinação das palavras mais significativas em nome ou categoria
+        or_conditions = []
+        for w in words:
+            or_conditions.append(f"name.ilike.%{w}%")
+            or_conditions.append(f"category.ilike.%{w}%")
+        
+        or_filter = ",".join(or_conditions)
         if or_filter:
             res = supabase.table("products").select("*").or_(or_filter).limit(10).execute()
             if res.data:
@@ -285,6 +298,27 @@ async def search_products(query: str) -> List[Dict]:
     except Exception as e:
         logger.error(f"Product search error: {e}")
         return []
+
+async def get_all_categories() -> List[str]:
+    if not supabase: return []
+    try:
+        # Tenta pegar da tabela categories primeiro
+        res = supabase.table("categories").select("name").eq("active", True).execute()
+        if res.data:
+            return [c["name"] for c in res.data]
+        
+        # Fallback: distinct da tabela products (se categories estiver vazia)
+        res = supabase.table("products").select("category").execute()
+        cats = set()
+        if res.data:
+            for p in res.data:
+                if p.get("category"):
+                    cats.add(p["category"])
+        return list(cats)
+    except Exception as e:
+        logger.error(f"Get categories error: {e}")
+        return []
+
 
 async def get_product_by_slug(slug: str) -> Optional[Dict]:
     if not supabase: return None
@@ -438,7 +472,7 @@ async def process_audio(
                 }
                 if not ai_text:
                     ai_text = f"Adicionado ao carrinho."
-            
+
             elif func_name == "list_categories":
                 categories = await get_all_categories()
                 if categories:
