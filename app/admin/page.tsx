@@ -10,6 +10,7 @@ import ProductManager from "@/components/admin/ProductManager";
 import HomeBlocksManager from "@/components/admin/HomeBlocksManager";
 import MarketingManager from "@/components/admin/MarketingManager";
 import CouponManager from "@/components/admin/CouponManager";
+import VoiceAgentManager from "@/components/admin/VoiceAgentManager";
 import { ArrowLeft, Upload, CheckCircle, AlertCircle, Layout, Layers, Save, Search, Settings, ShoppingBag, Mail, Mic } from "lucide-react";
 
 export default function AdminPage() {
@@ -329,11 +330,11 @@ export default function AdminPage() {
                         Marketing & E-mail
                     </button>
                     <button
-                        disabled
-                        className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 cursor-not-allowed"
+                        onClick={() => setActiveTab("voice_agent")}
+                        className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${activeTab === "voice_agent" ? "bg-red-50 text-[#E60012] border-l-4 border-[#E60012]" : "text-gray-600 hover:bg-gray-50"}`}
                     >
-                        <Settings size={18} />
-                        Configurações (Em breve)
+                        <Mic size={18} />
+                        Agente de Voz
                     </button>
                     <button
                         onClick={() => setActiveTab("coupons")}
@@ -353,6 +354,13 @@ export default function AdminPage() {
                     {activeTab === "home_blocks" && (
                          <div className="animate-in fade-in duration-300">
                              <HomeBlocksManager categories={categories} />
+                         </div>
+                    )}
+
+                    {/* VOICE AGENT TAB */}
+                    {activeTab === "voice_agent" && (
+                         <div className="animate-in fade-in duration-300">
+                             <VoiceAgentManager />
                          </div>
                     )}
 

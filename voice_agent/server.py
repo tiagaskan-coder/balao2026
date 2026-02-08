@@ -1,4 +1,5 @@
 import os
+import json
 import logging
 import base64
 import asyncio
@@ -29,8 +30,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- Configuration (Hardcoded) ---
-AGENT_CONFIG = {
+# --- Configuration & State ---
+CONFIG_FILE = "agent_config.json"
+DEFAULT_CONFIG = {
     "system_prompt": """Você é um vendedor especialista da Balão da Informática.
 Seu objetivo é ajudar o cliente a encontrar o melhor produto de tecnologia.
 Seja breve, amigável e persuasivo. Fale sempre em Português do Brasil.
@@ -44,8 +46,26 @@ Não invente produtos que não estão na lista.""",
 
 # Global instances
 supabase: Optional[Client] = None
+agent_config = DEFAULT_CONFIG.copy()
 
 # --- Helper Functions ---
+
+def load_config():
+    global agent_config
+    if os.path.exists(CONFIG_FILE):
+        try:
+            with open(CONFIG_FILE, "r") as f:
+                saved_config = json.load(f)
+                agent_config.update(saved_config)
+        except Exception as e:
+            logger.error(f"Failed to load config: {e}")
+
+def save_config():
+    try:
+        with open(CONFIG_FILE, "w") as f:
+            json.dump(agent_config, f, indent=2)
+    except Exception as e:
+        logger.error(f"Failed to save config: {e}")
 
 def init_services():
     global supabase
@@ -71,18 +91,88 @@ def init_services():
 
 # --- Pydantic Models ---
 
+class ConfigUpdate(BaseModel):
+    system_prompt: Optional[str] = None
+    temperature: Optional[float] = None
+    model_name: Optional[str] = None
+    voice_id: Optional[str] = None
+
 class ChatRequest(BaseModel):
     message: str
+
+# --- OpenAI Tools ---
+
+TOOLS = [
+    {
+        "type": "function",
+        "function": {
+            "name": "view_product",
+            "description": "Show/navigate to a specific product page on the website. Use this when recommending a specific product.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "product_slug": {
+                        "type": "string",
+                        "description": "The slug of the product to display (e.g., 'placa-de-video-rtx-3060')"
+                    }
+                },
+                "required": ["product_slug"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "add_to_cart",
+            "description": "Add a product to the shopping cart. Use this ONLY when the user explicitly agrees to add it.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "product_id": {
+                        "type": "string",
+                        "description": "The ID of the product to add to cart"
+                    },
+                     "product_name": {
+                        "type": "string",
+                        "description": "The name of the product"
+                    },
+                     "product_price": {
+                        "type": "string",
+                        "description": "The price of the product"
+                    },
+                     "product_image": {
+                        "type": "string",
+                        "description": "The image URL of the product"
+                    }
+                },
+                "required": ["product_id", "product_name", "product_price", "product_image"]
+            }
+        }
+    }
+]
 
 # --- Routes ---
 
 @app.on_event("startup")
 async def startup_event():
+    load_config()
     init_services()
 
 @app.get("/")
 async def root():
     return {"status": "online", "agent": "Voice Sales Agent (OpenAI)"}
+
+@app.get("/config")
+async def get_config():
+    return agent_config
+
+@app.post("/config")
+async def update_config(config: ConfigUpdate):
+    global agent_config
+    update_data = config.model_dump(exclude_unset=True)
+    agent_config.update(update_data)
+    save_config()
+    return {"status": "updated", "config": agent_config}
 
 @app.get("/test-connection")
 async def test_connection():
@@ -125,34 +215,6 @@ async def search_products(query: str):
         logger.error(f"Product search error: {e}")
         return []
 
-@app.post("/chat")
-async def chat_endpoint(request: ChatRequest):
-    """Text-only chat for testing."""
-    user_msg = request.message
-    
-    # 1. Search Products (Context)
-    products = await search_products(user_msg)
-    context_str = ""
-    if products:
-        context_str = "\nProdutos encontrados:\n" + "\n".join(
-            [f"- {p['name']}: R$ {p.get('price', '?')}" for p in products]
-        )
-    
-    # 2. Call OpenAI LLM
-    try:
-        client = openai.OpenAI()
-        response = client.chat.completions.create(
-            model=AGENT_CONFIG.get("model_name", "gpt-4o-mini"),
-            messages=[
-                {"role": "system", "content": AGENT_CONFIG["system_prompt"] + context_str},
-                {"role": "user", "content": user_msg}
-            ],
-            temperature=AGENT_CONFIG.get("temperature", 0.7)
-        )
-        return {"response": response.choices[0].message.content, "products": products}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
 @app.post("/process-audio")
 async def process_audio(file: UploadFile = File(...)):
     # 1. Save temp file (Whisper API needs a file-like object with name or actual file)
@@ -178,8 +240,9 @@ async def process_audio(file: UploadFile = File(...)):
              return JSONResponse(content={
                 "user_text": "",
                 "agent_text": "Não entendi, pode repetir?",
-                "audio_base64": "", # No audio response
-                "products_found": []
+                "audio_base64": "", 
+                "products_found": [],
+                "action": None
             })
 
         # 3. Search & LLM (GPT)
@@ -187,41 +250,81 @@ async def process_audio(file: UploadFile = File(...)):
         context_str = ""
         if products:
             context_str = "\nProdutos disponíveis no catálogo:\n" + "\n".join(
-                [f"- {p['name']}: R$ {p.get('price', 'N/A')}" for p in products]
+                [f"- {p['name']} (ID: {p['id']}, Slug: {p['slug']}): R$ {p.get('price', 'N/A')}" for p in products]
             )
 
+        # Call LLM with Tools
         llm_response = client.chat.completions.create(
-            model=AGENT_CONFIG.get("model_name", "gpt-4o-mini"),
+            model=agent_config.get("model_name", "gpt-4o-mini"),
             messages=[
-                {"role": "system", "content": AGENT_CONFIG["system_prompt"] + context_str},
+                {"role": "system", "content": agent_config["system_prompt"] + context_str},
                 {"role": "user", "content": user_text}
             ],
-            temperature=AGENT_CONFIG.get("temperature", 0.7)
+            temperature=agent_config.get("temperature", 0.7),
+            tools=TOOLS,
+            tool_choice="auto"
         )
-        ai_text = llm_response.choices[0].message.content
+        
+        response_msg = llm_response.choices[0].message
+        ai_text = response_msg.content or ""
+        
+        # Handle Tool Calls
+        action_payload = None
+        if response_msg.tool_calls:
+            tool_call = response_msg.tool_calls[0]
+            func_name = tool_call.function.name
+            func_args = json.loads(tool_call.function.arguments)
+            
+            logger.info(f"Tool Call: {func_name} args: {func_args}")
+            
+            if func_name == "view_product":
+                action_payload = {
+                    "type": "view_product",
+                    "payload": func_args.get("product_slug")
+                }
+                if not ai_text:
+                    ai_text = f"Encontrei este produto para você. Dê uma olhada!"
+                    
+            elif func_name == "add_to_cart":
+                action_payload = {
+                    "type": "add_to_cart",
+                    "payload": {
+                        "id": func_args.get("product_id"),
+                        "name": func_args.get("product_name"),
+                        "price": func_args.get("product_price"),
+                        "image": func_args.get("product_image")
+                    }
+                }
+                if not ai_text:
+                    ai_text = f"Adicionei {func_args.get('product_name')} ao seu carrinho."
+
         logger.info(f"AI replied: {ai_text}")
 
         # 4. TTS (OpenAI TTS)
-        # alloy, echo, fable, onyx, nova, and shimmer
-        voice = AGENT_CONFIG.get("voice_id", "alloy")
+        voice = agent_config.get("voice_id", "alloy")
         
-        speech_response = client.audio.speech.create(
-            model="tts-1",
-            voice=voice,
-            input=ai_text
-        )
+        # If AI text is empty but we have an action, generate a generic response? 
+        # Usually tool call comes with null content. We filled it above.
         
-        # Get binary data
-        audio_content = speech_response.content
-        
-        # Encode to base64 for frontend
-        audio_b64 = base64.b64encode(audio_content).decode('utf-8')
-            
+        if ai_text:
+            speech_response = client.audio.speech.create(
+                model="tts-1",
+                voice=voice,
+                input=ai_text
+            )
+            # Get binary data
+            audio_content = speech_response.content
+            # Encode to base64 for frontend
+            audio_b64 = base64.b64encode(audio_content).decode('utf-8')
+        else:
+            audio_b64 = ""
+
         return JSONResponse(content={
             "user_text": user_text,
             "agent_text": ai_text, 
             "audio_base64": audio_b64,
-            "products_found": products
+            "products_found": products,
+            "action": action_payload
         })
 
     except Exception as e:

@@ -29,6 +29,18 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     }, 3000);
   }, []);
 
+  // Listen for global custom event
+  React.useEffect(() => {
+      const handleCustomToast = (e: Event) => {
+          const detail = (e as CustomEvent).detail;
+          if (detail && detail.message) {
+              showToast(detail.message, detail.type || 'success');
+          }
+      };
+      window.addEventListener('balao-toast', handleCustomToast);
+      return () => window.removeEventListener('balao-toast', handleCustomToast);
+  }, [showToast]);
+
   const removeToast = (id: string) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   };

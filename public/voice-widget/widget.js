@@ -110,7 +110,7 @@
     let scriptProcessor = null;
 
     // Constants
-    const SILENCE_THRESHOLD = 1500; // 1.5s silence to stop
+    const SILENCE_THRESHOLD = 1000; // 1.0s silence to stop (faster response)
     const SPEECH_THRESHOLD = 20; // Volume threshold (0-255)
 
     // Event Listeners
@@ -271,6 +271,28 @@
             const data = await response.json();
             statusText.textContent = data.agent_text;
             
+            // Handle Actions
+            if (data.action) {
+                console.log("Action received:", data.action);
+                
+                if (data.action.type === 'view_product') {
+                    // Navigate to product page
+                    // We assume the frontend route is /product/:slug
+                    if (data.action.payload) {
+                        window.location.href = `/product/${data.action.payload}`;
+                    }
+                } 
+                else if (data.action.type === 'add_to_cart') {
+                    // Add to cart
+                    // We use the exposed global function from CartContext
+                    if (window.balao_addToCart && data.action.payload) {
+                        window.balao_addToCart(data.action.payload);
+                    } else {
+                        console.warn("balao_addToCart not found or invalid payload");
+                    }
+                }
+            }
+
             if (data.audio_base64) {
                 playAudio(data.audio_base64);
             } else {

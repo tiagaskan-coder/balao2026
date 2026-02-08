@@ -44,6 +44,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, isMounted]);
 
+  // Expose addToCart to window for Voice Agent
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+        (window as any).balao_addToCart = (product: Product) => {
+            addToCart(product);
+            // Also dispatch a custom event for Toast
+            window.dispatchEvent(new CustomEvent('balao-toast', { detail: { message: `Adicionado: ${product.name}` } }));
+            setIsCartOpen(true); // Open cart to confirm
+        };
+    }
+  }, [items]); // Re-bind if needed, but addToCart is stable-ish. Better depends on nothing or addToCart
+
   const addToCart = (product: Product) => {
     setItems((prev) => {
       const existing = prev.find((item) => item.id === product.id);
