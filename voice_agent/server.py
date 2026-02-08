@@ -90,13 +90,14 @@ def save_config():
 def init_services():
     global supabase
     
-    # Supabase
-    url = os.getenv("SUPABASE_URL")
-    key = os.getenv("SUPABASE_KEY")
+    # Supabase - Try standard env vars first, then legacy
+    url = os.getenv("NEXT_PUBLIC_SUPABASE_URL") or os.getenv("SUPABASE_URL")
+    key = os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY") or os.getenv("SUPABASE_KEY")
+    
     if url and key:
         try:
             supabase = create_client(url, key)
-            logger.info("Supabase connected.")
+            logger.info(f"Supabase connected to {url}")
         except Exception as e:
             logger.error(f"Supabase init failed: {e}")
     else:
