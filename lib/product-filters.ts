@@ -26,7 +26,7 @@ const PRIORITY_TERMS = [
 /**
  * Extrai tags relevantes de uma lista de produtos
  */
-export function extractTags(products: { name: string }[]): FilterTag[] {
+export function extractTags(products: Product[]): FilterTag[] {
   const tagCounts = new Map<string, number>();
 
   products.forEach(product => {

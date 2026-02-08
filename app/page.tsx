@@ -4,9 +4,8 @@ import ProductList from "@/components/ProductList";
 import Carousel from "@/components/Carousel";
 import ProductCarousel from "@/components/ProductCarousel";
 import SeoContent from "@/components/SeoContent";
-import { getProducts, getCarouselImages, getCategories, getHomeBlocks, getAllFilteredProducts } from "@/lib/db";
+import { getProducts, getCarouselImages, getCategories, getHomeBlocks } from "@/lib/db";
 import { searchProducts } from "@/lib/searchUtils";
-import { Product, Category, HomeBlock, CarouselImage } from "@/lib/utils";
 
 export const dynamic = 'force-dynamic';
 
@@ -15,19 +14,16 @@ type SearchParams = Promise<{ category?: string; search?: string }>;
 export default async function Home(props: {
   searchParams: SearchParams;
 }) {
+  const [products, carouselImages, categories, homeBlocks] = await Promise.all([
+    getProducts(),
+    getCarouselImages(true),
+    getCategories(),
+    getHomeBlocks(true)
+  ]);
+  
   const searchParams = await props.searchParams;
   const category = searchParams?.category;
   const search = searchParams?.search;
-
-  let products: Product[] = [];
-  let carouselImages: CarouselImage[] = [];
-  let categories: Category[] = [];
-  let homeBlocks: HomeBlock[] = [];
-  let filteredProducts: Product[] = [];
-  let validCategoriesList: string[] | undefined = undefined;
-
-  // Always fetch categories first as they are needed for sidebar and logic
-  categories = await getCategories();
 
   // Helper to find all descendant category names
   const getDescendantNames = (rootName: string, allCategories: any[]) => {
@@ -48,32 +44,20 @@ export default async function Home(props: {
       return descendants;
   }
 
-  if (category || search) {
-      // Listing Mode: Fetch ALL products matching filters
-      
-      if (category && category !== "Todos os Produtos") {
-          const validCategories = new Set<string>();
-          validCategories.add(category);
-          const descendants = getDescendantNames(category, categories);
-          descendants.forEach(d => validCategories.add(d));
-          validCategoriesList = Array.from(validCategories);
-      }
+  const validCategories = new Set<string>();
+  if (category) {
+      validCategories.add(category);
+      const descendants = getDescendantNames(category, categories);
+      descendants.forEach(d => validCategories.add(d));
+  }
 
-      filteredProducts = await getAllFilteredProducts({ 
-          categories: validCategoriesList,
-          search
-      });
-  } else {
-      // Home Mode: Fetch everything for carousels
-      // Note: This is still heavy, but requested changes focused on "Todos os Produtos" listing
-      const [allProducts, imgs, blocks] = await Promise.all([
-          getProducts(),
-          getCarouselImages(true),
-          getHomeBlocks(true)
-      ]);
-      products = allProducts;
-      carouselImages = imgs;
-      homeBlocks = blocks;
+  let filteredProducts = products.filter(p => {
+    if (category && category !== "Todos os Produtos" && !validCategories.has(p.category)) return false;
+    return true;
+  });
+
+  if (search) {
+      filteredProducts = searchProducts(filteredProducts, search);
   }
 
   return (
@@ -101,6 +85,7 @@ export default async function Home(props: {
             {/* Dynamic Home Blocks */}
             {!search && !category && (
                 <>
+                {/* Dynamic Home Blocks */}
                 {homeBlocks.map(block => {
                     const blockProducts = products.filter(p => p.category === block.category_id);
                     if (blockProducts.length === 0) return null;
@@ -123,7 +108,7 @@ export default async function Home(props: {
                     <h1 className="text-xl font-bold text-gray-800">
                         {category || `Resultados para: "${search}"`}
                     </h1>
-                    <span className="text-sm text-gray-500">{filteredProducts.length > 0 ? 'Exibindo produtos' : '0 produtos'}</span>
+                    <span className="text-sm text-gray-500">{filteredProducts.length} produtos</span>
                 </div>
 
                 {filteredProducts.length === 0 ? (
@@ -131,11 +116,7 @@ export default async function Home(props: {
                       <p className="text-xl font-medium">Nenhum produto encontrado.</p>
                    </div>
                 ) : (
-                  <ProductList 
-                    products={filteredProducts} 
-                    categories={validCategoriesList}
-                    searchQuery={search}
-                  />
+                  <ProductList products={filteredProducts} />
                 )}
               </>
             )}

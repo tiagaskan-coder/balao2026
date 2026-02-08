@@ -1,42 +1,11 @@
 import { NextResponse } from 'next/server';
-import { getProducts, saveProducts, createProduct, getPaginatedProducts, getAllFilteredProducts } from '@/lib/db';
+import { getProducts, saveProducts, createProduct } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  
-  const page = searchParams.get('page');
-  const limit = searchParams.get('limit');
-  const categories = searchParams.getAll('category'); // Support multiple categories
-  const search = searchParams.get('search');
-  const tags = searchParams.get('tags');
-
-  // Check if any pagination or filtering params are present
-  if (page || limit || categories.length > 0 || search || tags) {
-      // If limit is explicitly 'all' or not provided but filters exist, fetch all
-      if (limit === 'all' || (!limit && (categories.length > 0 || search || tags))) {
-          const data = await getAllFilteredProducts({
-              categories: categories.length > 0 ? categories : undefined,
-              search: search || undefined,
-              tags: tags ? tags.split(',') : undefined
-          });
-          return NextResponse.json(data);
-      }
-
-      const pageNum = parseInt(page || '1');
-      const limitNum = parseInt(limit || '20');
-      
-      const data = await getPaginatedProducts(pageNum, limitNum, { 
-          categories: categories.length > 0 ? categories : undefined,
-          search: search || undefined,
-          tags: tags ? tags.split(',') : undefined
-      });
-      return NextResponse.json(data);
-  }
-
-  const products = await getAllFilteredProducts(); // Use getAllFilteredProducts for consistency
+export async function GET() {
+  const products = await getProducts();
   return NextResponse.json(products);
 }
 

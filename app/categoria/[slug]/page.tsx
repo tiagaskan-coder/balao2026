@@ -2,8 +2,9 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import ProductList from "@/components/ProductList";
 import FilterSyncer from "@/components/FilterSyncer";
-import { getCategories, getAllFilteredProducts, getProductNames } from "@/lib/db";
-import { extractTags } from "@/lib/product-filters";
+import { getProducts, getCategories } from "@/lib/db";
+import { searchProducts } from "@/lib/searchUtils";
+import { extractTags, filterProductsByTags } from "@/lib/product-filters";
 import type { Category } from "@/lib/utils";
  
 export const dynamic = "force-dynamic";
@@ -19,8 +20,10 @@ export default async function CategoriaPage({
   const { search, tags: tagsParam } = await searchParams;
   const selectedTags = tagsParam ? tagsParam.split(',') : [];
  
-  // Fetch categories first
-  const categories = await getCategories();
+  const [products, categories] = await Promise.all([
+    getProducts(),
+    getCategories(),
+  ]);
  
   const findBySlug = (s: string, all: Category[]) =>
     all.find((c) => c.slug === s);
@@ -53,22 +56,21 @@ export default async function CategoriaPage({
     descendants.forEach((d) => validCategories.add(d));
   }
  
-  const validCategoriesList = Array.from(validCategories);
-
-  // Fetch ALL Products Matching Filters
-  const filteredProducts = await getAllFilteredProducts({
-      categories: validCategoriesList,
-      search,
-      tags: selectedTags
+  let filteredProducts = products.filter((p) => {
+    if (categoryName && categoryName !== "Todos os Produtos" && !validCategories.has(p.category)) return false;
+    return true;
   });
-  
-  // Extract tags from a sample of products (to show filters)
-  // Note: We can use filteredProducts here for tags if we want tags based on current result, 
-  // or use getProductNames if we want tags based on category. 
-  // Using getProductNames is safer for consistency with sidebar logic.
-  const productsForTags = await getProductNames(validCategoriesList, search);
-  const availableTags = extractTags(productsForTags);
+ 
+  if (search) {
+    filteredProducts = searchProducts(filteredProducts, search);
+  }
 
+  // Extract tags from current filtered products (before tag filtering)
+  const availableTags = extractTags(filteredProducts);
+
+  // Apply tag filter
+  filteredProducts = filterProductsByTags(filteredProducts, selectedTags);
+ 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       <FilterSyncer tags={availableTags} />
@@ -82,19 +84,14 @@ export default async function CategoriaPage({
             <h1 className="text-xl font-bold text-gray-800">
               {categoryName || "Categoria"}
             </h1>
-            <span className="text-sm text-gray-500">{filteredProducts.length > 0 ? 'Exibindo produtos' : '0 produtos'}</span>
+            <span className="text-sm text-gray-500">{filteredProducts.length} produtos</span>
           </div>
           {filteredProducts.length === 0 ? (
             <div className="text-center py-20 text-gray-500 bg-white rounded-lg shadow-sm">
               <p className="text-xl font-medium">Nenhum produto encontrado.</p>
             </div>
           ) : (
-            <ProductList 
-                products={filteredProducts} 
-                categories={validCategoriesList}
-                searchQuery={search}
-                tags={selectedTags}
-            />
+            <ProductList products={filteredProducts} />
           )}
 
           {/* SEO Section for Categories */}

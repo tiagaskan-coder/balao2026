@@ -3,29 +3,19 @@
 import React, { useState, useMemo } from "react";
 import { Product } from "@/lib/utils";
 import ProductCard from "./ProductCard";
-import { LayoutGrid, Grid2x2, ArrowUpDown } from "lucide-react";
+import { LayoutGrid, Grid2x2, List, ArrowUpDown, Filter, ChevronDown } from "lucide-react";
 
 type ViewMode = "small" | "large" | "list";
 type SortMode = "default" | "price-asc" | "price-desc";
 
-export default function ProductList({ 
-    products,
-    categories,
-    searchQuery,
-    tags
-}: { 
-    products: Product[],
-    categories?: string[],
-    searchQuery?: string,
-    tags?: string[]
-}) {
+export default function ProductList({ products }: { products: Product[] }) {
   const [viewMode, setViewMode] = useState<ViewMode>("small");
   const [sortMode, setSortMode] = useState<SortMode>("default");
-  
-  // Client-side sorting
-  const sortedProducts = useMemo(() => {
+
+  const filteredAndSortedProducts = useMemo(() => {
     let result = [...products];
 
+    // Sort
     if (sortMode !== "default") {
       result.sort((a, b) => {
         const priceA = parseFloat(a.price.replace("R$", "").replace(/\./g, "").replace(",", ".").trim());
@@ -49,6 +39,10 @@ export default function ProductList({
         return "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4";
     }
   };
+
+  const [visibleCount, setVisibleCount] = useState(30);
+  const visibleProducts = filteredAndSortedProducts.slice(0, visibleCount);
+  const loadMore = () => { setVisibleCount((prev) => prev + 30); };
 
   return (
     <div className="flex flex-col gap-6">
@@ -104,7 +98,7 @@ export default function ProductList({
 
       {/* Grid */}
       <div className={`grid gap-6 ${getGridClasses()}`}>
-        {sortedProducts.map((product) => (
+        {visibleProducts.map((product) => (
           <ProductCard 
             key={product.id} 
             product={product} 
@@ -113,10 +107,18 @@ export default function ProductList({
         ))}
       </div>
 
-      {/* Footer message */}
-      <div className="h-20 w-full flex justify-center items-center mt-4">
-           {products.length > 0 && <span className="text-gray-300 text-sm">Mostrando todos os {products.length} produtos.</span>}
-      </div>
+      {/* Load More Button */}
+      {visibleCount < filteredAndSortedProducts.length && (
+        <div className="flex justify-center mt-8">
+          <button
+            onClick={loadMore}
+            className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 text-gray-700 font-medium rounded-full shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-all group"
+          >
+            <span className="group-hover:text-[#E60012] transition-colors">Carregar mais produtos</span>
+            <ChevronDown size={20} className="text-gray-400 group-hover:text-[#E60012] transition-colors" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
