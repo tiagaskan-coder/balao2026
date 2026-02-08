@@ -39,7 +39,15 @@ app.add_middleware(
 # Configuração Supabase
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+supabase: Optional[Client] = None
+if SUPABASE_URL and SUPABASE_KEY:
+    try:
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    except Exception as e:
+        print(f"Failed to initialize Supabase client: {e}")
+else:
+    print("WARNING: Supabase credentials not found in .env. Search functionality will be disabled.")
 
 # Configuração LLM (Qwen)
 LLM_BASE_URL = os.getenv("LLM_BASE_URL", "https://api.openai.com/v1")
@@ -64,6 +72,10 @@ def search_products(query: str):
     """
     Busca produtos no Supabase pelo nome ou descrição.
     """
+    if not supabase:
+        print("Supabase client not initialized.")
+        return "[]"
+
     print(f"Searching products for: {query}")
     try:
         # Busca simples com ILIKE
