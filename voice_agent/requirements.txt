@@ -1,19 +1,11 @@
-fastapi==0.109.0
-uvicorn==0.27.0
-python-multipart==0.0.6
-supabase==2.3.0
-openai==1.10.0
-python-dotenv==1.0.1
-# Dependências para Whisper Local
-openai-whisper==20231117
-# Dependências para processamento de áudio
-soundfile==0.12.1
-numpy==1.26.3
-# Para Kokoro (supondo biblioteca compatível ou uso via transformers)
-# Se kokoro-82m for complexo, usaremos uma alternativa leve ou API, 
-# mas tentaremos incluir bibliotecas comuns de ML
-torch
-scipy
-transformers
-accelerate
-phonemizer
+fastapi
+uvicorn
+python-multipart
+supabase>=2.5.0
+python-dotenv
+ollama
+faster-whisper
+kokoro-onnx
+soundfile
+numpy
+requests
