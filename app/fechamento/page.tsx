@@ -58,6 +58,8 @@ export default function WeeklyClosing() {
   // Date Filter State
   const [filterStart, setFilterStart] = useState("");
   const [filterEnd, setFilterEnd] = useState("");
+  const [uiStart, setUiStart] = useState("");
+  const [uiEnd, setUiEnd] = useState("");
   
   // Form State - OS
   const [newOrder, setNewOrder] = useState<Partial<ServiceOrder>>({
@@ -380,9 +382,13 @@ export default function WeeklyClosing() {
                      if (start && end) {
                        setFilterStart(start);
                        setFilterEnd(end);
+                       setUiStart(start);
+                       setUiEnd(end);
                      } else {
                        setFilterStart("");
                        setFilterEnd("");
+                       setUiStart("");
+                       setUiEnd("");
                      }
                    }}
                  >
@@ -416,20 +422,30 @@ export default function WeeklyClosing() {
               <span className="text-xs font-bold text-slate-500 uppercase hidden md:inline">Período:</span>
               <input 
                 type="date" 
-                value={filterStart}
-                onChange={e => setFilterStart(e.target.value)}
+                value={uiStart}
+                onChange={e => setUiStart(e.target.value)}
                 className="p-1 border rounded text-xs text-slate-600 w-24 md:w-auto"
               />
               <span className="text-slate-400">-</span>
               <input 
                 type="date" 
-                value={filterEnd}
-                onChange={e => setFilterEnd(e.target.value)}
+                value={uiEnd}
+                onChange={e => setUiEnd(e.target.value)}
                 className="p-1 border rounded text-xs text-slate-600 w-24 md:w-auto"
               />
+              <button 
+                onClick={() => { setFilterStart(uiStart); setFilterEnd(uiEnd); }}
+                className="bg-blue-600 text-white text-xs px-2 py-1 rounded hover:bg-blue-700"
+                title="Atualizar Data"
+              >
+                Atualizar
+              </button>
               {(filterStart || filterEnd) && (
                 <button 
-                  onClick={() => { setFilterStart(""); setFilterEnd(""); }}
+                  onClick={() => { 
+                    setFilterStart(""); setFilterEnd(""); 
+                    setUiStart(""); setUiEnd("");
+                  }}
                   className="text-xs text-red-500 hover:text-red-700 font-medium px-2"
                 >
                   <Minus size={14} />
@@ -698,44 +714,48 @@ export default function WeeklyClosing() {
                           </tr>
                           
                           {/* Expanded Details Row */}
-                          <tr className={`${isExpanded ? 'table-row' : 'hidden'} print:table-row bg-slate-50 print:bg-white`}>
+                      <tr className={`${isExpanded ? 'table-row' : 'hidden'} bg-slate-50 print:bg-white`}>
                             <td colSpan={6} className="p-0">
                               <div className="px-4 py-2 print:px-0">
-                                <table className="w-full text-xs border-l-2 border-blue-500 print:border-none mb-2">
-                                  <thead className="text-slate-400 bg-slate-100 print:hidden">
-                                    <tr>
-                                      <th className="px-3 py-1 text-left">OS</th>
-                                      <th className="px-3 py-1 text-right">Rec.</th>
-                                      <th className="px-3 py-1 text-right">Custo</th>
-                                      <th className="px-3 py-1 text-right">Lucro</th>
-                                      <th className="px-3 py-1 text-right print:hidden">Ação</th>
+                                <table className="w-full text-xs border-l-2 border-blue-500 print:border-none mb-2 print:text-[10px]">
+                              <thead className="text-slate-400 bg-slate-100 print:hidden">
+                                <tr>
+                                  <th className="px-3 py-1 text-left">Data</th>
+                                  <th className="px-3 py-1 text-left">OS</th>
+                                  <th className="px-3 py-1 text-right">Rec.</th>
+                                  <th className="px-3 py-1 text-right">Custo</th>
+                                  <th className="px-3 py-1 text-right">Lucro</th>
+                                  <th className="px-3 py-1 text-right print:hidden">Ação</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-200">
+                                {day.orders.map(order => {
+                                  const rev = (order.laborIncome || 0) + (order.partsIncome || 0);
+                                  const cost = (order.laborExpense || 0) + (order.partsExpense || 0);
+                                  return (
+                                    <tr key={order.id} className="hover:bg-slate-200 print:hover:bg-transparent">
+                                      <td className="px-3 py-1 text-slate-500 print:py-0.5">
+                                        {new Date(order.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})}
+                                      </td>
+                                      <td className="px-3 py-1 font-medium text-slate-700 print:py-0.5">
+                                        OS: {order.osNumber} <span className="text-slate-400 font-normal ml-2">({order.status})</span>
+                                      </td>
+                                      <td className="px-3 py-1 text-right text-green-600 print:py-0.5">{fmt(rev)}</td>
+                                      <td className="px-3 py-1 text-right text-red-500 print:py-0.5">{fmt(cost)}</td>
+                                      <td className="px-3 py-1 text-right font-bold text-slate-700 print:py-0.5">{fmt(rev - cost)}</td>
+                                      <td className="px-3 py-1 text-right print:hidden">
+                                        <button 
+                                          onClick={(e) => { e.stopPropagation(); removeOrder(order.id); }} 
+                                          className="text-slate-400 hover:text-red-500"
+                                        >
+                                          <Trash2 size={12} />
+                                        </button>
+                                      </td>
                                     </tr>
-                                  </thead>
-                                  <tbody className="divide-y divide-slate-200">
-                                    {day.orders.map(order => {
-                                      const rev = (order.laborIncome || 0) + (order.partsIncome || 0);
-                                      const cost = (order.laborExpense || 0) + (order.partsExpense || 0);
-                                      return (
-                                        <tr key={order.id} className="hover:bg-slate-200 print:hover:bg-transparent">
-                                          <td className="px-3 py-1 font-medium text-slate-700 print:py-0.5">
-                                            OS: {order.osNumber} <span className="text-slate-400 font-normal ml-2">({order.status})</span>
-                                          </td>
-                                          <td className="px-3 py-1 text-right text-green-600 print:py-0.5">{fmt(rev)}</td>
-                                          <td className="px-3 py-1 text-right text-red-500 print:py-0.5">{fmt(cost)}</td>
-                                          <td className="px-3 py-1 text-right font-bold text-slate-700 print:py-0.5">{fmt(rev - cost)}</td>
-                                          <td className="px-3 py-1 text-right print:hidden">
-                                            <button 
-                                              onClick={(e) => { e.stopPropagation(); removeOrder(order.id); }} 
-                                              className="text-slate-400 hover:text-red-500"
-                                            >
-                                              <Trash2 size={12} />
-                                            </button>
-                                          </td>
-                                        </tr>
-                                      );
-                                    })}
-                                  </tbody>
-                                </table>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
                               </div>
                             </td>
                           </tr>
