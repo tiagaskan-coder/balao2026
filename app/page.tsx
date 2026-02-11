@@ -30,8 +30,11 @@ export default async function Home(props: {
       // If searching, use the advanced FTS + Fuzzy search from Supabase
       productsPromise = (async () => {
           const supabase = await createClient();
+          // Prepare AND query: "Desktop 2025" -> "Desktop & 2025"
+          const searchTerms = search.trim().split(/\s+/).join(' & ');
+
           const { data, error } = await supabase.rpc('search_products_fts', { 
-              query_text: search, 
+              query_text: searchTerms, 
               limit_count: 50 
           });
           

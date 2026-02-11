@@ -5,9 +5,11 @@ import { CartProvider } from "@/context/CartContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { SidebarProvider } from "@/context/SidebarContext";
+import { VoiceProvider } from "@/context/VoiceContext";
 import Footer from "@/components/Footer";
 import Sidebar from "@/components/Sidebar";
 import ProductPreview from "@/components/ProductPreview";
+import VoiceWidget from "@/components/VoiceWidget";
 import { getCategories } from "@/lib/db";
 
 export const viewport: Viewport = {
@@ -105,10 +107,13 @@ export default async function RootLayout({
             <CartProvider>
               <Suspense fallback={null}>
                 <SidebarProvider>
-                  <Sidebar categories={categories} mobileOnly />
-                  {children}
-                  <ProductPreview />
-                  <Footer />
+                  <VoiceProvider>
+                    <Sidebar categories={categories} mobileOnly />
+                    {children}
+                    <ProductPreview />
+                    <VoiceWidget />
+                    <Footer />
+                  </VoiceProvider>
                 </SidebarProvider>
               </Suspense>
             </CartProvider>

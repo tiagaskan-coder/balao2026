@@ -18,9 +18,20 @@ export default function ProductList({ products }: { products: Product[] }) {
     // Sort
     if (sortMode !== "default") {
       result.sort((a, b) => {
-        const priceA = parseFloat(a.price.replace("R$", "").replace(/\./g, "").replace(",", ".").trim());
-        const priceB = parseFloat(b.price.replace("R$", "").replace(/\./g, "").replace(",", ".").trim());
-        return sortMode === "price-asc" ? priceA - priceB : priceB - priceA;
+        try {
+            const getPrice = (p: Product) => {
+                if (typeof p.price === 'number') return p.price;
+                if (!p.price) return 0;
+                // Remove "R$", dots (thousands) and replace comma with dot
+                return parseFloat(p.price.toString().replace("R$", "").replace(/\./g, "").replace(",", ".").trim()) || 0;
+            };
+            
+            const priceA = getPrice(a);
+            const priceB = getPrice(b);
+            return sortMode === "price-asc" ? priceA - priceB : priceB - priceA;
+        } catch (e) {
+            return 0;
+        }
       });
     }
 
