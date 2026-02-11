@@ -141,15 +141,16 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (SpeechRecognition) {
         const recognition = new SpeechRecognition();
-        recognition.continuous = false; // Mantemos false para processar frase a frase, mas reiniciamos no onend
-        recognition.interimResults = false;
+        recognition.continuous = true; // Alterado para true para evitar cortes e manter fluxo de chamada
+        recognition.interimResults = true; // Necessário para detecção de silêncio customizada
         recognition.lang = 'pt-BR';
+
+        let silenceTimer: NodeJS.Timeout;
 
         recognition.onstart = () => {
           setIsListening(true);
-          console.log("Reconhecimento de voz iniciado");
+          console.log("Reconhecimento de voz iniciado (Chamada Ativa)");
           
-          // Interromper fala do robô se o usuário começar a falar
           if ('speechSynthesis' in window) {
               window.speechSynthesis.cancel();
               setIsSpeaking(false);
@@ -157,34 +158,56 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
         };
 
         recognition.onend = () => {
-          setIsListening(false);
-          console.log("Reconhecimento de voz finalizado");
-          // Se não estiver falando e estiver conectado, reiniciar escuta (Loop Contínuo)
-          if (isConnected && !window.speechSynthesis.speaking) {
-              setTimeout(() => {
-                  try {
-                    // Só reinicia se ainda estiver conectado
-                    recognition.start(); 
-                  } catch (e) {
-                    console.log("Erro ao reiniciar escuta:", e);
-                  }
-              }, 300);
+          // Só reinicia se a chamada estiver ativa
+          if (isConnected) {
+              console.log("Reiniciando microfone para manter chamada...");
+              try {
+                  recognition.start();
+              } catch(e) { /* ignore */ }
+          } else {
+              setIsListening(false);
+              console.log("Chamada encerrada, microfone desligado.");
           }
         };
 
         recognition.onresult = (event: any) => {
-          const transcript = event.results[0][0].transcript;
-          console.log("Transcrição detectada:", transcript);
-          if (transcript) {
-            sendMessage(transcript);
+          // Se o robô estiver falando, ignorar entradas para não se ouvir (echo cancellation simples)
+          if (window.speechSynthesis.speaking) return;
+
+          let finalTranscript = '';
+          let interimTranscript = '';
+
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+              finalTranscript += event.results[i][0].transcript;
+            } else {
+              interimTranscript += event.results[i][0].transcript;
+            }
+          }
+
+          // Lógica de Silêncio: Se houver resultado (interino ou final), resetar timer
+          // Se passar 1.5s sem novos resultados e houver texto acumulado, enviar.
+          clearTimeout(silenceTimer);
+          
+          if (finalTranscript || interimTranscript) {
+              silenceTimer = setTimeout(() => {
+                  if (finalTranscript) {
+                      sendMessage(finalTranscript);
+                  } else if (interimTranscript.trim().length > 2) {
+                      // Se só tiver interino mas parou de falar por 1.5s, assume que terminou
+                      sendMessage(interimTranscript);
+                      // Forçar reinício para limpar buffer
+                      recognition.stop(); 
+                  }
+              }, 1500); // 1.5 segundos de silêncio para considerar "fim da fala"
           }
         };
 
         recognition.onerror = (event: any) => {
           console.error("Erro no reconhecimento de voz:", event.error);
-          setIsListening(false);
           if (event.error === 'not-allowed') {
-            alert("Permissão de microfone negada.");
+            alert("Permissão de microfone negada. Verifique suas configurações.");
+            setIsConnected(false); // Encerrar chamada se não houver permissão
           }
         };
 
@@ -193,7 +216,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
         console.warn("Web Speech API não suportada neste navegador.");
       }
     }
-  }, []);
+  }, [isConnected]); // Dependência isConnected para reiniciar corretamente se necessário
 
   // Tocar som de telefone chamando (Gerado via Web Audio API)
   const playDialTone = () => {
@@ -210,16 +233,14 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
             gain.connect(ctx.destination);
 
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(425, ctx.currentTime); // Frequência padrão de tom de discagem (425Hz)
+            osc.frequency.setValueAtTime(425, ctx.currentTime);
             
-            // Volume envelope
             gain.gain.setValueAtTime(0, ctx.currentTime);
             gain.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.1);
-            gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 2.0); // Toca por 2 segundos
+            gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 2.0);
 
             osc.start();
             
-            // Parar após 2 segundos
             setTimeout(() => {
                 osc.stop();
                 ctx.close();
@@ -234,18 +255,25 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
 
   const connect = async () => {
     setIsConnected(true);
-    
-    // Tocar som de telefone
     await playDialTone();
-
-    // Saudação inicial
-    const greeting = "Balão da Informática, como posso ajudar?";
+    // Saudação específica solicitada
+    const greeting = "Olá, sou do balão da informática, como posso te ajudar?";
     setMessages(prev => [...prev, { role: 'assistant', content: greeting }]);
     speakText(greeting);
   };
 
   const disconnect = () => {
     setIsConnected(false);
+    setIsListening(false);
+    setIsSpeaking(false);
+    
+    if (recognitionRef.current) {
+        recognitionRef.current.stop();
+    }
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+    }
+    setMessages([]); // Limpar conversa ao encerrar? Opcional. Mantendo limpo para nova sessão.
   };
 
   const startListening = () => {

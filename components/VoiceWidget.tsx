@@ -21,15 +21,52 @@ export default function VoiceWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
 
-  const handleToggleOpen = () => {
+  // Debounce helper
+  const debounce = (func: Function, wait: number) => {
+    let timeout: NodeJS.Timeout;
+    return (...args: any[]) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), wait);
+    };
+  };
+
+  const handleToggleOpen = debounce(() => {
     if (!isOpen) {
       setIsOpen(true);
       if (!isConnected) connect();
     } else {
+      // Se clicar no X, apenas minimiza ou desconecta? O usuário pediu botão de encerrar na interface.
+      // Vamos manter o X como minimizar/fechar modal, mas adicionar o botão "Encerrar" dentro.
       setIsOpen(false);
     }
     setHasInteracted(true);
+  }, 500);
+
+  const handleEndCall = debounce(() => {
+      disconnect();
+      setIsOpen(false);
+  }, 500);
+  
+  const [inputText, setInputText] = useState("");
+  const handleSendText = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (inputText.trim()) {
+          // Precisamos expor sendMessage do context ou usar um hack
+          // Como sendMessage não está exposto diretamente no destructuring lá em cima, vamos adicionar
+          // Nota: O context exporta sendMessage, precisamos pegá-lo
+      }
   };
+
+  // Re-obter sendMessage do context
+  const { sendMessage } = useVoice();
+  
+  const submitText = (e: React.FormEvent) => {
+      e.preventDefault();
+      if(inputText.trim()) {
+          sendMessage(inputText);
+          setInputText("");
+      }
+  }
 
   const handleClose = () => {
     setIsOpen(false);
@@ -81,10 +118,12 @@ export default function VoiceWidget() {
                 <X size={20} />
             </button>
 
-            {/* Status Connection */}
+            {/* Status Connection & Mic Indicator */}
             <div className="absolute top-4 left-4 flex items-center gap-2">
-                 <div className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-500 animate-pulse" : "bg-red-500"}`}></div>
-                 <span className="text-xs font-medium text-white/70">{isConnected ? "Em chamada..." : "Conectando"}</span>
+                 <div className={`w-3 h-3 rounded-full transition-colors duration-300 ${isListening ? "bg-red-600 shadow-[0_0_10px_rgba(220,38,38,0.7)]" : "bg-gray-500"}`}></div>
+                 <span className="text-xs font-medium text-white/70">
+                    {isConnected ? (isListening ? "Ouvindo..." : "Processando...") : "Desconectado"}
+                 </span>
             </div>
 
             {/* Avatar / Visualizer Central */}
@@ -92,8 +131,8 @@ export default function VoiceWidget() {
                 
                 {/* Avatar */}
                 <div className="relative">
-                    <div className={`w-32 h-32 rounded-full border-4 flex items-center justify-center bg-gray-800 shadow-2xl ${
-                        isListening ? "border-green-500 animate-pulse" : "border-gray-600"
+                    <div className={`w-32 h-32 rounded-full border-4 flex items-center justify-center bg-gray-800 shadow-2xl transition-all duration-500 ${
+                        isListening ? "border-red-500 scale-105" : "border-gray-600"
                     }`}>
                         <div className="relative z-10">
                             <Image 
@@ -105,13 +144,16 @@ export default function VoiceWidget() {
                             />
                         </div>
                         {/* Ondas de som (Animação de fala) */}
-                        {messages.length > 0 && messages[messages.length-1].role === 'assistant' && !isListening && (
-                             <span className="absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-20 animate-ping"></span>
+                        {isListening && (
+                             <>
+                                <span className="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-20 animate-ping"></span>
+                                <span className="absolute inline-flex h-[120%] w-[120%] rounded-full bg-red-400 opacity-10 animate-ping delay-75"></span>
+                             </>
                         )}
                     </div>
                     {isListening && (
-                        <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-green-400 text-sm font-bold whitespace-nowrap">
-                            Ouvindo você...
+                        <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-red-400 text-sm font-bold whitespace-nowrap animate-pulse">
+                            Ouvindo...
                         </div>
                     )}
                 </div>
@@ -119,22 +161,35 @@ export default function VoiceWidget() {
                 {/* Última Mensagem (Legenda) */}
                 <div className="w-full max-w-[90%] text-center space-y-2 min-h-[60px]">
                     {messages.length > 0 ? (
-                        <p className="text-lg font-medium text-white/90 leading-relaxed animate-fade-in">
+                        <p className="text-lg font-medium text-white/90 leading-relaxed animate-fade-in transition-all">
                             "{messages[messages.length-1].content}"
                         </p>
                     ) : (
-                        <p className="text-gray-400">Aguardando início...</p>
+                        <p className="text-gray-400 text-sm">Aguardando início...</p>
                     )}
                 </div>
 
+                {/* Fallback Text Input */}
+                {!isListening && isConnected && (
+                    <form onSubmit={submitText} className="w-[80%] relative">
+                        <input 
+                            type="text" 
+                            value={inputText}
+                            onChange={(e) => setInputText(e.target.value)}
+                            placeholder="Digite se preferir..."
+                            className="w-full bg-white/10 border border-white/20 rounded-full py-2 px-4 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-red-500 transition-colors"
+                        />
+                    </form>
+                )}
+
                 {/* Product Suggestions (Cards Overlay) */}
                 {suggestedProducts.length > 0 && (
-                    <div className="w-full overflow-x-auto pb-4 px-2 flex gap-4 snap-x justify-center">
+                    <div className="w-full overflow-x-auto pb-4 px-2 flex gap-4 snap-x justify-center animate-slide-up">
                         {suggestedProducts.map(product => (
                             <Link 
                                 key={product.id}
                                 href={`/product/${product.id}`} 
-                                className="flex-shrink-0 w-40 bg-white rounded-xl shadow-lg p-3 snap-center transform hover:scale-105 transition-transform"
+                                className="flex-shrink-0 w-40 bg-white rounded-xl shadow-lg p-3 snap-center transform hover:scale-105 transition-transform duration-300"
                             >
                                 <div className="relative w-full h-24 mb-2 bg-gray-50 rounded-lg overflow-hidden">
                                     {product.image ? (
@@ -156,25 +211,22 @@ export default function VoiceWidget() {
             </div>
 
             {/* Footer Controls (Phone Style) */}
-            <div className="w-full pt-6 pb-2 flex items-center justify-center gap-8">
+            <div className="w-full pt-6 pb-2 flex items-center justify-center gap-8 relative">
+                
+                {/* Botão Encerrar Chamada (Central, Grande, Vermelho) */}
                 <button 
-                    onClick={toggleListening}
-                    className={`p-4 rounded-full transition-all transform hover:scale-110 ${
-                        isListening ? "bg-white text-black" : "bg-gray-700 text-white"
-                    }`}
+                    onClick={handleEndCall}
+                    className="p-5 rounded-full bg-red-600 text-white shadow-xl hover:bg-red-700 active:scale-95 transition-all transform hover:scale-105 flex flex-col items-center justify-center gap-1 w-20 h-20 border-4 border-[#1a1a1a]"
+                    aria-label="Encerrar Chamada"
                 >
-                    {isListening ? <Volume2 size={24} /> : <Mic size={24} />}
+                    <span className="sr-only">Encerrar</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transform rotate-135"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
                 </button>
 
-                <button 
-                    onClick={handleToggleOpen}
-                    className="p-4 rounded-full bg-red-600 text-white shadow-lg transform hover:scale-110"
-                >
-                    <span className="sr-only">Desligar</span>
-                    <X size={24} />
-                </button>
             </div>
             
+            {/* Hint de Encerrar */}
+            <p className="text-xs text-gray-500 absolute bottom-2 w-full text-center">Toque no botão vermelho para encerrar</p>
           </div>
 
 
