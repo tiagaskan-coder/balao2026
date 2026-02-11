@@ -37,12 +37,17 @@ export default async function Home(props: {
           
           if (error) {
               console.error("Search RPC error:", error);
-              // Fallback to basic ILIKE search if RPC fails
-              const { data: fallbackData } = await supabase
-                  .from('products')
-                  .select('*')
-                  .ilike('name', `%${search}%`)
-                  .limit(50);
+              // Fallback to basic ILIKE search with strict AND logic for each term
+              let queryBuilder = supabase.from('products').select('*');
+              
+              const terms = search.trim().split(/\s+/);
+              terms.forEach(term => {
+                  if (term.length > 0) {
+                      queryBuilder = queryBuilder.ilike('name', `%${term}%`);
+                  }
+              });
+
+              const { data: fallbackData } = await queryBuilder.limit(50);
               return (fallbackData as Product[]) || [];
           }
           

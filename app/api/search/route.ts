@@ -21,12 +21,17 @@ export async function GET(request: Request) {
     if (error) {
       console.error('Search RPC Error:', error);
       // Fallback to basic search if RPC fails (e.g. migration not applied yet)
-      // This ensures the site doesn't break while DB updates propagate
-      const { data: fallbackData } = await supabase
-        .from('products')
-        .select('*')
-        .ilike('name', `%${query}%`)
-        .limit(5);
+      // Uses strict AND logic for each term
+      let queryBuilder = supabase.from('products').select('*');
+      
+      const terms = query.trim().split(/\s+/);
+      terms.forEach(term => {
+          if (term.length > 0) {
+              queryBuilder = queryBuilder.ilike('name', `%${term}%`);
+          }
+      });
+
+      const { data: fallbackData } = await queryBuilder.limit(10);
       
       return NextResponse.json(fallbackData || []);
     }
