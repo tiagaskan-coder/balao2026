@@ -34,10 +34,18 @@ export default async function Home(props: {
               query_text: search, 
               limit_count: 50 
           });
+          
           if (error) {
               console.error("Search RPC error:", error);
-              return [];
+              // Fallback to basic ILIKE search if RPC fails
+              const { data: fallbackData } = await supabase
+                  .from('products')
+                  .select('*')
+                  .ilike('name', `%${search}%`)
+                  .limit(50);
+              return (fallbackData as Product[]) || [];
           }
+          
           return (data as Product[]) || [];
       })();
   } else {
