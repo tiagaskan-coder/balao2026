@@ -11,8 +11,6 @@ import { useToast } from "@/context/ToastContext";
 interface ServiceOrder {
   id: string;
   osNumber: string;
-  client: string;
-  pixReceipt: string; // Quem recebeu o pix ou chave
   status: "Entrada" | "Reparo" | "Concluída";
   date: string; // YYYY-MM-DD
   
@@ -64,8 +62,6 @@ export default function WeeklyClosing() {
   const [newOrder, setNewOrder] = useState<Partial<ServiceOrder>>({
     status: "Entrada",
     paymentMethod: "PIX",
-    client: "",
-    pixReceipt: "",
     laborIncome: 0,
     partsIncome: 0,
     laborExpense: 0,
@@ -239,8 +235,6 @@ export default function WeeklyClosing() {
     const order: ServiceOrder = {
       id: crypto.randomUUID(),
       osNumber: newOrder.osNumber,
-      client: newOrder.client || "",
-      pixReceipt: newOrder.pixReceipt || "",
       status: newOrder.status as any || "Entrada",
       paymentMethod: newOrder.paymentMethod as any || "PIX",
       laborIncome: Number(newOrder.laborIncome) || 0,
@@ -254,8 +248,6 @@ export default function WeeklyClosing() {
     setNewOrder({
       status: "Entrada",
       paymentMethod: "PIX",
-      client: "",
-      pixReceipt: "",
       laborIncome: 0,
       partsIncome: 0,
       laborExpense: 0,
@@ -437,14 +429,6 @@ export default function WeeklyClosing() {
                 onChange={e => setNewOrder({...newOrder, osNumber: e.target.value})}
                 className="col-span-1 p-2 border rounded text-sm"
               />
-              <input 
-                type="text" 
-                placeholder="Nome do Cliente"
-                value={newOrder.client}
-                onChange={e => setNewOrder({...newOrder, client: e.target.value})}
-                className="col-span-2 p-2 border rounded text-sm"
-              />
-              
               <select 
                 value={newOrder.status}
                 onChange={e => setNewOrder({...newOrder, status: e.target.value as any})}
@@ -457,19 +441,12 @@ export default function WeeklyClosing() {
               <select 
                 value={newOrder.paymentMethod}
                 onChange={e => setNewOrder({...newOrder, paymentMethod: e.target.value as any})}
-                className="col-span-1 p-2 border rounded text-sm"
+                className="col-span-2 md:col-span-1 p-2 border rounded text-sm"
               >
                 <option>PIX</option>
                 <option>Cartão</option>
                 <option>Dinheiro</option>
               </select>
-              <input 
-                type="text" 
-                placeholder="Recebimento PIX (Nome/Chave)"
-                value={newOrder.pixReceipt}
-                onChange={e => setNewOrder({...newOrder, pixReceipt: e.target.value})}
-                className="col-span-2 p-2 border rounded text-sm"
-              />
               
               <div className="col-span-2 grid grid-cols-2 gap-2">
                 <div className="space-y-1">
@@ -639,8 +616,6 @@ export default function WeeklyClosing() {
                   <thead className="text-xs text-slate-400 uppercase bg-slate-50">
                     <tr>
                       <th className="px-2 py-2">Data</th>
-                      <th className="px-2 py-2">Rec. Pix</th>
-                      <th className="px-2 py-2">Cliente</th>
                       <th className="px-2 py-2">OS</th>
                       <th className="px-2 py-2">Rec.</th>
                       <th className="px-2 py-2">Custo</th>
@@ -657,8 +632,6 @@ export default function WeeklyClosing() {
                           <td className="px-2 py-2 text-slate-500 text-xs">
                             {order.date ? new Date(order.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'}) : '-'}
                           </td>
-                          <td className="px-2 py-2 text-xs text-slate-600">{order.pixReceipt || '-'}</td>
-                          <td className="px-2 py-2 font-medium text-slate-700">{order.client || '-'}</td>
                           <td className="px-2 py-2 font-medium">{order.osNumber}</td>
                           <td className="px-2 py-2 text-green-600">{fmt(rev)}</td>
                           <td className="px-2 py-2 text-red-500">{fmt(cost)}</td>
@@ -672,7 +645,7 @@ export default function WeeklyClosing() {
                       );
                     })}
                     {filteredOrders.length === 0 && (
-                      <tr><td colSpan={8} className="text-center py-4 text-slate-400">Nenhuma OS encontrada.</td></tr>
+                      <tr><td colSpan={6} className="text-center py-4 text-slate-400">Nenhuma OS encontrada.</td></tr>
                     )}
                   </tbody>
                 </table>
