@@ -109,6 +109,12 @@ export default function Header() {
     performSearch();
   };
 
+  const clearSearch = () => {
+    setSearchQuery("");
+    setProducts([]);
+    setShowPreview(false);
+  };
+
   // Products are now fetched directly from API, so no need for client-side filtering here
   const previewProducts = products;
 
