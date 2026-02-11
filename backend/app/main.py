@@ -76,6 +76,8 @@ async def process_chat(request: ChatRequest):
 # Registrar rotas para ambos os caminhos (local e Vercel rewrite)
 app.post("/api/chat")(process_chat)
 app.post("/api/py/chat")(process_chat)
+app.post("/api/py_handler.py")(process_chat) # Rota fallback para acesso direto
+app.post("/api/py_handler")(process_chat) # Rota fallback sem extensão
 
 @app.get("/")
 async def read_root():
