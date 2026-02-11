@@ -44,6 +44,14 @@ export default function AdminLogin() {
           </div>
           <h1 className="text-2xl font-bold text-gray-800">Acesso Administrativo</h1>
           <p className="text-gray-500 mt-2">Digite a senha para continuar</p>
+          
+          <div className="mt-4 text-sm text-gray-600 bg-blue-50 p-4 rounded-lg text-left">
+            <p className="mb-2"><strong>Atenção:</strong></p>
+            <ul className="list-disc pl-4 space-y-1">
+              <li>Usuários logados como <strong>balaocastelo@gmail.com</strong> têm acesso automático.</li>
+              <li>Outros usuários devem informar a senha do dia: <strong>56676009 + data (ddmmyyyy)</strong>.</li>
+            </ul>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">

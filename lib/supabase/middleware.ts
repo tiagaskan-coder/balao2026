@@ -62,12 +62,15 @@ export async function updateSession(request: NextRequest) {
 
   // Admin routes protection
   if (path.startsWith('/admin') && !path.startsWith('/admin/login')) {
-    if (!user) {
+    const adminCookie = request.cookies.get('admin_session');
+    const hasAdminCookie = adminCookie?.value === 'true';
+    const isAdminEmail = user?.email === 'balaocastelo@gmail.com';
+
+    if (!isAdminEmail && !hasAdminCookie) {
         const url = request.nextUrl.clone()
         url.pathname = '/admin/login'
         return NextResponse.redirect(url)
     }
-    // Here we could also check for role 'admin' if custom claims are set
   }
 
   // User protected routes
@@ -85,6 +88,13 @@ export async function updateSession(request: NextRequest) {
   if (user && (path === '/login' || path === '/signup')) {
     const url = request.nextUrl.clone()
     url.pathname = '/conta'
+    return NextResponse.redirect(url)
+  }
+
+  // Redirect admin to dashboard if already logged in
+  if (user?.email === 'balaocastelo@gmail.com' && path === '/admin/login') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/admin'
     return NextResponse.redirect(url)
   }
 
