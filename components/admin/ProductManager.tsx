@@ -659,16 +659,21 @@ export default function ProductManager() {
     }
 
     if (searchTerm) {
-        try {
-            result = searchProducts(result, searchTerm);
-        } catch (e) {
-            console.error("Search error:", e);
-            // Fallback to basic filter
-            result = result.filter(p => 
-                p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                p.category?.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-        }
+        const lowerTerm = searchTerm.toLowerCase().trim();
+        
+        // Admin Search: Direct substring match for reliability
+        // Searches in Name, Category, Supplier, and ID
+        result = result.filter(p => {
+            const name = p.name?.toLowerCase() || "";
+            const category = p.category?.toLowerCase() || "";
+            const supplier = p.supplier?.toLowerCase() || "";
+            const id = p.id?.toLowerCase() || "";
+            
+            return name.includes(lowerTerm) || 
+                   category.includes(lowerTerm) || 
+                   supplier.includes(lowerTerm) ||
+                   id.includes(lowerTerm);
+        });
     }
     return result;
   }, [products, searchTerm, filterCategory]);
