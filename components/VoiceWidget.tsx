@@ -15,11 +15,14 @@ export default function VoiceWidget() {
     disconnect, 
     toggleListening, 
     messages, 
-    suggestedProducts 
+    suggestedProducts,
+    // @ts-ignore
+    sendMessage
   } = useVoice();
   
   const [isOpen, setIsOpen] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
+  const [inputText, setInputText] = useState(""); // For text fallback
 
   const handleToggleOpen = () => {
     if (!isOpen) {
@@ -29,6 +32,14 @@ export default function VoiceWidget() {
       setIsOpen(false);
     }
     setHasInteracted(true);
+  };
+
+  const handleSendText = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (inputText.trim()) {
+          sendMessage(inputText);
+          setInputText("");
+      }
   };
 
   const handleClose = () => {
@@ -157,23 +168,42 @@ export default function VoiceWidget() {
           )}
 
           {/* Footer Controls */}
-          <div className="p-4 bg-white border-t border-gray-100 flex items-center justify-center gap-4">
-             <button
-               onClick={toggleListening}
-               disabled={!isConnected}
-               className={`p-4 rounded-full shadow-lg transition-all ${
-                 isListening 
-                   ? "bg-red-100 text-[#E60012] scale-110 border-2 border-[#E60012]" 
-                   : "bg-[#E60012] text-white hover:bg-red-700 hover:scale-105"
-               } disabled:opacity-50 disabled:cursor-not-allowed`}
-             >
-               <Mic size={28} />
-             </button>
-             {isListening && (
-                <span className="absolute bottom-6 text-xs text-gray-500 font-medium animate-pulse">
-                   Ouvindo...
-                </span>
-             )}
+          <div className="p-3 bg-white border-t border-gray-100 flex flex-col gap-2">
+             {/* Text Input Fallback (Since STT is hard in browser without backend stream) */}
+             <form onSubmit={handleSendText} className="flex gap-2">
+                 <input 
+                    type="text" 
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    placeholder="Digite ou fale..."
+                    className="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#E60012]"
+                 />
+                 <button 
+                    type="submit" 
+                    className="p-2 bg-gray-200 text-gray-600 rounded-full hover:bg-[#E60012] hover:text-white transition-colors"
+                 >
+                    <ChevronRight size={18} />
+                 </button>
+             </form>
+             
+             <div className="flex items-center justify-center pt-1 relative">
+                <button
+                  onClick={toggleListening}
+                  disabled={!isConnected}
+                  className={`p-3 rounded-full shadow-lg transition-all ${
+                    isListening 
+                      ? "bg-red-100 text-[#E60012] scale-110 border-2 border-[#E60012]" 
+                      : "bg-[#E60012] text-white hover:bg-red-700 hover:scale-105"
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  <Mic size={24} />
+                </button>
+                {isListening && (
+                    <span className="absolute -bottom-0 text-[10px] text-gray-500 font-medium animate-pulse mt-1">
+                      Ouvindo...
+                    </span>
+                )}
+             </div>
           </div>
 
         </div>
