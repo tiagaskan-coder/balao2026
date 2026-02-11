@@ -41,6 +41,8 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
   
   // Referência para o reconhecimento de fala
   const recognitionRef = useRef<any>(null);
+  // Referência para timeout de resposta do usuário
+  const responseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Configurações de voz
   const [voiceConfig, setVoiceConfig] = useState({ voice_model: 'br_001', speed: 1.35 });
@@ -218,6 +220,31 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     }
   }, [isConnected]); // Dependência isConnected para reiniciar corretamente se necessário
 
+  // Monitorar fim da fala do assistente para timeout de resposta (Apenas na saudação inicial)
+  useEffect(() => {
+    // Só ativa se parou de falar, está conectado, e é a primeira mensagem (saudação)
+    if (!isSpeaking && isConnected && messages.length === 1 && messages[0].role === 'assistant') {
+      if (responseTimeoutRef.current) clearTimeout(responseTimeoutRef.current);
+      
+      console.log("Iniciando timeout de 5s para resposta do usuário...");
+      responseTimeoutRef.current = setTimeout(() => {
+        // Verifica novamente se ainda é a primeira mensagem (usuário não respondeu)
+        if (isConnected && messages.length === 1) {
+             const followUp = "Ainda está aí? Posso te ajudar a encontrar notebooks, impressoras ou computadores.";
+             setMessages(prev => [...prev, { role: 'assistant', content: followUp }]);
+             speakText(followUp);
+        }
+      }, 5000);
+    }
+  }, [isSpeaking, isConnected, messages]);
+
+  // Limpar timeout se o usuário responder
+  useEffect(() => {
+    if (messages.length > 1 && responseTimeoutRef.current) {
+      clearTimeout(responseTimeoutRef.current);
+    }
+  }, [messages]);
+
   // Tocar som de telefone chamando (Gerado via Web Audio API)
   const playDialTone = () => {
     return new Promise<void>((resolve) => {
@@ -266,6 +293,10 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     setIsConnected(false);
     setIsListening(false);
     setIsSpeaking(false);
+    
+    if (responseTimeoutRef.current) {
+      clearTimeout(responseTimeoutRef.current);
+    }
     
     if (recognitionRef.current) {
         recognitionRef.current.stop();
