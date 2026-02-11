@@ -1,13 +1,14 @@
 "use client";
 
 import { MessageCircle } from "lucide-react";
+import { SITE_CONFIG } from "@/lib/config";
 
 export default function WhatsAppButton({ productName }: { productName: string }) {
   const handleWhatsAppClick = () => {
     // Check if window is defined (client-side)
     if (typeof window !== "undefined") {
       const message = `Olá, gostaria de consultar a disponibilidade do produto: ${productName} - ${window.location.href}`;
-      const url = `https://wa.me/5519987510267?text=${encodeURIComponent(message)}`;
+      const url = `https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(message)}`;
       window.open(url, '_blank');
     }
   };

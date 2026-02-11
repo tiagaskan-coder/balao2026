@@ -2,11 +2,12 @@
 "use client";
 
 import Link from "next/link";
-import { CheckCircle, Home, Copy, Check } from "lucide-react";
+import { CheckCircle, Home, Copy, Check, MessageCircle } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense, useRef } from "react";
 import { generatePixPayload } from "@/lib/pix";
 import Script from "next/script";
+import { SITE_CONFIG } from "@/lib/config";
 
 function ThankYouContent() {
   const searchParams = useSearchParams();
@@ -105,8 +106,18 @@ function ThankYouContent() {
             </p>
           </div>
         )}
-        
+
         <div className="space-y-3">
+          <a 
+            href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(`Olá, acabei de fazer o pedido #${orderId ? orderId.slice(0, 8) : ''} e gostaria de acompanhar o status.`)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full bg-[#25D366] text-white py-3 rounded-md font-bold hover:bg-[#128C7E] transition-colors flex items-center justify-center gap-2"
+          >
+            <MessageCircle size={18} />
+            Acompanhar pelo WhatsApp
+          </a>
+
           <Link 
             href="/" 
             className="block w-full bg-[#E60012] text-white py-3 rounded-md font-bold hover:bg-red-700 transition-colors flex items-center justify-center gap-2"

@@ -9,6 +9,7 @@ import { AIContextProvider } from "@/context/AIContext"; // Nova Camada de Persi
 import Footer from "@/components/Footer";
 import ProductPreview from "@/components/ProductPreview";
 import AIOverlay from "@/components/AIOverlay"; // Nova Interface de Preview
+import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import { getCategories } from "@/lib/db";
 
 export const viewport: Viewport = {
@@ -99,22 +100,27 @@ export default async function RootLayout({
       >
         <AuthProvider>
           <CartProvider>
-                <Suspense>
-                  <SidebarProvider>
-                    <ToastProvider>
-                      <AIContextProvider>
-                        <div className="flex flex-col min-h-screen">
-                          <div className="flex-1 flex flex-col min-h-screen">
-                            {children}
-                          </div>
-                          <Footer />
-                        </div>
-                        <ProductPreview />
-                        <AIOverlay />
-                      </AIContextProvider>
-                    </ToastProvider>
-                  </SidebarProvider>
-                </Suspense>
+            <ToastProvider>
+              <Suspense>
+                <SidebarProvider>
+                  <AIContextProvider>
+                    <AIOverlay /> {/* Nova Interface de Preview */}
+                    <div className="flex flex-col min-h-screen">
+                      {/* Header será renderizado dentro das páginas ou layout específico se necessário, 
+                          mas geralmente o Header é global. Se não houver Header aqui, 
+                          ele deve estar sendo importado em outro lugar ou o layout espera que as páginas o tenham.
+                          Vou assumir que o Header é parte do children ou layout padrão.
+                          Mas para o FloatingWhatsApp, coloco no nível global. */}
+                      <main className="flex-grow">
+                        {children}
+                      </main>
+                      <Footer />
+                      <FloatingWhatsApp />
+                    </div>
+                  </AIContextProvider>
+                </SidebarProvider>
+              </Suspense>
+            </ToastProvider>
           </CartProvider>
         </AuthProvider>
         <script
