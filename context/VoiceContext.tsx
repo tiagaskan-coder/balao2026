@@ -197,7 +197,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     setMessages(prev => [...prev, { role: 'user', content: text }]);
 
     try {
-        const response = await fetch('/api/py/chat', {
+        const response = await fetch('/api/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -223,11 +223,8 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     } catch (error) {
         console.error("Erro ao enviar mensagem:", error);
         
-        // Tentar novamente (Retry simples)
-        if (text === "retry_flag") return; // Evitar loop infinito
-
-        // Mensagem de erro amigável com código técnico discreto
-        const errorMsg = "O servidor está acordando. Tente novamente em alguns segundos.";
+        // Mensagem de erro amigável
+        const errorMsg = "Tive um problema de conexão. Poderia repetir?";
         setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
         speakText(errorMsg);
     }
