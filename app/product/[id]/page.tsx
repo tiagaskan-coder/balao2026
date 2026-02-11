@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import { getProducts, getCategories } from '@/lib/db';
 import Header from '@/components/Header';
-import Sidebar from '@/components/Sidebar';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import ShareButton from '@/components/ShareButton';
@@ -78,9 +77,6 @@ export default async function ProductPage({ params }: Props) {
      <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       <Header />
       <div className="flex container mx-auto flex-1 py-6 gap-6">
-        <div className="hidden lg:block">
-            <Sidebar categories={categories} />
-        </div>
         <main className="flex-1 w-full px-4 lg:px-0">
           <div className="bg-white rounded-lg shadow-lg overflow-hidden">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-4 md:p-8">
