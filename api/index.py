@@ -17,21 +17,38 @@ app.add_middleware(
 class ChatRequest(BaseModel):
     message: str
 
-@app.post("/api/chat")
-@app.post("/api/py/chat")
-async def chat_endpoint(request: ChatRequest):
-    # Lógica simplificada sem dependências pesadas
+async def process_chat(request: ChatRequest):
     user_text = request.message
-    response_text = f"Recebi sua mensagem: '{user_text}'. (Backend Vercel Online)"
+    # Lógica de resposta simples e rápida
+    response_text = f"Entendi: '{user_text}'. (Processado pelo Python Vercel)"
     
-    # Aqui entraria a lógica de LLM/Search, mas mantendo simples para garantir deploy
     return {
         "text": response_text,
         "products": []
     }
 
+# Registrar rotas para todas as variações possíveis de caminho
+app.post("/api/chat")(process_chat)
+app.post("/api/py/chat")(process_chat)
+app.post("/chat")(process_chat)
+app.post("/")(process_chat)
+
 @app.get("/api/py")
+async def root_py():
+    return {"status": "online", "service": "Balão Voice Agent", "path": "/api/py"}
+
+@app.get("/")
 async def root():
-    return {"status": "online", "service": "Balão Voice Agent"}
+    return {"status": "online", "service": "Balão Voice Agent (Root)"}
+
+# Catch-all para debug de rotas não mapeadas
+@app.api_route("/{path_name:path}", methods=["GET", "POST", "OPTIONS"])
+async def catch_all(path_name: str, request: Request):
+    return {
+        "status": "catch_all_triggered",
+        "path_received": path_name,
+        "method": request.method,
+        "message": "Rota não encontrada especificamente, mas capturada pelo handler."
+    }
 
 handler = Mangum(app)
