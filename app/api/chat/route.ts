@@ -2,10 +2,6 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import Groq from 'groq-sdk';
 
-const groq = new Groq({
-    apiKey: process.env.GROQ_API_KEY,
-});
-
 export async function POST(req: Request) {
   try {
     const { message } = await req.json();
@@ -13,6 +9,20 @@ export async function POST(req: Request) {
     if (!message) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
+
+    // Initialize Groq inside the handler to avoid build-time errors if env var is missing
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) {
+        console.error("GROQ_API_KEY is missing");
+        return NextResponse.json(
+            { text: "Erro de configuração: Chave de API não encontrada. Por favor, configure a variável de ambiente GROQ_API_KEY." },
+            { status: 500 }
+        );
+    }
+
+    const groq = new Groq({
+        apiKey: apiKey,
+    });
 
     // 1. Buscar produtos no Supabase com base na mensagem do usuário
     const supabase = await createClient();
