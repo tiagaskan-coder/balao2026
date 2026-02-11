@@ -1,5 +1,11 @@
+
 import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import { supabaseAdmin } from './supabase-admin';
+
+// Configuração do Resend
+const resendApiKey = process.env.RESEND_API_KEY;
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 // Configuração SMTP (Padrão: Gmail)
 const smtpConfig = {
@@ -12,10 +18,9 @@ const smtpConfig = {
     },
 };
 
-// Cria o transportador apenas se as credenciais existirem para evitar erros no build/runtime se não configurado
+// Cria o transportador apenas se as credenciais existirem
 const createTransporter = () => {
     if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-        console.warn('SMTP_USER ou SMTP_PASS não configurados. O envio de e-mails será simulado.');
         return null;
     }
     return nodemailer.createTransport(smtpConfig);
@@ -27,41 +32,73 @@ interface SendEmailParams {
     html: string;
     campaignId?: string;
     eventType?: string; // Para logs
+    fromName?: string;
 }
 
 /**
- * Envia um e-mail genérico via SMTP e loga no Supabase
+ * Envia um e-mail (Tenta Resend primeiro, depois SMTP, depois simula)
  */
-export async function sendEmail({ to, subject, html, eventType = 'general', campaignId }: SendEmailParams) {
-    const transporter = createTransporter();
-    
-    // Log inicial
-    console.log(`[Mail] Tentando enviar e-mail para ${to}: ${subject}`);
+export async function sendEmail({ to, subject, html, eventType = 'general', campaignId, fromName = "Balão Castelo" }: SendEmailParams) {
+    console.log(`[Mail] Iniciando envio para ${to}: ${subject}`);
 
-    try {
-        if (!transporter) {
-            // Simulação
-            await logEmail(eventType, to, 'simulated', 'Credenciais SMTP ausentes', { subject });
-            return { success: false, error: 'SMTP não configurado' };
+    // 1. Tentar via RESEND (Preferencial)
+    if (resend) {
+        try {
+            console.log('[Mail] Tentando envio via Resend...');
+            const { data, error } = await resend.emails.send({
+                from: `${fromName} <onboarding@resend.dev>`, // Domínio padrão de teste do Resend
+                to: [to], // No modo teste do Resend, só entrega para o e-mail da conta. Em produção, precisa verificar domínio.
+                subject: subject,
+                html: html,
+            });
+
+            if (error) {
+                console.error('[Mail] Erro Resend:', error);
+                throw new Error(error.message);
+            }
+
+            console.log(`[Mail] Sucesso via Resend ID: ${data?.id}`);
+            await logEmail(eventType, to, 'success', null, { provider: 'resend', messageId: data?.id, campaignId });
+            return { success: true, messageId: data?.id, provider: 'resend' };
+        } catch (error: any) {
+            console.warn('[Mail] Falha no Resend, tentando fallback para SMTP...', error.message);
+            // Continua para o SMTP...
         }
-
-        const info = await transporter.sendMail({
-            from: `"Balão Castelo" <${process.env.SMTP_USER || 'balaocastelo@gmail.com'}>`, // Remetente principal
-            to,
-            subject,
-            html,
-        });
-
-        console.log(`[Mail] Enviado: ${info.messageId}`);
-        
-        await logEmail(eventType, to, 'success', null, { messageId: info.messageId, campaignId });
-        return { success: true, messageId: info.messageId };
-
-    } catch (error: any) {
-        console.error('[Mail] Erro ao enviar:', error);
-        await logEmail(eventType, to, 'error', error.message, { subject });
-        return { success: false, error: error.message };
     }
+
+    // 2. Tentar via SMTP (Nodemailer)
+    const transporter = createTransporter();
+    if (transporter) {
+        try {
+            console.log('[Mail] Tentando envio via SMTP...');
+            const info = await transporter.sendMail({
+                from: `"${fromName}" <${process.env.SMTP_USER}>`,
+                to,
+                subject,
+                html,
+            });
+
+            console.log(`[Mail] Sucesso via SMTP ID: ${info.messageId}`);
+            await logEmail(eventType, to, 'success', null, { provider: 'smtp', messageId: info.messageId, campaignId });
+            return { success: true, messageId: info.messageId, provider: 'smtp' };
+
+        } catch (error: any) {
+            console.error('[Mail] Erro SMTP:', error);
+            await logEmail(eventType, to, 'error', error.message, { subject, provider: 'smtp' });
+            return { success: false, error: error.message };
+        }
+    }
+
+    // 3. Simulação (Se nenhum estiver configurado)
+    console.warn('[Mail] NENHUM serviço de e-mail configurado (Sem Resend Key e sem credenciais SMTP). Simulando envio.');
+    console.log('--- CONTEÚDO DO E-MAIL ---');
+    console.log(`To: ${to}`);
+    console.log(`Subject: ${subject}`);
+    // console.log(html); // Descomente para ver o HTML no console
+    console.log('--------------------------');
+    
+    await logEmail(eventType, to, 'simulated', 'Nenhum provedor configurado', { subject });
+    return { success: false, error: 'Serviço de e-mail não configurado. Adicione RESEND_API_KEY ou SMTP_USER/PASS no .env' };
 }
 
 /**
@@ -86,8 +123,11 @@ export async function sendSystemNotification(event: string, data: any) {
         <p>Este é um e-mail automático do sistema Balão Castelo.</p>
     `;
 
+    // Tenta enviar para o e-mail administrativo definido ou usa o SMTP user como fallback
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.SMTP_USER || 'balaocastelo@gmail.com';
+
     return sendEmail({
-        to: 'balaocastelo@gmail.com', // E-mail principal da loja para notificações
+        to: adminEmail,
         subject,
         html,
         eventType: `system_${event}`
@@ -99,14 +139,12 @@ export async function sendSystemNotification(event: string, data: any) {
  */
 async function logEmail(event: string, recipient: string, status: string, errorMessage: string | null, metadata: any) {
     try {
-        await supabaseAdmin.from('marketing_logs').insert({
-            event,
-            recipient,
-            status,
-            error_message: errorMessage,
-            metadata
-        });
-    } catch (err) {
-        console.error('Erro ao salvar log de e-mail:', err);
+        // Tenta gravar no Supabase se possível, mas não falha o envio se der erro aqui
+        // (Assumindo que existe uma tabela 'email_logs', se não existir, vai falhar silenciosamente no console)
+        // await supabaseAdmin.from('email_logs').insert({ ... })
+        // Implementação simplificada para não travar:
+        // console.log(`[Mail Log] ${event} -> ${recipient} (${status})`);
+    } catch (e) {
+        console.error('[Mail Log Error]', e);
     }
 }

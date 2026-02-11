@@ -98,19 +98,22 @@ export const getOrderConfirmationTemplate = (order: any, items: any[]) => {
         <strong>${item.product_name}</strong><br>
         <span style="font-size: 12px; color: #888;">Qtd: ${item.quantity}</span>
       </td>
-      <td style="text-align: right;">${item.price}</td>
+      <td style="text-align: right;">
+        R$ ${Number(item.price).toFixed(2).replace('.', ',')}
+      </td>
     </tr>
   `).join('');
 
-  const content = `
-    <h2>Obrigado pelo seu pedido, ${order.customer_name}!</h2>
-    <p>Recebemos seu pedido com sucesso e já estamos processando. Abaixo estão os detalhes da sua compra.</p>
-    
-    <div class="info-box">
-      <strong>Pedido #${order.id.slice(0, 8)}</strong><br>
-      Status: <span style="color: #E60012; font-weight: bold;">Pendente</span>
-    </div>
+  const discountHtml = order.discount_value > 0 
+    ? `<p style="text-align: right; color: #10b981;">Desconto: - R$ ${Number(order.discount_value).toFixed(2).replace('.', ',')}</p>`
+    : '';
 
+  const content = `
+    <h2>Pedido Confirmado! #${order.id.slice(0, 8)}</h2>
+    <p>Olá, ${order.customer_name}!</p>
+    <p>Obrigado por comprar na Balão Castelo. Recebemos seu pedido e ele já está sendo processado.</p>
+    
+    <h3>Resumo do Pedido</h3>
     <table class="product-list">
       <thead>
         <tr>
@@ -123,44 +126,40 @@ export const getOrderConfirmationTemplate = (order: any, items: any[]) => {
       </tbody>
     </table>
 
+    ${discountHtml}
     <div class="total">
-      Total: R$ ${order.total.toFixed(2)}
+      Total: R$ ${Number(order.total).toFixed(2).replace('.', ',')}
     </div>
 
-    <h3>Endereço de Entrega</h3>
-    <p>
-      ${order.address.street}, ${order.address.number}<br>
-      ${order.address.complement ? `${order.address.complement}<br>` : ''}
-      ${order.address.city} - ${order.address.state}<br>
-      CEP: ${order.address.cep}
-    </p>
+    <div class="info-box">
+      <strong>Endereço de Entrega:</strong><br>
+      ${order.address.street}, ${order.address.number} ${order.address.complement ? `- ${order.address.complement}` : ''}<br>
+      ${order.address.cep} - ${order.address.city}/${order.address.state}
+    </div>
 
-    <p style="text-align: center;">
-      <a href="https://balaocastelo.com.br/meus-pedidos" class="button">Acompanhar Pedido</a>
-    </p>
+    <p>Você receberá novos e-mails assim que o status do seu pedido mudar.</p>
   `;
 
-  return getBaseTemplate(content, "Confirmação de Pedido", order.customer_email);
+  return getBaseTemplate(content, `Pedido Confirmado #${order.id.slice(0, 8)}`, order.customer_email);
 };
 
-export const getWelcomeTemplate = (name: string, email?: string) => {
+export const getWelcomeTemplate = (name: string, email: string) => {
   const content = `
-    <h2>Bem-vindo(a) à Balão Castelo, ${name}!</h2>
-    <p>Estamos muito felizes em ter você conosco. Agora você faz parte da nossa comunidade e receberá ofertas exclusivas em primeira mão.</p>
-    
-    <p>Na Balão Castelo você encontra:</p>
+    <h2>Bem-vindo(a) à Balão Castelo!</h2>
+    <p>Olá, ${name}!</p>
+    <p>Estamos muito felizes em ter você conosco. Sua conta foi criada com sucesso.</p>
+    <p>Agora você pode:</p>
     <ul>
-      <li>Informática e PC Gamer</li>
-      <li>Assistência Técnica Especializada</li>
-      <li>Melhores preços da região</li>
+      <li>Fazer pedidos de forma mais rápida</li>
+      <li>Acompanhar seu histórico de compras</li>
+      <li>Receber ofertas exclusivas</li>
     </ul>
-
+    <p>Aproveite nossas ofertas!</p>
     <p style="text-align: center;">
-      <a href="https://balaocastelo.com.br" class="button">Explorar Loja</a>
+      <a href="https://balaocastelo.com.br" class="button">Ir para a Loja</a>
     </p>
   `;
-
-  return getBaseTemplate(content, "Bem-vindo!", email);
+  return getBaseTemplate(content, "Bem-vindo à Balão Castelo", email);
 };
 
 export const getAdminNotificationTemplate = (title: string, data: any) => {
