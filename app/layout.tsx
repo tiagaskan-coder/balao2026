@@ -11,6 +11,7 @@ import ProductPreview from "@/components/ProductPreview";
 import AIOverlay from "@/components/AIOverlay"; // Nova Interface de Preview
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import { getCategories } from "@/lib/db";
+import Sidebar from "@/components/Sidebar";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -105,6 +106,7 @@ export default async function RootLayout({
                 <SidebarProvider>
                   <AIContextProvider>
                     <AIOverlay /> {/* Nova Interface de Preview */}
+                    <Sidebar categories={categories} mobileOnly />
                     <div className="flex flex-col min-h-screen">
                       {/* Header será renderizado dentro das páginas ou layout específico se necessário, 
                           mas geralmente o Header é global. Se não houver Header aqui, 
