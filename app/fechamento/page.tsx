@@ -268,7 +268,7 @@ export default function WeeklyClosing() {
 
       // Opções simplificadas para evitar erros de renderização
       const opt = {
-        margin: [10, 10, 10, 10],
+        margin: 10, // Margem uniforme em mm
         filename: `fechamento-${new Date().toISOString().split('T')[0]}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true },
