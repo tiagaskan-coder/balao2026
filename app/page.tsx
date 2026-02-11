@@ -5,7 +5,8 @@ import Carousel from "@/components/Carousel";
 import ProductCarousel from "@/components/ProductCarousel";
 import SeoContent from "@/components/SeoContent";
 import { getProducts, getCarouselImages, getCategories, getHomeBlocks } from "@/lib/db";
-import { searchProducts } from "@/lib/searchUtils";
+import { createClient } from "@/lib/supabase/server";
+import { Product } from "@/lib/utils";
 
 export const dynamic = 'force-dynamic';
 
@@ -14,16 +15,42 @@ type SearchParams = Promise<{ category?: string; search?: string }>;
 export default async function Home(props: {
   searchParams: SearchParams;
 }) {
-  const [products, carouselImages, categories, homeBlocks] = await Promise.all([
-    getProducts(),
-    getCarouselImages(true),
-    getCategories(),
-    getHomeBlocks(true)
-  ]);
-  
   const searchParams = await props.searchParams;
   const category = searchParams?.category;
   const search = searchParams?.search;
+
+  // Optimized Data Fetching
+  const carouselImagesPromise = getCarouselImages(true);
+  const categoriesPromise = getCategories();
+  const homeBlocksPromise = getHomeBlocks(true);
+  
+  let productsPromise: Promise<Product[]>;
+  
+  if (search) {
+      // If searching, use the advanced FTS + Fuzzy search from Supabase
+      productsPromise = (async () => {
+          const supabase = await createClient();
+          const { data, error } = await supabase.rpc('search_products_fts', { 
+              query_text: search, 
+              limit_count: 50 
+          });
+          if (error) {
+              console.error("Search RPC error:", error);
+              return [];
+          }
+          return (data as Product[]) || [];
+      })();
+  } else {
+      // Otherwise fetch all products (for category browsing and home blocks)
+      productsPromise = getProducts();
+  }
+
+  const [products, carouselImages, categories, homeBlocks] = await Promise.all([
+    productsPromise,
+    carouselImagesPromise,
+    categoriesPromise,
+    homeBlocksPromise
+  ]);
 
   // Helper to find all descendant category names
   const getDescendantNames = (rootName: string, allCategories: any[]) => {
@@ -51,13 +78,15 @@ export default async function Home(props: {
       descendants.forEach(d => validCategories.add(d));
   }
 
-  let filteredProducts = products.filter(p => {
-    if (category && category !== "Todos os Produtos" && !validCategories.has(p.category)) return false;
-    return true;
-  });
+  let filteredProducts = products;
 
-  if (search) {
-      filteredProducts = searchProducts(filteredProducts, search);
+  // If we are NOT searching, we might need to filter by category
+  // (If we ARE searching, 'products' is already the search result from RPC)
+  if (!search) {
+      filteredProducts = products.filter(p => {
+        if (category && category !== "Todos os Produtos" && !validCategories.has(p.category)) return false;
+        return true;
+      });
   }
 
   return (

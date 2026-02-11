@@ -4,15 +4,47 @@ import { ChevronRight } from "lucide-react";
 
 interface SearchPreviewProps {
   products: Product[];
+  searchQuery?: string;
   onSelect: (product: Product) => void;
   onClose: () => void;
 }
 
-export default function SearchPreview({ products, onSelect, onClose }: SearchPreviewProps) {
+export default function SearchPreview({ products, searchQuery = "", onSelect, onClose }: SearchPreviewProps) {
   if (products.length === 0) return null;
+
+  // Function to highlight search terms
+  const highlightText = (text: string, query: string) => {
+    if (!query || query.length < 2) return text;
+    
+    // Normalize for case-insensitive matching logic
+    const normalizedQuery = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    
+    // Split text to find matches
+    // This is a simple implementation; for more complex needs consider a library
+    const parts = text.split(new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'));
+    
+    return (
+      <>
+        {parts.map((part, i) => {
+          const isMatch = part.toLowerCase() === query.toLowerCase();
+          return isMatch ? (
+            <strong key={i} className="text-black font-extrabold bg-yellow-100 px-0.5 rounded">
+              {part}
+            </strong>
+          ) : (
+            <span key={i}>{part}</span>
+          );
+        })}
+      </>
+    );
+  };
 
   return (
     <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2">
+      <div className="p-2 bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider flex justify-between items-center">
+        <span>Sugestões de Produtos</span>
+        <span className="text-[10px] bg-gray-200 px-1.5 py-0.5 rounded text-gray-600">{products.length} encontrados</span>
+      </div>
       <div className="max-h-[400px] overflow-y-auto">
         {products.map((product) => (
           <div
@@ -31,7 +63,7 @@ export default function SearchPreview({ products, onSelect, onClose }: SearchPre
             </div>
             <div className="flex-1 min-w-0">
               <h4 className="text-sm font-medium text-gray-800 truncate group-hover:text-[#E60012] transition-colors">
-                {product.name}
+                {highlightText(product.name, searchQuery)}
               </h4>
               <div className="flex items-center gap-2 mt-0.5">
                 <span className="text-xs text-gray-500">{product.category}</span>

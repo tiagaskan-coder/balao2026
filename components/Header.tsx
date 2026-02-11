@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Search, ShoppingCart, User, Menu } from "lucide-react";
+import { Search, ShoppingCart, User, Menu, X, Loader2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
@@ -11,7 +11,6 @@ import { useAuth } from "@/context/AuthContext";
 import { useSidebar } from "@/context/SidebarContext";
 import { Product } from "@/lib/utils";
 import SearchPreview from "@/components/SearchPreview";
-import { searchProducts } from "@/lib/searchUtils";
 
 export default function Header() {
   const router = useRouter();
@@ -35,16 +34,35 @@ export default function Header() {
   // Search Preview State
   const [showPreview, setShowPreview] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const searchContainerRef = useRef<HTMLFormElement>(null);
   const mobileSearchContainerRef = useRef<HTMLDivElement>(null);
 
-  // Fetch products for client-side search preview
+  // Debounced Backend Search
   useEffect(() => {
-    fetch("/api/products")
-      .then(res => res.json())
-      .then(data => setProducts(data))
-      .catch(err => console.error("Failed to load products for search", err));
-  }, []);
+    // Don't search if query is too short
+    if (searchQuery.length < 2) {
+      setProducts([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsLoading(true);
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setProducts(data);
+        }
+      } catch (err) {
+        console.error("Failed to search products", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }, 300); // 300ms delay to wait for user to stop typing
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // Handle click outside to close preview
   useEffect(() => {
@@ -91,9 +109,8 @@ export default function Header() {
     performSearch();
   };
 
-  const previewProducts = searchQuery.length >= 2 
-    ? searchProducts(products, searchQuery).slice(0, 5)
-    : [];
+  // Products are now fetched directly from API, so no need for client-side filtering here
+  const previewProducts = products;
 
   return (
     <header className="bg-white border-b-4 border-[#E60012] sticky top-0 z-[900] shadow-md">
@@ -156,6 +173,7 @@ export default function Header() {
           {showPreview && searchQuery.length >= 2 && (
               <SearchPreview 
                   products={previewProducts}
+                  searchQuery={searchQuery}
                   onSelect={(product) => {
                       router.push(`/product/${product.id}`);
                       setShowPreview(false);
@@ -216,6 +234,18 @@ export default function Header() {
                 }}
                 onFocus={() => setShowPreview(true)}
             />
+            
+            {/* Clear Button (Mobile) */}
+            {searchQuery && (
+                 <button
+                     type="button"
+                     onClick={clearSearch}
+                     className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-400 p-2 z-10"
+                 >
+                     {isLoading ? <Loader2 size={18} className="animate-spin" /> : <X size={18} />}
+                 </button>
+            )}
+
              <button 
                type="button" 
                onClick={performSearch}
@@ -229,6 +259,7 @@ export default function Header() {
                 <div className="absolute top-full left-0 right-0 mt-1 z-50">
                     <SearchPreview 
                         products={previewProducts}
+                        searchQuery={searchQuery}
                         onSelect={(product) => {
                             router.push(`/product/${product.id}`);
                             setShowPreview(false);
