@@ -1,10 +1,9 @@
-
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
 import { 
   Plus, Trash2, TrendingUp, TrendingDown, DollarSign, 
-  PieChart, Share2, FileDown, BrainCircuit, Printer, AlertTriangle
+  PieChart, Share2, FileDown, BrainCircuit, Printer, AlertTriangle, Minus
 } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import { analyzeWeeklyClosing, WeeklyAnalysis } from "@/lib/ai-service-specific";
@@ -14,11 +13,23 @@ interface ServiceOrder {
   id: string;
   osNumber: string;
   status: "Entrada" | "Reparo" | "Concluída";
-  laborCost: number; // Mão de Obra
-  partsSaleValue: number; // Valor Venda Peças
-  partsCostValue: number; // Custo Peças (Saída)
-  thirdPartyCost: number; // Custo Terceiros
+  
+  // Entradas (Receitas)
+  laborIncome: number;
+  partsIncome: number;
+  
+  // Saídas (Custos diretos)
+  laborExpense: number; 
+  partsExpense: number;
+
   paymentMethod: "PIX" | "Cartão" | "Dinheiro";
+}
+
+interface OperationalExpense {
+  id: string;
+  description: string;
+  value: number;
+  category: "Salário" | "Insumo" | "Aluguel" | "Imposto" | "Outro";
 }
 
 interface FinancialSummary {
@@ -30,6 +41,8 @@ interface FinancialSummary {
     Cartao: number;
     Dinheiro: number;
   };
+  operationalExpensesTotal: number;
+  directCostsTotal: number;
 }
 
 // --- Component ---
@@ -38,22 +51,29 @@ export default function WeeklyClosing() {
   
   // State
   const [orders, setOrders] = useState<ServiceOrder[]>([]);
+  const [expenses, setExpenses] = useState<OperationalExpense[]>([]);
   const [loadingAI, setLoadingAI] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<WeeklyAnalysis | null>(null);
   
-  // Form State
+  // Form State - OS
   const [newOrder, setNewOrder] = useState<Partial<ServiceOrder>>({
     status: "Entrada",
     paymentMethod: "PIX",
-    laborCost: 0,
-    partsSaleValue: 0,
-    partsCostValue: 0,
-    thirdPartyCost: 0
+    laborIncome: 0,
+    partsIncome: 0,
+    laborExpense: 0,
+    partsExpense: 0,
+  });
+
+  // Form State - Expense
+  const [newExpense, setNewExpense] = useState<Partial<OperationalExpense>>({
+    category: "Outro",
+    value: 0,
+    description: ""
   });
 
   // Load from LocalStorage / URL on Mount
   useEffect(() => {
-    // Check URL params first for shared state
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const data = params.get("data");
@@ -61,9 +81,9 @@ export default function WeeklyClosing() {
         try {
           const decoded = JSON.parse(atob(data));
           if (decoded.orders) setOrders(decoded.orders);
+          if (decoded.expenses) setExpenses(decoded.expenses);
           if (decoded.aiAnalysis) setAiAnalysis(decoded.aiAnalysis);
           showToast("Dados carregados do link compartilhado!");
-          // Clean URL
           window.history.replaceState({}, "", "/fechamento");
           return;
         } catch (e) {
@@ -71,10 +91,12 @@ export default function WeeklyClosing() {
         }
       }
 
-      // Fallback to LocalStorage
-      const savedOrders = localStorage.getItem("techflow_orders");
-      const savedAnalysis = localStorage.getItem("techflow_analysis");
+      const savedOrders = localStorage.getItem("techflow_orders_v2");
+      const savedExpenses = localStorage.getItem("techflow_expenses");
+      const savedAnalysis = localStorage.getItem("techflow_analysis_v2");
+      
       if (savedOrders) setOrders(JSON.parse(savedOrders));
+      if (savedExpenses) setExpenses(JSON.parse(savedExpenses));
       if (savedAnalysis) setAiAnalysis(JSON.parse(savedAnalysis));
     }
   }, []);
@@ -82,33 +104,39 @@ export default function WeeklyClosing() {
   // Save to LocalStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("techflow_orders", JSON.stringify(orders));
+      localStorage.setItem("techflow_orders_v2", JSON.stringify(orders));
+      localStorage.setItem("techflow_expenses", JSON.stringify(expenses));
       if (aiAnalysis) {
-        localStorage.setItem("techflow_analysis", JSON.stringify(aiAnalysis));
+        localStorage.setItem("techflow_analysis_v2", JSON.stringify(aiAnalysis));
       }
     }
-  }, [orders, aiAnalysis]);
+  }, [orders, expenses, aiAnalysis]);
 
   // Calculations
-  const summary: FinancialSummary = orders.reduce(
-    (acc, order) => {
-      const revenue = (order.laborCost || 0) + (order.partsSaleValue || 0);
-      const expenses = (order.partsCostValue || 0) + (order.thirdPartyCost || 0);
-      
-      acc.grossRevenue += revenue;
-      acc.totalExpenses += expenses;
-      acc.netProfit += revenue - expenses;
-      
-      if (order.paymentMethod === "PIX") acc.paymentMix.PIX += revenue;
-      if (order.paymentMethod === "Cartão") acc.paymentMix.Cartao += revenue;
-      if (order.paymentMethod === "Dinheiro") acc.paymentMix.Dinheiro += revenue;
-      
+  const summary: FinancialSummary = React.useMemo(() => {
+    const directCosts = orders.reduce((sum, o) => sum + (o.laborExpense || 0) + (o.partsExpense || 0), 0);
+    const revenue = orders.reduce((sum, o) => sum + (o.laborIncome || 0) + (o.partsIncome || 0), 0);
+    const opExpenses = expenses.reduce((sum, e) => sum + (e.value || 0), 0);
+    
+    const paymentMix = orders.reduce((acc, order) => {
+      const orderTotal = (order.laborIncome || 0) + (order.partsIncome || 0);
+      if (order.paymentMethod === "PIX") acc.PIX += orderTotal;
+      if (order.paymentMethod === "Cartão") acc.Cartao += orderTotal;
+      if (order.paymentMethod === "Dinheiro") acc.Dinheiro += orderTotal;
       return acc;
-    },
-    { grossRevenue: 0, totalExpenses: 0, netProfit: 0, paymentMix: { PIX: 0, Cartao: 0, Dinheiro: 0 } }
-  );
+    }, { PIX: 0, Cartao: 0, Dinheiro: 0 });
 
-  // Handlers
+    return {
+      grossRevenue: revenue,
+      totalExpenses: directCosts + opExpenses,
+      netProfit: revenue - (directCosts + opExpenses),
+      paymentMix,
+      directCostsTotal: directCosts,
+      operationalExpensesTotal: opExpenses
+    };
+  }, [orders, expenses]);
+
+  // Handlers - Orders
   const handleAddOrder = () => {
     if (!newOrder.osNumber) {
       showToast("Número da OS é obrigatório!");
@@ -120,20 +148,20 @@ export default function WeeklyClosing() {
       osNumber: newOrder.osNumber,
       status: newOrder.status as any || "Entrada",
       paymentMethod: newOrder.paymentMethod as any || "PIX",
-      laborCost: Number(newOrder.laborCost) || 0,
-      partsSaleValue: Number(newOrder.partsSaleValue) || 0,
-      partsCostValue: Number(newOrder.partsCostValue) || 0,
-      thirdPartyCost: Number(newOrder.thirdPartyCost) || 0,
+      laborIncome: Number(newOrder.laborIncome) || 0,
+      partsIncome: Number(newOrder.partsIncome) || 0,
+      laborExpense: Number(newOrder.laborExpense) || 0,
+      partsExpense: Number(newOrder.partsExpense) || 0,
     };
 
     setOrders([...orders, order]);
     setNewOrder({
       status: "Entrada",
       paymentMethod: "PIX",
-      laborCost: 0,
-      partsSaleValue: 0,
-      partsCostValue: 0,
-      thirdPartyCost: 0,
+      laborIncome: 0,
+      partsIncome: 0,
+      laborExpense: 0,
+      partsExpense: 0,
       osNumber: ""
     });
     showToast("OS Adicionada!");
@@ -144,6 +172,31 @@ export default function WeeklyClosing() {
     showToast("OS Removida.");
   };
 
+  // Handlers - Expenses
+  const handleAddExpense = () => {
+    if (!newExpense.description || !newExpense.value) {
+      showToast("Descrição e valor são obrigatórios!");
+      return;
+    }
+
+    const expense: OperationalExpense = {
+      id: crypto.randomUUID(),
+      description: newExpense.description,
+      value: Number(newExpense.value),
+      category: newExpense.category as any || "Outro"
+    };
+
+    setExpenses([...expenses, expense]);
+    setNewExpense({ category: "Outro", value: 0, description: "" });
+    showToast("Despesa adicionada!");
+  };
+
+  const removeExpense = (id: string) => {
+    setExpenses(expenses.filter(e => e.id !== id));
+    showToast("Despesa removida.");
+  };
+
+  // AI & Export
   const handleAIAnalysis = async () => {
     setLoadingAI(true);
     try {
@@ -153,7 +206,11 @@ export default function WeeklyClosing() {
         netProfit: summary.netProfit,
         ordersCount: orders.length,
         paymentMix: summary.paymentMix,
-        topExpenses: [] // TODO: Refinar se necessário
+        topExpenses: orders.map(o => ({
+          name: `OS ${o.osNumber} (Custos)`,
+          value: (o.laborExpense || 0) + (o.partsExpense || 0)
+        })).filter(x => x.value > 0).sort((a,b) => b.value - a.value).slice(0, 5),
+        otherExpenses: expenses
       });
       setAiAnalysis(result);
       showToast("Análise de IA Concluída!");
@@ -188,14 +245,13 @@ export default function WeeklyClosing() {
   };
 
   const generateShareLink = () => {
-    const state = { orders, aiAnalysis };
+    const state = { orders, expenses, aiAnalysis };
     const encoded = btoa(JSON.stringify(state));
     const url = `${window.location.origin}${window.location.pathname}?data=${encoded}`;
     navigator.clipboard.writeText(url);
-    showToast("Link copiado para a área de transferência!");
+    showToast("Link copiado!");
   };
 
-  // Helper for currency
   const fmt = (val: number) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
   return (
@@ -218,250 +274,340 @@ export default function WeeklyClosing() {
           </div>
         </div>
 
-        {/* --- INPUT SECTION (No Print) --- */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 no-print">
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <Plus className="text-blue-500" /> Nova Ordem de Serviço
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-            <div className="col-span-2 md:col-span-1">
-              <label className="text-xs font-medium text-slate-500">Nº OS</label>
+        {/* --- INPUT SECTIONS (No Print) --- */}
+        <div className="grid md:grid-cols-3 gap-6 no-print">
+          
+          {/* OS Input */}
+          <div className="md:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Plus className="text-blue-500" /> Nova Ordem de Serviço
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <input 
                 type="text" 
+                placeholder="Nº OS"
                 value={newOrder.osNumber}
                 onChange={e => setNewOrder({...newOrder, osNumber: e.target.value})}
-                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-100 outline-none"
-                placeholder="0001"
+                className="col-span-1 p-2 border rounded text-sm"
               />
-            </div>
-            <div className="col-span-2 md:col-span-1">
-              <label className="text-xs font-medium text-slate-500">Status</label>
               <select 
                 value={newOrder.status}
                 onChange={e => setNewOrder({...newOrder, status: e.target.value as any})}
-                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-100 outline-none"
+                className="col-span-1 p-2 border rounded text-sm"
               >
                 <option>Entrada</option>
                 <option>Reparo</option>
                 <option>Concluída</option>
               </select>
-            </div>
-             <div className="col-span-2 md:col-span-1">
-              <label className="text-xs font-medium text-slate-500">Pagamento</label>
               <select 
                 value={newOrder.paymentMethod}
                 onChange={e => setNewOrder({...newOrder, paymentMethod: e.target.value as any})}
-                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-100 outline-none"
+                className="col-span-2 p-2 border rounded text-sm"
               >
                 <option>PIX</option>
                 <option>Cartão</option>
                 <option>Dinheiro</option>
               </select>
-            </div>
-            <div className="col-span-1">
-              <label className="text-xs font-medium text-slate-500 text-green-600">Mão de Obra (R$)</label>
-              <input 
-                type="number" 
-                value={newOrder.laborCost || ""}
-                onChange={e => setNewOrder({...newOrder, laborCost: parseFloat(e.target.value)})}
-                className="w-full p-2 border rounded focus:ring-2 focus:ring-green-100 outline-none"
-                placeholder="0.00"
-              />
-            </div>
-            <div className="col-span-1">
-              <label className="text-xs font-medium text-slate-500 text-green-600">Venda Peças (R$)</label>
-              <input 
-                type="number" 
-                value={newOrder.partsSaleValue || ""}
-                onChange={e => setNewOrder({...newOrder, partsSaleValue: parseFloat(e.target.value)})}
-                className="w-full p-2 border rounded focus:ring-2 focus:ring-green-100 outline-none"
-                placeholder="0.00"
-              />
-            </div>
-            <div className="col-span-1">
-              <label className="text-xs font-medium text-slate-500 text-red-500">Custo Peças (R$)</label>
-              <input 
-                type="number" 
-                value={newOrder.partsCostValue || ""}
-                onChange={e => setNewOrder({...newOrder, partsCostValue: parseFloat(e.target.value)})}
-                className="w-full p-2 border rounded focus:ring-2 focus:ring-red-100 outline-none"
-                placeholder="0.00"
-              />
-            </div>
-            <div className="col-span-1 flex items-end">
+              
+              <div className="col-span-2 grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-green-600">Entrada MO</label>
+                  <input 
+                    type="number" 
+                    placeholder="0.00"
+                    value={newOrder.laborIncome || ""}
+                    onChange={e => setNewOrder({...newOrder, laborIncome: parseFloat(e.target.value)})}
+                    className="w-full p-2 border border-green-200 rounded text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-green-600">Entrada Peça</label>
+                  <input 
+                    type="number" 
+                    placeholder="0.00"
+                    value={newOrder.partsIncome || ""}
+                    onChange={e => setNewOrder({...newOrder, partsIncome: parseFloat(e.target.value)})}
+                    className="w-full p-2 border border-green-200 rounded text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="col-span-2 grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-red-500">Saída MO</label>
+                  <input 
+                    type="number" 
+                    placeholder="0.00"
+                    value={newOrder.laborExpense || ""}
+                    onChange={e => setNewOrder({...newOrder, laborExpense: parseFloat(e.target.value)})}
+                    className="w-full p-2 border border-red-200 rounded text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-red-500">Saída Peça</label>
+                  <input 
+                    type="number" 
+                    placeholder="0.00"
+                    value={newOrder.partsExpense || ""}
+                    onChange={e => setNewOrder({...newOrder, partsExpense: parseFloat(e.target.value)})}
+                    className="w-full p-2 border border-red-200 rounded text-sm"
+                  />
+                </div>
+              </div>
+
               <button 
                 onClick={handleAddOrder}
-                className="w-full bg-slate-900 text-white p-2 rounded hover:bg-slate-800 transition-colors"
+                className="col-span-4 mt-2 bg-slate-900 text-white p-2 rounded hover:bg-slate-800 text-sm font-medium"
               >
-                Adicionar
+                Adicionar OS
               </button>
             </div>
           </div>
+
+          {/* Expenses Input */}
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+             <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Minus className="text-red-500" /> Despesa Avulsa
+            </h2>
+            <div className="space-y-3">
+              <input 
+                type="text" 
+                placeholder="Descrição (ex: Aluguel)"
+                value={newExpense.description}
+                onChange={e => setNewExpense({...newExpense, description: e.target.value})}
+                className="w-full p-2 border rounded text-sm"
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <select 
+                  value={newExpense.category}
+                  onChange={e => setNewExpense({...newExpense, category: e.target.value as any})}
+                  className="p-2 border rounded text-sm"
+                >
+                  <option>Salário</option>
+                  <option>Insumo</option>
+                  <option>Aluguel</option>
+                  <option>Imposto</option>
+                  <option>Outro</option>
+                </select>
+                <input 
+                  type="number" 
+                  placeholder="R$ 0.00"
+                  value={newExpense.value || ""}
+                  onChange={e => setNewExpense({...newExpense, value: parseFloat(e.target.value)})}
+                  className="p-2 border rounded text-sm"
+                />
+              </div>
+              <button 
+                onClick={handleAddExpense}
+                className="w-full bg-red-50 text-red-600 border border-red-200 p-2 rounded hover:bg-red-100 text-sm font-medium"
+              >
+                Lançar Despesa
+              </button>
+            </div>
+          </div>
+
         </div>
 
-        {/* --- REPORT AREA (To be printed) --- */}
-        <div id="report-content" className="space-y-8 bg-white p-8 shadow-sm">
+        {/* --- REPORT CONTENT (Printable) --- */}
+        <div id="report-content" className="bg-white p-8 rounded-xl shadow-lg border border-slate-200 space-y-8">
           
-          {/* AI Analysis Section (Page 1 in PDF logic) */}
-          {aiAnalysis && (
-            <div className="mb-8 break-after-page">
-              <div className="bg-gradient-to-br from-indigo-50 to-blue-50 p-6 rounded-xl border border-indigo-100">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-indigo-600 text-white rounded-lg">
-                    <BrainCircuit size={24} />
-                  </div>
-                  <h2 className="text-xl font-bold text-indigo-900">Análise Inteligente Semanal</h2>
-                </div>
-                
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-indigo-400 mb-2">Resumo Executivo</h3>
-                    <p className="text-slate-700 leading-relaxed">{aiAnalysis.summary}</p>
-                  </div>
-                  
-                  <div className="grid md:grid-cols-3 gap-6">
-                    <div className="bg-white p-4 rounded-lg shadow-sm border border-green-100">
-                      <h3 className="font-bold text-green-700 mb-2 flex items-center gap-2">
-                        <TrendingUp size={16} /> Pontos Positivos
-                      </h3>
-                      <ul className="list-disc list-inside text-sm text-slate-600 space-y-1">
-                        {aiAnalysis.positives.map((p, i) => <li key={i}>{p}</li>)}
-                      </ul>
-                    </div>
-                    
-                    <div className="bg-white p-4 rounded-lg shadow-sm border border-amber-100">
-                      <h3 className="font-bold text-amber-700 mb-2 flex items-center gap-2">
-                        <AlertTriangle size={16} /> Alertas & Riscos
-                      </h3>
-                       <ul className="list-disc list-inside text-sm text-slate-600 space-y-1">
-                        {aiAnalysis.alerts.map((a, i) => <li key={i}>{a}</li>)}
-                      </ul>
-                    </div>
+          <div className="border-b pb-4 flex justify-between items-end">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-800">Relatório de Fechamento</h2>
+              <p className="text-slate-500 text-sm">Gerado em {new Date().toLocaleDateString()}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-slate-400">TechFlow System</p>
+            </div>
+          </div>
 
-                    <div className="bg-white p-4 rounded-lg shadow-sm border border-blue-100">
-                      <h3 className="font-bold text-blue-700 mb-2 flex items-center gap-2">
-                        <DollarSign size={16} /> Dicas de Lucratividade
-                      </h3>
-                       <ul className="list-disc list-inside text-sm text-slate-600 space-y-1">
-                        {aiAnalysis.tips.map((t, i) => <li key={i}>{t}</li>)}
-                      </ul>
-                    </div>
+          {/* KPI Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 bg-green-50 rounded-lg border border-green-100">
+              <div className="flex items-center gap-2 text-green-700 mb-1">
+                <TrendingUp size={18} /> <span className="text-sm font-bold uppercase">Receita Bruta</span>
+              </div>
+              <p className="text-2xl font-bold text-green-800">{fmt(summary.grossRevenue)}</p>
+              <p className="text-xs text-green-600 mt-1">{orders.length} ordens de serviço</p>
+            </div>
+
+            <div className="p-4 bg-red-50 rounded-lg border border-red-100">
+              <div className="flex items-center gap-2 text-red-700 mb-1">
+                <TrendingDown size={18} /> <span className="text-sm font-bold uppercase">Despesas Totais</span>
+              </div>
+              <p className="text-2xl font-bold text-red-800">{fmt(summary.totalExpenses)}</p>
+              <div className="flex justify-between text-xs text-red-600 mt-1">
+                <span>Diretas: {fmt(summary.directCostsTotal)}</span>
+                <span>Op.: {fmt(summary.operationalExpensesTotal)}</span>
+              </div>
+            </div>
+
+            <div className={`p-4 rounded-lg border ${summary.netProfit >= 0 ? 'bg-blue-50 border-blue-100' : 'bg-orange-50 border-orange-100'}`}>
+              <div className={`flex items-center gap-2 mb-1 ${summary.netProfit >= 0 ? 'text-blue-700' : 'text-orange-700'}`}>
+                <DollarSign size={18} /> <span className="text-sm font-bold uppercase">Lucro Líquido</span>
+              </div>
+              <p className={`text-2xl font-bold ${summary.netProfit >= 0 ? 'text-blue-800' : 'text-orange-800'}`}>
+                {fmt(summary.netProfit)}
+              </p>
+              <p className={`text-xs mt-1 ${summary.netProfit >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
+                Margem: {summary.grossRevenue ? ((summary.netProfit / summary.grossRevenue) * 100).toFixed(1) : 0}%
+              </p>
+            </div>
+          </div>
+
+          {/* Tables Section */}
+          <div className="grid md:grid-cols-2 gap-8">
+            
+            {/* Orders Table */}
+            <div>
+              <h3 className="text-sm font-bold uppercase text-slate-500 mb-3 border-b pb-2">Detalhamento de OS</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                  <thead className="text-xs text-slate-400 uppercase bg-slate-50">
+                    <tr>
+                      <th className="px-2 py-2">OS</th>
+                      <th className="px-2 py-2">Rec.</th>
+                      <th className="px-2 py-2">Custo</th>
+                      <th className="px-2 py-2">Lucro</th>
+                      <th className="px-2 py-2 text-right no-print">Ação</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {orders.map(order => {
+                      const rev = (order.laborIncome || 0) + (order.partsIncome || 0);
+                      const cost = (order.laborExpense || 0) + (order.partsExpense || 0);
+                      return (
+                        <tr key={order.id} className="hover:bg-slate-50">
+                          <td className="px-2 py-2 font-medium">{order.osNumber}</td>
+                          <td className="px-2 py-2 text-green-600">{fmt(rev)}</td>
+                          <td className="px-2 py-2 text-red-500">{fmt(cost)}</td>
+                          <td className="px-2 py-2 font-bold">{fmt(rev - cost)}</td>
+                          <td className="px-2 py-2 text-right no-print">
+                            <button onClick={() => removeOrder(order.id)} className="text-slate-400 hover:text-red-500">
+                              <Trash2 size={14} />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {orders.length === 0 && (
+                      <tr><td colSpan={5} className="text-center py-4 text-slate-400">Nenhuma OS lançada.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Expenses & Mix Table */}
+            <div className="space-y-6">
+              
+              {/* Operational Expenses */}
+              <div>
+                <h3 className="text-sm font-bold uppercase text-slate-500 mb-3 border-b pb-2">Despesas Operacionais</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left">
+                    <thead className="text-xs text-slate-400 uppercase bg-slate-50">
+                      <tr>
+                        <th className="px-2 py-2">Desc.</th>
+                        <th className="px-2 py-2">Cat.</th>
+                        <th className="px-2 py-2 text-right">Valor</th>
+                        <th className="px-2 py-2 text-right no-print"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {expenses.map(exp => (
+                        <tr key={exp.id}>
+                          <td className="px-2 py-2">{exp.description}</td>
+                          <td className="px-2 py-2 text-xs text-slate-500">{exp.category}</td>
+                          <td className="px-2 py-2 text-right text-red-600">{fmt(exp.value)}</td>
+                          <td className="px-2 py-2 text-right no-print">
+                            <button onClick={() => removeExpense(exp.id)} className="text-slate-400 hover:text-red-500">
+                              <Trash2 size={14} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                      {expenses.length === 0 && (
+                        <tr><td colSpan={4} className="text-center py-4 text-slate-400">Nenhuma despesa extra.</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Payment Mix */}
+              <div>
+                <h3 className="text-sm font-bold uppercase text-slate-500 mb-3 border-b pb-2">Formas de Pagamento</h3>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="p-2 bg-slate-50 rounded">
+                    <div className="text-xs text-slate-500">PIX</div>
+                    <div className="font-bold text-slate-700">{fmt(summary.paymentMix.PIX)}</div>
+                  </div>
+                  <div className="p-2 bg-slate-50 rounded">
+                    <div className="text-xs text-slate-500">Cartão</div>
+                    <div className="font-bold text-slate-700">{fmt(summary.paymentMix.Cartao)}</div>
+                  </div>
+                  <div className="p-2 bg-slate-50 rounded">
+                    <div className="text-xs text-slate-500">Dinheiro</div>
+                    <div className="font-bold text-slate-700">{fmt(summary.paymentMix.Dinheiro)}</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          {/* AI Analysis Section */}
+          {aiAnalysis && (
+            <div className="mt-8 border-t pt-6 bg-indigo-50/50 p-6 rounded-xl border-indigo-100">
+              <div className="flex items-center gap-2 mb-4">
+                <BrainCircuit className="text-indigo-600" />
+                <h3 className="text-lg font-bold text-indigo-900">Análise Inteligente (Gemini)</h3>
+              </div>
+              
+              <div className="space-y-4 text-sm text-slate-700">
+                <p className="italic text-lg font-medium text-slate-800">"{aiAnalysis.summary}"</p>
+                
+                <div className="grid md:grid-cols-3 gap-4 mt-4">
+                  <div className="bg-white p-4 rounded-lg shadow-sm border border-green-100">
+                    <strong className="block text-green-700 mb-2 uppercase text-xs">Pontos Positivos</strong>
+                    <ul className="list-disc pl-4 space-y-1">
+                      {aiAnalysis.positives.map((p, i) => <li key={i}>{p}</li>)}
+                    </ul>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg shadow-sm border border-orange-100">
+                    <strong className="block text-orange-700 mb-2 uppercase text-xs">Alertas</strong>
+                    <ul className="list-disc pl-4 space-y-1">
+                      {aiAnalysis.alerts.map((a, i) => <li key={i}>{a}</li>)}
+                    </ul>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg shadow-sm border border-blue-100">
+                    <strong className="block text-blue-700 mb-2 uppercase text-xs">Dicas Estratégicas</strong>
+                    <ul className="list-disc pl-4 space-y-1">
+                      {aiAnalysis.tips.map((t, i) => <li key={i}>{t}</li>)}
+                    </ul>
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Financial Dashboard (Page 2+) */}
-          <div>
-             <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-slate-800">Relatório Financeiro & Operacional</h2>
-                <span className="text-slate-400 text-sm">{new Date().toLocaleDateString()}</span>
-             </div>
-
-             {/* KPIs */}
-             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="p-6 bg-slate-50 rounded-xl border border-slate-100">
-                  <p className="text-sm text-slate-500 mb-1">Receita Bruta</p>
-                  <p className="text-3xl font-bold text-slate-900">{fmt(summary.grossRevenue)}</p>
-                </div>
-                <div className="p-6 bg-red-50 rounded-xl border border-red-100">
-                  <p className="text-sm text-red-500 mb-1">Despesas Totais</p>
-                  <p className="text-3xl font-bold text-red-700">{fmt(summary.totalExpenses)}</p>
-                </div>
-                <div className="p-6 bg-green-50 rounded-xl border border-green-100">
-                  <p className="text-sm text-green-600 mb-1">Lucro Líquido</p>
-                  <p className="text-3xl font-bold text-green-700">{fmt(summary.netProfit)}</p>
-                </div>
-             </div>
-
-             {/* Charts & Mix */}
-             <div className="mb-8">
-                <h3 className="text-lg font-semibold mb-4 text-slate-700">Mix de Recebimento</h3>
-                <div className="h-4 bg-slate-100 rounded-full overflow-hidden flex">
-                  {summary.grossRevenue > 0 && (
-                    <>
-                      <div style={{ width: `${(summary.paymentMix.PIX / summary.grossRevenue) * 100}%` }} className="bg-green-500 h-full" title="PIX"></div>
-                      <div style={{ width: `${(summary.paymentMix.Cartao / summary.grossRevenue) * 100}%` }} className="bg-blue-500 h-full" title="Cartão"></div>
-                      <div style={{ width: `${(summary.paymentMix.Dinheiro / summary.grossRevenue) * 100}%` }} className="bg-amber-500 h-full" title="Dinheiro"></div>
-                    </>
-                  )}
-                </div>
-                <div className="flex gap-6 mt-2 text-sm">
-                  <div className="flex items-center gap-2"><div className="w-3 h-3 bg-green-500 rounded-full"></div> PIX: {fmt(summary.paymentMix.PIX)}</div>
-                  <div className="flex items-center gap-2"><div className="w-3 h-3 bg-blue-500 rounded-full"></div> Cartão: {fmt(summary.paymentMix.Cartao)}</div>
-                  <div className="flex items-center gap-2"><div className="w-3 h-3 bg-amber-500 rounded-full"></div> Dinheiro: {fmt(summary.paymentMix.Dinheiro)}</div>
-                </div>
-             </div>
-
-             {/* Table */}
-             <div className="overflow-x-auto">
-               <table className="w-full text-sm text-left">
-                 <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b">
-                   <tr>
-                     <th className="px-4 py-3">OS</th>
-                     <th className="px-4 py-3">Status</th>
-                     <th className="px-4 py-3 text-right text-green-600">Mão de Obra</th>
-                     <th className="px-4 py-3 text-right text-green-600">Peças (Venda)</th>
-                     <th className="px-4 py-3 text-right text-red-500">Peças (Custo)</th>
-                     <th className="px-4 py-3 text-right font-bold">Resultado</th>
-                     <th className="px-4 py-3 text-center no-print">Ações</th>
-                   </tr>
-                 </thead>
-                 <tbody className="divide-y divide-slate-100">
-                   {orders.map(order => {
-                     const orderRevenue = order.laborCost + order.partsSaleValue;
-                     const orderCost = order.partsCostValue + order.thirdPartyCost;
-                     const orderProfit = orderRevenue - orderCost;
-                     
-                     return (
-                       <tr key={order.id} className="hover:bg-slate-50">
-                         <td className="px-4 py-3 font-medium text-slate-900">{order.osNumber}</td>
-                         <td className="px-4 py-3">
-                           <span className={`px-2 py-1 rounded-full text-xs ${
-                             order.status === 'Concluída' ? 'bg-green-100 text-green-700' :
-                             order.status === 'Reparo' ? 'bg-amber-100 text-amber-700' :
-                             'bg-slate-100 text-slate-600'
-                           }`}>
-                             {order.status}
-                           </span>
-                         </td>
-                         <td className="px-4 py-3 text-right">{fmt(order.laborCost)}</td>
-                         <td className="px-4 py-3 text-right">{fmt(order.partsSaleValue)}</td>
-                         <td className="px-4 py-3 text-right text-red-400">{fmt(order.partsCostValue)}</td>
-                         <td className="px-4 py-3 text-right font-bold text-slate-700">{fmt(orderProfit)}</td>
-                         <td className="px-4 py-3 text-center no-print">
-                           <button onClick={() => removeOrder(order.id)} className="text-red-400 hover:text-red-600">
-                             <Trash2 size={16} />
-                           </button>
-                         </td>
-                       </tr>
-                     );
-                   })}
-                   {orders.length === 0 && (
-                     <tr>
-                       <td colSpan={7} className="text-center py-8 text-slate-400">
-                         Nenhuma ordem de serviço registrada nesta semana.
-                       </td>
-                     </tr>
-                   )}
-                 </tbody>
-               </table>
-             </div>
-          </div>
         </div>
 
-        {/* --- AI Trigger Button (No Print) --- */}
-        <div className="flex justify-center pb-12 no-print">
+        {/* AI Trigger Action (No Print) */}
+        <div className="flex justify-center no-print pb-12">
           <button 
             onClick={handleAIAnalysis}
             disabled={loadingAI || orders.length === 0}
-            className="group relative px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100"
+            className="flex items-center gap-3 px-8 py-4 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loadingAI ? (
-              <span className="flex items-center gap-2"><BrainCircuit className="animate-pulse" /> Analisando Dados...</span>
+              <>Calculando...</>
             ) : (
-              <span className="flex items-center gap-2"><BrainCircuit /> Gerar Análise com IA</span>
+              <>
+                <BrainCircuit size={24} /> 
+                <span className="text-lg font-medium">Gerar Análise Financeira com IA</span>
+              </>
             )}
           </button>
         </div>

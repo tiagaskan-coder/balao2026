@@ -15,6 +15,7 @@ export async function analyzeWeeklyClosing(data: {
   ordersCount: number;
   paymentMix: Record<string, number>;
   topExpenses: { name: string; value: number }[];
+  otherExpenses: { description: string; value: number; category: string }[];
 }): Promise<WeeklyAnalysis> {
   const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
   
@@ -34,7 +35,8 @@ export async function analyzeWeeklyClosing(data: {
     - Lucro Líquido: R$ ${data.netProfit.toFixed(2)}
     - Quantidade de OSs: ${data.ordersCount}
     - Mix de Pagamentos: ${JSON.stringify(data.paymentMix)}
-    - Principais Despesas: ${JSON.stringify(data.topExpenses)}
+    - Principais Custos Diretos (OS): ${JSON.stringify(data.topExpenses)}
+    - Despesas Operacionais/Avulsas: ${JSON.stringify(data.otherExpenses)}
 
     Forneça uma resposta estritamente em formato JSON com a seguinte estrutura:
     {
