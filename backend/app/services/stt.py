@@ -1,4 +1,5 @@
 import os
+import numpy as np
 
 try:
     from faster_whisper import WhisperModel
@@ -11,9 +12,8 @@ class STTService:
     def __init__(self):
         self.model = None
         if HAS_WHISPER:
+            model_size = os.getenv("WHISPER_MODEL", "distil-large-v3")
             try:
-                import numpy as np
-                model_size = os.getenv("WHISPER_MODEL", "distil-large-v3")
                 print(f"Loading Whisper Model: {model_size}...")
                 self.model = WhisperModel(model_size, device="auto", compute_type="float16")
                 print("Whisper Model loaded successfully.")
@@ -22,11 +22,10 @@ class STTService:
         else:
             print("STT Service running in MOCK mode.")
 
-    def transcribe(self, audio_data) -> str:
+    def transcribe(self, audio_data: np.ndarray) -> str:
         if not self.model:
             return "Simulação: Áudio recebido mas STT indisponível."
         
-        # Assume audio_data is correct format if model exists
         segments, info = self.model.transcribe(audio_data, beam_size=5, language="pt")
         text = "".join([segment.text for segment in segments])
         return text.strip()

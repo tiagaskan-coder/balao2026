@@ -30,75 +30,116 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [suggestedProducts, setSuggestedProducts] = useState<Product[]>([]);
   
-  // Use HTTP instead of WebSocket for Vercel Serverless compatibility
-  const sendMessage = async (text: string) => {
+  const wsRef = useRef<WebSocket | null>(null);
+
+  const connect = () => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) return;
+
+    // Conectar ao backend local (FastAPI)
+    // Em produção, isso deve ser parametrizável via ENV
+    const wsUrl = 'ws://localhost:8000/ws/chat';
+    
     try {
-        // Add user message immediately
-        setMessages(prev => [...prev, { role: 'user', content: text }]);
-        
-        // Call backend API
-        const response = await fetch('/api/py/chat', { // Use rewrites path
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: text })
-        });
-        
-        if (!response.ok) throw new Error('Falha na comunicação com o agente');
-        
-        const data = await response.json();
-        
-        // Add assistant response
-        setMessages(prev => [...prev, { role: 'assistant', content: data.text }]);
-        
-        if (data.products && data.products.length > 0) {
-            setSuggestedProducts(data.products);
+      const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
+
+      ws.onopen = () => {
+        console.log('Voice Agent conectado');
+        setIsConnected(true);
+      };
+
+      ws.onclose = () => {
+        console.log('Voice Agent desconectado');
+        setIsConnected(false);
+        setIsListening(false);
+      };
+
+      ws.onerror = (error) => {
+        console.error('Erro no WebSocket do Voice Agent:', error);
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          
+          if (data.type === 'text_response_chunk') {
+            setMessages(prev => {
+                const lastMsg = prev[prev.length - 1];
+                if (lastMsg && lastMsg.role === 'assistant') {
+                    // Append to last message
+                    return [
+                        ...prev.slice(0, -1),
+                        { ...lastMsg, content: lastMsg.content + data.content }
+                    ];
+                } else {
+                    // New message
+                    return [...prev, { role: 'assistant', content: data.content }];
+                }
+            });
+          }
+          
+          if (data.type === 'products') {
+            setSuggestedProducts(data.data);
+          }
+          
+          // Lógica futura para chunks de áudio (TTS)
+        } catch (e) {
+          console.error('Erro ao processar mensagem do WebSocket', e);
         }
-        
+      };
     } catch (e) {
-        console.error("Erro ao enviar mensagem para o agente:", e);
-        let errorMsg = "Desculpe, estou com dificuldades para conectar ao servidor no momento.";
-        
-        if (e instanceof Error) {
-            console.error("Detalhes do erro:", e.message);
-            // Se for erro de fetch/network
-            if (e.message.includes("Failed to fetch") || e.message.includes("NetworkError")) {
-                errorMsg += " (Erro de Conexão - Verifique se o backend está rodando)";
-            }
-        }
-        
-        setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
+      console.error('Falha ao conectar WebSocket', e);
     }
   };
 
-  const connect = () => {
-    // Mock connection for UI state, since HTTP is stateless
-    setIsConnected(true);
-    console.log('Voice Agent "conectado" (Modo HTTP Serverless)');
-  };
-
   const disconnect = () => {
+    if (wsRef.current) {
+      wsRef.current.close();
+      wsRef.current = null;
+    }
     setIsConnected(false);
   };
-  
-  // Mock listening logic for now (since we don't have real STT in browser yet)
+
   const startListening = () => {
-      setIsListening(true);
-      // Simulate listening delay then stop
-      setTimeout(() => {
-          stopListening();
-          // Mock input for testing
-          // sendMessage("Estou procurando um PC Gamer barato");
-      }, 3000);
+    // TODO: Implementar captura de áudio do microfone e streaming via WS
+    setIsListening(true);
+    
+    // Simulação temporária para testes sem microfone real
+    // Envia uma mensagem de texto de teste após 2 segundos
+    /*
+    setTimeout(() => {
+        if (wsRef.current?.readyState === WebSocket.OPEN) {
+            wsRef.current.send(JSON.stringify({
+                type: 'text_input',
+                content: 'Gostaria de ver notebooks gamer'
+            }));
+            setMessages(prev => [...prev, { role: 'user', content: 'Gostaria de ver notebooks gamer' }]);
+        }
+        setIsListening(false);
+    }, 2000);
+    */
   };
 
   const stopListening = () => {
-      setIsListening(false);
+    setIsListening(false);
+    // TODO: Parar stream de áudio
   };
 
   const toggleListening = () => {
-    if (isListening) stopListening();
-    else startListening();
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
   };
+
+  // Auto-connect on mount (optional, maybe wait for user interaction)
+  useEffect(() => {
+    // connect();
+    return () => {
+      disconnect();
+    };
+  }, []);
 
   return (
     <VoiceContext.Provider value={{
@@ -111,10 +152,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
       stopListening,
       toggleListening,
       connect,
-      disconnect,
-      // Expose sendMessage for manual testing via console or UI
-      // @ts-ignore
-      sendMessage
+      disconnect
     }}>
       {children}
     </VoiceContext.Provider>

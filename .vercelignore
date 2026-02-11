@@ -1,8 +1,0 @@
-venv
-.venv
-node_modules
-.git
-.next
-backend/venv
-__pycache__
-*.pyc

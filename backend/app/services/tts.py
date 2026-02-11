@@ -1,4 +1,5 @@
 import os
+import numpy as np
 # import soundfile as sf
 # from kokoro import KModel, KPipeline # Hypothetical import
 
