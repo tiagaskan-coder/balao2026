@@ -9,5 +9,10 @@ export const SITE_CONFIG = {
   social: {
     instagram: "https://instagram.com/balaodainformatica",
     facebook: "https://facebook.com/balaodainformatica",
+  },
+  pix: {
+    key: "34397947000108", // CNPJ
+    name: "Balao da informatica castelo",
+    city: "CAMPINAS"
   }
 };

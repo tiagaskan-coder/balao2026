@@ -23,11 +23,11 @@ function ThankYouContent() {
   useEffect(() => {
     if (total > 0) {
       const payload = generatePixPayload({
-        key: process.env.NEXT_PUBLIC_PIX_KEY || "",
-        name: process.env.NEXT_PUBLIC_PIX_NAME || "",
-        city: process.env.NEXT_PUBLIC_PIX_CITY || "",
+        key: SITE_CONFIG.pix.key,
+        name: SITE_CONFIG.pix.name,
+        city: SITE_CONFIG.pix.city,
         amount: total,
-        txid: "***"
+        txid: orderId ? orderId.slice(0, 20).replace(/[^a-zA-Z0-9]/g, '') : '***' // TXID deve ter até 25 caracteres
       });
       setPixPayload(payload);
     }
