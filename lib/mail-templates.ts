@@ -1,18 +1,38 @@
 
 export const emailStyles = `
   <style>
-    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f9f9f9; }
-    .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-    .header { background-color: #E60012; padding: 20px; text-align: center; }
-    .header h1 { color: #ffffff; margin: 0; font-size: 24px; }
-    .content { padding: 30px 20px; }
-    .footer { background-color: #f1f1f1; padding: 15px; text-align: center; font-size: 12px; color: #888; }
-    .button { display: inline-block; background-color: #E60012; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; margin-top: 20px; }
-    .product-list { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    .product-list th { text-align: left; border-bottom: 2px solid #eee; padding: 10px; color: #888; font-size: 12px; uppercase; }
-    .product-list td { border-bottom: 1px solid #eee; padding: 10px; vertical-align: middle; }
-    .total { text-align: right; font-size: 18px; font-weight: bold; margin-top: 20px; color: #E60012; }
-    .info-box { background-color: #f8f9fa; border-left: 4px solid #E60012; padding: 15px; margin: 20px 0; }
+    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f3f4f6; }
+    .container { max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; }
+    .header { background-color: #ffffff; padding: 30px 40px; text-align: center; border-bottom: 3px solid #E60012; }
+    .logo-text { color: #E60012; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin: 0; }
+    .content { padding: 40px; }
+    .footer { background-color: #f9fafb; padding: 30px; text-align: center; font-size: 13px; color: #6b7280; border-top: 1px solid #e5e7eb; }
+    .button { display: inline-block; background-color: #E60012; color: #ffffff !important; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; margin-top: 25px; box-shadow: 0 2px 4px rgba(230, 0, 18, 0.2); transition: background-color 0.2s; }
+    .button:hover { background-color: #cc0010; }
+    
+    .product-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 25px; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
+    .product-table th { background-color: #f9fafb; text-align: left; padding: 12px 16px; color: #4b5563; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e5e7eb; }
+    .product-table td { padding: 16px; vertical-align: middle; border-bottom: 1px solid #f3f4f6; }
+    .product-table tr:last-child td { border-bottom: none; }
+    
+    .product-img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid #e5e7eb; }
+    .product-name { font-weight: 600; color: #111827; display: block; margin-bottom: 4px; }
+    .product-meta { font-size: 13px; color: #6b7280; }
+    
+    .total-section { margin-top: 20px; text-align: right; padding-top: 20px; border-top: 2px dashed #e5e7eb; }
+    .total-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; color: #4b5563; }
+    .total-final { font-size: 20px; font-weight: 800; color: #E60012; margin-top: 12px; }
+    
+    .info-box { background-color: #fef2f2; border-left: 4px solid #E60012; padding: 20px; margin: 25px 0; border-radius: 0 8px 8px 0; }
+    .info-title { color: #991b1b; font-weight: 700; margin-bottom: 8px; display: block; font-size: 14px; text-transform: uppercase; }
+    
+    h1 { color: #111827; font-size: 24px; font-weight: 800; margin: 0 0 20px; }
+    h2 { color: #111827; font-size: 20px; font-weight: 700; margin: 30px 0 15px; }
+    p { margin: 0 0 16px; color: #374151; font-size: 16px; }
+    ul { margin: 0 0 20px; padding-left: 20px; color: #374151; }
+    li { margin-bottom: 8px; }
+    
+    .status-badge { display: inline-block; padding: 6px 12px; border-radius: 9999px; font-weight: 600; font-size: 14px; text-transform: uppercase; }
   </style>
 `;
 
@@ -34,15 +54,24 @@ export const getBaseTemplate = (content: string, title: string = "Balão Castelo
 <body>
   <div class="container">
     <div class="header">
-      <h1>Balão Castelo</h1>
+      <div class="logo-text">🎈 Balão da Informática</div>
     </div>
     <div class="content">
       ${content}
     </div>
     <div class="footer">
-      <p>&copy; ${new Date().getFullYear()} Balão Castelo. Todos os direitos reservados.</p>
-      <p>Este e-mail foi enviado automaticamente. Por favor, não responda.</p>
-      ${email ? `<p><a href="${getUnsubscribeLink(email)}" style="color: #888; text-decoration: underline;">Descadastrar-se</a></p>` : ''}
+      <p style="margin-bottom: 10px;">
+        <strong>Balão da Informática Castelo</strong><br>
+        Av. Anchieta, 789 - Campinas, SP<br>
+        (19) 98751-0267
+      </p>
+      <div style="margin-top: 20px; pt-10px; border-top: 1px solid #e5e7eb;">
+        <p style="font-size: 11px; color: #9ca3af;">
+          &copy; ${new Date().getFullYear()} Balão Castelo. Todos os direitos reservados.<br>
+          Este e-mail foi enviado automaticamente.
+        </p>
+        ${email ? `<p><a href="${getUnsubscribeLink(email)}" style="color: #9ca3af; text-decoration: underline;">Descadastrar-se</a></p>` : ''}
+      </div>
     </div>
   </div>
 </body>
@@ -51,74 +80,107 @@ export const getBaseTemplate = (content: string, title: string = "Balão Castelo
 
 export const getOrderStatusUpdateTemplate = (order: any, status: string) => {
   const statusMap: Record<string, string> = {
-    pending: "Pendente",
-    paid: "Pago / Em Separação",
-    shipped: "Enviado / Pronto para Retirada",
-    delivered: "Entregue",
-    canceled: "Cancelado"
+    pending: "⏳ Pendente",
+    paid: "✅ Pagamento Aprovado",
+    shipped: "🚚 Enviado",
+    delivered: "🎉 Entregue",
+    canceled: "❌ Cancelado"
   };
 
   const statusColor: Record<string, string> = {
-    pending: "#f59e0b",
-    paid: "#3b82f6",
-    shipped: "#8b5cf6",
-    delivered: "#10b981",
-    canceled: "#ef4444"
+    pending: "#fff7ed; color: #c2410c", // Orange
+    paid: "#eff6ff; color: #1d4ed8",    // Blue
+    shipped: "#f5f3ff; color: #6d28d9", // Purple
+    delivered: "#ecfdf5; color: #047857", // Green
+    canceled: "#fef2f2; color: #b91c1c"   // Red
   };
 
   const statusLabel = statusMap[status] || status;
-  const color = statusColor[status] || "#333";
+  const style = statusColor[status] || "background: #f3f4f6; color: #374151";
 
   const content = `
-    <h2>Atualização do Pedido #${order.id.slice(0, 8)}</h2>
-    <p>Olá, ${order.customer_name}!</p>
-    <p>O status do seu pedido foi atualizado.</p>
-    
-    <div class="info-box" style="border-left-color: ${color};">
-      <strong>Novo Status:</strong> <span style="color: ${color}; font-weight: bold; text-transform: uppercase;">${statusLabel}</span>
+    <div style="text-align: center; margin-bottom: 30px;">
+      <h1>Atualização de Pedido</h1>
+      <p style="font-size: 18px; color: #6b7280;">Pedido #${order.id.slice(0, 8)}</p>
+      <div style="margin-top: 20px;">
+        <span class="status-badge" style="background: ${style.split(';')[0]}; ${style.split(';')[1]}">
+          ${statusLabel}
+        </span>
+      </div>
     </div>
 
-    <p>Se você tiver alguma dúvida, entre em contato conosco.</p>
+    <p>Olá, <strong>${order.customer_name.split(' ')[0]}</strong>! 👋</p>
+    <p>Temos novidades sobre o seu pedido. O status foi atualizado para: <strong>${statusLabel}</strong>.</p>
+    
+    ${status === 'shipped' ? `
+    <div class="info-box" style="border-color: #6d28d9; background-color: #f5f3ff;">
+      <span class="info-title" style="color: #6d28d9;">🚚 Rastreamento</span>
+      <p style="margin:0;">Seu pedido está a caminho! Você receberá o código de rastreio em breve ou ele já está disponível na sua área de pedidos.</p>
+    </div>
+    ` : ''}
+
+    ${status === 'delivered' ? `
+    <div class="info-box" style="border-color: #047857; background-color: #ecfdf5;">
+      <span class="info-title" style="color: #047857;">🎉 Entrega Confirmada</span>
+      <p style="margin:0;">Esperamos que você ame seus novos produtos! Se precisar de ajuda, estamos aqui.</p>
+    </div>
+    ` : ''}
 
     <p style="text-align: center;">
-      <a href="https://balaocastelo.com.br/meus-pedidos" class="button">Ver Detalhes do Pedido</a>
+      <a href="https://balaocastelo.com.br/meus-pedidos" class="button">Acompanhar Pedido</a>
     </p>
   `;
 
-  return getBaseTemplate(content, `Atualização de Pedido #${order.id.slice(0, 8)}`, order.customer_email);
+  return getBaseTemplate(content, `Atualização do Pedido #${order.id.slice(0, 8)}`, order.customer_email);
 };
 
 export const getOrderConfirmationTemplate = (order: any, items: any[]) => {
   const itemsHtml = items.map(item => `
     <tr>
-      <td width="60">
-        ${item.product_image ? `<img src="${item.product_image}" width="50" style="border-radius: 4px;">` : ''}
+      <td width="70">
+        <img src="${item.product_image || 'https://via.placeholder.com/60'}" class="product-img" alt="${item.product_name}">
       </td>
       <td>
-        <strong>${item.product_name}</strong><br>
-        <span style="font-size: 12px; color: #888;">Qtd: ${item.quantity}</span>
+        <span class="product-name">${item.product_name}</span>
+        <span class="product-meta">Qtd: ${item.quantity}</span>
       </td>
-      <td style="text-align: right;">
+      <td style="text-align: right; font-weight: 600; white-space: nowrap;">
         R$ ${Number(item.price).toFixed(2).replace('.', ',')}
       </td>
     </tr>
   `).join('');
 
   const discountHtml = order.discount_value > 0 
-    ? `<p style="text-align: right; color: #10b981;">Desconto: - R$ ${Number(order.discount_value).toFixed(2).replace('.', ',')}</p>`
+    ? `
+    <div class="total-row" style="color: #059669;">
+      <span>Desconto</span>
+      <span>- R$ ${Number(order.discount_value).toFixed(2).replace('.', ',')}</span>
+    </div>`
     : '';
 
   const content = `
-    <h2>Pedido Confirmado! #${order.id.slice(0, 8)}</h2>
-    <p>Olá, ${order.customer_name}!</p>
-    <p>Obrigado por comprar na Balão Castelo. Recebemos seu pedido e ele já está sendo processado.</p>
+    <div style="text-align: center; margin-bottom: 30px;">
+      <div style="font-size: 48px; margin-bottom: 10px;">🎉</div>
+      <h1>Pedido Confirmado!</h1>
+      <p style="color: #6b7280;">Pedido #${order.id.slice(0, 8)}</p>
+    </div>
+
+    <p>Olá, <strong>${order.customer_name.split(' ')[0]}</strong>!</p>
+    <p>Obrigado pela sua compra! 🎈 Recebemos seu pedido e ele já está sendo preparado com muito carinho.</p>
     
-    <h3>Resumo do Pedido</h3>
-    <table class="product-list">
+    <div class="info-box">
+      <span class="info-title">📍 Endereço de Entrega</span>
+      ${order.address.street}, ${order.address.number} ${order.address.complement ? `- ${order.address.complement}` : ''}<br>
+      ${order.address.city}/${order.address.state}<br>
+      CEP: ${order.address.cep}
+    </div>
+
+    <h2>📦 Resumo do Pedido</h2>
+    <table class="product-table">
       <thead>
         <tr>
           <th colspan="2">Produto</th>
-          <th style="text-align: right;">Preço</th>
+          <th style="text-align: right;">Valor</th>
         </tr>
       </thead>
       <tbody>
@@ -126,18 +188,16 @@ export const getOrderConfirmationTemplate = (order: any, items: any[]) => {
       </tbody>
     </table>
 
-    ${discountHtml}
-    <div class="total">
-      Total: R$ ${Number(order.total).toFixed(2).replace('.', ',')}
+    <div class="total-section">
+      ${discountHtml}
+      <div class="total-final">
+        Total: R$ ${Number(order.total).toFixed(2).replace('.', ',')}
+      </div>
     </div>
 
-    <div class="info-box">
-      <strong>Endereço de Entrega:</strong><br>
-      ${order.address.street}, ${order.address.number} ${order.address.complement ? `- ${order.address.complement}` : ''}<br>
-      ${order.address.cep} - ${order.address.city}/${order.address.state}
-    </div>
-
-    <p>Você receberá novos e-mails assim que o status do seu pedido mudar.</p>
+    <p style="text-align: center; margin-top: 30px;">
+      <a href="https://balaocastelo.com.br/thank-you?orderId=${order.id}&total=${order.total}&name=${encodeURIComponent(order.customer_name)}" class="button">Ver Detalhes e Pagamento</a>
+    </p>
   `;
 
   return getBaseTemplate(content, `Pedido Confirmado #${order.id.slice(0, 8)}`, order.customer_email);
@@ -145,39 +205,57 @@ export const getOrderConfirmationTemplate = (order: any, items: any[]) => {
 
 export const getWelcomeTemplate = (name: string, email: string) => {
   const content = `
-    <h2>Bem-vindo(a) à Balão Castelo!</h2>
-    <p>Olá, ${name}!</p>
-    <p>Estamos muito felizes em ter você conosco. Sua conta foi criada com sucesso.</p>
-    <p>Agora você pode:</p>
-    <ul>
-      <li>Fazer pedidos de forma mais rápida</li>
-      <li>Acompanhar seu histórico de compras</li>
-      <li>Receber ofertas exclusivas</li>
-    </ul>
-    <p>Aproveite nossas ofertas!</p>
+    <div style="text-align: center; margin-bottom: 30px;">
+      <div style="font-size: 48px; margin-bottom: 10px;">🎈</div>
+      <h1>Bem-vindo(a)!</h1>
+    </div>
+
+    <p>Olá, <strong>${name.split(' ')[0]}</strong>!</p>
+    <p>Estamos muito felizes em ter você na família <strong>Balão da Informática Castelo</strong>! 🚀</p>
+    
+    <p>Agora você tem acesso às melhores ofertas de hardware e informática de Campinas e região.</p>
+
+    <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 25px 0;">
+      <h3 style="margin-top: 0; color: #E60012;">O que você pode fazer agora?</h3>
+      <ul style="margin-bottom: 0; padding-left: 20px;">
+        <li>🛒 Fazer pedidos com checkout agilizado</li>
+        <li>📦 Acompanhar o status das suas entregas</li>
+        <li>⚡ Receber promoções exclusivas em primeira mão</li>
+      </ul>
+    </div>
+
+    <p>Se precisar de qualquer ajuda, nossa equipe está pronta para te atender no WhatsApp ou aqui na loja física.</p>
+
     <p style="text-align: center;">
-      <a href="https://balaocastelo.com.br" class="button">Ir para a Loja</a>
+      <a href="https://balaocastelo.com.br" class="button">Começar a Comprar</a>
     </p>
   `;
-  return getBaseTemplate(content, "Bem-vindo à Balão Castelo", email);
+  return getBaseTemplate(content, "Bem-vindo à Balão Castelo! 🎈", email);
 };
 
 export const getAdminNotificationTemplate = (title: string, data: any) => {
   const dataHtml = Object.entries(data)
     .map(([key, value]) => `
-      <div style="margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;">
-        <strong style="color: #555; text-transform: uppercase; font-size: 10px;">${key}</strong><br>
-        <span style="font-family: monospace;">${typeof value === 'object' ? JSON.stringify(value) : value}</span>
+      <div style="margin-bottom: 12px; border-bottom: 1px solid #f3f4f6; padding-bottom: 8px;">
+        <strong style="color: #6b7280; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; display: block; margin-bottom: 4px;">${key}</strong>
+        <span style="font-family: monospace; color: #111827; background: #f9fafb; padding: 2px 6px; border-radius: 4px;">
+          ${typeof value === 'object' ? JSON.stringify(value) : value}
+        </span>
       </div>
     `).join('');
 
   const content = `
-    <h2 style="color: #E60012;">${title}</h2>
+    <div style="border-bottom: 2px solid #E60012; padding-bottom: 15px; margin-bottom: 20px;">
+      <h2 style="color: #E60012; margin: 0;">🛡️ ${title}</h2>
+    </div>
+    
     <p>Uma nova atividade requer sua atenção no sistema.</p>
-    <div style="background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 4px;">
+    
+    <div style="background: #ffffff; border: 1px solid #e5e7eb; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
       ${dataHtml}
     </div>
-    <p style="font-size: 12px; color: #888; margin-top: 20px;">
+    
+    <p style="font-size: 12px; color: #9ca3af; margin-top: 20px; text-align: right;">
       Data: ${new Date().toLocaleString('pt-BR')}
     </p>
   `;

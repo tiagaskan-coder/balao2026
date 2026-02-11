@@ -41,30 +41,7 @@ interface SendEmailParams {
 export async function sendEmail({ to, subject, html, eventType = 'general', campaignId, fromName = "Balão Castelo" }: SendEmailParams) {
     console.log(`[Mail] Iniciando envio para ${to}: ${subject}`);
 
-    // 1. Tentar via SMTP (Preferencial, se configurado)
-    const transporter = createTransporter();
-    if (transporter) {
-        try {
-            console.log('[Mail] Tentando envio via SMTP...');
-            const info = await transporter.sendMail({
-                from: `"${fromName}" <${process.env.SMTP_USER}>`,
-                to,
-                subject,
-                html,
-            });
-
-            console.log(`[Mail] Sucesso via SMTP ID: ${info.messageId}`);
-            await logEmail(eventType, to, 'success', null, { provider: 'smtp', messageId: info.messageId, campaignId });
-            return { success: true, messageId: info.messageId, provider: 'smtp' };
-
-        } catch (error: any) {
-            console.error('[Mail] Erro SMTP:', error);
-            console.warn('[Mail] Falha no SMTP, tentando fallback para Resend...');
-            // Continua para o Resend...
-        }
-    }
-
-    // 2. Tentar via RESEND (Fallback)
+    // 1. Tentar via RESEND (Prioridade)
     if (resend) {
         try {
             console.log('[Mail] Tentando envio via Resend...');
@@ -84,7 +61,29 @@ export async function sendEmail({ to, subject, html, eventType = 'general', camp
             await logEmail(eventType, to, 'success', null, { provider: 'resend', messageId: data?.id, campaignId });
             return { success: true, messageId: data?.id, provider: 'resend' };
         } catch (error: any) {
-            console.warn('[Mail] Falha no Resend também.', error.message);
+            console.warn('[Mail] Falha no Resend, tentando fallback para SMTP...', error.message);
+        }
+    }
+
+    // 2. Tentar via SMTP (Fallback)
+    const transporter = createTransporter();
+    if (transporter) {
+        try {
+            console.log('[Mail] Tentando envio via SMTP...');
+            const info = await transporter.sendMail({
+                from: `"${fromName}" <${process.env.SMTP_USER}>`,
+                to,
+                subject,
+                html,
+            });
+
+            console.log(`[Mail] Sucesso via SMTP ID: ${info.messageId}`);
+            await logEmail(eventType, to, 'success', null, { provider: 'smtp', messageId: info.messageId, campaignId });
+            return { success: true, messageId: info.messageId, provider: 'smtp' };
+
+        } catch (error: any) {
+            console.error('[Mail] Erro SMTP:', error);
+            console.warn('[Mail] Falha no SMTP também.');
         }
     }
 
