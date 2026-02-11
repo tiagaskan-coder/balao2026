@@ -7,7 +7,6 @@ import { AuthProvider } from "@/context/AuthContext";
 import { SidebarProvider } from "@/context/SidebarContext";
 import Footer from "@/components/Footer";
 import Sidebar from "@/components/Sidebar";
-import VoiceWidget from "@/components/VoiceWidget";
 import ProductPreview from "@/components/ProductPreview";
 import { getCategories } from "@/lib/db";
 
@@ -109,7 +108,6 @@ export default async function RootLayout({
                   <Sidebar categories={categories} mobileOnly />
                   {children}
                   <ProductPreview />
-                  <VoiceWidget />
                   <Footer />
                 </SidebarProvider>
               </Suspense>

@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Search, ShoppingCart, User, Menu, Phone } from "lucide-react";
+import { Search, ShoppingCart, User, Menu } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
@@ -106,25 +106,6 @@ export default function Header() {
           aria-label="Abrir menu"
         >
             <Menu size={32} strokeWidth={2.5} />
-        </button>
-
-        {/* Voice Agent Button (Telephone Style) */}
-        <button 
-          onClick={() => {
-            // Trigger global event for the widget
-            const event = new CustomEvent('open-voice-widget');
-            window.dispatchEvent(event);
-          }}
-          className="flex items-center justify-center p-2 rounded-full text-[#E60012] hover:bg-red-50 transition-colors mr-2"
-          title="Falar com Vendedor Virtual"
-        >
-            <div className="relative">
-                <Phone size={24} strokeWidth={2.5} className="animate-pulse-slow" />
-                <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-[#E60012]"></span>
-                </span>
-            </div>
         </button>
 
         {/* Logo Section */}
