@@ -1,4 +1,5 @@
 import Header from "@/components/Header";
+import Sidebar from "@/components/Sidebar";
 import ProductList from "@/components/ProductList";
 import FilterSyncer from "@/components/FilterSyncer";
 import { getProducts, getCategories } from "@/lib/db";
@@ -75,6 +76,9 @@ export default async function CategoriaPage({
       <FilterSyncer tags={availableTags} />
       <Header />
       <div className="flex container mx-auto flex-1 py-6 gap-6 px-4 lg:px-0">
+        <div className="hidden lg:block">
+          <Sidebar categories={categories} availableTags={availableTags} selectedTags={selectedTags} />
+        </div>
         <main className="flex-1 w-full min-w-0">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-xl font-bold text-gray-800">

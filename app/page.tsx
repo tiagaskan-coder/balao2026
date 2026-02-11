@@ -1,4 +1,5 @@
 import Header from "@/components/Header";
+import Sidebar from "@/components/Sidebar";
 import ProductList from "@/components/ProductList";
 import Carousel from "@/components/Carousel";
 import ProductCarousel from "@/components/ProductCarousel";
@@ -122,6 +123,9 @@ export default async function Home(props: {
       )}
 
       <div className="flex container mx-auto flex-1 py-6 gap-6 px-4 lg:px-0">
+        <div className="hidden lg:block">
+            <Sidebar categories={categories} />
+        </div>
         <main className="flex-1 w-full min-w-0">
             {/* Dynamic Home Blocks */}
             {!search && !category && (
