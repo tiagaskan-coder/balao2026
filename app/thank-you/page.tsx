@@ -18,20 +18,37 @@ function ThankYouContent() {
   
   const totalParam = searchParams.get("total");
   const orderId = searchParams.get("orderId");
+  const customerName = searchParams.get("name");
   const total = totalParam ? parseFloat(totalParam) : 0;
 
   useEffect(() => {
     if (total > 0) {
+      // Format TxID: PED + OrderID (first 8) + Name (First Name)
+      // Max 25 chars, alphanumeric only
+      let txid = '***';
+      if (orderId) {
+        const cleanOrder = orderId.slice(0, 8).replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+        let cleanName = '';
+        if (customerName) {
+           // Get first name and remove non-alphanumeric
+           const firstName = customerName.split(' ')[0];
+           cleanName = firstName.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+        }
+        // Build TxID: PED + ORDER + NAME (Fit into 25 chars)
+        // PED (3) + ORDER (8) = 11 chars. Left for name: 14 chars.
+        txid = `PED${cleanOrder}${cleanName}`.slice(0, 25);
+      }
+
       const payload = generatePixPayload({
         key: SITE_CONFIG.pix.key,
         name: SITE_CONFIG.pix.name,
         city: SITE_CONFIG.pix.city,
         amount: total,
-        txid: orderId ? orderId.slice(0, 20).replace(/[^a-zA-Z0-9]/g, '') : '***' // TXID deve ter até 25 caracteres
+        txid: txid
       });
       setPixPayload(payload);
     }
-  }, [total, orderId]);
+  }, [total, orderId, customerName]);
 
   useEffect(() => {
     if (pixPayload && canvasRef.current && (window as any).QRious) {

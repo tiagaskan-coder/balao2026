@@ -155,8 +155,8 @@ export default function CartPage() {
 
         if (response.ok && result.success) {
             clearCart();
-            // Pass orderId and total (with discount applied) for Pix generation
-            router.push(`/thank-you?orderId=${result.orderId}&total=${finalTotal}`);
+            // Pass orderId, total and customer name for Pix generation
+            router.push(`/thank-you?orderId=${result.orderId}&total=${finalTotal}&name=${encodeURIComponent(formData.name)}`);
         } else {
             console.error("Order failed details:", result);
             alert(`Ocorreu um erro ao processar seu pedido: ${result.error || "Erro desconhecido"}`);
