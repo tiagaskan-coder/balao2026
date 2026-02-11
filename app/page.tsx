@@ -4,6 +4,7 @@ import ProductList from "@/components/ProductList";
 import Carousel from "@/components/Carousel";
 import ProductCarousel from "@/components/ProductCarousel";
 import SeoContent from "@/components/SeoContent";
+import InstagramFeed from "@/components/InstagramFeed";
 import { getProducts, getCarouselImages, getCategories, getHomeBlocks } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { Product } from "@/lib/utils";
@@ -143,6 +144,8 @@ export default async function Home(props: {
                         />
                     );
                 })}
+                
+                <InstagramFeed />
                 </>
             )}
 
