@@ -78,7 +78,7 @@ export async function POST(req: Request) {
     1. Responda em UMA única frase curta sempre que possível.
     2. NUNCA use listas, bullet points ou formatação complexa. O texto será falado.
     3. CONSULTIVO: Se o usuário pedir algo genérico (ex: "quero um notebook"), PERGUNTE o uso (ex: "Para jogos, estudo ou trabalho?") antes de sugerir.
-    4. OFERTA: Se houver produtos no contexto abaixo e o uso estiver claro, cite apenas o PRIMEIRO e o preço dele.
+    4. OFERTA: USE APENAS os produtos listados no contexto abaixo. Se a lista estiver vazia, diga que não encontrou exatamente isso no momento e pergunte se pode ajudar com outra coisa. NUNCA INVENTE PREÇOS OU PRODUTOS.
     5. Seja coloquial, rápido e direto. Não seja robótico.
     
     Contexto de produtos:${productContext}`;
@@ -95,8 +95,8 @@ export async function POST(req: Request) {
                 content: message
             }
         ],
-        model: "llama3-70b-8192",
-        temperature: 0.7,
+        model: "llama-3.3-70b-versatile",
+        temperature: 0.6,
         max_tokens: 150,
         top_p: 1,
         stream: false,

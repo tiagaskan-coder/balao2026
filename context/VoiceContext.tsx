@@ -133,14 +133,14 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Inicializar SpeechRecognition
+  // Inicializar SpeechRecognition (Apenas uma vez)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (SpeechRecognition) {
         const recognition = new SpeechRecognition();
-        recognition.continuous = true; // Alterado para true para evitar cortes e manter fluxo de chamada
-        recognition.interimResults = true; // Necessário para detecção de silêncio customizada
+        recognition.continuous = true; 
+        recognition.interimResults = true; 
         recognition.lang = 'pt-BR';
 
         let silenceTimer: NodeJS.Timeout;
@@ -156,15 +156,16 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
         };
 
         recognition.onend = () => {
-          // Reinício Agressivo para manter conexão "infinita"
-          if (isConnected) {
-              console.log("Microfone desconectou (timeout/silêncio). Reiniciando imediatamente...");
+          // Se ainda deveria estar conectado, reinicia imediatamente
+          // Usamos uma ref para ler o valor mais atual de isConnected sem depender do closure
+          if (isConnectedRef.current) {
+              console.log("Microfone desconectou (timeout/silêncio). Reiniciando...");
               try {
                   recognition.start();
               } catch(e) { 
-                  // Se falhar, tentar novamente em breve
+                  // Se falhar (ex: já rodando), tentar novamente em breve
                   setTimeout(() => {
-                      if(isConnected) try { recognition.start() } catch(ee){}
+                      if(isConnectedRef.current) try { recognition.start() } catch(ee){}
                   }, 100);
               }
           } else {
@@ -174,11 +175,8 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
         };
 
         recognition.onresult = (event: any) => {
-          // Software Echo Cancellation:
-          // Se o robô estiver falando (isSpeaking ou speechSynthesis.speaking), ignorar qualquer entrada.
-          // Isso permite que o microfone continue aberto sem processar o próprio áudio do robô.
+          // Software Echo Cancellation
           if (window.speechSynthesis.speaking || isSpeaking) {
-              console.log("Ignorando entrada de áudio durante a fala do assistente (Echo Cancellation)");
               return;
           }
 
@@ -193,8 +191,6 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
             }
           }
 
-          // Lógica de Silêncio: Se houver resultado (interino ou final), resetar timer
-          // Se passar 1.5s sem novos resultados e houver texto acumulado, enviar.
           clearTimeout(silenceTimer);
           
           if (finalTranscript || interimTranscript) {
@@ -202,38 +198,45 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
                   if (finalTranscript) {
                       sendMessage(finalTranscript);
                   } else if (interimTranscript.trim().length > 2) {
-                      // Se só tiver interino mas parou de falar por 1.5s, assume que terminou
                       sendMessage(interimTranscript);
-                      // Forçar reinício para limpar buffer
-                      recognition.stop(); 
+                      recognition.stop(); // Força onend -> restart
                   }
-              }, 1500); // 1.5 segundos de silêncio para considerar "fim da fala"
+              }, 1500); 
           }
         };
 
         recognition.onerror = (event: any) => {
           console.error("Erro no reconhecimento de voz:", event.error);
           if (event.error === 'not-allowed') {
-            alert("Permissão de microfone negada. Verifique suas configurações.");
-            setIsConnected(false); // Encerrar chamada se não houver permissão
+            alert("Permissão de microfone negada.");
+            disconnect();
           }
+          // Ignorar 'no-speech' e 'aborted', pois o onend vai reiniciar
         };
 
         recognitionRef.current = recognition;
-
-        // Iniciar automaticamente se estiver conectado
-        if (isConnected) {
-            try {
-                recognition.start();
-            } catch (e) {
-                console.warn("Tentativa de início automático falhou:", e);
-            }
-        }
-      } else {
-        console.warn("Web Speech API não suportada neste navegador.");
       }
     }
-  }, [isConnected]); // Dependência isConnected para reiniciar corretamente se necessário
+    
+    return () => {
+        if(recognitionRef.current) recognitionRef.current.stop();
+    };
+  }, []); // Executa apenas no mount
+
+  // Ref para acesso síncrono ao estado de conexão dentro dos callbacks
+  const isConnectedRef = useRef(isConnected);
+  useEffect(() => {
+      isConnectedRef.current = isConnected;
+      
+      // Gerenciar Start/Stop baseado no estado
+      if (isConnected) {
+          if (recognitionRef.current) {
+              try { recognitionRef.current.start(); } catch(e) {}
+          }
+      } else {
+          if (recognitionRef.current) recognitionRef.current.stop();
+      }
+  }, [isConnected]);
 
   // Monitorar fim da fala do assistente para timeout de resposta (Apenas na saudação inicial)
   useEffect(() => {
