@@ -170,6 +170,11 @@ export default function WeeklyClosing() {
     const html2pdf = (await import("html2pdf.js")).default;
     
     const element = document.getElementById("report-content");
+    if (!element) {
+      showToast("Elemento do relatório não encontrado.");
+      return;
+    }
+
     const opt = {
       margin: 10,
       filename: `fechamento-${new Date().toISOString().split('T')[0]}.pdf`,
