@@ -22,6 +22,8 @@ type VoiceContextType = {
   isConnected: boolean;
   messages: Message[];
   suggestedProducts: Product[];
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
   startListening: () => void;
   stopListening: () => void;
   toggleListening: () => void;
@@ -38,6 +40,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
   const [isConnected, setIsConnected] = useState(true);
   const [messages, setMessages] = useState<Message[]>([]);
   const [suggestedProducts, setSuggestedProducts] = useState<Product[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
   
   // Referência para o reconhecimento de fala
   const recognitionRef = useRef<any>(null);
@@ -382,6 +385,8 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
       isConnected,
       messages,
       suggestedProducts,
+      isOpen,
+      setIsOpen,
       startListening,
       stopListening,
       toggleListening,
