@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { 
   Plus, Trash2, TrendingUp, TrendingDown, DollarSign, 
-  Share2, Printer, Minus, Calendar, Trash, ChevronDown, ChevronUp
+  Share2, Printer, Minus, Calendar, Trash, ChevronDown, ChevronUp, Lock
 } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 
@@ -50,6 +50,10 @@ interface FinancialSummary {
 export default function WeeklyClosing() {
   const { showToast } = useToast();
   
+  // Auth State
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+
   // State
   const [orders, setOrders] = useState<ServiceOrder[]>([]);
   const [expenses, setExpenses] = useState<OperationalExpense[]>([]);
@@ -83,6 +87,11 @@ export default function WeeklyClosing() {
   // Load from LocalStorage / URL on Mount
   useEffect(() => {
     if (typeof window !== "undefined") {
+      // Check Auth
+      if (sessionStorage.getItem("fechamento_auth") === "true") {
+        setIsAuthenticated(true);
+      }
+
       const params = new URLSearchParams(window.location.search);
       const data = params.get("data");
       if (data) {
@@ -358,6 +367,58 @@ export default function WeeklyClosing() {
   };
 
   const fmt = (val: number) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+  // Auth Handler
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const year = today.getFullYear();
+    const expected = `56676009${day}${month}${year}`;
+
+    if (passwordInput === expected) {
+      setIsAuthenticated(true);
+      sessionStorage.setItem("fechamento_auth", "true");
+      showToast("Acesso permitido!");
+    } else {
+      showToast("Senha incorreta.");
+    }
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-xl shadow-lg border border-slate-200 max-w-md w-full text-center">
+          <div className="bg-blue-100 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
+            <Lock className="text-blue-600" size={32} />
+          </div>
+          <h1 className="text-2xl font-bold text-slate-800 mb-2">Acesso Restrito</h1>
+          <p className="text-slate-500 mb-6">Digite a senha do dia para acessar o sistema.</p>
+          
+          <form onSubmit={handleLogin} className="space-y-4">
+            <input 
+              type="password" 
+              placeholder="Senha de Acesso"
+              value={passwordInput}
+              onChange={e => setPasswordInput(e.target.value)}
+              className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              autoFocus
+            />
+            <button 
+              type="submit" 
+              className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg"
+            >
+              Entrar
+            </button>
+          </form>
+          <div className="mt-6 text-xs text-slate-400">
+            Assistência Balão da Informática &copy; 2026
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 p-4 md:p-8 font-sans">
