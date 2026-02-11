@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { 
   Plus, Trash2, TrendingUp, TrendingDown, DollarSign, 
-  Share2, Printer, Minus, Calendar, Trash
+  Share2, Printer, Minus, Calendar, Trash, ChevronDown, ChevronUp
 } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 
@@ -53,6 +53,7 @@ export default function WeeklyClosing() {
   // State
   const [orders, setOrders] = useState<ServiceOrder[]>([]);
   const [expenses, setExpenses] = useState<OperationalExpense[]>([]);
+  const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
 
   // Date Filter State
   const [filterStart, setFilterStart] = useState("");
@@ -224,6 +225,41 @@ export default function WeeklyClosing() {
     return months.sort((a, b) => b.start.localeCompare(a.start));
   }, [orders, expenses]);
 
+  // Daily Summary Calculation
+  const dailySummary = useMemo(() => {
+    const summary = new Map<string, {
+      date: string;
+      count: number;
+      revenue: number;
+      cost: number;
+      orders: ServiceOrder[];
+    }>();
+
+    filteredOrders.forEach(order => {
+      const date = order.date;
+      if (!summary.has(date)) {
+        summary.set(date, {
+          date,
+          count: 0,
+          revenue: 0,
+          cost: 0,
+          orders: []
+        });
+      }
+      
+      const dayData = summary.get(date)!;
+      const rev = (order.laborIncome || 0) + (order.partsIncome || 0);
+      const cost = (order.laborExpense || 0) + (order.partsExpense || 0);
+      
+      dayData.count++;
+      dayData.revenue += rev;
+      dayData.cost += cost;
+      dayData.orders.push(order);
+    });
+
+    return Array.from(summary.values()).sort((a, b) => b.date.localeCompare(a.date));
+  }, [filteredOrders]);
+
 
   // Handlers - Orders
   const handleAddOrder = () => {
@@ -286,6 +322,16 @@ export default function WeeklyClosing() {
   const removeExpense = (id: string) => {
     setExpenses(expenses.filter(e => e.id !== id));
     showToast("Despesa removida.");
+  };
+
+  const toggleDay = (date: string) => {
+    const newSet = new Set(expandedDays);
+    if (newSet.has(date)) {
+      newSet.delete(date);
+    } else {
+      newSet.add(date);
+    }
+    setExpandedDays(newSet);
   };
 
   // Actions
@@ -608,44 +654,96 @@ export default function WeeklyClosing() {
           {/* Tables Section */}
           <div className="grid md:grid-cols-2 gap-8">
             
-            {/* Orders Table */}
-            <div>
-              <h3 className="text-sm font-bold uppercase text-slate-500 mb-3 border-b pb-2">Detalhamento de OS</h3>
+            {/* --- ORDERS LIST (Daily Summary) --- */}
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden print:shadow-none print:border-none">
+              <div className="p-4 border-b border-slate-100 flex justify-between items-center print:py-2">
+                <h2 className="text-lg font-semibold text-slate-800 print:text-base">Resumo Diário de Serviços</h2>
+                <div className="text-sm text-slate-500 print:hidden">
+                  {filteredOrders.length} OS encontradas
+                </div>
+              </div>
+              
               <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left">
-                  <thead className="text-xs text-slate-400 uppercase bg-slate-50">
+                <table className="w-full text-left text-sm">
+                  <thead className="text-xs text-slate-400 uppercase bg-slate-50 print:bg-transparent print:text-slate-600 print:border-b">
                     <tr>
-                      <th className="px-2 py-2">Data</th>
-                      <th className="px-2 py-2">OS</th>
-                      <th className="px-2 py-2">Rec.</th>
-                      <th className="px-2 py-2">Custo</th>
-                      <th className="px-2 py-2">Lucro</th>
-                      <th className="px-2 py-2 text-right no-print">Ação</th>
+                      <th className="px-4 py-3 w-8 print:hidden"></th>
+                      <th className="px-4 py-3">Data</th>
+                      <th className="px-4 py-3 text-center">Qtd. OS</th>
+                      <th className="px-4 py-3 text-right text-green-600">Receita</th>
+                      <th className="px-4 py-3 text-right text-red-500">Custo</th>
+                      <th className="px-4 py-3 text-right font-bold">Lucro</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {filteredOrders.map(order => {
-                      const rev = (order.laborIncome || 0) + (order.partsIncome || 0);
-                      const cost = (order.laborExpense || 0) + (order.partsExpense || 0);
+                  <tbody className="divide-y divide-slate-100 print:divide-slate-200">
+                    {dailySummary.map(day => {
+                      const isExpanded = expandedDays.has(day.date);
                       return (
-                        <tr key={order.id} className="hover:bg-slate-50">
-                          <td className="px-2 py-2 text-slate-500 text-xs">
-                            {order.date ? new Date(order.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'}) : '-'}
-                          </td>
-                          <td className="px-2 py-2 font-medium">{order.osNumber}</td>
-                          <td className="px-2 py-2 text-green-600">{fmt(rev)}</td>
-                          <td className="px-2 py-2 text-red-500">{fmt(cost)}</td>
-                          <td className="px-2 py-2 font-bold">{fmt(rev - cost)}</td>
-                          <td className="px-2 py-2 text-right no-print">
-                            <button onClick={() => removeOrder(order.id)} className="text-slate-400 hover:text-red-500">
-                              <Trash2 size={14} />
-                            </button>
-                          </td>
-                        </tr>
+                        <React.Fragment key={day.date}>
+                          {/* Day Summary Row */}
+                          <tr 
+                            className="hover:bg-slate-50 cursor-pointer print:font-bold print:bg-slate-100"
+                            onClick={() => toggleDay(day.date)}
+                          >
+                            <td className="px-4 py-3 text-slate-400 print:hidden">
+                              {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                            </td>
+                            <td className="px-4 py-3 font-medium text-slate-700">
+                              {new Date(day.date).toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' })}
+                            </td>
+                            <td className="px-4 py-3 text-center font-medium">{day.count}</td>
+                            <td className="px-4 py-3 text-right text-green-600 font-medium">{fmt(day.revenue)}</td>
+                            <td className="px-4 py-3 text-right text-red-500 font-medium">{fmt(day.cost)}</td>
+                            <td className="px-4 py-3 text-right font-bold text-slate-800">{fmt(day.revenue - day.cost)}</td>
+                          </tr>
+                          
+                          {/* Expanded Details Row */}
+                          <tr className={`${isExpanded ? 'table-row' : 'hidden'} print:table-row bg-slate-50 print:bg-white`}>
+                            <td colSpan={6} className="p-0">
+                              <div className="px-4 py-2 print:px-0">
+                                <table className="w-full text-xs border-l-2 border-blue-500 print:border-none mb-2">
+                                  <thead className="text-slate-400 bg-slate-100 print:hidden">
+                                    <tr>
+                                      <th className="px-3 py-1 text-left">OS</th>
+                                      <th className="px-3 py-1 text-right">Rec.</th>
+                                      <th className="px-3 py-1 text-right">Custo</th>
+                                      <th className="px-3 py-1 text-right">Lucro</th>
+                                      <th className="px-3 py-1 text-right print:hidden">Ação</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-slate-200">
+                                    {day.orders.map(order => {
+                                      const rev = (order.laborIncome || 0) + (order.partsIncome || 0);
+                                      const cost = (order.laborExpense || 0) + (order.partsExpense || 0);
+                                      return (
+                                        <tr key={order.id} className="hover:bg-slate-200 print:hover:bg-transparent">
+                                          <td className="px-3 py-1 font-medium text-slate-700 print:py-0.5">
+                                            OS: {order.osNumber} <span className="text-slate-400 font-normal ml-2">({order.status})</span>
+                                          </td>
+                                          <td className="px-3 py-1 text-right text-green-600 print:py-0.5">{fmt(rev)}</td>
+                                          <td className="px-3 py-1 text-right text-red-500 print:py-0.5">{fmt(cost)}</td>
+                                          <td className="px-3 py-1 text-right font-bold text-slate-700 print:py-0.5">{fmt(rev - cost)}</td>
+                                          <td className="px-3 py-1 text-right print:hidden">
+                                            <button 
+                                              onClick={(e) => { e.stopPropagation(); removeOrder(order.id); }} 
+                                              className="text-slate-400 hover:text-red-500"
+                                            >
+                                              <Trash2 size={12} />
+                                            </button>
+                                          </td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </td>
+                          </tr>
+                        </React.Fragment>
                       );
                     })}
-                    {filteredOrders.length === 0 && (
-                      <tr><td colSpan={6} className="text-center py-4 text-slate-400">Nenhuma OS encontrada.</td></tr>
+                    {dailySummary.length === 0 && (
+                      <tr><td colSpan={6} className="text-center py-8 text-slate-400">Nenhuma OS encontrada neste período.</td></tr>
                     )}
                   </tbody>
                 </table>
