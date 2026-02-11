@@ -127,6 +127,12 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
         recognition.onstart = () => {
           setIsListening(true);
           console.log("Reconhecimento de voz iniciado");
+          
+          // Interromper fala do robô se o usuário começar a falar
+          if ('speechSynthesis' in window) {
+              window.speechSynthesis.cancel();
+              setIsSpeaking(false);
+          }
         };
 
         recognition.onend = () => {
@@ -157,8 +163,53 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const connect = () => {
+  // Tocar som de telefone chamando (Gerado via Web Audio API)
+  const playDialTone = () => {
+    return new Promise<void>((resolve) => {
+        try {
+            const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+            if (!AudioContext) { resolve(); return; }
+
+            const ctx = new AudioContext();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(425, ctx.currentTime); // Frequência padrão de tom de discagem (425Hz)
+            
+            // Volume envelope
+            gain.gain.setValueAtTime(0, ctx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.1);
+            gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 2.0); // Toca por 2 segundos
+
+            osc.start();
+            
+            // Parar após 2 segundos
+            setTimeout(() => {
+                osc.stop();
+                ctx.close();
+                resolve();
+            }, 2000);
+        } catch (e) {
+            console.error("Erro ao tocar som:", e);
+            resolve();
+        }
+    });
+  };
+
+  const connect = async () => {
     setIsConnected(true);
+    
+    // Tocar som de telefone
+    await playDialTone();
+
+    // Saudação inicial
+    const greeting = "Balão da Informática, como posso ajudar?";
+    setMessages(prev => [...prev, { role: 'assistant', content: greeting }]);
+    speakText(greeting);
   };
 
   const disconnect = () => {
