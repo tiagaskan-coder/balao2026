@@ -100,23 +100,25 @@ export default async function RootLayout({
       >
         <AuthProvider>
           <CartProvider>
-            <SidebarProvider>
-              <ToastProvider>
-                <AIContextProvider>
-                  <div className="flex flex-col min-h-screen">
-                    <Suspense fallback={<div className="w-64 hidden lg:block" />}>
-                      <Sidebar categories={categories} />
-                    </Suspense>
-                    <div className="flex-1 flex flex-col min-h-screen">
-                      {children}
-                    </div>
-                    <Footer />
-                  </div>
-                  <ProductPreview />
-                  <AIOverlay />
-                </AIContextProvider>
-              </ToastProvider>
-            </SidebarProvider>
+                <Suspense>
+                  <SidebarProvider>
+                    <ToastProvider>
+                      <AIContextProvider>
+                        <div className="flex flex-col min-h-screen">
+                          <Suspense fallback={<div className="w-64 hidden lg:block" />}>
+                            <Sidebar categories={categories} />
+                          </Suspense>
+                          <div className="flex-1 flex flex-col min-h-screen">
+                            {children}
+                          </div>
+                          <Footer />
+                        </div>
+                        <ProductPreview />
+                        <AIOverlay />
+                      </AIContextProvider>
+                    </ToastProvider>
+                  </SidebarProvider>
+                </Suspense>
           </CartProvider>
         </AuthProvider>
         <script
