@@ -1,7 +1,15 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { Product } from '@/lib/utils';
+
+// Declaração de tipos para Web Speech API
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+  }
+}
 
 type Message = {
   role: 'user' | 'assistant';
@@ -27,11 +35,14 @@ const VoiceContext = createContext<VoiceContextType | undefined>(undefined);
 export function VoiceProvider({ children }: { children: ReactNode }) {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isConnected, setIsConnected] = useState(true); // Assume conectado via HTTP (stateless)
+  const [isConnected, setIsConnected] = useState(true);
   const [messages, setMessages] = useState<Message[]>([]);
   const [suggestedProducts, setSuggestedProducts] = useState<Product[]>([]);
+  
+  // Referência para o reconhecimento de fala
+  const recognitionRef = useRef<any>(null);
 
-  // Verificação de saúde do backend (opcional, mas bom para UX)
+  // Verificação de saúde do backend
   useEffect(() => {
     const checkHealth = async () => {
       try {
@@ -41,14 +52,55 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
             console.log("Backend Python online");
         } else {
             console.warn("Backend Python check failed:", res.status);
-            // Não marcamos como desconectado imediatamente para não bloquear a UI, 
-            // mas logamos o erro. Serverless acorda sob demanda.
         }
       } catch (e) {
         console.warn("Backend Python unreachable:", e);
       }
     };
     checkHealth();
+  }, []);
+
+  // Inicializar SpeechRecognition
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false; // Para ao terminar de falar
+        recognition.interimResults = false;
+        recognition.lang = 'pt-BR';
+
+        recognition.onstart = () => {
+          setIsListening(true);
+          console.log("Reconhecimento de voz iniciado");
+        };
+
+        recognition.onend = () => {
+          setIsListening(false);
+          console.log("Reconhecimento de voz finalizado");
+        };
+
+        recognition.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript;
+          console.log("Transcrição detectada:", transcript);
+          if (transcript) {
+            sendMessage(transcript);
+          }
+        };
+
+        recognition.onerror = (event: any) => {
+          console.error("Erro no reconhecimento de voz:", event.error);
+          setIsListening(false);
+          if (event.error === 'not-allowed') {
+            alert("Permissão de microfone negada.");
+          }
+        };
+
+        recognitionRef.current = recognition;
+      } else {
+        console.warn("Web Speech API não suportada neste navegador.");
+      }
+    }
   }, []);
 
   const connect = () => {
@@ -60,27 +112,37 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
   };
 
   const startListening = () => {
-    setIsListening(true);
-    // Aqui entraria a lógica de Web Speech API no futuro
-    // Por enquanto, simulamos ou usamos input de texto
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.start();
+      } catch (e) {
+        console.error("Erro ao iniciar reconhecimento:", e);
+      }
+    } else {
+      alert("Seu navegador não suporta reconhecimento de voz. Tente usar o Chrome.");
+    }
   };
 
   const stopListening = () => {
-    setIsListening(false);
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
   };
 
   const toggleListening = () => {
-    setIsListening(!isListening);
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
   };
 
   const sendMessage = async (text: string) => {
     if (!text.trim()) return;
 
-    // Adiciona mensagem do usuário
     setMessages(prev => [...prev, { role: 'user', content: text }]);
 
     try {
-        // Envia para o backend Serverless
         const response = await fetch('/api/py/chat', {
             method: 'POST',
             headers: {
@@ -95,19 +157,31 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
 
         const data = await response.json();
         
-        // Adiciona resposta do assistente
         setMessages(prev => [...prev, { role: 'assistant', content: data.text }]);
         
+        // Falar a resposta (TTS do navegador como fallback zero-cost)
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(data.text);
+            utterance.lang = 'pt-BR';
+            utterance.onstart = () => setIsSpeaking(true);
+            utterance.onend = () => setIsSpeaking(false);
+            window.speechSynthesis.speak(utterance);
+        }
+
         if (data.products && Array.isArray(data.products)) {
             setSuggestedProducts(data.products);
         }
 
     } catch (error) {
         console.error("Erro ao enviar mensagem:", error);
-        setMessages(prev => [...prev, { 
-            role: 'assistant', 
-            content: "Desculpe, estou com dificuldades para conectar ao servidor no momento. Tente novamente em instantes." 
-        }]);
+        const errorMsg = "Desculpe, estou com dificuldades para conectar ao servidor no momento. Tente novamente em instantes.";
+        setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
+        
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(errorMsg);
+            utterance.lang = 'pt-BR';
+            window.speechSynthesis.speak(utterance);
+        }
     }
   };
 
