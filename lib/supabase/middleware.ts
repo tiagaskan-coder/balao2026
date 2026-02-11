@@ -84,7 +84,7 @@ export async function updateSession(request: NextRequest) {
   // Auth pages redirection (if already logged in)
   if (user && (path === '/login' || path === '/signup')) {
     const url = request.nextUrl.clone()
-    url.pathname = '/'
+    url.pathname = '/conta'
     return NextResponse.redirect(url)
   }
 
