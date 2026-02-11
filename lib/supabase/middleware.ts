@@ -53,7 +53,40 @@ export async function updateSession(request: NextRequest) {
   // If this is not done, you may be causing the browser and server to go out
   // of sync and terminate the user's session prematurely!
 
-  await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  // Protected routes logic
+  const path = request.nextUrl.pathname;
+
+  // Admin routes protection
+  if (path.startsWith('/admin') && !path.startsWith('/admin/login')) {
+    if (!user) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/admin/login'
+        return NextResponse.redirect(url)
+    }
+    // Here we could also check for role 'admin' if custom claims are set
+  }
+
+  // User protected routes
+  const protectedRoutes = ['/checkout', '/fechamento', '/meus-pedidos', '/conta'];
+  const isProtectedRoute = protectedRoutes.some(route => path.startsWith(route));
+
+  if (isProtectedRoute && !user) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    url.searchParams.set('next', path)
+    return NextResponse.redirect(url)
+  }
+
+  // Auth pages redirection (if already logged in)
+  if (user && (path === '/login' || path === '/signup')) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/'
+    return NextResponse.redirect(url)
+  }
 
   return supabaseResponse
 }

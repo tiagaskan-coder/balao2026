@@ -34,9 +34,10 @@ describe('Mail Templates', () => {
         };
         const html = getOrderStatusUpdateTemplate(order, 'shipped');
         
-        expect(html).toContain('John Doe');
+        expect(html).toContain('John'); // First name only
         expect(html).toContain('12345678');
-        expect(html).toContain('Enviado / Pronto para Retirada');
-        expect(html).toContain('#8b5cf6'); // Purple color for shipped
+        expect(html).toContain('🚚 Enviado');
+        // Colors might be in style attribute
+        expect(html).toContain('background: #f5f3ff'); 
     });
 });

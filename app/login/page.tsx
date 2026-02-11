@@ -30,6 +30,8 @@ export default function LoginPage() {
     }
   };
 
+  const [rememberMe, setRememberMe] = useState(false);
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -61,6 +63,15 @@ export default function LoginPage() {
           password,
         });
         if (error) throw error;
+        
+        // Remember me logic is handled by Supabase session persistence by default,
+        // but we could set a local preference if needed.
+        if (rememberMe) {
+            localStorage.setItem("rememberMeEmail", email);
+        } else {
+            localStorage.removeItem("rememberMeEmail");
+        }
+
         showToast("Login realizado com sucesso!", "success");
         router.refresh();
       }
@@ -71,6 +82,14 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("rememberMeEmail");
+    if (savedEmail) {
+        setEmail(savedEmail);
+        setRememberMe(true);
+    }
+  }, []);
 
   const handleGoogleLogin = async () => {
     try {
@@ -231,6 +250,33 @@ export default function LoginPage() {
                 </div>
                 </div>
 
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                        <input
+                            id="remember-me"
+                            name="remember-me"
+                            type="checkbox"
+                            checked={rememberMe}
+                            onChange={(e) => setRememberMe(e.target.checked)}
+                            className="h-4 w-4 text-[#E60012] focus:ring-[#E60012] border-gray-300 rounded"
+                        />
+                        <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                            Lembrar-me
+                        </label>
+                    </div>
+
+                    {!isSignUp && (
+                        <div className="text-sm">
+                            <Link 
+                                href="/forgot-password" 
+                                className="font-medium text-[#E60012] hover:text-red-700"
+                            >
+                                Esqueceu a senha?
+                            </Link>
+                        </div>
+                    )}
+                </div>
+
                 <div>
                 <button
                     type="submit"
@@ -243,6 +289,26 @@ export default function LoginPage() {
                         isSignUp ? "Criar Conta" : "Entrar"
                     )}
                 </button>
+                </div>
+
+                <div className="relative my-6">
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                        <span className="px-2 bg-white text-gray-500">Ou continue com</span>
+                    </div>
+                </div>
+
+                <div>
+                    <button
+                        type="button"
+                        onClick={handleGoogleLogin}
+                        className="w-full flex justify-center items-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#E60012] transition-colors"
+                    >
+                        <Chrome className="h-5 w-5 mr-2 text-gray-900" />
+                        <span>Google</span>
+                    </button>
                 </div>
             </form>
         </div>
