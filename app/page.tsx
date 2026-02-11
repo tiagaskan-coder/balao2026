@@ -4,27 +4,7 @@ import ProductList from "@/components/ProductList";
 import Carousel from "@/components/Carousel";
 import ProductCarousel from "@/components/ProductCarousel";
 import SeoContent from "@/components/SeoContent";
-create table if not exists integrations (
-  id uuid default gen_random_uuid() primary key,
-  service text not null unique,
-  access_token text,
-  user_id text,
-  username text,
-  updated_at timestamp with time zone default now()
-);
-
-alter table integrations enable row level security;
-create policy "Allow all access for authenticated users" on integrations for all using (true) with check (true);create table if not exists integrations (
-  id uuid default gen_random_uuid() primary key,
-  service text not null unique,
-  access_token text,
-  user_id text,
-  username text,
-  updated_at timestamp with time zone default now()
-);
-
-alter table integrations enable row level security;
-create policy "Allow all access for authenticated users" on integrations for all using (true) with check (true);// InstagramFeed will be moved to Sidebar area
+// InstagramFeed will be moved to Sidebar area
 import InstagramFeed from "@/components/InstagramFeed";
 import { getProducts, getCarouselImages, getCategories, getHomeBlocks } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
