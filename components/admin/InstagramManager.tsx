@@ -144,8 +144,21 @@ export default function InstagramManager() {
             <li>Copie o token gerado e cole no campo ao lado.</li>
           </ol>
 
+          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded text-blue-800 text-sm">
+            <h4 className="font-bold mb-1 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4" />
+                Por que não posso usar apenas Login e Senha?
+            </h4>
+            <p className="mb-2">
+                O Instagram <strong>bloqueia</strong> conexões externas usando senha por motivos de segurança. Se tentarmos simular um login, sua conta pode ser bloqueada ou pedir verificação a cada acesso.
+            </p>
+            <p>
+                O uso do <strong>Token</strong> é a única forma oficial e segura permitida pela Meta/Facebook para exibir suas fotos no site sem riscos.
+            </p>
+          </div>
+
           <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-yellow-800 text-xs">
-            <strong>Nota:</strong> Tokens de teste expiram em 1 hora. Para uso contínuo, você deve gerar um Token de Longa Duração (60 dias) ou renovar periodicamente.
+            <strong>Dica:</strong> Se achar muito difícil gerar o token, você pode continuar usando o modo automático (que exibe os produtos do site) sem precisar configurar nada aqui.
           </div>
         </div>
       </div>
