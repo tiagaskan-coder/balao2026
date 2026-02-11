@@ -53,6 +53,7 @@ export default function WeeklyClosing() {
   const [orders, setOrders] = useState<ServiceOrder[]>([]);
   const [expenses, setExpenses] = useState<OperationalExpense[]>([]);
   const [loadingAI, setLoadingAI] = useState(false);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<WeeklyAnalysis | null>(null);
   
   // Form State - OS
@@ -224,24 +225,35 @@ export default function WeeklyClosing() {
 
   const generatePDF = async () => {
     if (typeof window === "undefined") return;
-    const html2pdf = (await import("html2pdf.js")).default;
     
-    const element = document.getElementById("report-content");
-    if (!element) {
-      showToast("Elemento do relatório não encontrado.");
-      return;
-    }
+    setIsGeneratingPDF(true);
+    showToast("Iniciando geração do PDF...");
 
-    const opt = {
-      margin: 10,
-      filename: `fechamento-${new Date().toISOString().split('T')[0]}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    } as any;
-    
-    html2pdf().set(opt).from(element).save();
-    showToast("Gerando PDF...");
+    try {
+      const html2pdf = (await import("html2pdf.js")).default;
+      
+      const element = document.getElementById("report-content");
+      if (!element) {
+        throw new Error("Elemento do relatório não encontrado.");
+      }
+
+      const opt = {
+        margin: [10, 10, 10, 10],
+        filename: `fechamento-${new Date().toISOString().split('T')[0]}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+      } as any;
+      
+      await html2pdf().set(opt).from(element).save();
+      showToast("PDF salvo com sucesso!");
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      showToast("Erro ao gerar PDF.");
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   const generateShareLink = () => {
@@ -268,8 +280,8 @@ export default function WeeklyClosing() {
             <button onClick={generateShareLink} className="p-2 bg-white border border-slate-200 rounded hover:bg-slate-50 text-slate-600 flex items-center gap-2">
               <Share2 size={18} /> <span className="hidden md:inline">Compartilhar</span>
             </button>
-            <button onClick={generatePDF} className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2">
-              <FileDown size={18} /> <span className="hidden md:inline">Exportar PDF</span>
+            <button onClick={generatePDF} disabled={isGeneratingPDF} className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+              <FileDown size={18} /> <span className="hidden md:inline">{isGeneratingPDF ? "Gerando..." : "Exportar PDF"}</span>
             </button>
           </div>
         </div>
