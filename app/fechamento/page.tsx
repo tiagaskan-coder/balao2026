@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { 
   Plus, Trash2, TrendingUp, TrendingDown, DollarSign, 
-  Share2, Printer, Minus, Calendar, Trash, ChevronDown, ChevronUp, Lock
+  Printer, Minus, Calendar, Trash, ChevronDown, ChevronUp, Lock
 } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 
@@ -90,7 +90,7 @@ export default function WeeklyClosing() {
     date: new Date().toISOString().split('T')[0]
   });
 
-  // Load from LocalStorage / URL on Mount
+  // Load from API on Mount
   useEffect(() => {
     if (typeof window !== "undefined") {
       // Check Auth
@@ -98,36 +98,34 @@ export default function WeeklyClosing() {
         setIsAuthenticated(true);
       }
 
-      const params = new URLSearchParams(window.location.search);
-      const data = params.get("data");
-      if (data) {
+      // Fetch Data
+      const fetchData = async () => {
         try {
-          const decoded = JSON.parse(atob(data));
-          if (decoded.orders) setOrders(decoded.orders);
-          if (decoded.expenses) setExpenses(decoded.expenses);
-          showToast("Dados carregados do link compartilhado!");
-          window.history.replaceState({}, "", "/fechamento");
-          return;
-        } catch (e) {
-          console.error("Erro ao decodificar URL", e);
-        }
-      }
+          const [resOrders, resExpenses] = await Promise.all([
+            fetch('/api/weekly/orders'),
+            fetch('/api/weekly/expenses')
+          ]);
 
-      const savedOrders = localStorage.getItem("techflow_orders_v2");
-      const savedExpenses = localStorage.getItem("techflow_expenses");
-      
-      if (savedOrders) setOrders(JSON.parse(savedOrders));
-      if (savedExpenses) setExpenses(JSON.parse(savedExpenses));
+          if (resOrders.ok) {
+            const data = await resOrders.json();
+            if (Array.isArray(data)) setOrders(data);
+          }
+          
+          if (resExpenses.ok) {
+            const data = await resExpenses.json();
+            if (Array.isArray(data)) setExpenses(data);
+          }
+        } catch (error) {
+          console.error("Failed to fetch data", error);
+          showToast("Erro ao carregar dados do servidor.");
+        }
+      };
+
+      fetchData();
     }
   }, []);
 
-  // Save to LocalStorage
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("techflow_orders_v2", JSON.stringify(orders));
-      localStorage.setItem("techflow_expenses", JSON.stringify(expenses));
-    }
-  }, [orders, expenses]);
+  // Removed LocalStorage Effects
 
   // Calculations
   const filteredOrders = useMemo(() => {
@@ -279,14 +277,16 @@ export default function WeeklyClosing() {
 
 
   // Handlers - Orders
-  const handleAddOrder = () => {
+  const handleAddOrder = async () => {
     if (!newOrder.osNumber) {
       showToast("Número da OS é obrigatório!");
       return;
     }
     
+    // Optimistic Update
+    const tempId = crypto.randomUUID();
     const order: ServiceOrder = {
-      id: crypto.randomUUID(),
+      id: tempId,
       osNumber: newOrder.osNumber,
       status: newOrder.status as any || "Entrada",
       paymentMethod: newOrder.paymentMethod as any || "PIX",
@@ -297,27 +297,55 @@ export default function WeeklyClosing() {
       date: newOrder.date || new Date().toISOString().split('T')[0]
     };
 
-    setOrders([...orders, order]);
-    setNewOrder({
-      status: "Entrada",
-      paymentMethod: "PIX",
-      laborIncome: 0,
-      partsIncome: 0,
-      laborExpense: 0,
-      partsExpense: 0,
-      osNumber: "",
-      date: new Date().toISOString().split('T')[0]
-    });
-    showToast("OS Adicionada!");
+    // Remove ID for creation (let DB handle it or use temp, but here we use UUID)
+    // Actually we can send the ID to Supabase if we want, or let it generate.
+    // Our SQL uses default gen_random_uuid(), but we can override.
+    // Let's rely on backend response for ID to be safe, but for optimistic UI we need one.
+    // We will wait for response to ensure persistence.
+    
+    try {
+      const res = await fetch('/api/weekly/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(order) // sending ID is fine as it's UUID
+      });
+
+      if (!res.ok) throw new Error("Falha ao salvar");
+      
+      const savedOrder = await res.json();
+      setOrders([...orders, savedOrder]);
+      
+      setNewOrder({
+        status: "Entrada",
+        paymentMethod: "PIX",
+        laborIncome: 0,
+        partsIncome: 0,
+        laborExpense: 0,
+        partsExpense: 0,
+        osNumber: "",
+        date: new Date().toISOString().split('T')[0]
+      });
+      showToast("OS Adicionada e Salva!");
+    } catch (e) {
+      console.error(e);
+      showToast("Erro ao salvar OS.");
+    }
   };
 
-  const removeOrder = (id: string) => {
-    setOrders(orders.filter(o => o.id !== id));
-    showToast("OS Removida.");
+  const removeOrder = async (id: string) => {
+    try {
+      const res = await fetch(`/api/weekly/orders?id=${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error("Falha ao remover");
+      
+      setOrders(orders.filter(o => o.id !== id));
+      showToast("OS Removida.");
+    } catch (e) {
+      showToast("Erro ao remover OS.");
+    }
   };
 
   // Handlers - Expenses
-  const handleAddExpense = () => {
+  const handleAddExpense = async () => {
     if (!newExpense.description || !newExpense.value) {
       showToast("Descrição e valor são obrigatórios!");
       return;
@@ -325,20 +353,41 @@ export default function WeeklyClosing() {
 
     const expense: OperationalExpense = {
       id: crypto.randomUUID(),
-      description: newExpense.description,
+      description: newExpense.description!,
       value: Number(newExpense.value),
       category: newExpense.category as any || "Outro",
       date: newExpense.date || new Date().toISOString().split('T')[0]
     };
 
-    setExpenses([...expenses, expense]);
-    setNewExpense({ category: "Outro", value: 0, description: "", date: new Date().toISOString().split('T')[0] });
-    showToast("Despesa adicionada!");
+    try {
+      const res = await fetch('/api/weekly/expenses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(expense)
+      });
+
+      if (!res.ok) throw new Error("Falha ao salvar");
+      
+      const savedExpense = await res.json();
+      setExpenses([...expenses, savedExpense]);
+      
+      setNewExpense({ category: "Outro", value: 0, description: "", date: new Date().toISOString().split('T')[0] });
+      showToast("Despesa adicionada!");
+    } catch (e) {
+      showToast("Erro ao salvar despesa.");
+    }
   };
 
-  const removeExpense = (id: string) => {
-    setExpenses(expenses.filter(e => e.id !== id));
-    showToast("Despesa removida.");
+  const removeExpense = async (id: string) => {
+    try {
+      const res = await fetch(`/api/weekly/expenses?id=${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error("Falha ao remover");
+      
+      setExpenses(expenses.filter(e => e.id !== id));
+      showToast("Despesa removida.");
+    } catch (e) {
+      showToast("Erro ao remover despesa.");
+    }
   };
 
   const toggleDay = (date: string) => {
@@ -356,20 +405,31 @@ export default function WeeklyClosing() {
     window.print();
   };
 
-  const handleClearAll = () => {
-    if (confirm("Tem certeza que deseja apagar TODOS os lançamentos? Esta ação não pode ser desfeita.")) {
-      setOrders([]);
-      setExpenses([]);
-      showToast("Todos os dados foram apagados.");
-    }
-  };
+  const handleClearAll = async () => {
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const year = today.getFullYear();
+    const expected = `56676009${day}${month}${year}`;
 
-  const generateShareLink = () => {
-    const state = { orders, expenses };
-    const encoded = btoa(JSON.stringify(state));
-    const url = `${window.location.origin}${window.location.pathname}?data=${encoded}`;
-    navigator.clipboard.writeText(url);
-    showToast("Link copiado!");
+    const pwd = prompt("Digite a senha de segurança para apagar TUDO (Senha do dia):");
+    if (pwd !== expected) {
+      showToast("Senha incorreta! Ação cancelada.");
+      return;
+    }
+
+    if (confirm("Tem certeza ABSOLUTA? Esta ação apagará TODOS os dados do banco de dados permanentemente.")) {
+      try {
+         const res = await fetch('/api/weekly/reset', { method: 'DELETE' });
+         if (!res.ok) throw new Error("Falha ao apagar");
+         
+         setOrders([]);
+         setExpenses([]);
+         showToast("Todos os dados foram apagados do servidor.");
+      } catch (e) {
+         showToast("Erro ao apagar dados.");
+      }
+    }
   };
 
   const fmt = (val: number) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -523,10 +583,6 @@ export default function WeeklyClosing() {
             <div className="flex gap-2 ml-auto xl:ml-0">
                <button onClick={handleClearAll} className="p-2 bg-red-100 text-red-600 border border-red-200 rounded hover:bg-red-200 flex items-center gap-2" title="Apagar Tudo">
                 <Trash size={18} />
-              </button>
-
-              <button onClick={generateShareLink} className="p-2 bg-white border border-slate-200 rounded hover:bg-slate-50 text-slate-600 flex items-center gap-2">
-                <Share2 size={18} /> <span className="hidden md:inline">Link</span>
               </button>
               
               <button onClick={handlePrint} className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2">
