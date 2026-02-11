@@ -4,6 +4,7 @@ import ProductList from "@/components/ProductList";
 import Carousel from "@/components/Carousel";
 import ProductCarousel from "@/components/ProductCarousel";
 import SeoContent from "@/components/SeoContent";
+// InstagramFeed will be moved to Sidebar area
 import InstagramFeed from "@/components/InstagramFeed";
 import { getProducts, getCarouselImages, getCategories, getHomeBlocks } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
@@ -124,8 +125,11 @@ export default async function Home(props: {
       )}
 
       <div className="flex container mx-auto flex-1 py-6 gap-6 px-4 lg:px-0">
-        <div className="hidden lg:block">
+        <div className="hidden lg:block w-64 flex-shrink-0">
             <Sidebar categories={categories} />
+            <div className="mt-4">
+                <InstagramFeed />
+            </div>
         </div>
         <main className="flex-1 w-full min-w-0">
             {/* Dynamic Home Blocks */}
@@ -144,8 +148,6 @@ export default async function Home(props: {
                         />
                     );
                 })}
-                
-                <InstagramFeed />
                 </>
             )}
 

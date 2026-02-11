@@ -46,45 +46,34 @@ export default function InstagramFeed() {
   }
 
   return (
-    <section className="py-8 border-t border-gray-100 mt-8">
-      <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
-        <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 p-0.5 rounded-full">
-                <div className="bg-white p-1.5 rounded-full">
-                    <Instagram className="text-black" size={24} />
-                </div>
-            </div>
-            <div>
-                <h2 className="text-xl font-bold text-gray-800">Siga-nos no Instagram</h2>
-                <a 
-                    href={PROFILE_URL} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-sm text-gray-500 hover:text-[#E60012] transition-colors"
-                >
-                    @balaodainformatica_castelo
-                </a>
+    <section className="mt-6">
+      <div className="flex items-center gap-3 mb-4 px-1">
+        <div className="bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 p-0.5 rounded-full">
+            <div className="bg-white p-1 rounded-full">
+                <Instagram className="text-black" size={16} />
             </div>
         </div>
-        
-        <a 
-            href={PROFILE_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-800 bg-blue-50 px-4 py-2 rounded-full transition-colors"
-        >
-            Ver perfil completo <ExternalLink size={16} />
-        </a>
+        <div>
+            <h2 className="text-sm font-bold text-gray-800">Siga-nos</h2>
+            <a 
+                href={PROFILE_URL} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-xs text-gray-500 hover:text-[#E60012] transition-colors block -mt-0.5"
+            >
+                @balaodainformatica_castelo
+            </a>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="flex flex-col gap-3">
         {posts.map((post) => (
           <a
             key={post.id}
             href={post.permalink || PROFILE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="group relative aspect-square bg-gray-100 rounded-lg overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-all"
+            className="group relative aspect-square w-full bg-gray-100 rounded-lg overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-all"
           >
             {post.media_url ? (
                 <div className="relative w-full h-full">
