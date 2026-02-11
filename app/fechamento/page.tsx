@@ -13,6 +13,7 @@ interface ServiceOrder {
   id: string;
   osNumber: string;
   status: "Entrada" | "Reparo" | "Concluída";
+  date: string; // YYYY-MM-DD
   
   // Entradas (Receitas)
   laborIncome: number;
@@ -30,6 +31,7 @@ interface OperationalExpense {
   description: string;
   value: number;
   category: "Salário" | "Insumo" | "Aluguel" | "Imposto" | "Outro";
+  date: string;
 }
 
 interface FinancialSummary {
@@ -55,6 +57,10 @@ export default function WeeklyClosing() {
   const [loadingAI, setLoadingAI] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<WeeklyAnalysis | null>(null);
+
+  // Date Filter State
+  const [filterStart, setFilterStart] = useState("");
+  const [filterEnd, setFilterEnd] = useState("");
   
   // Form State - OS
   const [newOrder, setNewOrder] = useState<Partial<ServiceOrder>>({
@@ -64,13 +70,15 @@ export default function WeeklyClosing() {
     partsIncome: 0,
     laborExpense: 0,
     partsExpense: 0,
+    date: new Date().toISOString().split('T')[0]
   });
 
   // Form State - Expense
   const [newExpense, setNewExpense] = useState<Partial<OperationalExpense>>({
     category: "Outro",
     value: 0,
-    description: ""
+    description: "",
+    date: new Date().toISOString().split('T')[0]
   });
 
   // Load from LocalStorage / URL on Mount
@@ -114,12 +122,28 @@ export default function WeeklyClosing() {
   }, [orders, expenses, aiAnalysis]);
 
   // Calculations
+  const filteredOrders = React.useMemo(() => {
+    return orders.filter(o => {
+      if (filterStart && o.date < filterStart) return false;
+      if (filterEnd && o.date > filterEnd) return false;
+      return true;
+    });
+  }, [orders, filterStart, filterEnd]);
+
+  const filteredExpenses = React.useMemo(() => {
+    return expenses.filter(e => {
+      if (filterStart && e.date < filterStart) return false;
+      if (filterEnd && e.date > filterEnd) return false;
+      return true;
+    });
+  }, [expenses, filterStart, filterEnd]);
+
   const summary: FinancialSummary = React.useMemo(() => {
-    const directCosts = orders.reduce((sum, o) => sum + (o.laborExpense || 0) + (o.partsExpense || 0), 0);
-    const revenue = orders.reduce((sum, o) => sum + (o.laborIncome || 0) + (o.partsIncome || 0), 0);
-    const opExpenses = expenses.reduce((sum, e) => sum + (e.value || 0), 0);
+    const directCosts = filteredOrders.reduce((sum, o) => sum + (o.laborExpense || 0) + (o.partsExpense || 0), 0);
+    const revenue = filteredOrders.reduce((sum, o) => sum + (o.laborIncome || 0) + (o.partsIncome || 0), 0);
+    const opExpenses = filteredExpenses.reduce((sum, e) => sum + (e.value || 0), 0);
     
-    const paymentMix = orders.reduce((acc, order) => {
+    const paymentMix = filteredOrders.reduce((acc, order) => {
       const orderTotal = (order.laborIncome || 0) + (order.partsIncome || 0);
       if (order.paymentMethod === "PIX") acc.PIX += orderTotal;
       if (order.paymentMethod === "Cartão") acc.Cartao += orderTotal;
@@ -135,7 +159,7 @@ export default function WeeklyClosing() {
       directCostsTotal: directCosts,
       operationalExpensesTotal: opExpenses
     };
-  }, [orders, expenses]);
+  }, [filteredOrders, filteredExpenses]);
 
   // Handlers - Orders
   const handleAddOrder = () => {
@@ -153,6 +177,7 @@ export default function WeeklyClosing() {
       partsIncome: Number(newOrder.partsIncome) || 0,
       laborExpense: Number(newOrder.laborExpense) || 0,
       partsExpense: Number(newOrder.partsExpense) || 0,
+      date: newOrder.date || new Date().toISOString().split('T')[0]
     };
 
     setOrders([...orders, order]);
@@ -163,7 +188,8 @@ export default function WeeklyClosing() {
       partsIncome: 0,
       laborExpense: 0,
       partsExpense: 0,
-      osNumber: ""
+      osNumber: "",
+      date: new Date().toISOString().split('T')[0]
     });
     showToast("OS Adicionada!");
   };
@@ -184,11 +210,12 @@ export default function WeeklyClosing() {
       id: crypto.randomUUID(),
       description: newExpense.description,
       value: Number(newExpense.value),
-      category: newExpense.category as any || "Outro"
+      category: newExpense.category as any || "Outro",
+      date: newExpense.date || new Date().toISOString().split('T')[0]
     };
 
     setExpenses([...expenses, expense]);
-    setNewExpense({ category: "Outro", value: 0, description: "" });
+    setNewExpense({ category: "Outro", value: 0, description: "", date: new Date().toISOString().split('T')[0] });
     showToast("Despesa adicionada!");
   };
 
@@ -205,13 +232,13 @@ export default function WeeklyClosing() {
         totalRevenue: summary.grossRevenue,
         totalExpenses: summary.totalExpenses,
         netProfit: summary.netProfit,
-        ordersCount: orders.length,
+        ordersCount: filteredOrders.length,
         paymentMix: summary.paymentMix,
-        topExpenses: orders.map(o => ({
+        topExpenses: filteredOrders.map(o => ({
           name: `OS ${o.osNumber} (Custos)`,
           value: (o.laborExpense || 0) + (o.partsExpense || 0)
         })).filter(x => x.value > 0).sort((a,b) => b.value - a.value).slice(0, 5),
-        otherExpenses: expenses
+        otherExpenses: filteredExpenses
       });
       setAiAnalysis(result);
       showToast("Análise de IA Concluída!");
@@ -230,6 +257,8 @@ export default function WeeklyClosing() {
     showToast("Iniciando geração do PDF...");
 
     try {
+      // Importação segura do html2pdf
+      // @ts-ignore
       const html2pdf = (await import("html2pdf.js")).default;
       
       const element = document.getElementById("report-content");
@@ -237,20 +266,20 @@ export default function WeeklyClosing() {
         throw new Error("Elemento do relatório não encontrado.");
       }
 
+      // Opções simplificadas para evitar erros de renderização
       const opt = {
         margin: [10, 10, 10, 10],
         filename: `fechamento-${new Date().toISOString().split('T')[0]}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-      } as any;
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
       
       await html2pdf().set(opt).from(element).save();
       showToast("PDF salvo com sucesso!");
     } catch (error) {
-      console.error("Erro ao gerar PDF:", error);
-      showToast("Erro ao gerar PDF.");
+      console.error("Erro detalhado ao gerar PDF:", error);
+      showToast("Erro ao gerar PDF. Tente imprimir pelo navegador (Ctrl+P).");
     } finally {
       setIsGeneratingPDF(false);
     }
@@ -276,6 +305,33 @@ export default function WeeklyClosing() {
             <h1 className="text-3xl font-bold text-slate-900">TechFlow Assist</h1>
             <p className="text-slate-500">Fechamento Semanal Inteligente</p>
           </div>
+
+          {/* Date Filter */}
+          <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
+            <span className="text-xs font-bold text-slate-500 uppercase">Período:</span>
+            <input 
+              type="date" 
+              value={filterStart}
+              onChange={e => setFilterStart(e.target.value)}
+              className="p-1 border rounded text-xs text-slate-600"
+            />
+            <span className="text-slate-400">-</span>
+            <input 
+              type="date" 
+              value={filterEnd}
+              onChange={e => setFilterEnd(e.target.value)}
+              className="p-1 border rounded text-xs text-slate-600"
+            />
+            {(filterStart || filterEnd) && (
+              <button 
+                onClick={() => { setFilterStart(""); setFilterEnd(""); }}
+                className="text-xs text-red-500 hover:text-red-700 font-medium px-2"
+              >
+                Limpar
+              </button>
+            )}
+          </div>
+
           <div className="flex gap-2">
             <button onClick={generateShareLink} className="p-2 bg-white border border-slate-200 rounded hover:bg-slate-50 text-slate-600 flex items-center gap-2">
               <Share2 size={18} /> <span className="hidden md:inline">Compartilhar</span>
@@ -295,6 +351,12 @@ export default function WeeklyClosing() {
               <Plus className="text-blue-500" /> Nova Ordem de Serviço
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <input 
+                type="date"
+                value={newOrder.date}
+                onChange={e => setNewOrder({...newOrder, date: e.target.value})}
+                className="col-span-1 p-2 border rounded text-sm text-slate-600"
+              />
               <input 
                 type="text" 
                 placeholder="Nº OS"
@@ -382,6 +444,12 @@ export default function WeeklyClosing() {
               <Minus className="text-red-500" /> Despesa Avulsa
             </h2>
             <div className="space-y-3">
+              <input 
+                type="date"
+                value={newExpense.date}
+                onChange={e => setNewExpense({...newExpense, date: e.target.value})}
+                className="w-full p-2 border rounded text-sm text-slate-600"
+              />
               <input 
                 type="text" 
                 placeholder="Descrição (ex: Aluguel)"
@@ -477,6 +545,7 @@ export default function WeeklyClosing() {
                 <table className="w-full text-sm text-left">
                   <thead className="text-xs text-slate-400 uppercase bg-slate-50">
                     <tr>
+                      <th className="px-2 py-2">Data</th>
                       <th className="px-2 py-2">OS</th>
                       <th className="px-2 py-2">Rec.</th>
                       <th className="px-2 py-2">Custo</th>
@@ -485,11 +554,14 @@ export default function WeeklyClosing() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {orders.map(order => {
+                    {filteredOrders.map(order => {
                       const rev = (order.laborIncome || 0) + (order.partsIncome || 0);
                       const cost = (order.laborExpense || 0) + (order.partsExpense || 0);
                       return (
                         <tr key={order.id} className="hover:bg-slate-50">
+                          <td className="px-2 py-2 text-slate-500 text-xs">
+                            {order.date ? new Date(order.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'}) : '-'}
+                          </td>
                           <td className="px-2 py-2 font-medium">{order.osNumber}</td>
                           <td className="px-2 py-2 text-green-600">{fmt(rev)}</td>
                           <td className="px-2 py-2 text-red-500">{fmt(cost)}</td>
@@ -515,33 +587,36 @@ export default function WeeklyClosing() {
               
               {/* Operational Expenses */}
               <div>
-                <h3 className="text-sm font-bold uppercase text-slate-500 mb-3 border-b pb-2">Despesas Operacionais</h3>
+                <h3 className="text-sm font-bold uppercase text-slate-500 mb-3 border-b pb-2">Despesas Avulsas</h3>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm text-left">
                     <thead className="text-xs text-slate-400 uppercase bg-slate-50">
                       <tr>
+                        <th className="px-2 py-2">Data</th>
                         <th className="px-2 py-2">Desc.</th>
                         <th className="px-2 py-2">Cat.</th>
-                        <th className="px-2 py-2 text-right">Valor</th>
-                        <th className="px-2 py-2 text-right no-print"></th>
+                        <th className="px-2 py-2">Valor</th>
+                        <th className="px-2 py-2 text-right no-print">Ação</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {expenses.map(exp => (
-                        <tr key={exp.id}>
-                          <td className="px-2 py-2">{exp.description}</td>
-                          <td className="px-2 py-2 text-xs text-slate-500">{exp.category}</td>
-                          <td className="px-2 py-2 text-right text-red-600">{fmt(exp.value)}</td>
+                      {filteredExpenses.map(expense => (
+                        <tr key={expense.id} className="hover:bg-slate-50">
+                          <td className="px-2 py-2 text-slate-500 text-xs">
+                             {expense.date ? new Date(expense.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'}) : '-'}
+                          </td>
+                          <td className="px-2 py-2">{expense.description}</td>
+                          <td className="px-2 py-2 text-xs">
+                            <span className="px-2 py-1 bg-slate-100 rounded-full text-slate-600">{expense.category}</span>
+                          </td>
+                          <td className="px-2 py-2 font-bold text-red-600">{fmt(expense.value)}</td>
                           <td className="px-2 py-2 text-right no-print">
-                            <button onClick={() => removeExpense(exp.id)} className="text-slate-400 hover:text-red-500">
+                            <button onClick={() => removeExpense(expense.id)} className="text-slate-400 hover:text-red-500">
                               <Trash2 size={14} />
                             </button>
                           </td>
                         </tr>
                       ))}
-                      {expenses.length === 0 && (
-                        <tr><td colSpan={4} className="text-center py-4 text-slate-400">Nenhuma despesa extra.</td></tr>
-                      )}
                     </tbody>
                   </table>
                 </div>
