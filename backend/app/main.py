@@ -4,7 +4,6 @@ import json
 import asyncio
 import os
 import base64
-import numpy as np
 from dotenv import load_dotenv
 from pydantic import BaseModel
 
@@ -86,73 +85,8 @@ async def read_root():
 async def read_root_vercel():
     return {"status": "online", "service": "Balão Voice Agent (Vercel)"}
 
-@app.websocket("/ws/chat")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    print("Cliente conectado ao WebSocket")
-    
-    try:
-        while True:
-            data = await websocket.receive_text()
-            payload = json.loads(data)
-            
-            user_text = ""
-            
-            # 1. Process Input (Text or Audio)
-            if payload.get("type") == "audio":
-                # Decode audio and transcribe
-                # TODO: Implement robust audio decoding. 
-                # Assuming raw PCM or compatible format sent via base64
-                # For now, let's assume client sends text or we mock transcription
-                # audio_bytes = base64.b64decode(payload.get("data"))
-                # user_text = stt_service.transcribe(audio_bytes)
-                user_text = "Estou procurando promoções" # Mock
-            elif payload.get("type") == "text":
-                user_text = payload.get("data")
-            
-            print(f"User said: {user_text}")
-            
-            # 2. Intent Recognition & Search
-            products = []
-            search_keywords = ["procur", "busc", "tem", "preço", "custa", "comprar", "vende"]
-            
-            if any(k in user_text.lower() for k in search_keywords):
-                print("Detected search intent")
-                # Simple extraction logic
-                search_query = user_text.replace("procurando", "").replace("buscando", "").strip()
-                products = search_service.search_products(search_query)
-
-            # 3. LLM Generation
-            system_prompt = (
-                "Você é o assistente virtual do Balão da Informática. "
-                "Fale em Português do Brasil. Seja breve, útil e vendedor. "
-                "Se houver produtos encontrados, mencione-os."
-            )
-            
-            if products:
-                prod_context = "\n".join([f"- {p['name']} (R$ {p['price']})" for p in products[:3]])
-                prompt = f"O usuário perguntou: '{user_text}'. Produtos encontrados:\n{prod_context}\nResponda sugerindo esses produtos."
-            else:
-                prompt = user_text
-
-            # Stream response
-            full_response = ""
-            for token in llm_service.generate_stream(prompt, system_prompt):
-                full_response += token
-                await websocket.send_json({"type": "text_delta", "data": token})
-            
-            # 4. Final Payload with Metadata
-            await websocket.send_json({
-                "type": "response_end", 
-                "text": full_response,
-                "products": products
-            })
-            
-            # 5. TTS (Optional - send audio URL or base64)
-            # audio_path = tts_service.synthesize(full_response)
-            # await websocket.send_json({"type": "audio", "data": "..."})
-
-    except WebSocketDisconnect:
-        print("Cliente desconectado")
-    except Exception as e:
-        print(f"Erro no WebSocket: {e}")
+# WebSocket endpoint removido para economizar tamanho no Serverless (Vercel não suporta WS em Python Functions)
+# @app.websocket("/ws/chat")
+# async def websocket_endpoint(websocket: WebSocket):
+#     await websocket.accept()
+# ... (código comentado)

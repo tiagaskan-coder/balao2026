@@ -3,7 +3,5 @@ uvicorn
 pydantic
 python-dotenv
 supabase
-numpy
 mangum
-websockets
 requests
