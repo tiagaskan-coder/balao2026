@@ -47,6 +47,12 @@ interface FinancialSummary {
 }
 
 // --- Component ---
+const parseDate = (dateStr: string) => {
+  if (!dateStr) return new Date();
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, d);
+};
+
 export default function WeeklyClosing() {
   const { showToast } = useToast();
   
@@ -173,7 +179,7 @@ export default function WeeklyClosing() {
 
     allDates.forEach(dateStr => {
       if (!dateStr) return;
-      const date = new Date(dateStr);
+      const date = parseDate(dateStr);
       // Get Sunday of that week
       const start = new Date(date);
       start.setDate(date.getDate() - date.getDay());
@@ -684,7 +690,7 @@ export default function WeeklyClosing() {
               <h2 className="text-2xl font-bold text-slate-800">Relatório de Fechamento</h2>
               <p className="text-slate-500 text-sm">
                 {filterStart && filterEnd 
-                  ? `Período: ${new Date(filterStart).toLocaleDateString('pt-BR')} até ${new Date(filterEnd).toLocaleDateString('pt-BR')}`
+                  ? `Período: ${parseDate(filterStart).toLocaleDateString('pt-BR')} até ${parseDate(filterEnd).toLocaleDateString('pt-BR')}`
                   : `Gerado em ${new Date().toLocaleDateString('pt-BR')}`
                 }
               </p>
@@ -766,7 +772,7 @@ export default function WeeklyClosing() {
                               {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                             </td>
                             <td className="px-4 py-3 font-medium text-slate-700">
-                              {new Date(day.date).toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' })}
+                              {parseDate(day.date).toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' })}
                             </td>
                             <td className="px-4 py-3 text-center font-medium">{day.count}</td>
                             <td className="px-4 py-3 text-right text-green-600 font-medium">{fmt(day.revenue)}</td>
@@ -796,7 +802,7 @@ export default function WeeklyClosing() {
                                   return (
                                     <tr key={order.id} className="hover:bg-slate-200 print:hover:bg-transparent">
                                       <td className="px-3 py-1 text-slate-500 print:py-0.5">
-                                        {new Date(order.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})}
+                                        {parseDate(order.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})}
                                       </td>
                                       <td className="px-3 py-1 font-medium text-slate-700 print:py-0.5">
                                         OS: {order.osNumber} <span className="text-slate-400 font-normal ml-2">({order.status})</span>
@@ -852,7 +858,7 @@ export default function WeeklyClosing() {
                       {filteredExpenses.map(expense => (
                         <tr key={expense.id} className="hover:bg-slate-50">
                           <td className="px-2 py-2 text-slate-500 text-xs">
-                             {expense.date ? new Date(expense.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'}) : '-'}
+                             {expense.date ? parseDate(expense.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'}) : '-'}
                           </td>
                           <td className="px-2 py-2">{expense.description}</td>
                           <td className="px-2 py-2 text-xs">
