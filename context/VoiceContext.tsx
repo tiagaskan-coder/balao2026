@@ -110,20 +110,13 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
 
         utterance.onstart = () => {
             setIsSpeaking(true);
-            // Pausar reconhecimento enquanto fala para não se ouvir
-            if (recognitionRef.current) recognitionRef.current.stop();
+            // NÃO parar reconhecimento enquanto fala para manter o microfone "quente"
+            // O evento onresult irá filtrar o eco via software
         };
         
         utterance.onend = () => {
             setIsSpeaking(false);
-            // Retomar reconhecimento automaticamente após falar (Modo Conversa Contínua)
-            if (isConnected) {
-                setTimeout(() => {
-                    try {
-                        recognitionRef.current?.start();
-                    } catch(e) { /* ignorar se já estiver rodando */ }
-                }, 100);
-            }
+            // Não precisa reiniciar se nunca parou
         };
 
         utterance.onerror = (e) => {
@@ -160,12 +153,17 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
         };
 
         recognition.onend = () => {
-          // Só reinicia se a chamada estiver ativa
+          // Reinício Agressivo para manter conexão "infinita"
           if (isConnected) {
-              console.log("Reiniciando microfone para manter chamada...");
+              console.log("Microfone desconectou (timeout/silêncio). Reiniciando imediatamente...");
               try {
                   recognition.start();
-              } catch(e) { /* ignore */ }
+              } catch(e) { 
+                  // Se falhar, tentar novamente em breve
+                  setTimeout(() => {
+                      if(isConnected) try { recognition.start() } catch(ee){}
+                  }, 100);
+              }
           } else {
               setIsListening(false);
               console.log("Chamada encerrada, microfone desligado.");
@@ -173,8 +171,13 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
         };
 
         recognition.onresult = (event: any) => {
-          // Se o robô estiver falando, ignorar entradas para não se ouvir (echo cancellation simples)
-          if (window.speechSynthesis.speaking) return;
+          // Software Echo Cancellation:
+          // Se o robô estiver falando (isSpeaking ou speechSynthesis.speaking), ignorar qualquer entrada.
+          // Isso permite que o microfone continue aberto sem processar o próprio áudio do robô.
+          if (window.speechSynthesis.speaking || isSpeaking) {
+              console.log("Ignorando entrada de áudio durante a fala do assistente (Echo Cancellation)");
+              return;
+          }
 
           let finalTranscript = '';
           let interimTranscript = '';
