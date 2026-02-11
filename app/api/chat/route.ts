@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import Groq from 'groq-sdk';
+
+const groq = new Groq({
+    apiKey: process.env.GROQ_API_KEY,
+});
 
 export async function POST(req: Request) {
   try {
@@ -65,20 +70,30 @@ export async function POST(req: Request) {
     3. Se o usuário não foi específico, pergunte: "Para qual uso? Jogos ou trabalho?".
     4. Se houver produtos abaixo, cite apenas o PRIMEIRO e o preço dele.
     5. Seja coloquial, rápido e direto.
-    `;
     
-    const fullPrompt = `${systemPrompt}${productContext}\n\nUsuário: ${message}\nAssistente (Vendedor Consultivo):`;
-
-    // 3. Consultar LLM (Pollinations.ai)
-    const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(fullPrompt)}`, {
-        method: 'GET',
+    Contexto de produtos:${productContext}`;
+    
+    // 3. Consultar LLM (Groq)
+    const completion = await groq.chat.completions.create({
+        messages: [
+            {
+                role: "system",
+                content: systemPrompt
+            },
+            {
+                role: "user",
+                content: message
+            }
+        ],
+        model: "llama3-70b-8192",
+        temperature: 0.7,
+        max_tokens: 150,
+        top_p: 1,
+        stream: false,
+        stop: null
     });
 
-    if (!response.ok) {
-        throw new Error('Falha ao conectar com o cérebro da IA');
-    }
-
-    const text = await response.text();
+    const text = completion.choices[0]?.message?.content || "Desculpe, não entendi.";
 
     return NextResponse.json({
       text: text,
