@@ -144,7 +144,7 @@ export default function VoiceWidget() {
                                     )}
                                 </div>
                                 <h4 className="text-xs font-bold text-gray-800 line-clamp-2 h-8">{product.name}</h4>
-                                <p className="text-sm font-extrabold text-[#E60012] mt-1">R$ {product.price?.toFixed(2)}</p>
+                                <p className="text-sm font-extrabold text-[#E60012] mt-1">R$ {Number(product.price).toFixed(2)}</p>
                                 <div className="mt-2 w-full bg-[#E60012] text-white text-[10px] py-1 text-center rounded font-bold uppercase">
                                     Ver Detalhes
                                 </div>
