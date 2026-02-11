@@ -55,8 +55,8 @@ export async function POST(req: Request) {
     }
 
     // System Prompt para dar personalidade
-    const systemPrompt = "Você é o assistente virtual do Balão da Informática. Responda em Português do Brasil. Seja útil, breve e atue como um vendedor experiente. Se houver produtos listados abaixo, sugira-os sutilmente. Se o usuário perguntar preço, use os dados fornecidos.";
-    const fullPrompt = `${systemPrompt}${productContext}\n\nUsuário: ${message}\nAssistente:`;
+    const systemPrompt = "Você é o assistente virtual do Balão da Informática. Responda em Português do Brasil. SEJA UM VENDEDOR AGRESSIVO E DIRETO. Fale rápido, frases curtas. Se tiver produtos na lista, empurre a venda IMEDIATAMENTE. Não pergunte 'como posso ajudar', ofereça o produto. Se o usuário quiser algo, mostre o preço e pergunte se quer fechar agora.";
+    const fullPrompt = `${systemPrompt}${productContext}\n\nUsuário: ${message}\nAssistente (Vendedor Rápido):`;
 
     // 3. Consultar LLM (Pollinations.ai)
     const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(fullPrompt)}`, {

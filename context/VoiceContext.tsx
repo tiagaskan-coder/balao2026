@@ -43,7 +43,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
   const recognitionRef = useRef<any>(null);
 
   // Configurações de voz
-  const [voiceConfig, setVoiceConfig] = useState({ voice_model: 'br_001' });
+  const [voiceConfig, setVoiceConfig] = useState({ voice_model: 'br_001', speed: 1.35 });
 
   // Carregar configurações salvas
   useEffect(() => {
@@ -52,6 +52,8 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
         if (saved) {
             try {
                 const parsed = JSON.parse(saved);
+                // Garantir velocidade se não existir
+                if (!parsed.speed) parsed.speed = 1.35;
                 setVoiceConfig(parsed);
             } catch (e) {
                 console.error("Erro ao ler config de voz", e);
@@ -71,6 +73,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
 
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'pt-BR';
+        utterance.rate = voiceConfig.speed || 1.35; // Velocidade rápida conforme solicitado
         
         // Tentar selecionar voz baseada na configuração
         const voices = window.speechSynthesis.getVoices();
@@ -103,11 +106,29 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
              if (ptVoice) utterance.voice = ptVoice;
         }
 
-        utterance.onstart = () => setIsSpeaking(true);
-        utterance.onend = () => setIsSpeaking(false);
+        utterance.onstart = () => {
+            setIsSpeaking(true);
+            // Pausar reconhecimento enquanto fala para não se ouvir
+            if (recognitionRef.current) recognitionRef.current.stop();
+        };
+        
+        utterance.onend = () => {
+            setIsSpeaking(false);
+            // Retomar reconhecimento automaticamente após falar (Modo Conversa Contínua)
+            if (isConnected) {
+                setTimeout(() => {
+                    try {
+                        recognitionRef.current?.start();
+                    } catch(e) { /* ignorar se já estiver rodando */ }
+                }, 100);
+            }
+        };
+
         utterance.onerror = (e) => {
             console.error("Erro no TTS:", e);
             setIsSpeaking(false);
+            // Tentar retomar mesmo com erro
+            if (isConnected) recognitionRef.current?.start();
         };
         
         window.speechSynthesis.speak(utterance);
@@ -120,7 +141,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (SpeechRecognition) {
         const recognition = new SpeechRecognition();
-        recognition.continuous = false; // Para ao terminar de falar
+        recognition.continuous = false; // Mantemos false para processar frase a frase, mas reiniciamos no onend
         recognition.interimResults = false;
         recognition.lang = 'pt-BR';
 
@@ -138,6 +159,17 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
         recognition.onend = () => {
           setIsListening(false);
           console.log("Reconhecimento de voz finalizado");
+          // Se não estiver falando e estiver conectado, reiniciar escuta (Loop Contínuo)
+          if (isConnected && !window.speechSynthesis.speaking) {
+              setTimeout(() => {
+                  try {
+                    // Só reinicia se ainda estiver conectado
+                    recognition.start(); 
+                  } catch (e) {
+                    console.log("Erro ao reiniciar escuta:", e);
+                  }
+              }, 300);
+          }
         };
 
         recognition.onresult = (event: any) => {
