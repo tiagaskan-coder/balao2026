@@ -1,17 +1,18 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { 
   Plus, Trash2, TrendingUp, TrendingDown, DollarSign, 
-  PieChart, Share2, FileDown, BrainCircuit, Printer, AlertTriangle, Minus
+  Share2, Printer, Minus, Calendar, Trash
 } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
-import { analyzeWeeklyClosing, WeeklyAnalysis } from "@/lib/ai-service-specific";
 
 // --- Types ---
 interface ServiceOrder {
   id: string;
   osNumber: string;
+  client: string;
+  pixReceipt: string; // Quem recebeu o pix ou chave
   status: "Entrada" | "Reparo" | "Concluída";
   date: string; // YYYY-MM-DD
   
@@ -54,9 +55,6 @@ export default function WeeklyClosing() {
   // State
   const [orders, setOrders] = useState<ServiceOrder[]>([]);
   const [expenses, setExpenses] = useState<OperationalExpense[]>([]);
-  const [loadingAI, setLoadingAI] = useState(false);
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  const [aiAnalysis, setAiAnalysis] = useState<WeeklyAnalysis | null>(null);
 
   // Date Filter State
   const [filterStart, setFilterStart] = useState("");
@@ -66,6 +64,8 @@ export default function WeeklyClosing() {
   const [newOrder, setNewOrder] = useState<Partial<ServiceOrder>>({
     status: "Entrada",
     paymentMethod: "PIX",
+    client: "",
+    pixReceipt: "",
     laborIncome: 0,
     partsIncome: 0,
     laborExpense: 0,
@@ -91,7 +91,6 @@ export default function WeeklyClosing() {
           const decoded = JSON.parse(atob(data));
           if (decoded.orders) setOrders(decoded.orders);
           if (decoded.expenses) setExpenses(decoded.expenses);
-          if (decoded.aiAnalysis) setAiAnalysis(decoded.aiAnalysis);
           showToast("Dados carregados do link compartilhado!");
           window.history.replaceState({}, "", "/fechamento");
           return;
@@ -102,11 +101,9 @@ export default function WeeklyClosing() {
 
       const savedOrders = localStorage.getItem("techflow_orders_v2");
       const savedExpenses = localStorage.getItem("techflow_expenses");
-      const savedAnalysis = localStorage.getItem("techflow_analysis_v2");
       
       if (savedOrders) setOrders(JSON.parse(savedOrders));
       if (savedExpenses) setExpenses(JSON.parse(savedExpenses));
-      if (savedAnalysis) setAiAnalysis(JSON.parse(savedAnalysis));
     }
   }, []);
 
@@ -115,14 +112,11 @@ export default function WeeklyClosing() {
     if (typeof window !== "undefined") {
       localStorage.setItem("techflow_orders_v2", JSON.stringify(orders));
       localStorage.setItem("techflow_expenses", JSON.stringify(expenses));
-      if (aiAnalysis) {
-        localStorage.setItem("techflow_analysis_v2", JSON.stringify(aiAnalysis));
-      }
     }
-  }, [orders, expenses, aiAnalysis]);
+  }, [orders, expenses]);
 
   // Calculations
-  const filteredOrders = React.useMemo(() => {
+  const filteredOrders = useMemo(() => {
     return orders.filter(o => {
       if (filterStart && o.date < filterStart) return false;
       if (filterEnd && o.date > filterEnd) return false;
@@ -130,7 +124,7 @@ export default function WeeklyClosing() {
     });
   }, [orders, filterStart, filterEnd]);
 
-  const filteredExpenses = React.useMemo(() => {
+  const filteredExpenses = useMemo(() => {
     return expenses.filter(e => {
       if (filterStart && e.date < filterStart) return false;
       if (filterEnd && e.date > filterEnd) return false;
@@ -138,7 +132,7 @@ export default function WeeklyClosing() {
     });
   }, [expenses, filterStart, filterEnd]);
 
-  const summary: FinancialSummary = React.useMemo(() => {
+  const summary: FinancialSummary = useMemo(() => {
     const directCosts = filteredOrders.reduce((sum, o) => sum + (o.laborExpense || 0) + (o.partsExpense || 0), 0);
     const revenue = filteredOrders.reduce((sum, o) => sum + (o.laborIncome || 0) + (o.partsIncome || 0), 0);
     const opExpenses = filteredExpenses.reduce((sum, e) => sum + (e.value || 0), 0);
@@ -161,6 +155,80 @@ export default function WeeklyClosing() {
     };
   }, [filteredOrders, filteredExpenses]);
 
+  // Weeks Calculation
+  const availableWeeks = useMemo(() => {
+    const allDates = [...orders.map(o => o.date), ...expenses.map(e => e.date)].sort();
+    if (allDates.length === 0) return [];
+
+    const weeks: { start: string; end: string; label: string }[] = [];
+    const processed = new Set<string>();
+
+    allDates.forEach(dateStr => {
+      if (!dateStr) return;
+      const date = new Date(dateStr);
+      // Get Sunday of that week
+      const start = new Date(date);
+      start.setDate(date.getDate() - date.getDay());
+      const startStr = start.toISOString().split('T')[0];
+
+      if (processed.has(startStr)) return;
+      processed.add(startStr);
+
+      const end = new Date(start);
+      end.setDate(start.getDate() + 6);
+      const endStr = end.toISOString().split('T')[0];
+
+      weeks.push({
+        start: startStr,
+        end: endStr,
+        label: `Semana ${start.toLocaleDateString('pt-BR')} - ${end.toLocaleDateString('pt-BR')}`
+      });
+    });
+
+    return weeks.sort((a, b) => b.start.localeCompare(a.start));
+  }, [orders, expenses]);
+
+  // Months Calculation
+  const availableMonths = useMemo(() => {
+    const allDates = [...orders.map(o => o.date), ...expenses.map(e => e.date)].sort();
+    if (allDates.length === 0) return [];
+
+    const months: { start: string; end: string; label: string }[] = [];
+    const processed = new Set<string>();
+
+    allDates.forEach(dateStr => {
+      if (!dateStr) return;
+      // Ajuste de fuso horário simples para garantir mês correto
+      const [y, m, d] = dateStr.split('-').map(Number);
+      const date = new Date(y, m - 1, d);
+      
+      const year = date.getFullYear();
+      const month = date.getMonth(); // 0-11
+      const key = `${year}-${month}`;
+
+      if (processed.has(key)) return;
+      processed.add(key);
+
+      const start = new Date(year, month, 1);
+      const end = new Date(year, month + 1, 0); // Last day of month
+
+      // Format YYYY-MM-DD manually to avoid timezone issues
+      const startStr = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+      const endStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(end.getDate()).padStart(2, '0')}`;
+      
+      const monthName = start.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
+      months.push({
+        start: startStr,
+        end: endStr,
+        label: monthName.charAt(0).toUpperCase() + monthName.slice(1)
+      });
+    });
+
+    return months.sort((a, b) => b.start.localeCompare(a.start));
+  }, [orders, expenses]);
+
+
   // Handlers - Orders
   const handleAddOrder = () => {
     if (!newOrder.osNumber) {
@@ -171,6 +239,8 @@ export default function WeeklyClosing() {
     const order: ServiceOrder = {
       id: crypto.randomUUID(),
       osNumber: newOrder.osNumber,
+      client: newOrder.client || "",
+      pixReceipt: newOrder.pixReceipt || "",
       status: newOrder.status as any || "Entrada",
       paymentMethod: newOrder.paymentMethod as any || "PIX",
       laborIncome: Number(newOrder.laborIncome) || 0,
@@ -184,6 +254,8 @@ export default function WeeklyClosing() {
     setNewOrder({
       status: "Entrada",
       paymentMethod: "PIX",
+      client: "",
+      pixReceipt: "",
       laborIncome: 0,
       partsIncome: 0,
       laborExpense: 0,
@@ -224,69 +296,21 @@ export default function WeeklyClosing() {
     showToast("Despesa removida.");
   };
 
-  // AI & Export
-  const handleAIAnalysis = async () => {
-    setLoadingAI(true);
-    try {
-      const result = await analyzeWeeklyClosing({
-        totalRevenue: summary.grossRevenue,
-        totalExpenses: summary.totalExpenses,
-        netProfit: summary.netProfit,
-        ordersCount: filteredOrders.length,
-        paymentMix: summary.paymentMix,
-        topExpenses: filteredOrders.map(o => ({
-          name: `OS ${o.osNumber} (Custos)`,
-          value: (o.laborExpense || 0) + (o.partsExpense || 0)
-        })).filter(x => x.value > 0).sort((a,b) => b.value - a.value).slice(0, 5),
-        otherExpenses: filteredExpenses
-      });
-      setAiAnalysis(result);
-      showToast("Análise de IA Concluída!");
-    } catch (error) {
-      console.error(error);
-      showToast("Erro ao analisar com IA.");
-    } finally {
-      setLoadingAI(false);
-    }
+  // Actions
+  const handlePrint = () => {
+    window.print();
   };
 
-  const generatePDF = async () => {
-    if (typeof window === "undefined") return;
-    
-    setIsGeneratingPDF(true);
-    showToast("Iniciando geração do PDF...");
-
-    try {
-      // Importação segura do html2pdf
-      // @ts-ignore
-      const html2pdf = (await import("html2pdf.js")).default;
-      
-      const element = document.getElementById("report-content");
-      if (!element) {
-        throw new Error("Elemento do relatório não encontrado.");
-      }
-
-      // Opções simplificadas para evitar erros de renderização
-      const opt = {
-        margin: 10, // Margem uniforme em mm
-        filename: `fechamento-${new Date().toISOString().split('T')[0]}.pdf`,
-        image: { type: 'jpeg' as const, quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
-      };
-      
-      await html2pdf().set(opt).from(element).save();
-      showToast("PDF salvo com sucesso!");
-    } catch (error) {
-      console.error("Erro detalhado ao gerar PDF:", error);
-      showToast("Erro ao gerar PDF. Tente imprimir pelo navegador (Ctrl+P).");
-    } finally {
-      setIsGeneratingPDF(false);
+  const handleClearAll = () => {
+    if (confirm("Tem certeza que deseja apagar TODOS os lançamentos? Esta ação não pode ser desfeita.")) {
+      setOrders([]);
+      setExpenses([]);
+      showToast("Todos os dados foram apagados.");
     }
   };
 
   const generateShareLink = () => {
-    const state = { orders, expenses, aiAnalysis };
+    const state = { orders, expenses };
     const encoded = btoa(JSON.stringify(state));
     const url = `${window.location.origin}${window.location.pathname}?data=${encoded}`;
     navigator.clipboard.writeText(url);
@@ -300,45 +324,94 @@ export default function WeeklyClosing() {
       <div className="max-w-6xl mx-auto space-y-8">
         
         {/* Header Actions */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 no-print">
+        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 no-print">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">TechFlow Assist</h1>
-            <p className="text-slate-500">Fechamento Semanal Inteligente</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Fechamento Semanal</h1>
+            <p className="text-slate-500">Assistência Balão da Informática</p>
           </div>
 
-          {/* Date Filter */}
-          <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
-            <span className="text-xs font-bold text-slate-500 uppercase">Período:</span>
-            <input 
-              type="date" 
-              value={filterStart}
-              onChange={e => setFilterStart(e.target.value)}
-              className="p-1 border rounded text-xs text-slate-600"
-            />
-            <span className="text-slate-400">-</span>
-            <input 
-              type="date" 
-              value={filterEnd}
-              onChange={e => setFilterEnd(e.target.value)}
-              className="p-1 border rounded text-xs text-slate-600"
-            />
-            {(filterStart || filterEnd) && (
-              <button 
-                onClick={() => { setFilterStart(""); setFilterEnd(""); }}
-                className="text-xs text-red-500 hover:text-red-700 font-medium px-2"
-              >
-                Limpar
-              </button>
+          <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+            {/* Period Selector */}
+            {(availableWeeks.length > 0 || availableMonths.length > 0) && (
+              <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
+                 <Calendar size={16} className="text-slate-400" />
+                 <select 
+                   className="text-xs text-slate-600 bg-transparent outline-none"
+                   onChange={(e) => {
+                     const [start, end] = e.target.value.split('|');
+                     if (start && end) {
+                       setFilterStart(start);
+                       setFilterEnd(end);
+                     } else {
+                       setFilterStart("");
+                       setFilterEnd("");
+                     }
+                   }}
+                 >
+                   <option value="|">Todo o Período</option>
+                   
+                   {availableMonths.length > 0 && (
+                     <optgroup label="Meses">
+                       {availableMonths.map((m, idx) => (
+                         <option key={`m-${idx}`} value={`${m.start}|${m.end}`}>
+                           {m.label}
+                         </option>
+                       ))}
+                     </optgroup>
+                   )}
+
+                   {availableWeeks.length > 0 && (
+                     <optgroup label="Semanas">
+                       {availableWeeks.map((week, idx) => (
+                         <option key={`w-${idx}`} value={`${week.start}|${week.end}`}>
+                           {week.label}
+                         </option>
+                       ))}
+                     </optgroup>
+                   )}
+                 </select>
+              </div>
             )}
-          </div>
 
-          <div className="flex gap-2">
-            <button onClick={generateShareLink} className="p-2 bg-white border border-slate-200 rounded hover:bg-slate-50 text-slate-600 flex items-center gap-2">
-              <Share2 size={18} /> <span className="hidden md:inline">Compartilhar</span>
-            </button>
-            <button onClick={generatePDF} disabled={isGeneratingPDF} className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-              <FileDown size={18} /> <span className="hidden md:inline">{isGeneratingPDF ? "Gerando..." : "Exportar PDF"}</span>
-            </button>
+            {/* Date Filter */}
+            <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
+              <span className="text-xs font-bold text-slate-500 uppercase hidden md:inline">Período:</span>
+              <input 
+                type="date" 
+                value={filterStart}
+                onChange={e => setFilterStart(e.target.value)}
+                className="p-1 border rounded text-xs text-slate-600 w-24 md:w-auto"
+              />
+              <span className="text-slate-400">-</span>
+              <input 
+                type="date" 
+                value={filterEnd}
+                onChange={e => setFilterEnd(e.target.value)}
+                className="p-1 border rounded text-xs text-slate-600 w-24 md:w-auto"
+              />
+              {(filterStart || filterEnd) && (
+                <button 
+                  onClick={() => { setFilterStart(""); setFilterEnd(""); }}
+                  className="text-xs text-red-500 hover:text-red-700 font-medium px-2"
+                >
+                  <Minus size={14} />
+                </button>
+              )}
+            </div>
+            
+            <div className="flex gap-2 ml-auto xl:ml-0">
+               <button onClick={handleClearAll} className="p-2 bg-red-100 text-red-600 border border-red-200 rounded hover:bg-red-200 flex items-center gap-2" title="Apagar Tudo">
+                <Trash size={18} />
+              </button>
+
+              <button onClick={generateShareLink} className="p-2 bg-white border border-slate-200 rounded hover:bg-slate-50 text-slate-600 flex items-center gap-2">
+                <Share2 size={18} /> <span className="hidden md:inline">Link</span>
+              </button>
+              
+              <button onClick={handlePrint} className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2">
+                <Printer size={18} /> <span className="hidden md:inline">Imprimir</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -364,6 +437,14 @@ export default function WeeklyClosing() {
                 onChange={e => setNewOrder({...newOrder, osNumber: e.target.value})}
                 className="col-span-1 p-2 border rounded text-sm"
               />
+              <input 
+                type="text" 
+                placeholder="Nome do Cliente"
+                value={newOrder.client}
+                onChange={e => setNewOrder({...newOrder, client: e.target.value})}
+                className="col-span-2 p-2 border rounded text-sm"
+              />
+              
               <select 
                 value={newOrder.status}
                 onChange={e => setNewOrder({...newOrder, status: e.target.value as any})}
@@ -376,12 +457,19 @@ export default function WeeklyClosing() {
               <select 
                 value={newOrder.paymentMethod}
                 onChange={e => setNewOrder({...newOrder, paymentMethod: e.target.value as any})}
-                className="col-span-2 p-2 border rounded text-sm"
+                className="col-span-1 p-2 border rounded text-sm"
               >
                 <option>PIX</option>
                 <option>Cartão</option>
                 <option>Dinheiro</option>
               </select>
+              <input 
+                type="text" 
+                placeholder="Recebimento PIX (Nome/Chave)"
+                value={newOrder.pixReceipt}
+                onChange={e => setNewOrder({...newOrder, pixReceipt: e.target.value})}
+                className="col-span-2 p-2 border rounded text-sm"
+              />
               
               <div className="col-span-2 grid grid-cols-2 gap-2">
                 <div className="space-y-1">
@@ -431,7 +519,7 @@ export default function WeeklyClosing() {
 
               <button 
                 onClick={handleAddOrder}
-                className="col-span-4 mt-2 bg-slate-900 text-white p-2 rounded hover:bg-slate-800 text-sm font-medium"
+                className="col-span-2 md:col-span-4 mt-2 bg-slate-900 text-white p-2 rounded hover:bg-slate-800 text-sm font-medium"
               >
                 Adicionar OS
               </button>
@@ -489,15 +577,20 @@ export default function WeeklyClosing() {
         </div>
 
         {/* --- REPORT CONTENT (Printable) --- */}
-        <div id="report-content" className="bg-white p-8 rounded-xl shadow-lg border border-slate-200 space-y-8">
+        <div id="report-content" className="bg-white p-8 rounded-xl shadow-lg border border-slate-200 space-y-8 print:shadow-none print:border-none print:p-0">
           
           <div className="border-b pb-4 flex justify-between items-end">
             <div>
               <h2 className="text-2xl font-bold text-slate-800">Relatório de Fechamento</h2>
-              <p className="text-slate-500 text-sm">Gerado em {new Date().toLocaleDateString()}</p>
+              <p className="text-slate-500 text-sm">
+                {filterStart && filterEnd 
+                  ? `Período: ${new Date(filterStart).toLocaleDateString('pt-BR')} até ${new Date(filterEnd).toLocaleDateString('pt-BR')}`
+                  : `Gerado em ${new Date().toLocaleDateString('pt-BR')}`
+                }
+              </p>
             </div>
             <div className="text-right">
-              <p className="text-xs text-slate-400">TechFlow System</p>
+              <p className="text-xs text-slate-400">Balão da Informática</p>
             </div>
           </div>
 
@@ -508,7 +601,7 @@ export default function WeeklyClosing() {
                 <TrendingUp size={18} /> <span className="text-sm font-bold uppercase">Receita Bruta</span>
               </div>
               <p className="text-2xl font-bold text-green-800">{fmt(summary.grossRevenue)}</p>
-              <p className="text-xs text-green-600 mt-1">{orders.length} ordens de serviço</p>
+              <p className="text-xs text-green-600 mt-1">{filteredOrders.length} ordens de serviço</p>
             </div>
 
             <div className="p-4 bg-red-50 rounded-lg border border-red-100">
@@ -546,6 +639,8 @@ export default function WeeklyClosing() {
                   <thead className="text-xs text-slate-400 uppercase bg-slate-50">
                     <tr>
                       <th className="px-2 py-2">Data</th>
+                      <th className="px-2 py-2">Rec. Pix</th>
+                      <th className="px-2 py-2">Cliente</th>
                       <th className="px-2 py-2">OS</th>
                       <th className="px-2 py-2">Rec.</th>
                       <th className="px-2 py-2">Custo</th>
@@ -562,6 +657,8 @@ export default function WeeklyClosing() {
                           <td className="px-2 py-2 text-slate-500 text-xs">
                             {order.date ? new Date(order.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'}) : '-'}
                           </td>
+                          <td className="px-2 py-2 text-xs text-slate-600">{order.pixReceipt || '-'}</td>
+                          <td className="px-2 py-2 font-medium text-slate-700">{order.client || '-'}</td>
                           <td className="px-2 py-2 font-medium">{order.osNumber}</td>
                           <td className="px-2 py-2 text-green-600">{fmt(rev)}</td>
                           <td className="px-2 py-2 text-red-500">{fmt(cost)}</td>
@@ -574,8 +671,8 @@ export default function WeeklyClosing() {
                         </tr>
                       );
                     })}
-                    {orders.length === 0 && (
-                      <tr><td colSpan={5} className="text-center py-4 text-slate-400">Nenhuma OS lançada.</td></tr>
+                    {filteredOrders.length === 0 && (
+                      <tr><td colSpan={8} className="text-center py-4 text-slate-400">Nenhuma OS encontrada.</td></tr>
                     )}
                   </tbody>
                 </table>
@@ -617,6 +714,9 @@ export default function WeeklyClosing() {
                           </td>
                         </tr>
                       ))}
+                      {filteredExpenses.length === 0 && (
+                        <tr><td colSpan={5} className="text-center py-4 text-slate-400">Nenhuma despesa encontrada.</td></tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -644,59 +744,6 @@ export default function WeeklyClosing() {
             </div>
           </div>
 
-          {/* AI Analysis Section */}
-          {aiAnalysis && (
-            <div className="mt-8 border-t pt-6 bg-indigo-50/50 p-6 rounded-xl border-indigo-100">
-              <div className="flex items-center gap-2 mb-4">
-                <BrainCircuit className="text-indigo-600" />
-                <h3 className="text-lg font-bold text-indigo-900">Análise Inteligente (Gemini)</h3>
-              </div>
-              
-              <div className="space-y-4 text-sm text-slate-700">
-                <p className="italic text-lg font-medium text-slate-800">"{aiAnalysis.summary}"</p>
-                
-                <div className="grid md:grid-cols-3 gap-4 mt-4">
-                  <div className="bg-white p-4 rounded-lg shadow-sm border border-green-100">
-                    <strong className="block text-green-700 mb-2 uppercase text-xs">Pontos Positivos</strong>
-                    <ul className="list-disc pl-4 space-y-1">
-                      {aiAnalysis.positives.map((p, i) => <li key={i}>{p}</li>)}
-                    </ul>
-                  </div>
-                  <div className="bg-white p-4 rounded-lg shadow-sm border border-orange-100">
-                    <strong className="block text-orange-700 mb-2 uppercase text-xs">Alertas</strong>
-                    <ul className="list-disc pl-4 space-y-1">
-                      {aiAnalysis.alerts.map((a, i) => <li key={i}>{a}</li>)}
-                    </ul>
-                  </div>
-                  <div className="bg-white p-4 rounded-lg shadow-sm border border-blue-100">
-                    <strong className="block text-blue-700 mb-2 uppercase text-xs">Dicas Estratégicas</strong>
-                    <ul className="list-disc pl-4 space-y-1">
-                      {aiAnalysis.tips.map((t, i) => <li key={i}>{t}</li>)}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-        </div>
-
-        {/* AI Trigger Action (No Print) */}
-        <div className="flex justify-center no-print pb-12">
-          <button 
-            onClick={handleAIAnalysis}
-            disabled={loadingAI || orders.length === 0}
-            className="flex items-center gap-3 px-8 py-4 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loadingAI ? (
-              <>Calculando...</>
-            ) : (
-              <>
-                <BrainCircuit size={24} /> 
-                <span className="text-lg font-medium">Gerar Análise Financeira com IA</span>
-              </>
-            )}
-          </button>
         </div>
 
       </div>
