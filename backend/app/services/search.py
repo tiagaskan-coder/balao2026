@@ -28,10 +28,25 @@ class SearchService:
             # Se não retornar nada, fallback para ILIKE (como solicitado anteriormente, mas aqui no backend python)
             if not products:
                 print("FTS returned empty, trying ILIKE fallback...")
-                # Python fallback logic logic is harder with chaining dynamic ilikes efficiently via supabase-py without query builder complexity
-                # Let's try a simple name ilike for each term if needed, or just return empty for now to keep it fast.
-                # Or use the "or" operator logic if needed.
-                pass
+                # Simple fallback: split terms and try to find items matching ALL terms via ILIKE
+                # This is a bit manual without a query builder, but sufficient for fallback
+                # "Desktop 2025" -> name ilike %Desktop% AND name ilike %2025%
+                
+                terms = query.split()
+                if not terms:
+                    return []
+                
+                # Start with a base query
+                db_query = self.client.table("products").select("*")
+                
+                # Apply ilike for each term (PostgREST syntax: column=ilike.*term*)
+                # Note: supabase-py might not support chaining dynamic filters easily in a loop without re-assigning
+                # Correct way in supabase-py:
+                for term in terms:
+                    db_query = db_query.ilike("name_description", f"%{term}%")
+                
+                res = db_query.execute()
+                products = res.data
             
             return products
         except Exception as e:

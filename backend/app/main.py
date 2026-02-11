@@ -7,14 +7,14 @@ import base64
 import numpy as np
 from dotenv import load_dotenv
 
+# Carrega variáveis de ambiente ANTES de importar os serviços
+load_dotenv()
+
 # Import Services
 from app.services.stt import stt_service
 from app.services.llm import llm_service
 from app.services.tts import tts_service
 from app.services.search import search_service
-
-# Carrega variáveis de ambiente
-load_dotenv()
 
 app = FastAPI(title="Balão Voice Agent API")
 
@@ -63,11 +63,22 @@ async def websocket_endpoint(websocket: WebSocket):
             # 2. Intent Recognition & Search
             # Simple heuristic: If it looks like a product search
             products = []
-            if any(k in user_text.lower() for k in ["procur", "busc", "tem", "preço", "custa", "comprar", "vende"]):
-                # Extract search terms (naive approach, assume whole text is query for now)
-                # Better: Use LLM to extract keywords, but for speed let's just search
-                search_query = user_text.replace("procurando", "").replace("buscando", "").replace("quero comprar", "").strip()
-                products = search_service.search_products(search_query)
+            # Expanded keyword list for better detection
+            search_keywords = ["procur", "busc", "tem", "preço", "custa", "comprar", "vende", "gostaria", "preciso", "queria", "ver", "mostra"]
+            
+            if any(k in user_text.lower() for k in search_keywords):
+                # Extract search terms (naive approach)
+                # Remove common stop words to isolate the product name
+                stop_words = ["procurando", "buscando", "quero comprar", "gostaria de", "tem", "o preço do", "quanto custa", "vende", "preciso de", "um", "uma", "o", "a", "por favor", "me mostra"]
+                search_query = user_text.lower()
+                for sw in stop_words:
+                    search_query = search_query.replace(sw, "")
+                
+                search_query = search_query.strip()
+                
+                if len(search_query) > 2: # Avoid searching for single letters or empty strings
+                    print(f"Detected search intent. Query: '{search_query}'")
+                    products = search_service.search_products(search_query)
                 
                 if products:
                     await websocket.send_json({
