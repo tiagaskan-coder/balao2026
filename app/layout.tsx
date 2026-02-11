@@ -104,7 +104,9 @@ export default async function RootLayout({
               <ToastProvider>
                 <AIContextProvider>
                   <div className="flex flex-col min-h-screen">
-                    <Sidebar categories={categories} />
+                    <Suspense fallback={<div className="w-64 hidden lg:block" />}>
+                      <Sidebar categories={categories} />
+                    </Suspense>
                     <div className="flex-1 flex flex-col min-h-screen">
                       {children}
                     </div>
