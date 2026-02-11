@@ -15,10 +15,13 @@ export default function VoiceWidget() {
     disconnect, 
     toggleListening, 
     messages, 
-    suggestedProducts 
+    suggestedProducts,
+    isOpen,
+    setIsOpen,
+    sendMessage
   } = useVoice();
   
-  const [isOpen, setIsOpen] = useState(false);
+  // const [isOpen, setIsOpen] = useState(false); // REMOVIDO: Usar do contexto
   const [hasInteracted, setHasInteracted] = useState(false);
 
   // Debounce helper
@@ -51,14 +54,13 @@ export default function VoiceWidget() {
   const handleSendText = (e: React.FormEvent) => {
       e.preventDefault();
       if (inputText.trim()) {
-          // Precisamos expor sendMessage do context ou usar um hack
-          // Como sendMessage não está exposto diretamente no destructuring lá em cima, vamos adicionar
-          // Nota: O context exporta sendMessage, precisamos pegá-lo
+          // sendMessage já está disponível no escopo via destructuring inicial
+          sendMessage(inputText);
+          setInputText("");
       }
   };
 
-  // Re-obter sendMessage do context
-  const { sendMessage } = useVoice();
+  // const { sendMessage } = useVoice(); // Removido: já obtido acima
   
   const submitText = (e: React.FormEvent) => {
       e.preventDefault();

@@ -220,6 +220,15 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
         };
 
         recognitionRef.current = recognition;
+
+        // Iniciar automaticamente se estiver conectado
+        if (isConnected) {
+            try {
+                recognition.start();
+            } catch (e) {
+                console.warn("Tentativa de início automático falhou:", e);
+            }
+        }
       } else {
         console.warn("Web Speech API não suportada neste navegador.");
       }
@@ -252,38 +261,43 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
   }, [messages]);
 
   // Tocar som de telefone chamando (Gerado via Web Audio API)
-  const playDialTone = () => {
-    return new Promise<void>((resolve) => {
-        try {
-            const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-            if (!AudioContext) { resolve(); return; }
+  const playDialTone = async () => {
+    try {
+        const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+        if (!AudioContext) return;
 
-            const ctx = new AudioContext();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
+        const ctx = new AudioContext();
+        
+        // Garantir que o contexto esteja ativo
+        if (ctx.state === 'suspended') {
+            await ctx.resume();
+        }
 
-            osc.connect(gain);
-            gain.connect(ctx.destination);
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
 
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(425, ctx.currentTime);
-            
-            gain.gain.setValueAtTime(0, ctx.currentTime);
-            gain.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.1);
-            gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 2.0);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
 
-            osc.start();
-            
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(425, ctx.currentTime);
+        
+        gain.gain.setValueAtTime(0, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.1);
+        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 2.0);
+
+        osc.start();
+        
+        return new Promise<void>((resolve) => {
             setTimeout(() => {
                 osc.stop();
                 ctx.close();
                 resolve();
             }, 2000);
-        } catch (e) {
-            console.error("Erro ao tocar som:", e);
-            resolve();
-        }
-    });
+        });
+    } catch (e) {
+        console.error("Erro ao tocar som:", e);
+    }
   };
 
   const connect = async () => {
