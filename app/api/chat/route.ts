@@ -1,120 +1,90 @@
+// Required Dependencies:
+// npm install groq-sdk
+
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import Groq from 'groq-sdk';
+import { Groq } from 'groq-sdk';
+import { searchProducts } from '@/utils/supabase';
+
+const apiKey = process.env.GROQ_API_KEY;
+const groq = apiKey ? new Groq({ apiKey }) : null;
 
 export async function POST(req: Request) {
+  let message = '';
+  let products: any[] = [];
+
   try {
-    const { message } = await req.json();
+    const body = await req.json();
+    message = body.message || '';
 
-    if (!message) {
-      return NextResponse.json({ error: 'Message is required' }, { status: 400 });
-    }
+    // 1. Camada de Dados: Busca produtos antes de chamar a IA
+    products = await searchProducts(message);
 
-    // Initialize Groq inside the handler to avoid build-time errors if env var is missing
-    const apiKey = process.env.GROQ_API_KEY;
-    if (!apiKey) {
-        console.error("GROQ_API_KEY is missing");
-        return NextResponse.json(
-            { text: "Erro de configuração: Chave de API não encontrada. Por favor, configure a variável de ambiente GROQ_API_KEY." },
-            { status: 500 }
-        );
-    }
+    if (!groq) throw new Error('Groq API Key missing');
 
-    const groq = new Groq({
-        apiKey: apiKey,
-    });
+    const productContext = products.length > 0 
+      ? JSON.stringify(products.map(p => ({ id: p.id, name: p.name, price: p.price })))
+      : "Nenhum produto encontrado.";
 
-    // 1. Buscar produtos no Supabase com base na mensagem do usuário
-    const supabase = await createClient();
-    
-    // Extrair termos de busca simples (remove stop words básicas)
-    const searchTerms = message.toLowerCase()
-        .replace(/qu[ae]ro|comprar|busco|procur[oa]|preciso|tem|voc[êe]|tem|aí/g, '')
-        .trim()
-        .split(' ')
-        .filter((t: string) => t.length > 2)
-        .slice(0, 3) // Limitar a 3 termos para não estourar a query
-        .join(' & ');
-
-    let products: any[] = [];
-    
-    if (searchTerms) {
-        // Busca usando Full Text Search ou ILIKE simples como fallback
-        const { data, error } = await supabase
-            .from('products')
-            .select('id, name, price, description, image_url')
-            .textSearch('name', searchTerms, { type: 'websearch', config: 'english' }) // Tenta busca inteligente
-            .limit(3);
-        
-        if (!error && data && data.length > 0) {
-            products = data;
-        } else {
-             // Fallback: Tentar ILIKE no primeiro termo se a busca textual falhar
-             const firstTerm = searchTerms.split('&')[0].trim();
-             if (firstTerm) {
-                 const { data: dataIlike } = await supabase
-                    .from('products')
-                    .select('id, name, price, description, image_url')
-                    .ilike('name', `%${firstTerm}%`)
-                    .limit(3);
-                 if (dataIlike) products = dataIlike;
-             }
-        }
-    }
-
-    // 2. Montar contexto para o LLM
-    let productContext = "";
-    if (products.length > 0) {
-        productContext = "\n\nProdutos encontrados no catálogo que podem interessar ao usuário:\n" + 
-            products.map(p => `- ${p.name}: R$ ${p.price.toFixed(2)}`).join("\n");
-    }
-
-    // System Prompt para dar personalidade
-    const systemPrompt = `Você é o assistente de voz do Balão da Informática.
-    
-    SUA MISSÃO: Vender produtos de informática. Aja como um vendedor consultivo experiente.
-    
-    REGRAS CRÍTICAS DE RESPOSTA (Latência Baixa):
-    1. Responda em UMA única frase curta sempre que possível.
-    2. NUNCA use listas, bullet points ou formatação complexa. O texto será falado.
-    3. CONSULTIVO: Se o usuário pedir algo genérico (ex: "quero um notebook"), PERGUNTE o uso (ex: "Para jogos, estudo ou trabalho?") antes de sugerir.
-    4. OFERTA: USE APENAS os produtos listados no contexto abaixo. Se a lista estiver vazia, diga que não encontrou exatamente isso no momento e pergunte se pode ajudar com outra coisa. NUNCA INVENTE PREÇOS OU PRODUTOS.
-    5. Seja coloquial, rápido e direto. Não seja robótico.
-    
-    Contexto de produtos:${productContext}`;
-    
-    // 3. Consultar LLM (Groq)
+    // 2. Camada de Inteligência: Gera resposta estruturada
     const completion = await groq.chat.completions.create({
-        messages: [
+      messages: [
+        {
+          role: 'system',
+          content: `
+            Você é o assistente virtual do "Balão da Informática".
+            OBJETIVO: Vender produtos e tirar dúvidas.
+            
+            CONTEXTO DE DADOS (Resultados da busca):
+            ${productContext}
+
+            INSTRUÇÕES:
+            1. Analise a pergunta do usuário e os produtos encontrados.
+            2. Se houver produtos, destaque o melhor preço ou característica.
+            3. Se NÃO houver produtos, peça mais detalhes gentilmente.
+            4. Responda em Português, de forma curta (max 2 frases faladas).
+
+            FORMATO JSON OBRIGATÓRIO:
             {
-                role: "system",
-                content: systemPrompt
-            },
-            {
-                role: "user",
-                content: message
+              "fala": "Texto para síntese de voz",
+              "produtos": [ ...lista original de produtos... ]
             }
-        ],
-        model: "llama-3.3-70b-versatile",
-        temperature: 0.6,
-        max_tokens: 150,
-        top_p: 1,
-        stream: false,
-        stop: null
+          `
+        },
+        { role: 'user', content: message }
+      ],
+      model: 'llama-3.3-70b-versatile',
+      response_format: { type: 'json_object' },
+      temperature: 0.6,
+      max_tokens: 250
     });
 
-    const text = completion.choices[0]?.message?.content || "Desculpe, não entendi.";
+    const rawContent = completion.choices[0].message.content || '{}';
+    let jsonResponse;
+    
+    try {
+      jsonResponse = JSON.parse(rawContent);
+    } catch (e) {
+      // Fallback caso a IA não retorne JSON
+      jsonResponse = {
+        fala: rawContent,
+        produtos: products
+      };
+    }
 
-    return NextResponse.json({
-      text: text,
-      products: products // Retorna os produtos para o frontend exibir cards
-    });
+    // Garante que a lista de produtos seja a real do banco, caso a IA alucine
+    if (!jsonResponse.produtos || jsonResponse.produtos.length === 0) {
+      jsonResponse.produtos = products;
+    }
+
+    return NextResponse.json(jsonResponse);
 
   } catch (error) {
-    console.error('Error in chat route:', error);
-    return NextResponse.json(
-      { text: "Desculpe, meu cérebro está um pouco lento agora. Tente novamente." },
-      { status: 500 }
-    );
+    console.error('❌ Erro na Camada de Inteligência:', error);
+    
+    // Tratamento de Erro solicitado
+    return NextResponse.json({
+      fala: "Estou com instabilidade, mas aqui estão os produtos que encontrei.",
+      produtos: products // Retorna os produtos que conseguiu buscar antes do erro
+    });
   }
 }

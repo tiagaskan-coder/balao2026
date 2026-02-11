@@ -5,11 +5,11 @@ import { CartProvider } from "@/context/CartContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { SidebarProvider } from "@/context/SidebarContext";
-import { VoiceProvider } from "@/context/VoiceContext";
+import { AIContextProvider } from "@/context/AIContext"; // Nova Camada de Persistência
 import Footer from "@/components/Footer";
 import Sidebar from "@/components/Sidebar";
 import ProductPreview from "@/components/ProductPreview";
-import VoiceWidget from "@/components/VoiceWidget";
+import AIOverlay from "@/components/AIOverlay"; // Nova Interface de Preview
 import { getCategories } from "@/lib/db";
 
 export const viewport: Viewport = {
@@ -98,27 +98,29 @@ export default async function RootLayout({
       <body
         className={`antialiased flex flex-col min-h-screen overflow-x-hidden`}
       >
+        <AuthProvider>
+          <CartProvider>
+            <SidebarProvider>
+              <ToastProvider>
+                <AIContextProvider>
+                  <div className="flex flex-col min-h-screen">
+                    <Sidebar categories={categories} />
+                    <div className="flex-1 flex flex-col min-h-screen">
+                      {children}
+                    </div>
+                    <Footer />
+                  </div>
+                  <ProductPreview />
+                  <AIOverlay />
+                </AIContextProvider>
+              </ToastProvider>
+            </SidebarProvider>
+          </CartProvider>
+        </AuthProvider>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <AuthProvider>
-          <ToastProvider>
-            <CartProvider>
-              <Suspense fallback={null}>
-                <SidebarProvider>
-                  <VoiceProvider>
-                    <Sidebar categories={categories} mobileOnly />
-                    {children}
-                    <ProductPreview />
-                    <VoiceWidget />
-                    <Footer />
-                  </VoiceProvider>
-                </SidebarProvider>
-              </Suspense>
-            </CartProvider>
-          </ToastProvider>
-        </AuthProvider>
       </body>
     </html>
   );

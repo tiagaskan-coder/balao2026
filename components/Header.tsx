@@ -9,7 +9,7 @@ import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useSidebar } from "@/context/SidebarContext";
-import { useVoice } from "@/context/VoiceContext";
+import { useAI } from "@/context/AIContext";
 import { Product } from "@/lib/utils";
 import SearchPreview from "@/components/SearchPreview";
 
@@ -19,7 +19,7 @@ export default function Header() {
   const { cartCount } = useCart();
   const { user } = useAuth();
   const { toggleSidebar } = useSidebar();
-  const { isOpen, setIsOpen, connect, isConnected } = useVoice();
+  const { isListening, startListening, stopListening } = useAI();
   const [logoClicks, setLogoClicks] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   
@@ -153,19 +153,22 @@ export default function Header() {
         {/* Botão de Assistente de Voz (Desktop/Mobile - Ao lado do Logo) */}
         <button
             onClick={() => {
-                setIsOpen(true);
-                if (!isConnected) connect();
+                if (isListening) {
+                    stopListening();
+                } else {
+                    startListening();
+                }
             }}
             className="p-2 text-gray-700 hover:text-[#E60012] transition-colors active:scale-95 flex flex-col items-center gap-1 group"
             title="Falar com Assistente"
         >
             <div className="relative">
-                <div className={`p-1.5 rounded-full transition-all duration-300 ${isOpen ? 'bg-[#E60012] text-white' : 'bg-gray-100 text-gray-600 group-hover:bg-[#E60012]/10 group-hover:text-[#E60012]'}`}>
+                <div className={`p-1.5 rounded-full transition-all duration-300 ${isListening ? 'bg-[#E60012] text-white animate-pulse' : 'bg-gray-100 text-gray-600 group-hover:bg-[#E60012]/10 group-hover:text-[#E60012]'}`}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
                 </div>
                 {/* Indicador de Status */}
-                {isConnected && !isOpen && (
-                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></span>
+                {isListening && (
+                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white animate-ping"></span>
                 )}
             </div>
             <span className="text-[10px] font-bold hidden md:block">Assistente</span>
