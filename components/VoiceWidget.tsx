@@ -71,110 +71,112 @@ export default function VoiceWidget() {
         <div className="fixed bottom-40 right-6 z-[9998] w-[90vw] max-w-[400px] h-[500px] bg-white rounded-2xl shadow-2xl flex flex-col border border-gray-100 overflow-hidden font-sans">
           
           {/* Header */}
-          <div className="bg-gradient-to-r from-[#E60012] to-red-700 p-4 text-white flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-white/20 rounded-full">
-                <Mic size={20} className="text-white" />
-              </div>
-              <div>
-                <h3 className="font-bold text-sm">Assistente Balão</h3>
-                <div className="flex items-center gap-1.5">
-                  <span className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-400" : "bg-red-400"}`}></span>
-                  <span className="text-xs text-white/90">{isConnected ? "Online" : "Conectando..."}</span>
-                </div>
-              </div>
-            </div>
-            {/* Visualizer (Fake wave for now) */}
-            {isListening && (
-               <div className="flex gap-1 items-end h-4">
-                  <div className="w-1 h-3 bg-white animate-pulse"></div>
-                  <div className="w-1 h-5 bg-white animate-pulse delay-75"></div>
-                  <div className="w-1 h-2 bg-white animate-pulse delay-150"></div>
-                  <div className="w-1 h-4 bg-white animate-pulse"></div>
-               </div>
-            )}
-          </div>
-
-          {/* Chat Area */}
-          <div className="flex-1 overflow-y-auto p-4 bg-gray-50 space-y-4">
-            {messages.length === 0 && (
-              <div className="text-center text-gray-400 mt-10 text-sm">
-                <p>Olá! Eu sou o assistente virtual do Balão.</p>
-                <p className="mt-2">Pressione o microfone para falar.</p>
-                <p className="mt-1">Ex: "Estou procurando um PC Gamer barato"</p>
-              </div>
-            )}
+          <div className="bg-[#1a1a1a] p-6 text-white flex flex-col items-center justify-center h-full relative">
             
-            {messages.map((msg, idx) => (
-              <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[80%] p-3 rounded-xl text-sm ${
-                  msg.role === 'user' 
-                    ? 'bg-blue-600 text-white rounded-tr-none' 
-                    : 'bg-white border border-gray-200 text-gray-800 rounded-tl-none shadow-sm'
-                }`}>
-                  {msg.content}
+            {/* Botão Fechar */}
+            <button 
+                onClick={handleToggleOpen}
+                className="absolute top-4 right-4 p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
+            >
+                <X size={20} />
+            </button>
+
+            {/* Status Connection */}
+            <div className="absolute top-4 left-4 flex items-center gap-2">
+                 <div className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-500 animate-pulse" : "bg-red-500"}`}></div>
+                 <span className="text-xs font-medium text-white/70">{isConnected ? "Em chamada..." : "Conectando"}</span>
+            </div>
+
+            {/* Avatar / Visualizer Central */}
+            <div className="flex-1 flex flex-col items-center justify-center w-full space-y-8 mt-4">
+                
+                {/* Avatar */}
+                <div className="relative">
+                    <div className={`w-32 h-32 rounded-full border-4 flex items-center justify-center bg-gray-800 shadow-2xl ${
+                        isListening ? "border-green-500 animate-pulse" : "border-gray-600"
+                    }`}>
+                        <div className="relative z-10">
+                            <Image 
+                                src="https://github.com/shadcn.png" 
+                                alt="Agent" 
+                                width={80} 
+                                height={80} 
+                                className="rounded-full opacity-80"
+                            />
+                        </div>
+                        {/* Ondas de som (Animação de fala) */}
+                        {messages.length > 0 && messages[messages.length-1].role === 'assistant' && !isListening && (
+                             <span className="absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-20 animate-ping"></span>
+                        )}
+                    </div>
+                    {isListening && (
+                        <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-green-400 text-sm font-bold whitespace-nowrap">
+                            Ouvindo você...
+                        </div>
+                    )}
                 </div>
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
+
+                {/* Última Mensagem (Legenda) */}
+                <div className="w-full max-w-[90%] text-center space-y-2 min-h-[60px]">
+                    {messages.length > 0 ? (
+                        <p className="text-lg font-medium text-white/90 leading-relaxed animate-fade-in">
+                            "{messages[messages.length-1].content}"
+                        </p>
+                    ) : (
+                        <p className="text-gray-400">Aguardando início...</p>
+                    )}
+                </div>
+
+                {/* Product Suggestions (Cards Overlay) */}
+                {suggestedProducts.length > 0 && (
+                    <div className="w-full overflow-x-auto pb-4 px-2 flex gap-4 snap-x justify-center">
+                        {suggestedProducts.map(product => (
+                            <Link 
+                                key={product.id}
+                                href={`/product/${product.id}`} 
+                                className="flex-shrink-0 w-40 bg-white rounded-xl shadow-lg p-3 snap-center transform hover:scale-105 transition-transform"
+                            >
+                                <div className="relative w-full h-24 mb-2 bg-gray-50 rounded-lg overflow-hidden">
+                                    {product.image ? (
+                                        <Image src={product.image} alt={product.name} fill className="object-contain" />
+                                    ) : (
+                                        <div className="flex items-center justify-center h-full text-gray-300"><ShoppingCart size={24} /></div>
+                                    )}
+                                </div>
+                                <h4 className="text-xs font-bold text-gray-800 line-clamp-2 h-8">{product.name}</h4>
+                                <p className="text-sm font-extrabold text-[#E60012] mt-1">R$ {product.price?.toFixed(2)}</p>
+                                <div className="mt-2 w-full bg-[#E60012] text-white text-[10px] py-1 text-center rounded font-bold uppercase">
+                                    Ver Detalhes
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                )}
+
+            </div>
+
+            {/* Footer Controls (Phone Style) */}
+            <div className="w-full pt-6 pb-2 flex items-center justify-center gap-8">
+                <button 
+                    onClick={toggleListening}
+                    className={`p-4 rounded-full transition-all transform hover:scale-110 ${
+                        isListening ? "bg-white text-black" : "bg-gray-700 text-white"
+                    }`}
+                >
+                    {isListening ? <Volume2 size={24} /> : <Mic size={24} />}
+                </button>
+
+                <button 
+                    onClick={handleToggleOpen}
+                    className="p-4 rounded-full bg-red-600 text-white shadow-lg transform hover:scale-110"
+                >
+                    <span className="sr-only">Desligar</span>
+                    <X size={24} />
+                </button>
+            </div>
+            
           </div>
 
-          {/* Product Suggestions Carousel (Horizontal Scroll) */}
-          {suggestedProducts.length > 0 && (
-             <div className="bg-white border-t border-gray-100 p-3">
-                <p className="text-xs font-bold text-gray-500 mb-2 px-1">Produtos Sugeridos</p>
-                <div className="flex gap-3 overflow-x-auto pb-2 snap-x">
-                   {suggestedProducts.map(product => (
-                      <Link 
-                        key={product.id}
-                        href={`/product/${product.id}`} 
-                        className="flex-shrink-0 w-32 bg-gray-50 rounded-lg border border-gray-100 p-2 snap-center hover:border-red-200 transition-colors group"
-                      >
-                         <div className="relative w-full h-24 mb-2 bg-white rounded-md overflow-hidden">
-                           {product.image ? (
-                              <Image 
-                                src={product.image} 
-                                alt={product.name} 
-                                fill 
-                                className="object-contain p-1"
-                              />
-                           ) : (
-                               <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-300">
-                                  <ShoppingCart size={20} />
-                               </div>
-                            )}
-                         </div>
-                         <p className="text-[10px] font-medium text-gray-700 line-clamp-2 leading-tight group-hover:text-[#E60012]">
-                            {product.name}
-                         </p>
-                         <p className="text-xs font-bold text-[#E60012] mt-1">
-                            {product.price}
-                         </p>
-                      </Link>
-                   ))}
-                </div>
-             </div>
-          )}
-
-          {/* Footer Controls */}
-          <div className="p-4 bg-white border-t border-gray-100 flex items-center justify-center gap-4">
-             <button
-               onClick={toggleListening}
-               disabled={!isConnected}
-               className={`p-4 rounded-full shadow-lg transition-all ${
-                 isListening 
-                   ? "bg-red-100 text-[#E60012] scale-110 border-2 border-[#E60012]" 
-                   : "bg-[#E60012] text-white hover:bg-red-700 hover:scale-105"
-               } disabled:opacity-50 disabled:cursor-not-allowed`}
-             >
-               <Mic size={28} />
-             </button>
-             {isListening && (
-                <span className="absolute bottom-6 text-xs text-gray-500 font-medium animate-pulse">
-                   Ouvindo...
-                </span>
-             )}
-          </div>
 
         </div>
       )}
