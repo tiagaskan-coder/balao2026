@@ -21,6 +21,16 @@ export default function AISettingsPage() {
   const [testOutput, setTestOutput] = useState("");
 
   useEffect(() => {
+    // Load config from LocalStorage
+    const savedConfig = localStorage.getItem("balao_ai_config");
+    if (savedConfig) {
+      try {
+        setConfig(prev => ({ ...prev, ...JSON.parse(savedConfig) }));
+      } catch (e) {
+        console.error("Erro ao carregar configurações", e);
+      }
+    }
+
     // Check Status
     setTimeout(() => {
       setStatus({
@@ -29,10 +39,13 @@ export default function AISettingsPage() {
         supabase: "online"
       });
     }, 1000);
-  }, [config.provider]);
+  }, []); // Run once on mount
 
   const handleSave = () => {
-    alert("Configurações salvas! (Modo: " + (config.provider === 'serverless' ? "Online Serverless" : "Local Ollama") + ")");
+    localStorage.setItem("balao_ai_config", JSON.stringify(config));
+    // Disparar evento para atualizar outros componentes se necessário
+    window.dispatchEvent(new Event("storage"));
+    alert("Configurações salvas e aplicadas! (Modo: " + (config.provider === 'serverless' ? "Online Serverless" : "Local Ollama") + ")");
   };
 
   const handleTest = async () => {

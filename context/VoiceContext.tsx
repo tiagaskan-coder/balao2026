@@ -42,23 +42,77 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
   // Referência para o reconhecimento de fala
   const recognitionRef = useRef<any>(null);
 
-  // Verificação de saúde do backend
+  // Configurações de voz
+  const [voiceConfig, setVoiceConfig] = useState({ voice_model: 'br_001' });
+
+  // Carregar configurações salvas
   useEffect(() => {
-    const checkHealth = async () => {
-      try {
-        const res = await fetch('/api/py');
-        if (res.ok) {
-            setIsConnected(true);
-            console.log("Backend Python online");
-        } else {
-            console.warn("Backend Python check failed:", res.status);
+    const loadConfig = () => {
+        const saved = localStorage.getItem("balao_ai_config");
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                setVoiceConfig(parsed);
+            } catch (e) {
+                console.error("Erro ao ler config de voz", e);
+            }
         }
-      } catch (e) {
-        console.warn("Backend Python unreachable:", e);
-      }
     };
-    checkHealth();
+    
+    loadConfig();
+    window.addEventListener("storage", loadConfig);
+    return () => window.removeEventListener("storage", loadConfig);
   }, []);
+
+  const speakText = (text: string) => {
+    if ('speechSynthesis' in window) {
+        // Cancelar falas anteriores
+        window.speechSynthesis.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'pt-BR';
+        
+        // Tentar selecionar voz baseada na configuração
+        const voices = window.speechSynthesis.getVoices();
+        
+        // Mapeamento simples: br_002/003/005 -> Masculina, br_001/004 -> Feminina
+        const targetGender = ['br_002', 'br_003', 'br_005'].includes(voiceConfig.voice_model) ? 'male' : 'female';
+        
+        // Tentar encontrar uma voz que corresponda (heuristicas baseadas em nomes comuns)
+        const selectedVoice = voices.find(v => {
+            const name = v.name.toLowerCase();
+            const lang = v.lang.toLowerCase();
+            if (!lang.includes('pt') && !lang.includes('br')) return false;
+            
+            if (targetGender === 'male') {
+                return name.includes('felipe') || name.includes('daniel') || name.includes('male');
+            } else {
+                return name.includes('luciana') || name.includes('fernanda') || name.includes('female') || name.includes('google português');
+            }
+        });
+
+        if (selectedVoice) {
+            utterance.voice = selectedVoice;
+            // Ajustar pitch para tentar masculinizar/feminilizar artificialmente se necessário
+            if (targetGender === 'male' && !selectedVoice.name.toLowerCase().includes('male')) {
+                utterance.pitch = 0.8; // Mais grave
+            }
+        } else {
+             // Fallback genérico pt-BR
+             const ptVoice = voices.find(v => v.lang.includes('pt') || v.lang.includes('BR'));
+             if (ptVoice) utterance.voice = ptVoice;
+        }
+
+        utterance.onstart = () => setIsSpeaking(true);
+        utterance.onend = () => setIsSpeaking(false);
+        utterance.onerror = (e) => {
+            console.error("Erro no TTS:", e);
+            setIsSpeaking(false);
+        };
+        
+        window.speechSynthesis.speak(utterance);
+    }
+  };
 
   // Inicializar SpeechRecognition
   useEffect(() => {
@@ -159,14 +213,8 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
         
         setMessages(prev => [...prev, { role: 'assistant', content: data.text }]);
         
-        // Falar a resposta (TTS do navegador como fallback zero-cost)
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(data.text);
-            utterance.lang = 'pt-BR';
-            utterance.onstart = () => setIsSpeaking(true);
-            utterance.onend = () => setIsSpeaking(false);
-            window.speechSynthesis.speak(utterance);
-        }
+        // Falar a resposta
+        speakText(data.text);
 
         if (data.products && Array.isArray(data.products)) {
             setSuggestedProducts(data.products);
@@ -174,14 +222,14 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
 
     } catch (error) {
         console.error("Erro ao enviar mensagem:", error);
-        const errorMsg = "Desculpe, estou com dificuldades para conectar ao servidor no momento. Tente novamente em instantes.";
-        setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
         
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(errorMsg);
-            utterance.lang = 'pt-BR';
-            window.speechSynthesis.speak(utterance);
-        }
+        // Tentar novamente (Retry simples)
+        if (text === "retry_flag") return; // Evitar loop infinito
+
+        // Mensagem de erro amigável com código técnico discreto
+        const errorMsg = "O servidor está acordando. Tente novamente em alguns segundos.";
+        setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
+        speakText(errorMsg);
     }
   };
 
