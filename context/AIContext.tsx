@@ -28,6 +28,15 @@ export function AIContextProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const recognitionRef = useRef<any>(null); // Type any para evitar erro TS do SpeechRecognition
   const isSpeakingRef = useRef(false);
+  const hasWelcomedRef = useRef(false);
+
+  // Detect Android environment
+  const isAndroid = () => {
+    if (typeof window !== 'undefined') {
+      return /Android/i.test(navigator.userAgent);
+    }
+    return false;
+  };
 
   // Inicializa o reconhecimento de voz (Lazy load)
   const getRecognition = () => {
@@ -50,8 +59,10 @@ export function AIContextProvider({ children }: { children: React.ReactNode }) {
         
         recognition.onend = () => {
             console.log('Microfone desligou. Intenção de ouvir:', isListeningRef.current);
+            
             // Reinício automático agressivo para Mobile
-            if (isListeningRef.current) {
+            // SOMENTE se não estiver falando (evita conflito com o restart do speak())
+            if (isListeningRef.current && !isSpeakingRef.current) {
                 console.log('🔄 Reiniciando microfone (loop)...');
                 setTimeout(() => {
                     try {
@@ -60,7 +71,7 @@ export function AIContextProvider({ children }: { children: React.ReactNode }) {
                         // Ignora erro se já estiver rodando
                     }
                 }, 100);
-            } else {
+            } else if (!isListeningRef.current) {
                 setIsListening(false);
             }
         };
@@ -125,13 +136,42 @@ export function AIContextProvider({ children }: { children: React.ReactNode }) {
   const speak = (text: string) => {
     if (typeof window === 'undefined') return;
     
+    // Set speaking flag immediately to block onend restart and onresult
+    isSpeakingRef.current = true;
+
+    // Stop recognition to prevent echo (Critical for Android)
+    if (recognitionRef.current && isListeningRef.current) {
+        try {
+            recognitionRef.current.stop();
+            console.log('🔇 Pausando microfone para falar (Echo Cancellation)');
+        } catch (e) {
+            // Ignore error
+        }
+    }
+
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'pt-BR';
     
-    utterance.onstart = () => { isSpeakingRef.current = true; };
+    utterance.onstart = () => { 
+        isSpeakingRef.current = true; 
+    };
+    
     utterance.onend = () => { 
         isSpeakingRef.current = false; 
+        
+        // Resume recognition if user intention is to listen
+        if (isListeningRef.current) {
+            console.log('🔊 Retomando microfone após falar');
+            setTimeout(() => {
+                const recognition = getRecognition();
+                try {
+                    recognition?.start();
+                } catch (e) {
+                    console.log('Microfone já ativo ou erro ao reiniciar');
+                }
+            }, 100);
+        }
     };
 
     window.speechSynthesis.speak(utterance);
@@ -140,6 +180,15 @@ export function AIContextProvider({ children }: { children: React.ReactNode }) {
   const startListening = () => {
     isListeningRef.current = true; // Define intenção do usuário
     const recognition = getRecognition();
+    
+    // Welcome message logic
+    if (!hasWelcomedRef.current) {
+        hasWelcomedRef.current = true;
+        speak("Olá! Sou o assistente do Balão da Informática. Como posso te ajudar hoje?");
+        // Note: speak() will handle the recognition start/stop flow
+        return;
+    }
+
     if (recognition) {
         try {
             recognition.start();
