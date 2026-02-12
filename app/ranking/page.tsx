@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState, useRef } from 'react';
-import { Flag, Trophy, Target, AlertTriangle, Star } from 'lucide-react';
+import { Flag, Trophy, Star } from 'lucide-react';
 
 // --- Types ---
 type Seller = {
@@ -71,8 +71,27 @@ export default function RankingPage() {
         return;
       }
 
-      // Sort by sales descending
-      const sorted = (data.sellers as Seller[]).sort((a, b) => b.total_sales - a.total_sales);
+      const rawSellers = Array.isArray(data.sellers) ? (data.sellers as Seller[]) : [];
+      const normalized: Seller[] = rawSellers.map((seller, index) => {
+        const totalSales = Number(seller.total_sales);
+        const reviewsCount = Number(seller.google_reviews_count);
+        const name = typeof seller.name === 'string' && seller.name.trim().length > 0
+          ? seller.name
+          : `Vendedor ${index + 1}`;
+        const id = typeof seller.id === 'string' && seller.id.length > 0
+          ? seller.id
+          : `${index}-${name}`;
+        return {
+          id,
+          name,
+          photo_url: typeof seller.photo_url === 'string' ? seller.photo_url : null,
+          total_sales: Number.isFinite(totalSales) ? totalSales : 0,
+          hire_date: typeof seller.hire_date === 'string' ? seller.hire_date : '',
+          google_reviews_count: Number.isFinite(reviewsCount) ? reviewsCount : 0
+        };
+      });
+
+      const sorted = normalized.sort((a, b) => b.total_sales - a.total_sales);
 
       // Sound triggers
       if (prevSellersRef.current.length > 0) {
@@ -90,7 +109,12 @@ export default function RankingPage() {
       }
 
       setSellers(sorted);
-      setGoals(data.goals || {});
+      const goalsData = data.goals || {};
+      setGoals({
+        daily: goalsData.daily || goalsData.day,
+        weekly: goalsData.weekly || goalsData.week,
+        monthly: goalsData.monthly || goalsData.month
+      });
       prevSellersRef.current = sorted;
     } catch (e) {
       console.error(e);
