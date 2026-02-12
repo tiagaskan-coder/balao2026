@@ -65,17 +65,26 @@ export default function RankingPage() {
   const fetchData = async () => {
     try {
       const res = await fetch('/api/ranking');
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
       const data = await res.json();
       
+      if (!data || !data.sellers) {
+        console.warn('Dados de ranking inválidos ou vazios');
+        setSellers([]);
+        return;
+      }
+      
       // Sort sellers by sales amount descending
-      const sortedSellers = (data.sellers || []).sort((a: any, b: any) => b.total_sales - a.total_sales);
+      const sortedSellers = (data.sellers || []).sort((a: any, b: any) => (b.total_sales || 0) - (a.total_sales || 0));
       
       // Check for changes to trigger sounds
       if (prevSellersRef.current.length > 0) {
         // Check for sales increase
         const hasNewSales = sortedSellers.some((seller: any) => {
           const prev = prevSellersRef.current.find(p => p.id === seller.id);
-          return prev && seller.total_sales > prev.total_sales;
+          return prev && (seller.total_sales || 0) > (prev.total_sales || 0);
         });
 
         // Check for rank change (overtake)
@@ -180,8 +189,8 @@ export default function RankingPage() {
           <div className="space-y-4">
             <AnimatePresence>
               {sellers.map((seller, index) => {
-              const maxSales = Math.max(...sellers.map(s => s.total_sales), 1); // Avoid division by zero
-              const percentage = Math.min((seller.total_sales / (goals.monthly?.target_amount || maxSales * 1.2)) * 100, 100);
+              const maxSales = Math.max(...sellers.map(s => s.total_sales || 0), 1); // Avoid division by zero
+              const percentage = Math.min(((seller.total_sales || 0) / (goals.monthly?.target_amount || maxSales * 1.2)) * 100, 100);
               
               return (
                 <motion.div
