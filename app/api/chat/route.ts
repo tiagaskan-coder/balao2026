@@ -59,7 +59,53 @@ export async function POST(req: Request) {
     }
 
     // 1. Camada de Dados: Busca produtos antes de chamar a IA
-    products = await searchProducts(message, maxResults, budget);
+    // Preferir supabaseAdmin no backend para evitar problemas de RLS/credenciais
+    if (hasAdmin) {
+      const cleanedQuery = (message || '').trim();
+      const normalizedQuery = cleanedQuery
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+      const terms = normalizedQuery.split(/\s+/).filter(t => t.length > 2);
+
+      // Tentativa 1: FTS em name_description
+      let builder = supabaseAdmin
+        .from('products')
+        .select('id, name, price, description, image');
+      if (typeof budget === 'number' && !Number.isNaN(budget)) {
+        builder = builder.lte('price', budget);
+      }
+      let ftsProducts: any[] = [];
+      try {
+        const { data, error } = await builder
+          .textSearch('name_description', cleanedQuery, { config: 'portuguese', type: 'websearch' })
+          .limit(maxResults);
+        if (!error && data) ftsProducts = data;
+      } catch {}
+
+      if (ftsProducts && ftsProducts.length > 0) {
+        products = ftsProducts;
+      } else {
+        // Tentativa 2: ILIKE AND por termos no campo name
+        let q = supabaseAdmin
+          .from('products')
+          .select('id, name, price, description, image');
+        if (typeof budget === 'number' && !Number.isNaN(budget)) {
+          q = q.lte('price', budget);
+        }
+        if (terms.length > 0) {
+          for (const term of terms) {
+            q = q.ilike('name', `%${term}%`);
+          }
+        } else {
+          q = q.ilike('name', `%${normalizedQuery}%`);
+        }
+        const { data } = await q.limit(maxResults);
+        products = data || [];
+      }
+    } else {
+      // Fallback para client anon
+      products = await searchProducts(message, maxResults, budget);
+    }
     if ((!products || products.length === 0) && fallback === 'site') {
       try {
         const { data: latest } = await supabaseAdmin
