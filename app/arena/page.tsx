@@ -604,7 +604,32 @@ export default function ArenaPage() {
                       </div>
                     </div>
                   </motion.div>
-                  <div className="absolute right-4 sm:right-6 top-2 text-xs text-red-200">🏁</div>
+                  <div className="absolute right-4 sm:right-6 top-0 bottom-0 flex items-center justify-center">
+                    <motion.div
+                      className="h-full w-6 sm:w-8 flex flex-col overflow-hidden shadow-lg"
+                      initial={{ skewY: -5 }}
+                      animate={{ skewY: 5 }}
+                      transition={{ 
+                        duration: 2, 
+                        repeat: Infinity, 
+                        repeatType: "mirror", 
+                        ease: "easeInOut" 
+                      }}
+                    >
+                      <div 
+                        className="w-full h-full opacity-80"
+                        style={{
+                          backgroundColor: '#fff',
+                          backgroundImage: `
+                            linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000),
+                            linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000)
+                          `,
+                          backgroundPosition: '0 0, 10px 10px',
+                          backgroundSize: '20px 20px'
+                        }}
+                      />
+                    </motion.div>
+                  </div>
                 </motion.div>
               );
             })}
