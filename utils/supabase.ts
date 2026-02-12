@@ -16,7 +16,7 @@ if (!supabaseUrl || !supabaseKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
-export async function searchProducts(query: string, limit: number = 5) {
+export async function searchProducts(query: string, limit: number = 5, budget?: number) {
   // 1. Limpeza básica da query
   const cleanedQuery = query.trim();
   
@@ -26,11 +26,14 @@ export async function searchProducts(query: string, limit: number = 5) {
 
   // 2. Tentativa 1: Busca Textual Otimizada (Full Text Search) na coluna 'name_description'
   // Usamos 'websearch' que lida melhor com input natural do usuário (ex: "monitor gamer" vira "monitor & gamer")
-  let { data: products, error } = await supabase
+  let builder = supabase
     .from('products')
     .select('id, name, price, description, image') // Corrigido: image_url -> image
-    .textSearch('name_description', cleanedQuery, { config: 'portuguese', type: 'websearch' })
-    .limit(limit);
+    .textSearch('name_description', cleanedQuery, { config: 'portuguese', type: 'websearch' });
+  if (typeof budget === 'number' && !Number.isNaN(budget)) {
+    builder = builder.lte('price', budget);
+  }
+  let { data: products, error } = await builder.limit(limit);
 
   if (error) {
     console.warn('⚠️ Erro no textSearch (pode ser falta de índice/coluna):', error.message);
@@ -56,6 +59,9 @@ export async function searchProducts(query: string, limit: number = 5) {
       let queryBuilder = supabase
           .from('products')
           .select('id, name, price, description, image'); // Corrigido: image_url -> image
+      if (typeof budget === 'number' && !Number.isNaN(budget)) {
+        queryBuilder = queryBuilder.lte('price', budget);
+      }
       
       // Adiciona um ILIKE para cada termo (AND logico)
       terms.forEach(term => {
@@ -75,11 +81,14 @@ export async function searchProducts(query: string, limit: number = 5) {
   // Ou busca pela string original simples
   console.log('⚠️ Tentando último recurso (ILIKE simples)...');
   
-  const { data: finalFallback } = await supabase
+  let finalBuilder = supabase
       .from('products')
       .select('id, name, price, description, image') // Corrigido: image_url -> image
-      .ilike('name', `%${normalizedQuery}%`)
-      .limit(limit);
+      .ilike('name', `%${normalizedQuery}%`);
+  if (typeof budget === 'number' && !Number.isNaN(budget)) {
+    finalBuilder = finalBuilder.lte('price', budget);
+  }
+  const { data: finalFallback } = await finalBuilder.limit(limit);
 
   return finalFallback || [];
 }

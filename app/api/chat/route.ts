@@ -24,6 +24,20 @@ export async function POST(req: Request) {
     engine = body.engine || engine;
     fallback = body.fallback || fallback;
 
+    // Extração simples de orçamento (ex.: "até 10.000", "10000", "R$ 10.000")
+    const numMatches = (message || '').replace(/r\$\s*/gi, '').match(/\d{1,3}(\.\d{3})*(,\d+)?|\d+(,\d+)?/g);
+    let budget: number | undefined = undefined;
+    if (numMatches && numMatches.length > 0) {
+      // Pega o maior número como orçamento
+      const nums = numMatches.map(n => {
+        const cleaned = n.replace(/\./g, '').replace(',', '.');
+        return Number(cleaned);
+      }).filter(v => !Number.isNaN(v));
+      if (nums.length > 0) {
+        budget = Math.max(...nums);
+      }
+    }
+
     // 0. Configurações do assistente (limite de resultados)
     if (hasAdmin) {
       try {
@@ -45,7 +59,7 @@ export async function POST(req: Request) {
     }
 
     // 1. Camada de Dados: Busca produtos antes de chamar a IA
-    products = await searchProducts(message, maxResults);
+    products = await searchProducts(message, maxResults, budget);
     if ((!products || products.length === 0) && fallback === 'site') {
       try {
         const { data: latest } = await supabaseAdmin
