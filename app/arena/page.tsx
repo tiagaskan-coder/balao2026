@@ -866,11 +866,11 @@ export default function ArenaPage() {
                 {celebration.type === 'sale' ? 'NOVO PEDIDO DETECTADO!' : 'NOVO LÍDER!'}
               </motion.div>
               
-              <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-full border-4 border-yellow-400/50 shadow-[0_0_50px_rgba(250,204,21,0.4)] overflow-hidden bg-slate-900 mb-6">
+              <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-full border-4 border-yellow-400/50 shadow-[0_0_50px_rgba(250,204,21,0.4)] overflow-hidden bg-slate-900 mb-6 flex items-center justify-center">
                  <img 
                    src={celebration.type === 'sale' ? "https://i.pinimg.com/originals/3d/27/11/3d271128514d50a47c22e5f1beecb4fc.gif" : "https://i.pinimg.com/originals/a4/d3/ce/a4d3ce7ff09e24bbc4cf265686e9becc.gif"}
                    alt="Celebration" 
-                   className="w-full h-full object-cover"
+                   className={`w-full h-full ${celebration.type === 'sale' ? 'object-contain' : 'object-cover'}`}
                  />
                  {/* Overlay do Avatar do Vendedor */}
                  <div className="absolute bottom-4 right-4 w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-white shadow-lg overflow-hidden bg-slate-800">
