@@ -2,43 +2,7 @@ import { supabase } from './supabase';
 import { supabaseAdmin } from './supabase-admin';
 import { Product, CarouselImage, Category, HomeBlock } from './utils';
  
-export async function getSiteTheme(): Promise<string> {
-  try {
-    const { data, error } = await supabase
-      .from('site_settings')
-      .select('value')
-      .eq('key', 'theme')
-      .single();
-    if (error) {
-      if (error.code === '42P01') return 'default';
-      return 'default';
-    }
-    return (data?.value as string) || 'default';
-  } catch {
-    return 'default';
-  }
-}
-
-export async function setSiteTheme(themeKey: string): Promise<void> {
-  try {
-    // Prefer admin client
-    const { error } = await supabaseAdmin
-      .from('site_settings')
-      .upsert({ key: 'theme', value: themeKey });
-    if (error) throw error;
-  } catch (e) {
-    // Fallback anon
-    try {
-      const { error } = await supabase
-        .from('site_settings')
-        .upsert({ key: 'theme', value: themeKey });
-      if (error) throw error;
-    } catch (err) {
-      console.error('Error setting site theme:', err);
-      throw err;
-    }
-  }
-}
+ 
 
 // Fallback to empty array if connection fails or env vars missing
 export async function getProducts(): Promise<Product[]> {

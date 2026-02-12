@@ -10,10 +10,10 @@ import ProductManager from "@/components/admin/ProductManager";
 import HomeBlocksManager from "@/components/admin/HomeBlocksManager";
 import MarketingManager from "@/components/admin/MarketingManager";
 import CouponManager from "@/components/admin/CouponManager";
-import { ArrowLeft, Upload, CheckCircle, AlertCircle, Layout, Layers, Save, Search, Settings, ShoppingBag, Mail, Palette } from "lucide-react";
+import { ArrowLeft, Upload, CheckCircle, AlertCircle, Layout, Layers, Save, Search, Settings, ShoppingBag, Mail } from "lucide-react";
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState<"import" | "carousel" | "products" | "categories" | "orders" | "home_blocks" | "marketing" | "coupons" | "themes">("import");
+  const [activeTab, setActiveTab] = useState<"import" | "carousel" | "products" | "categories" | "orders" | "home_blocks" | "marketing" | "coupons">("import");
 
   // Product List State
   const [products, setProducts] = useState<Product[]>([]);
@@ -36,54 +36,7 @@ export default function AdminPage() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
 
-  // Themes
-  const AVAILABLE_THEMES = [
-    { key: "default", name: "Padrão", background: "#ffffff", foreground: "#000000", brand: "#E60012" },
-    { key: "escuro", name: "Escuro", background: "#0a0a0a", foreground: "#ededed", brand: "#E60012" },
-    { key: "azul", name: "Azul", background: "#ffffff", foreground: "#000000", brand: "#1e40af" },
-    { key: "matrix", name: "Matrix", background: "#000000", foreground: "#00ff00", brand: "#00ff00" },
-    { key: "carnaval", name: "Carnaval", background: "#ffffff", foreground: "#000000", brand: "#E60012" },
-    { key: "chuva", name: "Chuva", background: "#eaf2ff", foreground: "#000000", brand: "#1e40af" }
-  ];
-  const [selectedTheme, setSelectedTheme] = useState<string>("default");
-
-  const applyTheme = (key: string) => {
-    const theme = AVAILABLE_THEMES.find(t => t.key === key) || AVAILABLE_THEMES[0];
-    const root = document.documentElement;
-    root.style.setProperty("--background", theme.background);
-    root.style.setProperty("--foreground", theme.foreground);
-    root.style.setProperty("--brand-color", theme.brand);
-  };
-
-  useEffect(() => {
-    const fetchTheme = async () => {
-      try {
-        const res = await fetch("/api/site-settings");
-        const data = await res.json();
-        const key = data?.theme || "default";
-        setSelectedTheme(key);
-        applyTheme(key);
-      } catch {
-        setSelectedTheme("default");
-        applyTheme("default");
-      }
-    };
-    fetchTheme();
-  }, []);
-
-  const handleSelectTheme = async (key: string) => {
-    try {
-      setSelectedTheme(key);
-      applyTheme(key);
-      await fetch("/api/site-settings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ theme: key })
-      });
-    } catch (e) {
-      console.error("Falha ao salvar tema no servidor", e);
-    }
-  };
+  
 
   // Keyboard Shortcuts
   useEffect(() => {
@@ -362,13 +315,6 @@ export default function AdminPage() {
                     >
                         <Settings size={18} />
                         Gerenciar Produtos
-                    </button>
-                    <button
-                        onClick={() => setActiveTab("themes")}
-                        className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${activeTab === "themes" ? "bg-red-50 text-[#E60012] border-l-4 border-[#E60012]" : "text-gray-600 hover:bg-gray-50"}`}
-                    >
-                        <Palette size={18} />
-                        Temas
                     </button>
                     <button
                         onClick={() => setActiveTab("home_blocks")}
@@ -673,47 +619,7 @@ export default function AdminPage() {
                         </div>
                     )}
 
-                    {/* THEMES TAB */}
-                    {activeTab === "themes" && (
-                        <div className="animate-in fade-in duration-300">
-                             <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                                    <Palette className="text-[#E60012]" />
-                                    Temas do Site
-                                </h2>
-                            </div>
-                            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                                <p className="text-sm text-gray-600 mb-4">
-                                    Selecione um tema. A seleção é salva e aplicada automaticamente ao recarregar.
-                                </p>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    {AVAILABLE_THEMES.map(t => (
-                                        <button
-                                            key={t.key}
-                                            onClick={() => handleSelectTheme(t.key)}
-                                            className={`border rounded-lg p-4 text-left transition-colors ${selectedTheme === t.key ? 'border-[#E60012] bg-red-50' : 'border-gray-200 hover:bg-gray-50'}`}
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-6 h-6 rounded-full" style={{ backgroundColor: t.brand }} />
-                                                <div>
-                                                    <div className="font-medium">{t.name}</div>
-                                                    <div className="text-xs text-gray-500">BG {t.background} • FG {t.foreground}</div>
-                                                </div>
-                                            </div>
-                                        </button>
-                                    ))}
-                                </div>
-                                <div className="mt-6">
-                                    <button
-                                      onClick={() => handleSelectTheme("default")}
-                                      className="px-3 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-900 transition-colors"
-                                    >
-                                      Restaurar Padrão
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                    
                 </div>
             </div>
         </div>
