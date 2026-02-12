@@ -433,13 +433,17 @@ export default function ArenaPage() {
                 <motion.div
                   key={seller.id}
                   className={`relative h-20 sm:h-24 rounded-2xl border overflow-hidden ${
-                    isPodium ? "border-amber-400/60 bg-slate-900/80 shadow-[0_0_25px_rgba(251,191,36,0.15)]" : "border-amber-500/30 bg-slate-900/60"
+                    isPodium ? "border-amber-400/60 bg-slate-900/90 shadow-[0_0_25px_rgba(251,191,36,0.15)]" : "border-amber-500/30 bg-slate-900/80"
                   }`}
                   animate={salePulse ? { boxShadow: ["0 0 0 rgba(251,191,36,0)", "0 0 22px rgba(251,191,36,0.35)", "0 0 0 rgba(251,191,36,0)"] } : {}}
                   transition={{ duration: 0.8 }}
                 >
+                  {/* Pista de corrida background */}
+                  <div className="absolute inset-0 opacity-30 bg-[repeating-linear-gradient(90deg,transparent,transparent_50px,rgba(255,255,255,0.05)_50px,rgba(255,255,255,0.05)_100px)]" />
+                  <div className="absolute top-1/2 left-0 right-0 h-0 border-t-2 border-dashed border-slate-600/30 transform -translate-y-1/2" />
+                  
                   <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(251,191,36,0.08),transparent)]" />
-                  <div className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 flex items-center gap-3">
+                  <div className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 flex items-center gap-3 relative z-20">
                     <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-amber-300 overflow-hidden bg-slate-800 flex items-center justify-center">
                       {seller.avatar_url ? (
                         <img src={seller.avatar_url} alt={seller.nome} className="w-full h-full object-cover" />
@@ -447,7 +451,7 @@ export default function ArenaPage() {
                         <span className="text-sm font-bold">{seller.nome.slice(0, 2).toUpperCase()}</span>
                       )}
                     </div>
-                    <div>
+                    <div className="bg-slate-900/60 px-2 py-1 rounded-lg backdrop-blur-sm">
                       <div className="text-sm sm:text-base font-semibold">{seller.nome}</div>
                       <div className="text-[11px] sm:text-xs text-amber-200">
                         {formatCurrency(total)} • {Math.round(progress)}%
@@ -463,18 +467,29 @@ export default function ArenaPage() {
                   <motion.div
                     animate={{ left: `${progress}%`, scale: isTurbo ? 1.12 : 1 }}
                     transition={{ type: "spring", stiffness: 120, damping: 20 }}
-                    className="absolute top-1/2 -translate-y-1/2"
+                    className="absolute top-1/2 -translate-y-1/2 z-10"
                     style={{ left: `${progress}%` }}
                   >
-                    <div className="relative">
+                    <div className="relative flex items-center justify-center">
                       {isTurbo && (
                         <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-14 h-14 bg-amber-400/40 blur-xl rounded-full animate-pulse" />
                       )}
                       {isZap && (
                         <div className="absolute inset-0 -m-2 rounded-full bg-blue-500/40 blur-lg animate-pulse" />
                       )}
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-4 border-amber-300 bg-slate-800 flex items-center justify-center shadow-xl">
-                        <Trophy className="w-5 h-5 text-amber-200" />
+                      
+                      {/* Foguete (atrás) */}
+                      <div className="absolute -left-6 text-4xl sm:text-5xl transform rotate-45 z-0 filter drop-shadow-lg">
+                        🚀
+                      </div>
+
+                      {/* Avatar (frente) */}
+                      <div className="relative z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-amber-300 overflow-hidden bg-slate-800 shadow-xl">
+                        {seller.avatar_url ? (
+                          <img src={seller.avatar_url} alt={seller.nome} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-sm font-bold text-white">{seller.nome.slice(0, 2).toUpperCase()}</span>
+                        )}
                       </div>
                     </div>
                   </motion.div>
