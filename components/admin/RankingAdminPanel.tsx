@@ -183,8 +183,8 @@ export default function RankingAdminPanel() {
       {/* Header & Status */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Painel de Controle do Ranking</h2>
-          <p className="text-gray-500">Gerencie vendas, metas e vendedores para a gamificação.</p>
+          <h2 className="text-2xl font-bold text-gray-800">Gerenciadores do Ranking</h2>
+          <p className="text-gray-500">Metas, desafios e vendedores centralizados em um só lugar.</p>
         </div>
         <Link 
           href="/ranking" 
@@ -202,6 +202,18 @@ export default function RankingAdminPanel() {
           {successMsg}
         </div>
       )}
+
+      <div className="flex flex-wrap gap-3">
+        <a href="#gerenciador-metas" className="px-4 py-2 rounded-full text-sm font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+          Gerenciador de Metas
+        </a>
+        <a href="#gerenciador-desafios" className="px-4 py-2 rounded-full text-sm font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+          Gerenciador de Desafios
+        </a>
+        <a href="#gerenciador-vendedores" className="px-4 py-2 rounded-full text-sm font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+          Gerenciador de Vendedores
+        </a>
+      </div>
 
       {/* Main Actions Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -289,10 +301,10 @@ export default function RankingAdminPanel() {
       </div>
 
       {/* Goals Configuration */}
-      <section className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <section id="gerenciador-metas" className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-4 border-b bg-gray-50 flex items-center gap-2">
           <Trophy className="text-yellow-600" />
-          <h3 className="font-bold text-gray-800">Configuração de Metas e Prêmios</h3>
+          <h3 className="font-bold text-gray-800">Gerenciador de Metas</h3>
         </div>
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -423,10 +435,10 @@ export default function RankingAdminPanel() {
         </div>
       </section>
 
-      <section className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <section id="gerenciador-desafios" className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-4 border-b bg-gray-50 flex items-center gap-2">
           <Trophy className="text-red-600" />
-          <h3 className="font-bold text-gray-800">Desafio Flash</h3>
+          <h3 className="font-bold text-gray-800">Gerenciador de Desafios</h3>
         </div>
         <div className="p-6 space-y-6">
           {flashChallenge?.active && (
@@ -476,10 +488,10 @@ export default function RankingAdminPanel() {
       </section>
 
       {/* Seller Management */}
-      <section className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <section id="gerenciador-vendedores" className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-4 border-b bg-gray-50 flex items-center gap-2">
           <Users className="text-gray-600" />
-          <h3 className="font-bold text-gray-800">Cadastro de Vendedores</h3>
+          <h3 className="font-bold text-gray-800">Gerenciador de Vendedores</h3>
         </div>
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
