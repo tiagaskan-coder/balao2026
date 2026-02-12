@@ -66,8 +66,13 @@ export default function ArenaPage() {
   }, [sellers]);
 
   useEffect(() => {
-    document.body.style.overflow = "hidden";
+    const updateOverflow = () => {
+      document.body.style.overflow = window.innerWidth >= 1024 ? "hidden" : "auto";
+    };
+    updateOverflow();
+    window.addEventListener("resize", updateOverflow);
     return () => {
+      window.removeEventListener("resize", updateOverflow);
       document.body.style.overflow = "";
       if (battleLoopRef.current) window.clearInterval(battleLoopRef.current);
       ambientSourceRef.current?.stop();
@@ -359,7 +364,7 @@ export default function ArenaPage() {
   );
 
   return (
-    <div className="min-h-screen w-screen overflow-hidden bg-slate-950 text-white">
+    <div className="min-h-screen w-screen overflow-x-hidden overflow-y-auto lg:overflow-hidden bg-slate-950 text-white">
       <motion.div
         key={battlePulse}
         className="absolute inset-0 pointer-events-none"
@@ -383,7 +388,7 @@ export default function ArenaPage() {
           />
         ))}
       </div>
-      <div className="relative z-10 min-h-screen w-full grid grid-cols-1 xl:grid-cols-[1.6fr_0.7fr] gap-4 xl:gap-6 p-4 sm:p-6">
+      <div className="relative z-10 min-h-screen w-full grid grid-cols-1 xl:grid-cols-[1.6fr_0.7fr] gap-4 xl:gap-6 p-4 sm:p-6 pb-12">
         <motion.div
           className="flex flex-col gap-6"
           animate={overtakePulse ? { x: [0, -6, 6, -4, 0] } : { x: 0 }}
