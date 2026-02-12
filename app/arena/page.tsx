@@ -86,7 +86,7 @@ export default function ArenaPage() {
     justification: "",
     evidenceUrl: ""
   });
-  const [celebration, setCelebration] = useState<{ type: "leader" | "overtake"; seller: Seller } | null>(null);
+  const [celebration, setCelebration] = useState<{ type: "leader" | "overtake" | "sale"; seller: Seller } | null>(null);
   const lastRankingsRef = useRef<Record<string, number>>({});
 
   const supabase = useMemo(() => createClient(), []);
@@ -358,6 +358,15 @@ export default function ArenaPage() {
           });
           const message = buildFeedMessage(sale);
           setSalesFeed((prev) => [{ id: sale.id, message, isGoogle: sale.is_google_bonus, createdAt: sale.criado_em }, ...prev].slice(0, 5));
+          
+          // Trigger Sale Celebration
+          const seller = sellersRef.current.find(s => s.id === sale.vendedor_id);
+          if (seller) {
+            setCelebration({ type: "sale", seller });
+            // Close after 3 seconds
+            setTimeout(() => setCelebration(null), 3000);
+          }
+
           if (sale.is_google_bonus) {
             setZapId(sale.vendedor_id);
             setTimeout(() => setZapId(null), 1200);
@@ -837,12 +846,12 @@ export default function ArenaPage() {
                 transition={{ delay: 0.2 }}
                 className="text-4xl sm:text-6xl font-['Bangers'] text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.8)] tracking-wider mb-4 text-center"
               >
-                NOVO LÍDER!
+                {celebration.type === 'sale' ? 'NOVO PEDIDO DETECTADO!' : 'NOVO LÍDER!'}
               </motion.div>
               
               <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-full border-4 border-yellow-400/50 shadow-[0_0_50px_rgba(250,204,21,0.4)] overflow-hidden bg-slate-900 mb-6">
                  <img 
-                   src="https://i.pinimg.com/originals/a4/d3/ce/a4d3ce7ff09e24bbc4cf265686e9becc.gif" 
+                   src={celebration.type === 'sale' ? "https://i.pinimg.com/originals/3d/27/11/3d271128514d50a47c22e5f1beecb4fc.gif" : "https://i.pinimg.com/originals/a4/d3/ce/a4d3ce7ff09e24bbc4cf265686e9becc.gif"}
                    alt="Celebration" 
                    className="w-full h-full object-cover"
                  />
@@ -873,7 +882,7 @@ export default function ArenaPage() {
                 transition={{ delay: 0.8 }}
                 className="mt-4 text-yellow-200 text-lg sm:text-xl font-medium"
               >
-                Assumiu a 1ª Posição! 👑
+                {celebration.type === 'sale' ? 'Parabéns pela venda! 🎉' : 'Assumiu a 1ª Posição! 👑'}
               </motion.div>
 
               <button 
