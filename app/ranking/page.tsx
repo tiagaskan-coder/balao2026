@@ -71,22 +71,31 @@ export default function RankingPage() {
         return;
       }
 
-      const rawSellers = Array.isArray(data.sellers) ? (data.sellers as Seller[]) : [];
-      const normalized: Seller[] = rawSellers.map((seller, index) => {
-        const totalSales = Number(seller.total_sales);
-        const reviewsCount = Number(seller.google_reviews_count);
-        const name = typeof seller.name === 'string' && seller.name.trim().length > 0
-          ? seller.name
+      const rawSellers = Array.isArray(data.sellers) ? data.sellers : [];
+      const normalized: Seller[] = rawSellers.map((entry: any, index: number) => {
+        const sellerData = entry?.seller ?? entry ?? {};
+        const totalSales = Number(entry?.month_total ?? entry?.total_sales ?? sellerData?.total_sales ?? 0);
+        const reviewsCount = Number(entry?.google_reviews_count ?? sellerData?.google_reviews_count ?? 0);
+        const name = typeof sellerData?.name === 'string' && sellerData.name.trim().length > 0
+          ? sellerData.name
           : `Vendedor ${index + 1}`;
-        const id = typeof seller.id === 'string' && seller.id.length > 0
-          ? seller.id
+        const id = typeof sellerData?.id === 'string' && sellerData.id.length > 0
+          ? sellerData.id
           : `${index}-${name}`;
         return {
           id,
           name,
-          photo_url: typeof seller.photo_url === 'string' ? seller.photo_url : null,
+          photo_url: typeof sellerData?.photo_url === 'string'
+            ? sellerData.photo_url
+            : typeof sellerData?.photo === 'string'
+              ? sellerData.photo
+              : null,
           total_sales: Number.isFinite(totalSales) ? totalSales : 0,
-          hire_date: typeof seller.hire_date === 'string' ? seller.hire_date : '',
+          hire_date: typeof sellerData?.hire_date === 'string'
+            ? sellerData.hire_date
+            : typeof sellerData?.hired_at === 'string'
+              ? sellerData.hired_at
+              : '',
           google_reviews_count: Number.isFinite(reviewsCount) ? reviewsCount : 0
         };
       });
@@ -110,10 +119,17 @@ export default function RankingPage() {
 
       setSellers(sorted);
       const goalsData = data.goals || {};
+      const normalizeGoal = (goal: any) => {
+        if (!goal) return undefined;
+        return {
+          target_amount: Number(goal.target ?? goal.target_amount ?? 0),
+          prize_description: goal.prize ?? goal.prize_description ?? ''
+        };
+      };
       setGoals({
-        daily: goalsData.daily || goalsData.day,
-        weekly: goalsData.weekly || goalsData.week,
-        monthly: goalsData.monthly || goalsData.month
+        daily: normalizeGoal(goalsData.daily ?? goalsData.day),
+        weekly: normalizeGoal(goalsData.weekly ?? goalsData.week),
+        monthly: normalizeGoal(goalsData.monthly ?? goalsData.month)
       });
       prevSellersRef.current = sorted;
     } catch (e) {
@@ -296,6 +312,9 @@ export default function RankingPage() {
                           ) : (
                             <div className="w-full h-full flex items-center justify-center font-bold text-xl">{seller.name.charAt(0)}</div>
                           )}
+                        </div>
+                        <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 bg-black/80 text-white text-[10px] font-semibold py-1 px-2 rounded border border-gray-700 whitespace-nowrap max-w-[140px] truncate">
+                          {seller.name}
                         </div>
                         
                         {/* Current Value Tooltip (Always visible or hover?) Let's make it always visible above */}
