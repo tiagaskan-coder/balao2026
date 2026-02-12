@@ -419,6 +419,7 @@ export default function ArenaPage() {
               const total = totals[seller.id] || 0;
               const meta = activeChallenge?.meta_global || seller.meta_valor || 1;
               const progress = Math.min(Math.max((total / meta) * 100, 0), 100);
+              const visualProgress = 20 + (progress * 0.8);
               const isTurbo = turboIds.includes(seller.id);
               const isZap = zapId === seller.id;
               const isPodium = index < 3;
@@ -458,12 +459,33 @@ export default function ArenaPage() {
                   </div>
                   <div className="absolute right-4 sm:right-6 top-0 bottom-0 w-1 bg-amber-400/70 rounded-full" />
                   <motion.div
-                    animate={{ left: `${progress}%`, scale: isTurbo ? 1.12 : 1 }}
+                    animate={{ left: `${visualProgress}%`, scale: isTurbo ? 1.12 : 1 }}
                     transition={{ type: "spring", stiffness: 120, damping: 20 }}
                     className="absolute top-1/2 -translate-y-1/2 z-10"
-                    style={{ left: `${progress}%` }}
                   >
                     <div className="relative flex items-center justify-center">
+                      {/* Efeitos de Fogo e Fumaça */}
+                      <div className="absolute right-full mr-[-10px] top-1/2 -translate-y-1/2 flex items-center flex-row-reverse">
+                         {/* Fogo principal */}
+                         <motion.div 
+                           className="w-6 h-3 bg-gradient-to-l from-orange-400 via-red-500 to-transparent rounded-l-full blur-[2px]"
+                           animate={{ scaleX: [1, 1.3, 0.9], opacity: [0.8, 1, 0.7] }}
+                           transition={{ duration: 0.1, repeat: Infinity, repeatType: "reverse" }}
+                         />
+                         {/* Fumaça */}
+                         <motion.div
+                           className="absolute right-2 w-8 h-6 bg-slate-400/40 rounded-full blur-md"
+                           animate={{ x: [-5, -25], opacity: [0.6, 0], scale: [0.5, 1.5] }}
+                           transition={{ duration: 0.6, repeat: Infinity, ease: "easeOut" }}
+                         />
+                         {/* Partículas extras de fumaça */}
+                         <motion.div
+                           className="absolute right-1 w-4 h-4 bg-white/30 rounded-full blur-sm"
+                           animate={{ x: [-2, -15], y: [-2, 5], opacity: [0.5, 0] }}
+                           transition={{ duration: 0.4, repeat: Infinity, delay: 0.1 }}
+                         />
+                      </div>
+
                       {isTurbo && (
                         <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-14 h-14 bg-amber-400/40 blur-xl rounded-full animate-pulse" />
                       )}
@@ -471,7 +493,7 @@ export default function ArenaPage() {
                         <div className="absolute inset-0 -m-2 rounded-full bg-blue-500/40 blur-lg animate-pulse" />
                       )}
                       
-                      <div className="text-4xl sm:text-5xl transform rotate-45 filter drop-shadow-lg">
+                      <div className="text-4xl sm:text-5xl transform rotate-45 filter drop-shadow-lg z-10 relative">
                         🚀
                       </div>
                     </div>
