@@ -70,8 +70,20 @@ create table if not exists public.arena_desafios (
     id uuid default gen_random_uuid() primary key,
     premio_semana text not null,
     meta_global numeric not null,
+    premio_top1 text,
+    premio_top2 text,
+    premio_top3 text,
+    premio_google text,
+    premio_ultrapassagem text,
     criado_em timestamp with time zone default timezone('utc'::text, now()) not null
 );
+
+alter table if exists public.arena_desafios
+    add column if not exists premio_top1 text,
+    add column if not exists premio_top2 text,
+    add column if not exists premio_top3 text,
+    add column if not exists premio_google text,
+    add column if not exists premio_ultrapassagem text;
 
 create or replace view public.ranking_vendedores as
 select

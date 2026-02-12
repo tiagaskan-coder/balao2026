@@ -23,6 +23,11 @@ type Challenge = {
   id: string;
   premio_semana: string;
   meta_global: number;
+  premio_top1: string | null;
+  premio_top2: string | null;
+  premio_top3: string | null;
+  premio_google: string | null;
+  premio_ultrapassagem: string | null;
   criado_em: string;
 };
 
@@ -43,7 +48,12 @@ export default function ArenaAdminPanel() {
   });
   const [challengeForm, setChallengeForm] = useState({
     premio_semana: "",
-    meta_global: ""
+    meta_global: "",
+    premio_top1: "",
+    premio_top2: "",
+    premio_top3: "",
+    premio_google: "",
+    premio_ultrapassagem: ""
   });
 
   const [editingSellerId, setEditingSellerId] = useState<string | null>(null);
@@ -63,7 +73,12 @@ export default function ArenaAdminPanel() {
   const [editingChallengeId, setEditingChallengeId] = useState<string | null>(null);
   const [editingChallenge, setEditingChallenge] = useState({
     premio_semana: "",
-    meta_global: ""
+    meta_global: "",
+    premio_top1: "",
+    premio_top2: "",
+    premio_top3: "",
+    premio_google: "",
+    premio_ultrapassagem: ""
   });
 
   useEffect(() => {
@@ -309,14 +324,27 @@ export default function ArenaAdminPanel() {
         body: JSON.stringify({
           action: "create_challenge",
           premio_semana: challengeForm.premio_semana,
-          meta_global: Number(challengeForm.meta_global)
+          meta_global: Number(challengeForm.meta_global),
+          premio_top1: challengeForm.premio_top1 || null,
+          premio_top2: challengeForm.premio_top2 || null,
+          premio_top3: challengeForm.premio_top3 || null,
+          premio_google: challengeForm.premio_google || null,
+          premio_ultrapassagem: challengeForm.premio_ultrapassagem || null
         })
       });
       if (!res.ok) {
         setErrorMessage(await parseError(res));
         return;
       }
-      setChallengeForm({ premio_semana: "", meta_global: "" });
+      setChallengeForm({
+        premio_semana: "",
+        meta_global: "",
+        premio_top1: "",
+        premio_top2: "",
+        premio_top3: "",
+        premio_google: "",
+        premio_ultrapassagem: ""
+      });
       await fetchData();
     } finally {
       setLoading(false);
@@ -327,7 +355,12 @@ export default function ArenaAdminPanel() {
     setEditingChallengeId(challenge.id);
     setEditingChallenge({
       premio_semana: challenge.premio_semana,
-      meta_global: String(challenge.meta_global)
+      meta_global: String(challenge.meta_global),
+      premio_top1: challenge.premio_top1 || "",
+      premio_top2: challenge.premio_top2 || "",
+      premio_top3: challenge.premio_top3 || "",
+      premio_google: challenge.premio_google || "",
+      premio_ultrapassagem: challenge.premio_ultrapassagem || ""
     });
   };
 
@@ -344,7 +377,12 @@ export default function ArenaAdminPanel() {
           id: editingChallengeId,
           updates: {
             premio_semana: editingChallenge.premio_semana,
-            meta_global: Number(editingChallenge.meta_global || 0)
+            meta_global: Number(editingChallenge.meta_global || 0),
+            premio_top1: editingChallenge.premio_top1 || null,
+            premio_top2: editingChallenge.premio_top2 || null,
+            premio_top3: editingChallenge.premio_top3 || null,
+            premio_google: editingChallenge.premio_google || null,
+            premio_ultrapassagem: editingChallenge.premio_ultrapassagem || null
           }
         })
       });
@@ -403,6 +441,23 @@ export default function ArenaAdminPanel() {
               {activeChallenge ? formatCurrency(activeChallenge.meta_global) : "—"}
             </div>
           </div>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2 text-xs">
+          <span className="px-2 py-1 rounded-full bg-white/20">
+            Top 1: {activeChallenge?.premio_top1 || "—"}
+          </span>
+          <span className="px-2 py-1 rounded-full bg-white/20">
+            Top 2: {activeChallenge?.premio_top2 || "—"}
+          </span>
+          <span className="px-2 py-1 rounded-full bg-white/20">
+            Top 3: {activeChallenge?.premio_top3 || "—"}
+          </span>
+          <span className="px-2 py-1 rounded-full bg-white/20">
+            Google: {activeChallenge?.premio_google || "—"}
+          </span>
+          <span className="px-2 py-1 rounded-full bg-white/20">
+            Ultrapassagem: {activeChallenge?.premio_ultrapassagem || "—"}
+          </span>
         </div>
       </div>
 
@@ -702,7 +757,7 @@ export default function ArenaAdminPanel() {
           <Crown className="w-5 h-5 text-[#E60012]" />
           Configuração de Desafios
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <input
             value={challengeForm.premio_semana}
             onChange={(e) => setChallengeForm((prev) => ({ ...prev, premio_semana: e.target.value }))}
@@ -715,6 +770,36 @@ export default function ArenaAdminPanel() {
             className="border rounded-md px-3 py-2"
             placeholder="Meta global (R$)"
             type="number"
+          />
+          <input
+            value={challengeForm.premio_top1}
+            onChange={(e) => setChallengeForm((prev) => ({ ...prev, premio_top1: e.target.value }))}
+            className="border rounded-md px-3 py-2"
+            placeholder="Premiação Top 1"
+          />
+          <input
+            value={challengeForm.premio_top2}
+            onChange={(e) => setChallengeForm((prev) => ({ ...prev, premio_top2: e.target.value }))}
+            className="border rounded-md px-3 py-2"
+            placeholder="Premiação Top 2"
+          />
+          <input
+            value={challengeForm.premio_top3}
+            onChange={(e) => setChallengeForm((prev) => ({ ...prev, premio_top3: e.target.value }))}
+            className="border rounded-md px-3 py-2"
+            placeholder="Premiação Top 3"
+          />
+          <input
+            value={challengeForm.premio_google}
+            onChange={(e) => setChallengeForm((prev) => ({ ...prev, premio_google: e.target.value }))}
+            className="border rounded-md px-3 py-2"
+            placeholder="Prêmio Google Bonus"
+          />
+          <input
+            value={challengeForm.premio_ultrapassagem}
+            onChange={(e) => setChallengeForm((prev) => ({ ...prev, premio_ultrapassagem: e.target.value }))}
+            className="border rounded-md px-3 py-2"
+            placeholder="Prêmio Ultrapassagem"
           />
         </div>
         <div className="flex justify-end">
@@ -739,6 +824,7 @@ export default function ArenaAdminPanel() {
               <tr>
                 <th className="py-2">Prêmio</th>
                 <th className="py-2">Meta</th>
+                <th className="py-2">Premiações</th>
                 <th className="py-2 text-right">Ações</th>
               </tr>
             </thead>
@@ -768,6 +854,50 @@ export default function ArenaAdminPanel() {
                       formatCurrency(Number(challenge.meta_global || 0))
                     )}
                   </td>
+                  <td className="py-3">
+                    {editingChallengeId === challenge.id ? (
+                      <div className="grid grid-cols-1 gap-2 min-w-[240px]">
+                        <input
+                          value={editingChallenge.premio_top1}
+                          onChange={(e) => setEditingChallenge((prev) => ({ ...prev, premio_top1: e.target.value }))}
+                          className="border rounded px-2 py-1"
+                          placeholder="Top 1"
+                        />
+                        <input
+                          value={editingChallenge.premio_top2}
+                          onChange={(e) => setEditingChallenge((prev) => ({ ...prev, premio_top2: e.target.value }))}
+                          className="border rounded px-2 py-1"
+                          placeholder="Top 2"
+                        />
+                        <input
+                          value={editingChallenge.premio_top3}
+                          onChange={(e) => setEditingChallenge((prev) => ({ ...prev, premio_top3: e.target.value }))}
+                          className="border rounded px-2 py-1"
+                          placeholder="Top 3"
+                        />
+                        <input
+                          value={editingChallenge.premio_google}
+                          onChange={(e) => setEditingChallenge((prev) => ({ ...prev, premio_google: e.target.value }))}
+                          className="border rounded px-2 py-1"
+                          placeholder="Google"
+                        />
+                        <input
+                          value={editingChallenge.premio_ultrapassagem}
+                          onChange={(e) => setEditingChallenge((prev) => ({ ...prev, premio_ultrapassagem: e.target.value }))}
+                          className="border rounded px-2 py-1"
+                          placeholder="Ultrapassagem"
+                        />
+                      </div>
+                    ) : (
+                      <div className="text-xs text-gray-600 space-y-1">
+                        <div>Top 1: {challenge.premio_top1 || "—"}</div>
+                        <div>Top 2: {challenge.premio_top2 || "—"}</div>
+                        <div>Top 3: {challenge.premio_top3 || "—"}</div>
+                        <div>Google: {challenge.premio_google || "—"}</div>
+                        <div>Ultrapassagem: {challenge.premio_ultrapassagem || "—"}</div>
+                      </div>
+                    )}
+                  </td>
                   <td className="py-3 text-right">
                     {editingChallengeId === challenge.id ? (
                       <div className="flex justify-end gap-2">
@@ -793,7 +923,7 @@ export default function ArenaAdminPanel() {
               ))}
               {challenges.length === 0 && (
                 <tr>
-                  <td colSpan={3} className="py-6 text-center text-gray-500">
+                  <td colSpan={4} className="py-6 text-center text-gray-500">
                     Nenhum desafio lançado
                   </td>
                 </tr>

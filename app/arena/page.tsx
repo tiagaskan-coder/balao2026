@@ -25,6 +25,11 @@ type Challenge = {
   id: string;
   premio_semana: string;
   meta_global: number;
+  premio_top1: string | null;
+  premio_top2: string | null;
+  premio_top3: string | null;
+  premio_google: string | null;
+  premio_ultrapassagem: string | null;
   criado_em: string;
 };
 
@@ -320,6 +325,23 @@ export default function ArenaPage() {
   }, [sellers, totals]);
 
   const topThree = rankedSellers.slice(0, 3);
+  const globalTotal = useMemo(
+    () => Object.values(totals).reduce((acc, value) => acc + Number(value || 0), 0),
+    [totals]
+  );
+  const globalProgress = activeChallenge?.meta_global
+    ? Math.min((globalTotal / Number(activeChallenge.meta_global || 1)) * 100, 100)
+    : 0;
+  const rewardCards = useMemo(
+    () => [
+      { label: "Top 1", value: activeChallenge?.premio_top1 || "—", icon: "👑" },
+      { label: "Top 2", value: activeChallenge?.premio_top2 || "—", icon: "🥈" },
+      { label: "Top 3", value: activeChallenge?.premio_top3 || "—", icon: "🥉" },
+      { label: "Google Bonus", value: activeChallenge?.premio_google || "—", icon: "⚡️" },
+      { label: "Ultrapassagem", value: activeChallenge?.premio_ultrapassagem || "—", icon: "🔥" }
+    ],
+    [activeChallenge]
+  );
 
   useEffect(() => {
     if (audioEnabled) startBattleAmbience();
@@ -381,6 +403,16 @@ export default function ArenaPage() {
               <div className="text-sm text-purple-200">
                 Meta global: {activeChallenge ? formatCurrency(activeChallenge.meta_global) : "—"}
               </div>
+              <div className="text-xs text-amber-100 mt-2">
+                Total na arena: {formatCurrency(globalTotal)}
+              </div>
+              <div className="mt-2 h-2 w-56 bg-white/10 rounded-full overflow-hidden ml-auto">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-amber-400 to-fuchsia-400"
+                  animate={{ width: `${globalProgress}%` }}
+                  transition={{ type: "spring", stiffness: 140, damping: 20 }}
+                />
+              </div>
             </div>
           </header>
 
@@ -391,10 +423,13 @@ export default function ArenaPage() {
               const progress = Math.min(Math.max((total / meta) * 100, 0), 100);
               const isTurbo = turboIds.includes(seller.id);
               const isZap = zapId === seller.id;
+              const isPodium = index < 3;
               return (
                 <motion.div
                   key={seller.id}
-                  className="relative h-20 rounded-2xl border border-amber-500/30 bg-slate-900/60 overflow-hidden"
+                  className={`relative h-20 rounded-2xl border overflow-hidden ${
+                    isPodium ? "border-amber-400/60 bg-slate-900/80 shadow-[0_0_25px_rgba(251,191,36,0.15)]" : "border-amber-500/30 bg-slate-900/60"
+                  }`}
                   animate={salePulse ? { boxShadow: ["0 0 0 rgba(251,191,36,0)", "0 0 22px rgba(251,191,36,0.35)", "0 0 0 rgba(251,191,36,0)"] } : {}}
                   transition={{ duration: 0.8 }}
                 >
@@ -413,6 +448,11 @@ export default function ArenaPage() {
                         {formatCurrency(total)} • {Math.round(progress)}%
                       </div>
                     </div>
+                    {isPodium && (
+                      <div className="text-xs px-2 py-1 rounded-full bg-amber-400/20 border border-amber-300/40 text-amber-100">
+                        #{index + 1}
+                      </div>
+                    )}
                   </div>
                   <div className="absolute right-6 top-0 bottom-0 w-1 bg-amber-400/70 rounded-full" />
                   <motion.div
@@ -476,6 +516,31 @@ export default function ArenaPage() {
               {topThree.length === 0 && (
                 <div className="text-amber-200">Sem ranking ainda</div>
               )}
+            </div>
+          </div>
+
+          <div className="bg-slate-900/70 border border-fuchsia-500/30 rounded-2xl p-5">
+            <div className="flex items-center justify-between text-fuchsia-200 uppercase tracking-[0.3em] text-xs mb-4">
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4" />
+                Premiações da Arena
+              </div>
+              <span className="text-[10px] text-fuchsia-300">Atualizável no admin</span>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {rewardCards.map((reward) => (
+                <motion.div
+                  key={reward.label}
+                  className="rounded-xl border border-fuchsia-500/20 bg-slate-800/70 px-3 py-2"
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <div className="text-xs text-fuchsia-200 flex items-center gap-2">
+                    <span>{reward.icon}</span>
+                    {reward.label}
+                  </div>
+                  <div className="text-sm font-semibold text-white mt-1">{reward.value}</div>
+                </motion.div>
+              ))}
             </div>
           </div>
 

@@ -21,6 +21,11 @@ type Challenge = {
   id: string;
   premio_semana: string;
   meta_global: number;
+  premio_top1: string | null;
+  premio_top2: string | null;
+  premio_top3: string | null;
+  premio_google: string | null;
+  premio_ultrapassagem: string | null;
   criado_em: string;
 };
 
@@ -193,15 +198,25 @@ export async function POST(req: Request) {
     }
 
     if (action === "create_challenge") {
-      const { premio_semana, meta_global } = body as {
+      const { premio_semana, meta_global, premio_top1, premio_top2, premio_top3, premio_google, premio_ultrapassagem } = body as {
         premio_semana: string;
         meta_global: number;
+        premio_top1?: string | null;
+        premio_top2?: string | null;
+        premio_top3?: string | null;
+        premio_google?: string | null;
+        premio_ultrapassagem?: string | null;
       };
       const { data, error } = await supabaseAdmin
         .from("arena_desafios")
         .insert({
           premio_semana,
-          meta_global
+          meta_global,
+          premio_top1: premio_top1 || null,
+          premio_top2: premio_top2 || null,
+          premio_top3: premio_top3 || null,
+          premio_google: premio_google || null,
+          premio_ultrapassagem: premio_ultrapassagem || null
         })
         .select()
         .single();
@@ -218,7 +233,12 @@ export async function POST(req: Request) {
         .from("arena_desafios")
         .update({
           premio_semana: updates.premio_semana,
-          meta_global: updates.meta_global
+          meta_global: updates.meta_global,
+          premio_top1: updates.premio_top1 ?? null,
+          premio_top2: updates.premio_top2 ?? null,
+          premio_top3: updates.premio_top3 ?? null,
+          premio_google: updates.premio_google ?? null,
+          premio_ultrapassagem: updates.premio_ultrapassagem ?? null
         })
         .eq("id", id)
         .select()
