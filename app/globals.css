@@ -32,3 +32,21 @@ body {
 .text-slate-500, .text-slate-600, .text-zinc-500, .text-neutral-500 {
   color: #000000 !important;
 }
+
+@keyframes starMovement {
+  from { background-position: 0 0; }
+  to { background-position: -200px 0; }
+}
+
+.animate-stars {
+  background-image: 
+    radial-gradient(1px 1px at 10px 10px, rgba(255,255,255,0.8), rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 30px 60px, rgba(255,255,255,0.8), rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 50px 120px, rgba(255,255,255,0.8), rgba(0,0,0,0)),
+    radial-gradient(1.5px 1.5px at 90px 40px, rgba(255,255,255,0.8), rgba(0,0,0,0)),
+    radial-gradient(1.5px 1.5px at 130px 80px, rgba(255,255,255,0.8), rgba(0,0,0,0)),
+    radial-gradient(1.5px 1.5px at 170px 150px, rgba(255,255,255,0.8), rgba(0,0,0,0));
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  animation: starMovement 2s linear infinite;
+}

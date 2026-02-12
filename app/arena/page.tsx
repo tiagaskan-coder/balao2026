@@ -525,7 +525,7 @@ export default function ArenaPage() {
                   transition={{ duration: 0.8 }}
                 >
                   {/* Pista de corrida background */}
-                  <div className="absolute inset-0 opacity-30 bg-[repeating-linear-gradient(90deg,transparent,transparent_50px,rgba(255,255,255,0.05)_50px,rgba(255,255,255,0.05)_100px)]" />
+                  <div className="absolute inset-0 z-0 animate-stars opacity-40" />
                   <div className="absolute top-1/2 left-0 right-0 h-0 border-t-2 border-dashed border-slate-600/30 transform -translate-y-1/2" />
                   
                   <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(230,0,18,0.08),transparent)]" />
