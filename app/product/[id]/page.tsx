@@ -10,11 +10,11 @@ import ProductActions from '@/components/ProductActions';
 import ShippingCalculator from '@/components/ShippingCalculator';
 
 type Props = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = params;
+  const { id } = await params;
   const product = await getProductById(id);
 
   if (!product) {
@@ -50,7 +50,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ProductPage({ params }: Props) {
-  const { id } = params;
+  const { id } = await params;
   const [product, categories] = await Promise.all([
     getProductById(id),
     getCategories()
