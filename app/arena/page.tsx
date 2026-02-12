@@ -46,7 +46,14 @@ export default function ArenaPage() {
   const [zapId, setZapId] = useState<string | null>(null);
   const sellersRef = useRef<Seller[]>([]);
   const prevRankRef = useRef<Record<string, number>>({});
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const ambientSourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const ambientGainRef = useRef<GainNode | null>(null);
+  const battleLoopRef = useRef<number | null>(null);
+  const [audioEnabled, setAudioEnabled] = useState(false);
+  const [salePulse, setSalePulse] = useState(0);
+  const [overtakePulse, setOvertakePulse] = useState(0);
+  const [battlePulse, setBattlePulse] = useState(0);
   const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
@@ -55,9 +62,38 @@ export default function ArenaPage() {
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
-    audioRef.current = new Audio("/sounds/cash_register.mp3");
     return () => {
       document.body.style.overflow = "";
+      if (battleLoopRef.current) window.clearInterval(battleLoopRef.current);
+      ambientSourceRef.current?.stop();
+      audioContextRef.current?.close();
+    };
+  }, []);
+
+  const ensureAudio = async () => {
+    try {
+      if (!audioContextRef.current) {
+        audioContextRef.current = new AudioContext();
+      }
+      if (audioContextRef.current.state === "suspended") {
+        await audioContextRef.current.resume();
+      }
+      if (!audioEnabled) setAudioEnabled(true);
+      return audioContextRef.current;
+    } catch {
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    const unlock = async () => {
+      await ensureAudio();
+    };
+    window.addEventListener("pointerdown", unlock, { once: true });
+    window.addEventListener("keydown", unlock, { once: true });
+    return () => {
+      window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("keydown", unlock);
     };
   }, []);
 
@@ -132,19 +168,97 @@ export default function ArenaPage() {
     });
     const prevRank = prevRankRef.current;
     const boosts = Object.keys(nextRank).filter((id) => prevRank[id] && nextRank[id] < prevRank[id]);
-    if (boosts.length) triggerTurbo(boosts);
+    if (boosts.length) {
+      triggerTurbo(boosts);
+      setOvertakePulse(Date.now());
+      playOvertake(boosts.length);
+    }
     prevRankRef.current = nextRank;
   };
 
-  const playSound = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.currentTime = 0;
-    audio.play().catch(() => undefined);
+  const playTone = (freq: number, duration: number, type: OscillatorType, gainValue: number) => {
+    const ctx = audioContextRef.current;
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.value = gainValue;
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    const now = ctx.currentTime;
+    gain.gain.setValueAtTime(gainValue, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    osc.start();
+    osc.stop(now + duration);
+  };
+
+  const playSale = async () => {
+    const ctx = await ensureAudio();
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(420, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(780, ctx.currentTime + 0.12);
+    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.2);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.2);
+  };
+
+  const playGoogleZap = async () => {
+    const ctx = await ensureAudio();
+    if (!ctx) return;
+    playTone(1200, 0.12, "sawtooth", 0.08);
+    playTone(800, 0.18, "square", 0.05);
+  };
+
+  const playOvertake = async (count: number) => {
+    const ctx = await ensureAudio();
+    if (!ctx) return;
+    const base = 320 + count * 40;
+    playTone(base, 0.18, "square", 0.06);
+    playTone(base + 180, 0.22, "triangle", 0.05);
+  };
+
+  const startBattleAmbience = async () => {
+    const ctx = await ensureAudio();
+    if (!ctx || ambientSourceRef.current) return;
+
+    const buffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < data.length; i += 1) {
+      data[i] = (Math.random() * 2 - 1) * 0.15;
+    }
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = 520;
+    const gain = ctx.createGain();
+    gain.gain.value = 0.04;
+    source.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    source.start();
+    ambientSourceRef.current = source;
+    ambientGainRef.current = gain;
+
+    if (battleLoopRef.current) window.clearInterval(battleLoopRef.current);
+    battleLoopRef.current = window.setInterval(() => {
+      setBattlePulse(Date.now());
+      playTone(90, 0.08, "sine", 0.08);
+      playTone(140, 0.06, "triangle", 0.05);
+    }, 1800);
   };
 
   useEffect(() => {
     refreshData();
+    const refreshInterval = window.setInterval(() => refreshData(), 20000);
     const channel = supabase
       .channel("arena_vendas")
       .on("postgres_changes", { event: "*", schema: "public", table: "vendas" }, (payload) => {
@@ -161,8 +275,10 @@ export default function ArenaPage() {
           if (sale.is_google_bonus) {
             setZapId(sale.vendedor_id);
             setTimeout(() => setZapId(null), 1200);
+            playGoogleZap();
           }
-          playSound();
+          setSalePulse(Date.now());
+          playSale();
         }
         if (payload.eventType === "UPDATE") {
           const oldSale = payload.old as Sale;
@@ -195,6 +311,7 @@ export default function ArenaPage() {
 
     return () => {
       supabase.removeChannel(channel);
+      window.clearInterval(refreshInterval);
     };
   }, [supabase]);
 
@@ -204,12 +321,52 @@ export default function ArenaPage() {
 
   const topThree = rankedSellers.slice(0, 3);
 
+  useEffect(() => {
+    if (audioEnabled) startBattleAmbience();
+  }, [audioEnabled]);
+
+  const ambientParticles = useMemo(
+    () =>
+      Array.from({ length: 14 }).map((_, index) => ({
+        id: index,
+        x: 5 + Math.random() * 90,
+        size: 24 + Math.random() * 48,
+        delay: Math.random() * 3
+      })),
+    []
+  );
+
   return (
     <div className="h-screen w-screen overflow-hidden bg-slate-950 text-white">
+      <motion.div
+        key={battlePulse}
+        className="absolute inset-0 pointer-events-none"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.12 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#fbbf24,transparent_65%)]" />
+      </motion.div>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#2b1a55,transparent_55%)] opacity-70" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,#3b2a10,transparent_55%)] opacity-70" />
+      <div className="absolute inset-0 pointer-events-none">
+        {ambientParticles.map((particle) => (
+          <motion.div
+            key={particle.id}
+            className="absolute rounded-full bg-amber-300/10 blur-xl"
+            style={{ left: `${particle.x}%`, width: particle.size, height: particle.size }}
+            animate={{ y: [0, -40, 0], opacity: [0.15, 0.35, 0.15] }}
+            transition={{ duration: 6 + particle.delay, repeat: Infinity, delay: particle.delay }}
+          />
+        ))}
+      </div>
       <div className="relative z-10 h-full w-full grid grid-cols-[1.6fr_0.7fr] gap-6 p-6">
-        <div className="flex flex-col gap-6">
+        <motion.div
+          className="flex flex-col gap-6"
+          animate={overtakePulse ? { x: [0, -6, 6, -4, 0] } : { x: 0 }}
+          transition={{ duration: 0.4 }}
+        >
           <header className="flex items-center justify-between bg-gradient-to-r from-amber-500/20 to-purple-500/20 border border-amber-400/40 rounded-2xl px-6 py-4 shadow-lg">
             <div className="flex items-center gap-3">
               <Swords className="w-8 h-8 text-amber-300" />
@@ -235,7 +392,12 @@ export default function ArenaPage() {
               const isTurbo = turboIds.includes(seller.id);
               const isZap = zapId === seller.id;
               return (
-                <div key={seller.id} className="relative h-20 rounded-2xl border border-amber-500/30 bg-slate-900/60 overflow-hidden">
+                <motion.div
+                  key={seller.id}
+                  className="relative h-20 rounded-2xl border border-amber-500/30 bg-slate-900/60 overflow-hidden"
+                  animate={salePulse ? { boxShadow: ["0 0 0 rgba(251,191,36,0)", "0 0 22px rgba(251,191,36,0.35)", "0 0 0 rgba(251,191,36,0)"] } : {}}
+                  transition={{ duration: 0.8 }}
+                >
                   <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(251,191,36,0.08),transparent)]" />
                   <div className="absolute left-5 top-1/2 -translate-y-1/2 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full border-2 border-amber-300 overflow-hidden bg-slate-800 flex items-center justify-center">
@@ -254,14 +416,14 @@ export default function ArenaPage() {
                   </div>
                   <div className="absolute right-6 top-0 bottom-0 w-1 bg-amber-400/70 rounded-full" />
                   <motion.div
-                    animate={{ left: `${progress}%` }}
+                    animate={{ left: `${progress}%`, scale: isTurbo ? 1.12 : 1 }}
                     transition={{ type: "spring", stiffness: 120, damping: 20 }}
                     className="absolute top-1/2 -translate-y-1/2"
                     style={{ left: `${progress}%` }}
                   >
                     <div className="relative">
                       {isTurbo && (
-                        <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-amber-400/40 blur-xl rounded-full" />
+                        <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-14 h-14 bg-amber-400/40 blur-xl rounded-full animate-pulse" />
                       )}
                       {isZap && (
                         <div className="absolute inset-0 -m-2 rounded-full bg-blue-500/40 blur-lg animate-pulse" />
@@ -273,7 +435,7 @@ export default function ArenaPage() {
                   </motion.div>
                   <div className="absolute right-6 top-2 text-xs text-amber-200">🏁</div>
                   <div className="absolute left-5 bottom-2 text-xs text-purple-200">Lane {index + 1}</div>
-                </div>
+                </motion.div>
               );
             })}
             {rankedSellers.length === 0 && (
@@ -282,7 +444,7 @@ export default function ArenaPage() {
               </div>
             )}
           </div>
-        </div>
+        </motion.div>
 
         <aside className="flex flex-col gap-6">
           <div className="bg-slate-900/70 border border-amber-500/30 rounded-2xl p-5">

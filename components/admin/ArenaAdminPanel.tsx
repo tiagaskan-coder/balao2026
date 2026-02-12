@@ -28,6 +28,7 @@ type Challenge = {
 
 export default function ArenaAdminPanel() {
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [sellers, setSellers] = useState<Seller[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
@@ -69,18 +70,30 @@ export default function ArenaAdminPanel() {
     fetchData();
   }, []);
 
+  const parseError = async (res: Response) => {
+    try {
+      const data = await res.json();
+      return data?.error || "Erro ao salvar dados";
+    } catch {
+      return "Erro ao salvar dados";
+    }
+  };
+
   const fetchData = async () => {
     setLoading(true);
     try {
+      setErrorMessage(null);
       const res = await fetch("/api/arena?full=1", { cache: "no-store" });
-      if (res.ok) {
-        const data = await res.json();
-        setSellers(data.sellers || []);
-        setSales(data.salesFeed || []);
-        setChallenges(data.challenges || []);
-        if (!selectedSellerId && data.sellers?.length) {
-          setSelectedSellerId(data.sellers[0].id);
-        }
+      if (!res.ok) {
+        setErrorMessage(await parseError(res));
+        return;
+      }
+      const data = await res.json();
+      setSellers(data.sellers || []);
+      setSales(data.salesFeed || []);
+      setChallenges(data.challenges || []);
+      if (!selectedSellerId && data.sellers?.length) {
+        setSelectedSellerId(data.sellers[0].id);
       }
     } finally {
       setLoading(false);
@@ -95,6 +108,7 @@ export default function ArenaAdminPanel() {
   const handleAvatarUpload = async (file: File) => {
     setUploading(true);
     try {
+      setErrorMessage(null);
       const formData = new FormData();
       formData.append("file", file);
       formData.append("bucket", "avatars");
@@ -103,7 +117,11 @@ export default function ArenaAdminPanel() {
         body: formData
       });
       const data = await res.json();
-      if (res.ok && data.url) {
+      if (!res.ok) {
+        setErrorMessage(data?.error || "Falha no upload do avatar");
+        return;
+      }
+      if (data.url) {
         setNewSeller((prev) => ({ ...prev, avatar_url: data.url }));
       }
     } finally {
@@ -115,7 +133,8 @@ export default function ArenaAdminPanel() {
     if (!newSeller.nome) return;
     setLoading(true);
     try {
-      await fetch("/api/arena", {
+      setErrorMessage(null);
+      const res = await fetch("/api/arena", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -125,6 +144,10 @@ export default function ArenaAdminPanel() {
           meta_valor: newSeller.meta_valor ? Number(newSeller.meta_valor) : null
         })
       });
+      if (!res.ok) {
+        setErrorMessage(await parseError(res));
+        return;
+      }
       setNewSeller({ nome: "", meta_valor: "", avatar_url: "" });
       await fetchData();
     } finally {
@@ -145,7 +168,8 @@ export default function ArenaAdminPanel() {
     if (!editingSellerId) return;
     setLoading(true);
     try {
-      await fetch("/api/arena", {
+      setErrorMessage(null);
+      const res = await fetch("/api/arena", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -158,6 +182,10 @@ export default function ArenaAdminPanel() {
           }
         })
       });
+      if (!res.ok) {
+        setErrorMessage(await parseError(res));
+        return;
+      }
       setEditingSellerId(null);
       await fetchData();
     } finally {
@@ -169,11 +197,16 @@ export default function ArenaAdminPanel() {
     if (!confirm("Excluir vendedor e todas as vendas associadas?")) return;
     setLoading(true);
     try {
-      await fetch("/api/arena", {
+      setErrorMessage(null);
+      const res = await fetch("/api/arena", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "delete_seller", id })
       });
+      if (!res.ok) {
+        setErrorMessage(await parseError(res));
+        return;
+      }
       await fetchData();
     } finally {
       setLoading(false);
@@ -184,7 +217,8 @@ export default function ArenaAdminPanel() {
     if (!selectedSellerId || !saleValue) return;
     setLoading(true);
     try {
-      await fetch("/api/arena", {
+      setErrorMessage(null);
+      const res = await fetch("/api/arena", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -194,6 +228,10 @@ export default function ArenaAdminPanel() {
           is_google_bonus: googleBonus
         })
       });
+      if (!res.ok) {
+        setErrorMessage(await parseError(res));
+        return;
+      }
       setSaleValue("");
       setGoogleBonus(false);
       await fetchData();
@@ -215,7 +253,8 @@ export default function ArenaAdminPanel() {
     if (!editingSaleId) return;
     setLoading(true);
     try {
-      await fetch("/api/arena", {
+      setErrorMessage(null);
+      const res = await fetch("/api/arena", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -228,6 +267,10 @@ export default function ArenaAdminPanel() {
           }
         })
       });
+      if (!res.ok) {
+        setErrorMessage(await parseError(res));
+        return;
+      }
       setEditingSaleId(null);
       await fetchData();
     } finally {
@@ -239,11 +282,16 @@ export default function ArenaAdminPanel() {
     if (!confirm("Excluir esta venda?")) return;
     setLoading(true);
     try {
-      await fetch("/api/arena", {
+      setErrorMessage(null);
+      const res = await fetch("/api/arena", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "delete_sale", id })
       });
+      if (!res.ok) {
+        setErrorMessage(await parseError(res));
+        return;
+      }
       await fetchData();
     } finally {
       setLoading(false);
@@ -254,7 +302,8 @@ export default function ArenaAdminPanel() {
     if (!challengeForm.premio_semana || !challengeForm.meta_global) return;
     setLoading(true);
     try {
-      await fetch("/api/arena", {
+      setErrorMessage(null);
+      const res = await fetch("/api/arena", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -263,6 +312,10 @@ export default function ArenaAdminPanel() {
           meta_global: Number(challengeForm.meta_global)
         })
       });
+      if (!res.ok) {
+        setErrorMessage(await parseError(res));
+        return;
+      }
       setChallengeForm({ premio_semana: "", meta_global: "" });
       await fetchData();
     } finally {
@@ -282,7 +335,8 @@ export default function ArenaAdminPanel() {
     if (!editingChallengeId) return;
     setLoading(true);
     try {
-      await fetch("/api/arena", {
+      setErrorMessage(null);
+      const res = await fetch("/api/arena", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -294,6 +348,10 @@ export default function ArenaAdminPanel() {
           }
         })
       });
+      if (!res.ok) {
+        setErrorMessage(await parseError(res));
+        return;
+      }
       setEditingChallengeId(null);
       await fetchData();
     } finally {
@@ -305,11 +363,16 @@ export default function ArenaAdminPanel() {
     if (!confirm("Excluir este desafio?")) return;
     setLoading(true);
     try {
-      await fetch("/api/arena", {
+      setErrorMessage(null);
+      const res = await fetch("/api/arena", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "delete_challenge", id })
       });
+      if (!res.ok) {
+        setErrorMessage(await parseError(res));
+        return;
+      }
       await fetchData();
     } finally {
       setLoading(false);
@@ -318,6 +381,11 @@ export default function ArenaAdminPanel() {
 
   return (
     <div className="space-y-8">
+      {errorMessage && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+          {errorMessage}
+        </div>
+      )}
       <div className="bg-gradient-to-r from-yellow-400 to-amber-500 rounded-xl p-5 text-white shadow-lg">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">

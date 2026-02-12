@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { supabaseAdmin, hasAdmin } from "@/lib/supabase-admin";
 
 type Seller = {
   id: string;
@@ -34,6 +34,12 @@ const calculateTotals = (sales: Sale[]) => {
 
 export async function GET(request: Request) {
   try {
+    if (!hasAdmin) {
+      return NextResponse.json(
+        { error: "SUPABASE_SERVICE_ROLE_KEY não configurada no servidor." },
+        { status: 500 }
+      );
+    }
     const { searchParams } = new URL(request.url);
     const full = searchParams.get("full") === "1";
     const { data: sellers, error: sellersError } = await supabaseAdmin
@@ -81,6 +87,12 @@ export async function GET(request: Request) {
 
 export async function POST(req: Request) {
   try {
+    if (!hasAdmin) {
+      return NextResponse.json(
+        { error: "SUPABASE_SERVICE_ROLE_KEY não configurada no servidor." },
+        { status: 500 }
+      );
+    }
     const body = await req.json();
     const { action } = body as { action: string };
 
