@@ -643,7 +643,7 @@ export default function ArenaPage() {
                   <motion.div
                     animate={{ left: `${visualProgress}%`, scale: isTurbo ? 1.12 : 1 }}
                     transition={{ type: "spring", stiffness: 120, damping: 20 }}
-                    className="absolute top-[32%] -translate-y-1/2 z-[100]"
+                    className="absolute top-[calc(32%-19px)] -translate-y-1/2 z-[100]"
                   >
                     <div className="relative flex items-center justify-center">
                       {/* Efeitos de Fogo e Fumaça */}
