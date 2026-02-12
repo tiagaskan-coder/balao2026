@@ -433,15 +433,15 @@ export default function ArenaPage() {
         exit={{ opacity: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#fbbf24,transparent_65%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#E60012,transparent_65%)]" />
       </motion.div>
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#2b1a55,transparent_55%)] opacity-70" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,#3b2a10,transparent_55%)] opacity-70" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#450a0a,transparent_55%)] opacity-70" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,#450a0a,transparent_55%)] opacity-70" />
       <div className="absolute inset-0 pointer-events-none">
         {ambientParticles.map((particle) => (
           <motion.div
             key={particle.id}
-            className="absolute rounded-full bg-amber-300/10 blur-xl"
+            className="absolute rounded-full bg-red-500/10 blur-xl"
             style={{ left: `${particle.x}%`, width: particle.size, height: particle.size }}
             animate={{ y: [0, -40, 0], opacity: [0.15, 0.35, 0.15] }}
             transition={{ duration: 6 + particle.delay, repeat: Infinity, delay: particle.delay }}
@@ -454,26 +454,26 @@ export default function ArenaPage() {
           animate={overtakePulse ? { x: [0, -6, 6, -4, 0] } : { x: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-amber-500/20 to-purple-500/20 border border-amber-400/40 rounded-2xl px-4 sm:px-6 py-4 shadow-lg">
+          <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-red-600/20 to-red-900/20 border border-red-500/40 rounded-2xl px-4 sm:px-6 py-4 shadow-lg">
             <div className="flex items-center gap-3">
-              <Swords className="w-7 h-7 sm:w-8 sm:h-8 text-amber-300" />
+              <Swords className="w-7 h-7 sm:w-8 sm:h-8 text-red-500" />
               <div>
-                <div className="text-xs sm:text-sm uppercase tracking-[0.3em] text-amber-200">Arena Royale</div>
+                <div className="text-xs sm:text-sm uppercase tracking-[0.3em] text-red-200">Arena Royale</div>
                 <h1 className="text-2xl sm:text-3xl font-['Bangers'] tracking-wide">Corrida de Vendas</h1>
               </div>
             </div>
             <div className="text-left sm:text-right w-full sm:w-auto">
-              <div className="text-xs uppercase tracking-widest text-amber-200">Desafio da Semana</div>
+              <div className="text-xs uppercase tracking-widest text-red-200">Desafio da Semana</div>
               <div className="text-base sm:text-lg font-semibold">{activeChallenge?.premio_semana || "Defina o prêmio"}</div>
-              <div className="text-xs sm:text-sm text-purple-200">
+              <div className="text-xs sm:text-sm text-red-300">
                 Meta global: {activeChallenge ? formatCurrency(activeChallenge.meta_global) : "—"}
               </div>
-              <div className="text-xs text-amber-100 mt-2">
+              <div className="text-xs text-red-100 mt-2">
                 Total na arena: {formatCurrency(globalTotal)}
               </div>
               <div className="mt-2 h-2 w-full sm:w-56 bg-white/10 rounded-full overflow-hidden sm:ml-auto">
                 <motion.div
-                  className="h-full bg-gradient-to-r from-amber-400 to-fuchsia-400"
+                  className="h-full bg-gradient-to-r from-red-600 to-red-400"
                   animate={{ width: `${globalProgress}%` }}
                   transition={{ type: "spring", stiffness: 140, damping: 20 }}
                 />
@@ -494,18 +494,18 @@ export default function ArenaPage() {
                 <motion.div
                   key={seller.id}
                   className={`relative h-20 sm:h-24 rounded-2xl border overflow-hidden ${
-                    isPodium ? "border-amber-400/60 bg-slate-900/90 shadow-[0_0_25px_rgba(251,191,36,0.15)]" : "border-amber-500/30 bg-slate-900/80"
+                    isPodium ? "border-red-500/60 bg-slate-900/90 shadow-[0_0_25px_rgba(230,0,18,0.15)]" : "border-red-500/30 bg-slate-900/80"
                   }`}
-                  animate={salePulse ? { boxShadow: ["0 0 0 rgba(251,191,36,0)", "0 0 22px rgba(251,191,36,0.35)", "0 0 0 rgba(251,191,36,0)"] } : {}}
+                  animate={salePulse ? { boxShadow: ["0 0 0 rgba(230,0,18,0)", "0 0 22px rgba(230,0,18,0.35)", "0 0 0 rgba(230,0,18,0)"] } : {}}
                   transition={{ duration: 0.8 }}
                 >
                   {/* Pista de corrida background */}
                   <div className="absolute inset-0 opacity-30 bg-[repeating-linear-gradient(90deg,transparent,transparent_50px,rgba(255,255,255,0.05)_50px,rgba(255,255,255,0.05)_100px)]" />
                   <div className="absolute top-1/2 left-0 right-0 h-0 border-t-2 border-dashed border-slate-600/30 transform -translate-y-1/2" />
                   
-                  <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(251,191,36,0.08),transparent)]" />
+                  <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(230,0,18,0.08),transparent)]" />
                   <div className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 flex items-center gap-3 relative z-20">
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-amber-300 overflow-hidden bg-slate-800 flex items-center justify-center">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-red-400 overflow-hidden bg-slate-800 flex items-center justify-center">
                       {seller.avatar_url ? (
                         <img src={seller.avatar_url} alt={seller.nome} className="w-full h-full object-cover" />
                       ) : (
@@ -515,7 +515,7 @@ export default function ArenaPage() {
                     <div className="bg-slate-900/60 px-2 py-1 rounded-lg backdrop-blur-sm flex flex-col gap-1 z-30">
                       <div>
                         <div className="text-sm sm:text-base font-semibold">{seller.nome}</div>
-                        <div className="text-[11px] sm:text-xs text-amber-200">
+                        <div className="text-[11px] sm:text-xs text-red-200">
                           {formatCurrency(total)} • {Math.round(progress)}%
                         </div>
                       </div>
@@ -529,9 +529,9 @@ export default function ArenaPage() {
                             <div
                                 key={ach.id}
                                 title={hasAchievement ? `${ach.nome}: ${ach.descricao}` : `${ach.nome} (Bloqueado)`}
-                                className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] cursor-help transition-all ${
+                                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs cursor-help transition-all ${
                                 hasAchievement
-                                    ? "bg-amber-400/20 text-amber-100 border border-amber-400/50 shadow-[0_0_5px_rgba(251,191,36,0.3)] scale-100"
+                                    ? "bg-red-600/20 text-red-100 border border-red-500/50 shadow-[0_0_5px_rgba(230,0,18,0.3)] scale-100"
                                     : "bg-slate-800 text-slate-600 border border-slate-700 grayscale opacity-30 scale-90"
                                 }`}
                             >
@@ -542,16 +542,16 @@ export default function ArenaPage() {
                       </div>
                     </div>
                     {isPodium && (
-                      <div className="text-xs px-2 py-1 rounded-full bg-amber-400/20 border border-amber-300/40 text-amber-100">
+                      <div className="text-xs px-2 py-1 rounded-full bg-red-600/20 border border-red-400/40 text-red-100">
                         #{index + 1}
                       </div>
                     )}
                   </div>
-                  <div className="absolute right-4 sm:right-6 top-0 bottom-0 w-1 bg-amber-400/70 rounded-full" />
+                  <div className="absolute right-4 sm:right-6 top-0 bottom-0 w-1 bg-red-500/70 rounded-full" />
                   <motion.div
                     animate={{ left: `${visualProgress}%`, scale: isTurbo ? 1.12 : 1 }}
                     transition={{ type: "spring", stiffness: 120, damping: 20 }}
-                    className="absolute top-1/2 -translate-y-1/2 z-10"
+                    className="absolute top-1/2 -translate-y-1/2 z-50"
                   >
                     <div className="relative flex items-center justify-center">
                       {/* Efeitos de Fogo e Fumaça */}
@@ -577,23 +577,23 @@ export default function ArenaPage() {
                       </div>
 
                       {isTurbo && (
-                        <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-14 h-14 bg-amber-400/40 blur-xl rounded-full animate-pulse" />
+                        <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-14 h-14 bg-red-500/40 blur-xl rounded-full animate-pulse" />
                       )}
                       {isZap && (
                         <div className="absolute inset-0 -m-2 rounded-full bg-blue-500/40 blur-lg animate-pulse" />
                       )}
                       
-                      <div className="text-4xl sm:text-5xl transform rotate-45 filter drop-shadow-lg z-10 relative">
+                      <div className="text-4xl sm:text-5xl transform rotate-45 filter drop-shadow-lg z-[100] relative">
                         🚀
                       </div>
                     </div>
                   </motion.div>
-                  <div className="absolute right-4 sm:right-6 top-2 text-xs text-amber-200">🏁</div>
+                  <div className="absolute right-4 sm:right-6 top-2 text-xs text-red-200">🏁</div>
                 </motion.div>
               );
             })}
             {rankedSellers.length === 0 && (
-              <div className="h-full flex items-center justify-center text-amber-200">
+              <div className="h-full flex items-center justify-center text-red-200">
                 Cadastre vendedores para começar a corrida
               </div>
             )}
@@ -601,8 +601,8 @@ export default function ArenaPage() {
         </motion.div>
 
         <aside className="flex flex-col gap-4 sm:gap-6 lg:h-full lg:overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
-          <div className="bg-slate-900/70 border border-amber-500/30 rounded-2xl p-5">
-            <div className="flex items-center gap-2 text-amber-200 uppercase tracking-[0.3em] text-xs mb-4">
+          <div className="bg-slate-900/70 border border-red-500/30 rounded-2xl p-5">
+            <div className="flex items-center gap-2 text-red-200 uppercase tracking-[0.3em] text-xs mb-4">
               <Crown className="w-4 h-4" />
               Top 3
             </div>
@@ -610,7 +610,7 @@ export default function ArenaPage() {
               {topThree.map((seller, index) => (
                 <div key={seller.id} className="flex items-center justify-between bg-slate-800/60 rounded-xl px-3 sm:px-4 py-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full border-2 border-amber-300 overflow-hidden bg-slate-800 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full border-2 border-red-400 overflow-hidden bg-slate-800 flex items-center justify-center">
                       {seller.avatar_url ? (
                         <img src={seller.avatar_url} alt={seller.nome} className="w-full h-full object-cover" />
                       ) : (
@@ -619,7 +619,7 @@ export default function ArenaPage() {
                     </div>
                     <div>
                       <div className="font-semibold">{seller.nome}</div>
-                      <div className="text-xs text-amber-200">{formatCurrency(totals[seller.id] || 0)}</div>
+                      <div className="text-xs text-red-200">{formatCurrency(totals[seller.id] || 0)}</div>
                     </div>
                   </div>
                   <div className="text-xl sm:text-2xl">
@@ -628,13 +628,13 @@ export default function ArenaPage() {
                 </div>
               ))}
               {topThree.length === 0 && (
-                <div className="text-amber-200">Sem ranking ainda</div>
+                <div className="text-red-200">Sem ranking ainda</div>
               )}
             </div>
           </div>
 
-          <div className="bg-slate-900/70 border border-fuchsia-500/30 rounded-2xl p-4 sm:p-5">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-fuchsia-200 uppercase tracking-[0.3em] text-xs mb-4 gap-2">
+          <div className="bg-slate-900/70 border border-red-500/30 rounded-2xl p-4 sm:p-5">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-red-200 uppercase tracking-[0.3em] text-xs mb-4 gap-2">
               <div className="flex items-center gap-2">
                 <Zap className="w-4 h-4" />
                 Premiações da Arena
@@ -644,10 +644,10 @@ export default function ArenaPage() {
               {rewardCards.map((reward) => (
                 <motion.div
                   key={reward.label}
-                  className="rounded-xl border border-fuchsia-500/20 bg-slate-800/70 px-3 py-2"
+                  className="rounded-xl border border-red-500/20 bg-slate-800/70 px-3 py-2"
                   whileHover={{ scale: 1.02 }}
                 >
-                  <div className="text-xs text-fuchsia-200 flex items-center gap-2">
+                  <div className="text-xs text-red-200 flex items-center gap-2">
                     <span>{reward.icon}</span>
                     {reward.label}
                   </div>
@@ -657,8 +657,8 @@ export default function ArenaPage() {
             </div>
           </div>
 
-          <div className="bg-slate-900/70 border border-purple-500/30 rounded-2xl p-4 sm:p-5 flex-1">
-            <div className="flex items-center gap-2 text-purple-200 uppercase tracking-[0.3em] text-xs mb-4">
+          <div className="bg-slate-900/70 border border-red-500/30 rounded-2xl p-4 sm:p-5 flex-1">
+            <div className="flex items-center gap-2 text-red-200 uppercase tracking-[0.3em] text-xs mb-4">
               <Zap className="w-4 h-4" />
               Kill Feed
             </div>
@@ -671,7 +671,7 @@ export default function ArenaPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     className={`rounded-xl px-4 py-3 text-sm border ${
-                      item.isGoogle ? "border-blue-400/50 bg-blue-500/10" : "border-amber-400/30 bg-slate-800/60"
+                      item.isGoogle ? "border-blue-400/50 bg-blue-500/10" : "border-red-500/30 bg-slate-800/60"
                     }`}
                   >
                     <div className="flex flex-col gap-1">
@@ -689,7 +689,7 @@ export default function ArenaPage() {
                 ))}
               </AnimatePresence>
               {salesFeed.length === 0 && (
-                <div className="text-purple-200 text-sm">Aguardando novas vendas...</div>
+                <div className="text-red-200 text-sm">Aguardando novas vendas...</div>
               )}
             </div>
           </div>
@@ -715,7 +715,7 @@ export default function ArenaPage() {
             </button>
             
             <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <Trophy className="text-amber-400" />
+              <Trophy className="text-red-500" />
               Solicitar Conquista
             </h3>
 
@@ -725,7 +725,7 @@ export default function ArenaPage() {
                 <select 
                   value={requestForm.sellerId}
                   onChange={(e) => setRequestForm({...requestForm, sellerId: e.target.value})}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-red-500"
                 >
                   <option value="">Selecione...</option>
                   {sellers.map(s => <option key={s.id} value={s.id}>{s.nome}</option>)}
@@ -737,7 +737,7 @@ export default function ArenaPage() {
                 <select 
                   value={requestForm.achievementId}
                   onChange={(e) => setRequestForm({...requestForm, achievementId: e.target.value})}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-red-500"
                 >
                   <option value="">Selecione...</option>
                   {achievements
@@ -752,7 +752,7 @@ export default function ArenaPage() {
                 <textarea 
                   value={requestForm.justification}
                   onChange={(e) => setRequestForm({...requestForm, justification: e.target.value})}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500 min-h-[80px]"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-red-500 min-h-[80px]"
                   placeholder="Descreva por que você merece esta conquista..."
                 />
               </div>
@@ -763,7 +763,7 @@ export default function ArenaPage() {
                   type="text"
                   value={requestForm.evidenceUrl}
                   onChange={(e) => setRequestForm({...requestForm, evidenceUrl: e.target.value})}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-red-500"
                   placeholder="https://..."
                 />
               </div>
@@ -771,7 +771,7 @@ export default function ArenaPage() {
               <button
                 onClick={handleSubmitRequest}
                 disabled={loadingRequest}
-                className="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-red-600 hover:bg-red-700 text-slate-900 font-bold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loadingRequest ? "Enviando..." : "Enviar Solicitação"}
               </button>
