@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Crown, Zap, Swords, Trophy } from "lucide-react";
+import { Crown, Zap, Swords, Trophy, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 type Seller = {
@@ -78,7 +78,51 @@ export default function ArenaPage() {
   const [salePulse, setSalePulse] = useState(0);
   const [overtakePulse, setOvertakePulse] = useState(0);
   const [battlePulse, setBattlePulse] = useState(0);
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [loadingRequest, setLoadingRequest] = useState(false);
+  const [requestForm, setRequestForm] = useState({
+    sellerId: "",
+    achievementId: "",
+    justification: "",
+    evidenceUrl: ""
+  });
   const supabase = useMemo(() => createClient(), []);
+
+  const handleSubmitRequest = async () => {
+    if (!requestForm.sellerId || !requestForm.achievementId) {
+      alert("Selecione vendedor e conquista");
+      return;
+    }
+    setLoadingRequest(true);
+    try {
+      const res = await fetch("/api/arena", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "add_achievement",
+          vendedor_id: requestForm.sellerId,
+          conquista_id: requestForm.achievementId,
+          status: "pendente",
+          justificativa: requestForm.justification,
+          evidencia_url: requestForm.evidenceUrl
+        })
+      });
+      if (res.ok) {
+        alert("Solicitação enviada com sucesso! Aguarde aprovação.");
+        setShowRequestModal(false);
+        setRequestForm({ sellerId: "", achievementId: "", justification: "", evidenceUrl: "" });
+        refreshData();
+      } else {
+        const data = await res.json();
+        alert("Erro: " + (data.message || "Falha ao enviar"));
+      }
+    } catch (err) {
+      alert("Erro ao enviar solicitação");
+    } finally {
+      setLoadingRequest(false);
+    }
+  };
+
 
   useEffect(() => {
     sellersRef.current = sellers;
@@ -649,8 +693,92 @@ export default function ArenaPage() {
               )}
             </div>
           </div>
+          
+          <button
+            onClick={() => setShowRequestModal(true)}
+            className="w-full bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700 text-slate-400 hover:text-white py-2 rounded-lg text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2"
+          >
+            <Trophy size={14} />
+            Solicitar Conquista
+          </button>
         </aside>
       </div>
+
+      {showRequestModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-xl p-6 w-full max-w-md relative">
+            <button 
+              onClick={() => setShowRequestModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white"
+            >
+              <X size={20} />
+            </button>
+            
+            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+              <Trophy className="text-amber-400" />
+              Solicitar Conquista
+            </h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm text-slate-400 mb-1 block">Vendedor</label>
+                <select 
+                  value={requestForm.sellerId}
+                  onChange={(e) => setRequestForm({...requestForm, sellerId: e.target.value})}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500"
+                >
+                  <option value="">Selecione...</option>
+                  {sellers.map(s => <option key={s.id} value={s.id}>{s.nome}</option>)}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-sm text-slate-400 mb-1 block">Conquista</label>
+                <select 
+                  value={requestForm.achievementId}
+                  onChange={(e) => setRequestForm({...requestForm, achievementId: e.target.value})}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500"
+                >
+                  <option value="">Selecione...</option>
+                  {achievements
+                    .filter(a => a.tipo === 'manual')
+                    .map(a => <option key={a.id} value={a.id}>{a.nome}</option>)
+                  }
+                </select>
+              </div>
+
+              <div>
+                <label className="text-sm text-slate-400 mb-1 block">Justificativa</label>
+                <textarea 
+                  value={requestForm.justification}
+                  onChange={(e) => setRequestForm({...requestForm, justification: e.target.value})}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500 min-h-[80px]"
+                  placeholder="Descreva por que você merece esta conquista..."
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-slate-400 mb-1 block">Link da Evidência (Opcional)</label>
+                <input 
+                  type="text"
+                  value={requestForm.evidenceUrl}
+                  onChange={(e) => setRequestForm({...requestForm, evidenceUrl: e.target.value})}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500"
+                  placeholder="https://..."
+                />
+              </div>
+
+              <button
+                onClick={handleSubmitRequest}
+                disabled={loadingRequest}
+                className="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loadingRequest ? "Enviando..." : "Enviar Solicitação"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -10,11 +10,10 @@ import ProductManager from "@/components/admin/ProductManager";
 import HomeBlocksManager from "@/components/admin/HomeBlocksManager";
 import MarketingManager from "@/components/admin/MarketingManager";
 import CouponManager from "@/components/admin/CouponManager";
-import ArenaAdminPanel from "@/components/admin/ArenaAdminPanel";
-import { ArrowLeft, Upload, CheckCircle, AlertCircle, Layout, Layers, Save, Search, Settings, ShoppingBag, Mail, Swords } from "lucide-react";
+import { ArrowLeft, Upload, CheckCircle, AlertCircle, Layout, Layers, Save, Search, Settings, ShoppingBag, Mail } from "lucide-react";
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState<"import" | "carousel" | "products" | "categories" | "orders" | "home_blocks" | "marketing" | "coupons" | "arena">("import");
+  const [activeTab, setActiveTab] = useState<"import" | "carousel" | "products" | "categories" | "orders" | "home_blocks" | "marketing" | "coupons">("import");
 
   // Product List State
   const [products, setProducts] = useState<Product[]>([]);
@@ -316,13 +315,6 @@ export default function AdminPage() {
                     >
                         <ShoppingBag size={18} />
                         Gerenciar Pedidos
-                    </button>
-                    <button
-                        onClick={() => setActiveTab("arena")}
-                        className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${activeTab === "arena" ? "bg-red-50 text-[#E60012] border-l-4 border-[#E60012]" : "text-gray-600 hover:bg-gray-50"}`}
-                    >
-                        <Swords size={18} />
-                        Ranking Arena
                     </button>
                     <button
                         onClick={() => setActiveTab("products")}
@@ -632,18 +624,6 @@ export default function AdminPage() {
                                 </h2>
                             </div>
                             <ProductManager />
-                        </div>
-                    )}
-
-                    {activeTab === "arena" && (
-                        <div className="animate-in fade-in duration-300">
-                             <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                                    <Swords className="text-[#E60012]" />
-                                    Ranking da Arena
-                                </h2>
-                            </div>
-                            <ArenaAdminPanel />
                         </div>
                     )}
 

@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS vendedor_conquistas (
     conquista_id UUID NOT NULL REFERENCES conquistas(id) ON DELETE CASCADE,
     data_conquista TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     status TEXT CHECK (status IN ('pendente', 'aprovado')) DEFAULT 'aprovado',
+    justificativa TEXT,
+    evidencia_url TEXT,
     UNIQUE(vendedor_id, conquista_id) -- Evita duplicidade da mesma conquista para o mesmo vendedor
 );
 

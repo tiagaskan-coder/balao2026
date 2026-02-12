@@ -45,6 +45,8 @@ type SellerAchievement = {
   conquista_id: string;
   data_conquista: string;
   status: "pendente" | "aprovado";
+  justificativa?: string;
+  evidencia_url?: string;
 };
 
 export default function ArenaAdminPanel() {
@@ -158,6 +160,27 @@ export default function ArenaAdminPanel() {
         setLoading(false);
     }
   };
+
+  const removeAchievement = async (id: string) => {
+    if (!confirm("Tem certeza que deseja rejeitar/remover esta conquista?")) return;
+    setLoading(true);
+    try {
+        setErrorMessage(null);
+        const res = await fetch("/api/arena", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "remove_achievement", id })
+        });
+        if (!res.ok) {
+            setErrorMessage(await parseError(res));
+            return;
+        }
+        await fetchData();
+    } finally {
+        setLoading(false);
+    }
+  };
+
 
   const assignAchievement = async () => {
       if (!selectedSellerId || !selectedAchievementId) return;
@@ -1052,19 +1075,40 @@ export default function ArenaAdminPanel() {
                         const seller = sellers.find(s => s.id === sa.vendedor_id);
                         const ach = achievements.find(a => a.id === sa.conquista_id);
                         return (
-                            <div key={sa.id} className="flex items-center justify-between bg-yellow-50 border border-yellow-200 p-3 rounded-lg">
+                            <div key={sa.id} className="flex flex-col md:flex-row md:items-center justify-between bg-yellow-50 border border-yellow-200 p-3 rounded-lg gap-3">
                                 <div>
                                     <div className="font-semibold text-gray-800">{seller?.nome || 'Desconhecido'}</div>
                                     <div className="text-sm text-gray-600">Solicitou: <span className="font-medium">{ach?.nome}</span></div>
-                                    <div className="text-xs text-gray-500">{new Date(sa.data_conquista).toLocaleString()}</div>
+                                    <div className="text-xs text-gray-500 mb-1">{new Date(sa.data_conquista).toLocaleString()}</div>
+                                    {sa.justificativa && (
+                                        <div className="text-xs text-gray-700 bg-white/50 p-2 rounded border border-yellow-100 mt-1">
+                                            <span className="font-semibold">Justificativa:</span> {sa.justificativa}
+                                        </div>
+                                    )}
+                                    {sa.evidencia_url && (
+                                        <div className="text-xs mt-1">
+                                            <a href={sa.evidencia_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                                Ver Evidência
+                                            </a>
+                                        </div>
+                                    )}
                                 </div>
-                                <button
-                                    onClick={() => approveAchievement(sa.id)}
-                                    disabled={loading}
-                                    className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded-md"
-                                >
-                                    Aprovar
-                                </button>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => approveAchievement(sa.id)}
+                                        disabled={loading}
+                                        className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded-md whitespace-nowrap"
+                                    >
+                                        Aprovar
+                                    </button>
+                                     <button
+                                        onClick={() => removeAchievement(sa.id)}
+                                        disabled={loading}
+                                        className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded-md whitespace-nowrap"
+                                    >
+                                        Rejeitar
+                                    </button>
+                                </div>
                             </div>
                         );
                     })}

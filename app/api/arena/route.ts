@@ -280,21 +280,25 @@ export async function POST(req: Request) {
     }
 
     if (action === "add_achievement") {
-      const { vendedor_id, conquista_id, status } = body as {
+      const { vendedor_id, conquista_id, status, justificativa, evidencia_url } = body as {
         vendedor_id: string;
         conquista_id: string;
         status?: "pendente" | "aprovado";
+        justificativa?: string;
+        evidencia_url?: string;
       };
       const { data, error } = await supabaseAdmin
         .from("vendedor_conquistas")
         .insert({
           vendedor_id,
           conquista_id,
-          status: status || "pendente"
+          status: status || "pendente",
+          justificativa: justificativa || null,
+          evidencia_url: evidencia_url || null
         })
         .select()
         .single();
-      
+
       if (error) {
         if (error.code === '23505') { 
             return NextResponse.json({ message: "Conquista já atribuída/solicitada" });
@@ -304,26 +308,26 @@ export async function POST(req: Request) {
       return NextResponse.json(data);
     }
 
-    if (action === "approve_achievement") {
-        const { id } = body as { id: string };
-        const { data, error } = await supabaseAdmin
-            .from("vendedor_conquistas")
-            .update({ status: "aprovado" })
-            .eq("id", id)
-            .select()
-            .single();
-        if (error) throw error;
-        return NextResponse.json(data);
+    if (action === "remove_achievement") {
+      const { id } = body as { id: string };
+      const { error } = await supabaseAdmin
+        .from("vendedor_conquistas")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+      return NextResponse.json({ ok: true });
     }
 
-    if (action === "remove_achievement") {
-         const { id } = body as { id: string };
-         const { error } = await supabaseAdmin
-            .from("vendedor_conquistas")
-            .delete()
-            .eq("id", id);
-         if (error) throw error;
-         return NextResponse.json({ ok: true });
+    if (action === "approve_achievement") {
+      const { id } = body as { id: string };
+      const { data, error } = await supabaseAdmin
+        .from("vendedor_conquistas")
+        .update({ status: "aprovado" })
+        .eq("id", id)
+        .select()
+        .single();
+      if (error) throw error;
+      return NextResponse.json(data);
     }
 
     return NextResponse.json({ error: "Ação inválida" }, { status: 400 });
