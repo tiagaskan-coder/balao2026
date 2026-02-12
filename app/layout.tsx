@@ -12,6 +12,7 @@ import AIOverlay from "@/components/AIOverlay"; // Nova Interface de Preview
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import { getCategories } from "@/lib/db";
 import Sidebar from "@/components/Sidebar";
+import type { Category } from "@/lib/utils";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -92,7 +93,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const categories = await getCategories();
+  let categories: Category[] = [];
+  try {
+    categories = await getCategories();
+  } catch {
+    categories = [];
+  }
 
   return (
     <html lang="pt-BR">
