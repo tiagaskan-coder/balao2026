@@ -16,25 +16,40 @@ export default function AssistantSettings() {
     maxResults: 5,
   });
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem("balao_assistant_config");
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        setConfig({
-          greeting: parsed.greeting ?? config.greeting,
-          voiceEnabled: typeof parsed.voiceEnabled === "boolean" ? parsed.voiceEnabled : config.voiceEnabled,
-          maxResults: Number(parsed.maxResults) || config.maxResults,
-        });
+    const load = async () => {
+      try {
+        const res = await fetch("/api/assistant/settings");
+        if (res.ok) {
+          const data = await res.json();
+          setConfig({
+            greeting: data.greeting ?? config.greeting,
+            voiceEnabled: typeof data.voiceEnabled === "boolean" ? data.voiceEnabled : config.voiceEnabled,
+            maxResults: Number(data.maxResults) || config.maxResults,
+          });
+        }
+      } finally {
+        setLoading(false);
       }
-    } catch {}
+    };
+    load();
   }, []);
 
   const handleSave = () => {
-    localStorage.setItem("balao_assistant_config", JSON.stringify(config));
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    const run = async () => {
+      const res = await fetch("/api/assistant/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(config),
+      });
+      if (res.ok) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+      }
+    };
+    run();
   };
 
   return (
@@ -42,6 +57,8 @@ export default function AssistantSettings() {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold text-gray-800">Configurações do Assistente</h2>
       </div>
+
+      {loading && <div className="text-sm text-gray-500">Carregando configurações...</div>}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>

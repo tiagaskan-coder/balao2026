@@ -29,6 +29,40 @@ export function AIContextProvider({ children }: { children: React.ReactNode }) {
   const recognitionRef = useRef<any>(null); // Type any para evitar erro TS do SpeechRecognition
   const isSpeakingRef = useRef(false);
   const hasWelcomedRef = useRef(false);
+  const settingsRef = useRef<{ greeting: string; voiceEnabled: boolean; maxResults: number }>({
+    greeting: "Olá! Sou o assistente do Balão da Informática. Como posso te ajudar hoje?",
+    voiceEnabled: true,
+    maxResults: 5
+  });
+  const sessionIdRef = useRef<string>("");
+
+  useEffect(() => {
+    // Load assistant settings and session id
+    const init = async () => {
+      try {
+        const res = await fetch("/api/assistant/settings");
+        if (res.ok) {
+          const data = await res.json();
+          settingsRef.current = {
+            greeting: data.greeting ?? settingsRef.current.greeting,
+            voiceEnabled: typeof data.voiceEnabled === "boolean" ? data.voiceEnabled : settingsRef.current.voiceEnabled,
+            maxResults: Number(data.maxResults ?? settingsRef.current.maxResults)
+          };
+        }
+      } catch {}
+      try {
+        const sid = localStorage.getItem("balao_assistant_session_id");
+        if (sid) {
+          sessionIdRef.current = sid;
+        } else {
+          const newId = Math.random().toString(36).slice(2) + Date.now().toString(36);
+          localStorage.setItem("balao_assistant_session_id", newId);
+          sessionIdRef.current = newId;
+        }
+      } catch {}
+    };
+    init();
+  }, []);
 
   // Detect Android environment
   const isAndroid = () => {
@@ -111,10 +145,10 @@ export function AIContextProvider({ children }: { children: React.ReactNode }) {
 
   const processUserMessage = async (message: string) => {
     try {
-      const response = await fetch('/api/chat', {
+          const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message })
+            body: JSON.stringify({ message, sessionId: sessionIdRef.current })
       });
 
       const data = await response.json();
@@ -184,16 +218,8 @@ export function AIContextProvider({ children }: { children: React.ReactNode }) {
     // Welcome message logic
     if (!hasWelcomedRef.current) {
         hasWelcomedRef.current = true;
-        try {
-          const raw = localStorage.getItem("balao_assistant_config");
-          const cfg = raw ? JSON.parse(raw) : null;
-          const greeting = (cfg && typeof cfg.greeting === "string" && cfg.greeting.trim())
-            ? cfg.greeting
-            : "Olá! Sou o assistente do Balão da Informática. Como posso te ajudar hoje?";
-          speak(greeting);
-        } catch {
-          speak("Olá! Sou o assistente do Balão da Informática. Como posso te ajudar hoje?");
-        }
+        const greeting = settingsRef.current.greeting || "Olá! Sou o assistente do Balão da Informática. Como posso te ajudar hoje?";
+        speak(greeting);
         // Note: speak() will handle the recognition start/stop flow
         return;
     }

@@ -16,7 +16,7 @@ if (!supabaseUrl || !supabaseKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
-export async function searchProducts(query: string) {
+export async function searchProducts(query: string, limit: number = 5) {
   // 1. Limpeza básica da query
   const cleanedQuery = query.trim();
   
@@ -30,7 +30,7 @@ export async function searchProducts(query: string) {
     .from('products')
     .select('id, name, price, description, image') // Corrigido: image_url -> image
     .textSearch('name_description', cleanedQuery, { config: 'portuguese', type: 'websearch' })
-    .limit(5);
+    .limit(limit);
 
   if (error) {
     console.warn('⚠️ Erro no textSearch (pode ser falta de índice/coluna):', error.message);
@@ -62,7 +62,7 @@ export async function searchProducts(query: string) {
           queryBuilder = queryBuilder.ilike('name', `%${term}%`);
       });
       
-      const { data: fallbackData, error: fallbackError } = await queryBuilder.limit(5);
+      const { data: fallbackData, error: fallbackError } = await queryBuilder.limit(limit);
       
       if (!fallbackError && fallbackData && fallbackData.length > 0) {
           console.log(`✅ Encontrados ${fallbackData.length} produtos via ILIKE (AND).`);
@@ -79,7 +79,7 @@ export async function searchProducts(query: string) {
       .from('products')
       .select('id, name, price, description, image') // Corrigido: image_url -> image
       .ilike('name', `%${normalizedQuery}%`)
-      .limit(5);
+      .limit(limit);
 
   return finalFallback || [];
 }
