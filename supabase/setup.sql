@@ -49,3 +49,45 @@ create policy "Authenticated users can insert import history"
     on public.import_history
     for insert
     with check (auth.role() = 'authenticated');
+
+create table if not exists public.vendedores (
+    id uuid default gen_random_uuid() primary key,
+    nome text not null,
+    avatar_url text,
+    meta_valor numeric,
+    criado_em timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+create table if not exists public.vendas (
+    id uuid default gen_random_uuid() primary key,
+    vendedor_id uuid references public.vendedores(id) on delete cascade,
+    valor numeric not null,
+    is_google_bonus boolean default false,
+    criado_em timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+create table if not exists public.arena_desafios (
+    id uuid default gen_random_uuid() primary key,
+    premio_semana text not null,
+    meta_global numeric not null,
+    criado_em timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+create or replace view public.ranking_vendedores as
+select
+    v.id,
+    v.nome,
+    v.avatar_url,
+    v.meta_valor,
+    coalesce(sum(va.valor + case when va.is_google_bonus then 100 else 0 end), 0) as total_vendas
+from public.vendedores v
+left join public.vendas va on va.vendedor_id = v.id
+group by v.id, v.nome, v.avatar_url, v.meta_valor;
+
+alter table public.vendedores enable row level security;
+alter table public.vendas enable row level security;
+alter table public.arena_desafios enable row level security;
+
+create policy "public read vendedores" on public.vendedores for select using (true);
+create policy "public read vendas" on public.vendas for select using (true);
+create policy "public read desafios" on public.arena_desafios for select using (true);

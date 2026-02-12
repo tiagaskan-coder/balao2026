@@ -1,5 +1,6 @@
 'use client';
 
+import { usePathname } from "next/navigation";
 import { SidebarProvider } from "@/context/SidebarContext";
 import Sidebar from "@/components/Sidebar";
 import Footer from "@/components/Footer";
@@ -13,6 +14,13 @@ export default function LayoutWrapper({
   children: React.ReactNode; 
   categories: Category[] 
 }) {
+  const pathname = usePathname();
+  const isArena = pathname === "/arena" || pathname?.startsWith("/arena/");
+
+  if (isArena) {
+    return <>{children}</>;
+  }
+
   return (
     <SidebarProvider>
       <Sidebar categories={categories} mobileOnly />
