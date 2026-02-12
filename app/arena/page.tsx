@@ -86,6 +86,9 @@ export default function ArenaPage() {
     justification: "",
     evidenceUrl: ""
   });
+  const [celebration, setCelebration] = useState<{ type: "leader" | "overtake"; seller: Seller } | null>(null);
+  const lastRankingsRef = useRef<Record<string, number>>({});
+
   const supabase = useMemo(() => createClient(), []);
 
   const handleSubmitRequest = async () => {
@@ -236,7 +239,20 @@ export default function ArenaPage() {
     list.forEach((seller, index) => {
       nextRank[seller.id] = index + 1;
     });
+
     const prevRank = prevRankRef.current;
+    
+    // Detect Leader Change
+    const newLeader = list[0];
+    const oldLeaderId = Object.keys(prevRank).find(id => prevRank[id] === 1);
+    
+    // Only trigger if we had a previous leader (not first load) and it changed
+    if (oldLeaderId && newLeader && newLeader.id !== oldLeaderId) {
+      setCelebration({ type: "leader", seller: newLeader });
+      // Auto-hide after 8 seconds
+      setTimeout(() => setCelebration(null), 8000);
+    }
+
     const boosts = Object.keys(nextRank).filter((id) => prevRank[id] && nextRank[id] < prevRank[id]);
     if (boosts.length) {
       triggerTurbo(boosts);
@@ -779,6 +795,97 @@ export default function ArenaPage() {
           </div>
         </div>
       )}
+      {/* Celebration Popup */}
+      <AnimatePresence>
+        {celebration && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+            onClick={() => setCelebration(null)}
+          >
+            <div className="relative flex flex-col items-center justify-center max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
+              <motion.div
+                initial={{ y: -50, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="text-4xl sm:text-6xl font-['Bangers'] text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.8)] tracking-wider mb-4 text-center"
+              >
+                NOVO LÍDER!
+              </motion.div>
+              
+              <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-full border-4 border-yellow-400/50 shadow-[0_0_50px_rgba(250,204,21,0.4)] overflow-hidden bg-slate-900 mb-6">
+                 <img 
+                   src="https://i.pinimg.com/originals/a4/d3/ce/a4d3ce7ff09e24bbc4cf265686e9becc.gif" 
+                   alt="Celebration" 
+                   className="w-full h-full object-cover"
+                 />
+                 {/* Overlay do Avatar do Vendedor */}
+                 <div className="absolute bottom-4 right-4 w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-white shadow-lg overflow-hidden bg-slate-800">
+                    {celebration.seller.avatar_url ? (
+                      <img src={celebration.seller.avatar_url} alt={celebration.seller.nome} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center font-bold text-xl text-white bg-slate-700">
+                        {celebration.seller.nome.slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                 </div>
+              </div>
+
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.4, type: "spring" }}
+                className="text-3xl sm:text-5xl font-bold text-white text-center drop-shadow-lg"
+              >
+                {celebration.seller.nome}
+              </motion.div>
+              
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
+                className="mt-4 text-yellow-200 text-lg sm:text-xl font-medium"
+              >
+                Assumiu a 1ª Posição! 👑
+              </motion.div>
+
+              <button 
+                onClick={() => setCelebration(null)}
+                className="absolute top-0 right-0 p-2 text-white/50 hover:text-white transition-colors"
+              >
+                <X size={32} />
+              </button>
+            </div>
+            
+            {/* Confetes */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+               {[...Array(20)].map((_, i) => (
+                 <motion.div
+                   key={i}
+                   className="absolute w-3 h-3 bg-yellow-400 rounded-sm"
+                   initial={{ 
+                     x: Math.random() * window.innerWidth, 
+                     y: -20, 
+                     rotate: 0 
+                   }}
+                   animate={{ 
+                     y: window.innerHeight + 20, 
+                     rotate: 360 * 2 + Math.random() * 360 
+                   }}
+                   transition={{ 
+                     duration: 2 + Math.random() * 2, 
+                     repeat: Infinity, 
+                     ease: "linear",
+                     delay: Math.random() * 2
+                   }}
+                 />
+               ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
