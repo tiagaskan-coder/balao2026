@@ -49,25 +49,3 @@ create policy "Authenticated users can insert import history"
     on public.import_history
     for insert
     with check (auth.role() = 'authenticated');
-
-alter table public.sellers add column if not exists badge_key text;
-
-create table if not exists public.flash_challenges (
-    id uuid default gen_random_uuid() primary key,
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-    title text not null,
-    prize_value numeric default 0,
-    active boolean default true
-);
-
-alter table public.flash_challenges enable row level security;
-
-create policy "Authenticated users can manage flash challenges"
-    on public.flash_challenges
-    for all
-    using (auth.role() = 'authenticated');
-
-create policy "Public can view active flash challenges"
-    on public.flash_challenges
-    for select
-    using (active = true);
