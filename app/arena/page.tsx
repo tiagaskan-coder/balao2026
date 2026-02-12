@@ -714,57 +714,55 @@ export default function ArenaPage() {
         </motion.div>
 
         <aside className="flex flex-col gap-4 sm:gap-6 lg:h-full lg:overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
-          <div className="bg-slate-900/70 border border-red-500/30 rounded-2xl p-5">
-            <div className="flex items-center gap-2 text-red-200 uppercase tracking-[0.3em] text-xs mb-4">
+          <div className="bg-slate-900/70 border border-red-500/30 rounded-xl p-3">
+            <div className="flex items-center gap-1 text-red-200 uppercase tracking-[0.25em] text-[10px] mb-2">
               <Crown className="w-4 h-4" />
               Top 3
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {topThree.map((seller, index) => (
-                <div key={seller.id} className="flex items-center justify-between bg-slate-800/60 rounded-xl px-3 sm:px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full border-2 border-red-400 overflow-hidden bg-slate-800 flex items-center justify-center">
+                <div key={seller.id} className="flex items-center justify-between bg-slate-800/60 rounded-lg px-3 py-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full border border-red-400 overflow-hidden bg-slate-800 flex items-center justify-center">
                       {seller.avatar_url ? (
                         <img src={seller.avatar_url} alt={seller.nome} className="w-full h-full object-cover" />
                       ) : (
-                        <span className="text-sm font-bold">{seller.nome.slice(0, 2).toUpperCase()}</span>
+                        <span className="text-[10px] font-bold">{seller.nome.slice(0, 2).toUpperCase()}</span>
                       )}
                     </div>
                     <div>
-                      <div className="font-semibold">{seller.nome}</div>
-                      <div className="text-xs text-red-200">{formatCurrency(totals[seller.id] || 0)}</div>
+                      <div className="text-xs font-medium">{seller.nome}</div>
+                      <div className="text-[10px] text-red-200">{formatCurrency(totals[seller.id] || 0)}</div>
                     </div>
                   </div>
-                  <div className="text-xl sm:text-2xl">
+                  <div className="text-lg">
                     {index === 0 ? "👑" : index === 1 ? "🥈" : "🥉"}
                   </div>
                 </div>
               ))}
               {topThree.length === 0 && (
-                <div className="text-red-200">Sem ranking ainda</div>
+                <div className="text-red-200 text-xs">Sem ranking ainda</div>
               )}
             </div>
           </div>
 
-          <div className="bg-slate-900/70 border border-red-500/30 rounded-2xl p-4 sm:p-5">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-red-200 uppercase tracking-[0.3em] text-xs mb-4 gap-2">
-              <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4" />
-                Premiações da Arena
-              </div>
+          <div className="bg-slate-900/70 border border-red-500/30 rounded-xl p-3">
+            <div className="flex items-center gap-1 text-red-200 uppercase tracking-[0.25em] text-[10px] mb-2">
+              <Zap className="w-4 h-4" />
+              Premiações da Arena
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {rewardCards.map((reward) => (
                 <motion.div
                   key={reward.label}
-                  className="rounded-xl border border-red-500/20 bg-slate-800/70 px-3 py-2"
+                  className="rounded-lg border border-red-500/20 bg-slate-800/70 px-2 py-1"
                   whileHover={{ scale: 1.02 }}
                 >
-                  <div className="text-xs text-red-200 flex items-center gap-2">
+                  <div className="text-[10px] text-red-200 flex items-center gap-1">
                     <span>{reward.icon}</span>
                     {reward.label}
                   </div>
-                  <div className="text-sm font-semibold text-white mt-1">{reward.value}</div>
+                  <div className="text-xs font-medium text-white mt-1">{reward.value}</div>
                 </motion.div>
               ))}
             </div>
