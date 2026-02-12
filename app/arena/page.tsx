@@ -474,7 +474,6 @@ export default function ArenaPage() {
                     </div>
                   </motion.div>
                   <div className="absolute right-4 sm:right-6 top-2 text-xs text-amber-200">🏁</div>
-                  <div className="absolute left-3 sm:left-5 bottom-2 text-xs text-purple-200">Lane {index + 1}</div>
                 </motion.div>
               );
             })}
