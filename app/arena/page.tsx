@@ -248,9 +248,12 @@ export default function ArenaPage() {
     
     // Only trigger if we had a previous leader (not first load) and it changed
     if (oldLeaderId && newLeader && newLeader.id !== oldLeaderId) {
-      setCelebration({ type: "leader", seller: newLeader });
-      // Auto-hide after 8 seconds
-      setTimeout(() => setCelebration(null), 8000);
+      setCelebration(prev => {
+        // If there is already a sale celebration, don't overwrite it with leader celebration
+        // unless you want leader to take precedence. Here we prioritize 'sale' to ensure the GIF is seen.
+        if (prev?.type === 'sale') return prev;
+        return { type: "leader", seller: newLeader };
+      });
     }
 
     const boosts = Object.keys(nextRank).filter((id) => prevRank[id] && nextRank[id] < prevRank[id]);
@@ -261,6 +264,25 @@ export default function ArenaPage() {
     }
     prevRankRef.current = nextRank;
   };
+
+  // Effect to update ranks when totals change
+  useEffect(() => {
+    updateRanks(totals);
+  }, [totals]);
+
+  // Effect to handle celebration timeouts
+  useEffect(() => {
+    if (!celebration) return;
+
+    let duration = 3000; // Default 3s (sale)
+    if (celebration.type === 'leader') duration = 8000;
+    
+    const timer = setTimeout(() => {
+      setCelebration(null);
+    }, duration);
+
+    return () => clearTimeout(timer);
+  }, [celebration]);
 
   const playTone = (freq: number, duration: number, type: OscillatorType, gainValue: number) => {
     const ctx = audioContextRef.current;
@@ -353,7 +375,6 @@ export default function ArenaPage() {
           setTotals((prev) => {
             const next = { ...prev };
             next[sale.vendedor_id] = (next[sale.vendedor_id] || 0) + getDelta(sale);
-            updateRanks(next);
             return next;
           });
           const message = buildFeedMessage(sale);
@@ -363,8 +384,6 @@ export default function ArenaPage() {
           const seller = sellersRef.current.find(s => s.id === sale.vendedor_id);
           if (seller) {
             setCelebration({ type: "sale", seller });
-            // Close after 3 seconds
-            setTimeout(() => setCelebration(null), 3000);
           }
 
           if (sale.is_google_bonus) {
@@ -382,7 +401,6 @@ export default function ArenaPage() {
             const next = { ...prev };
             next[oldSale.vendedor_id] = (next[oldSale.vendedor_id] || 0) - getDelta(oldSale);
             next[newSale.vendedor_id] = (next[newSale.vendedor_id] || 0) + getDelta(newSale);
-            updateRanks(next);
             return next;
           });
         }
@@ -391,7 +409,6 @@ export default function ArenaPage() {
           setTotals((prev) => {
             const next = { ...prev };
             next[oldSale.vendedor_id] = (next[oldSale.vendedor_id] || 0) - getDelta(oldSale);
-            updateRanks(next);
             return next;
           });
         }
