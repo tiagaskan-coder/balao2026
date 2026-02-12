@@ -86,7 +86,7 @@ export default function ArenaPage() {
     justification: "",
     evidenceUrl: ""
   });
-  const [celebration, setCelebration] = useState<{ type: "leader" | "overtake" | "sale"; seller: Seller } | null>(null);
+  const [celebration, setCelebration] = useState<{ type: "leader" | "overtake" | "sale" | "google"; seller: Seller } | null>(null);
   const lastRankingsRef = useRef<Record<string, number>>({});
 
   const supabase = useMemo(() => createClient(), []);
@@ -249,9 +249,9 @@ export default function ArenaPage() {
     // Only trigger if we had a previous leader (not first load) and it changed
     if (oldLeaderId && newLeader && newLeader.id !== oldLeaderId) {
       setCelebration(prev => {
-        // If there is already a sale celebration, don't overwrite it with leader celebration
-        // unless you want leader to take precedence. Here we prioritize 'sale' to ensure the GIF is seen.
-        if (prev?.type === 'sale') return prev;
+        // If there is already a sale/google celebration, don't overwrite it with leader celebration
+        // unless you want leader to take precedence. Here we prioritize sale/google events.
+        if (prev?.type === 'sale' || prev?.type === 'google') return prev;
         return { type: "leader", seller: newLeader };
       });
     }
@@ -274,7 +274,7 @@ export default function ArenaPage() {
   useEffect(() => {
     if (!celebration) return;
 
-    let duration = 3000; // Default 3s (sale)
+    let duration = 3000; // Default 3s (sale/google)
     if (celebration.type === 'leader') duration = 8000;
     
     const timer = setTimeout(() => {
@@ -382,17 +382,21 @@ export default function ArenaPage() {
           const message = buildFeedMessage(sale);
           setSalesFeed((prev) => [{ id: sale.id, message, isGoogle: sale.is_google_bonus, createdAt: sale.criado_em }, ...prev].slice(0, 5));
           
-          // Trigger Sale Celebration
+          // Trigger Celebration
           const seller = sellersRef.current.find(s => String(s.id) === String(sale.vendedor_id));
           
           if (seller) {
             console.log("Celebration Triggered for:", seller.nome);
-            setCelebration({ type: "sale", seller });
+            if (sale.is_google_bonus) {
+              setCelebration({ type: "google", seller });
+            } else {
+              setCelebration({ type: "sale", seller });
+            }
           } else {
             console.warn("Seller not found for celebration:", sale.vendedor_id);
             // Fallback para não perder o evento visualmente
             setCelebration({ 
-              type: "sale", 
+              type: sale.is_google_bonus ? "google" : "sale", 
               seller: { 
                 id: String(sale.vendedor_id), 
                 nome: "Vendedor", 
@@ -893,14 +897,20 @@ export default function ArenaPage() {
                 transition={{ delay: 0.2 }}
                 className="text-4xl sm:text-6xl font-['Bangers'] text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.8)] tracking-wider mb-4 text-center"
               >
-                {celebration.type === 'sale' ? 'NOVO PEDIDO DETECTADO!' : 'NOVO LÍDER!'}
+                {celebration.type === 'google' ? 'REI DO GOOGLE!' : (celebration.type === 'sale' ? 'NOVO PEDIDO DETECTADO!' : 'NOVO LÍDER!')}
               </motion.div>
               
               <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-full border-4 border-yellow-400/50 shadow-[0_0_50px_rgba(250,204,21,0.4)] overflow-hidden bg-slate-900 mb-6 flex items-center justify-center">
                  <img 
-                   src={celebration.type === 'sale' ? "https://i.pinimg.com/originals/3d/27/11/3d271128514d50a47c22e5f1beecb4fc.gif" : "https://i.pinimg.com/originals/a4/d3/ce/a4d3ce7ff09e24bbc4cf265686e9becc.gif"}
+                   src={
+                     celebration.type === 'google' 
+                       ? "https://i.giphy.com/QtvEouZBOE8nPn7yFx.webp" 
+                       : (celebration.type === 'sale' 
+                           ? "https://i.pinimg.com/originals/3d/27/11/3d271128514d50a47c22e5f1beecb4fc.gif" 
+                           : "https://i.pinimg.com/originals/a4/d3/ce/a4d3ce7ff09e24bbc4cf265686e9becc.gif")
+                   }
                    alt="Celebration" 
-                   className={`w-full h-full ${celebration.type === 'sale' ? 'object-contain' : 'object-cover'}`}
+                   className={`w-full h-full ${(celebration.type === 'sale' || celebration.type === 'google') ? 'object-contain' : 'object-cover'}`}
                    onError={(e) => {
                      // Fallback se a imagem falhar
                      e.currentTarget.style.display = 'none';
@@ -933,7 +943,7 @@ export default function ArenaPage() {
                 transition={{ delay: 0.8 }}
                 className="mt-4 text-yellow-200 text-lg sm:text-xl font-medium"
               >
-                {celebration.type === 'sale' ? 'Parabéns pela venda! 🎉' : 'Assumiu a 1ª Posição! 👑'}
+                {celebration.type === 'google' ? 'Dominou o Google! 🚀' : (celebration.type === 'sale' ? 'Parabéns pela venda! 🎉' : 'Assumiu a 1ª Posição! 👑')}
               </motion.div>
 
               <button 
@@ -949,7 +959,11 @@ export default function ArenaPage() {
                {[...Array(20)].map((_, i) => (
                  <motion.div
                    key={i}
-                   className="absolute w-3 h-3 bg-yellow-400 rounded-sm"
+                   className={`absolute w-3 h-3 rounded-sm ${
+                      celebration.type === 'google' 
+                      ? ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500'][i % 4] 
+                      : 'bg-yellow-400'
+                   }`}
                    initial={{ 
                      x: Math.random() * window.innerWidth, 
                      y: -20, 
