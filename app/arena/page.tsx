@@ -633,11 +633,7 @@ export default function ArenaPage() {
                         })}
                       </div>
                     </div>
-                    {isPodium && (
-                      <div className="text-xs px-2 py-1 rounded-full bg-red-600/20 border border-red-400/40 text-red-100">
-                        #{index + 1}
-                      </div>
-                    )}
+                    
                   </div>
                   <div className="absolute right-4 sm:right-6 top-0 bottom-0 w-1 bg-red-500/70 rounded-full" />
                   <motion.div
