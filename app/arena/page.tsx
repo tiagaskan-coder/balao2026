@@ -359,7 +359,7 @@ export default function ArenaPage() {
   );
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-slate-950 text-white">
+    <div className="min-h-screen w-screen overflow-hidden bg-slate-950 text-white">
       <motion.div
         key={battlePulse}
         className="absolute inset-0 pointer-events-none"
@@ -383,30 +383,30 @@ export default function ArenaPage() {
           />
         ))}
       </div>
-      <div className="relative z-10 h-full w-full grid grid-cols-[1.6fr_0.7fr] gap-6 p-6">
+      <div className="relative z-10 min-h-screen w-full grid grid-cols-1 xl:grid-cols-[1.6fr_0.7fr] gap-4 xl:gap-6 p-4 sm:p-6">
         <motion.div
           className="flex flex-col gap-6"
           animate={overtakePulse ? { x: [0, -6, 6, -4, 0] } : { x: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <header className="flex items-center justify-between bg-gradient-to-r from-amber-500/20 to-purple-500/20 border border-amber-400/40 rounded-2xl px-6 py-4 shadow-lg">
+          <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-amber-500/20 to-purple-500/20 border border-amber-400/40 rounded-2xl px-4 sm:px-6 py-4 shadow-lg">
             <div className="flex items-center gap-3">
-              <Swords className="w-8 h-8 text-amber-300" />
+              <Swords className="w-7 h-7 sm:w-8 sm:h-8 text-amber-300" />
               <div>
-                <div className="text-sm uppercase tracking-[0.3em] text-amber-200">Arena Royale</div>
-                <h1 className="text-3xl font-['Bangers'] tracking-wide">Corrida de Vendas</h1>
+                <div className="text-xs sm:text-sm uppercase tracking-[0.3em] text-amber-200">Arena Royale</div>
+                <h1 className="text-2xl sm:text-3xl font-['Bangers'] tracking-wide">Corrida de Vendas</h1>
               </div>
             </div>
-            <div className="text-right">
+            <div className="text-left sm:text-right w-full sm:w-auto">
               <div className="text-xs uppercase tracking-widest text-amber-200">Desafio da Semana</div>
-              <div className="text-lg font-semibold">{activeChallenge?.premio_semana || "Defina o prêmio"}</div>
-              <div className="text-sm text-purple-200">
+              <div className="text-base sm:text-lg font-semibold">{activeChallenge?.premio_semana || "Defina o prêmio"}</div>
+              <div className="text-xs sm:text-sm text-purple-200">
                 Meta global: {activeChallenge ? formatCurrency(activeChallenge.meta_global) : "—"}
               </div>
               <div className="text-xs text-amber-100 mt-2">
                 Total na arena: {formatCurrency(globalTotal)}
               </div>
-              <div className="mt-2 h-2 w-56 bg-white/10 rounded-full overflow-hidden ml-auto">
+              <div className="mt-2 h-2 w-full sm:w-56 bg-white/10 rounded-full overflow-hidden sm:ml-auto">
                 <motion.div
                   className="h-full bg-gradient-to-r from-amber-400 to-fuchsia-400"
                   animate={{ width: `${globalProgress}%` }}
@@ -427,15 +427,15 @@ export default function ArenaPage() {
               return (
                 <motion.div
                   key={seller.id}
-                  className={`relative h-20 rounded-2xl border overflow-hidden ${
+                  className={`relative h-20 sm:h-24 rounded-2xl border overflow-hidden ${
                     isPodium ? "border-amber-400/60 bg-slate-900/80 shadow-[0_0_25px_rgba(251,191,36,0.15)]" : "border-amber-500/30 bg-slate-900/60"
                   }`}
                   animate={salePulse ? { boxShadow: ["0 0 0 rgba(251,191,36,0)", "0 0 22px rgba(251,191,36,0.35)", "0 0 0 rgba(251,191,36,0)"] } : {}}
                   transition={{ duration: 0.8 }}
                 >
                   <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(251,191,36,0.08),transparent)]" />
-                  <div className="absolute left-5 top-1/2 -translate-y-1/2 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full border-2 border-amber-300 overflow-hidden bg-slate-800 flex items-center justify-center">
+                  <div className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 flex items-center gap-3">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-amber-300 overflow-hidden bg-slate-800 flex items-center justify-center">
                       {seller.avatar_url ? (
                         <img src={seller.avatar_url} alt={seller.nome} className="w-full h-full object-cover" />
                       ) : (
@@ -443,8 +443,8 @@ export default function ArenaPage() {
                       )}
                     </div>
                     <div>
-                      <div className="text-sm font-semibold">{seller.nome}</div>
-                      <div className="text-xs text-amber-200">
+                      <div className="text-sm sm:text-base font-semibold">{seller.nome}</div>
+                      <div className="text-[11px] sm:text-xs text-amber-200">
                         {formatCurrency(total)} • {Math.round(progress)}%
                       </div>
                     </div>
@@ -454,7 +454,7 @@ export default function ArenaPage() {
                       </div>
                     )}
                   </div>
-                  <div className="absolute right-6 top-0 bottom-0 w-1 bg-amber-400/70 rounded-full" />
+                  <div className="absolute right-4 sm:right-6 top-0 bottom-0 w-1 bg-amber-400/70 rounded-full" />
                   <motion.div
                     animate={{ left: `${progress}%`, scale: isTurbo ? 1.12 : 1 }}
                     transition={{ type: "spring", stiffness: 120, damping: 20 }}
@@ -468,13 +468,13 @@ export default function ArenaPage() {
                       {isZap && (
                         <div className="absolute inset-0 -m-2 rounded-full bg-blue-500/40 blur-lg animate-pulse" />
                       )}
-                      <div className="w-12 h-12 rounded-full border-4 border-amber-300 bg-slate-800 flex items-center justify-center shadow-xl">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-4 border-amber-300 bg-slate-800 flex items-center justify-center shadow-xl">
                         <Trophy className="w-5 h-5 text-amber-200" />
                       </div>
                     </div>
                   </motion.div>
-                  <div className="absolute right-6 top-2 text-xs text-amber-200">🏁</div>
-                  <div className="absolute left-5 bottom-2 text-xs text-purple-200">Lane {index + 1}</div>
+                  <div className="absolute right-4 sm:right-6 top-2 text-xs text-amber-200">🏁</div>
+                  <div className="absolute left-3 sm:left-5 bottom-2 text-xs text-purple-200">Lane {index + 1}</div>
                 </motion.div>
               );
             })}
@@ -486,7 +486,7 @@ export default function ArenaPage() {
           </div>
         </motion.div>
 
-        <aside className="flex flex-col gap-6">
+        <aside className="flex flex-col gap-4 sm:gap-6">
           <div className="bg-slate-900/70 border border-amber-500/30 rounded-2xl p-5">
             <div className="flex items-center gap-2 text-amber-200 uppercase tracking-[0.3em] text-xs mb-4">
               <Crown className="w-4 h-4" />
@@ -494,7 +494,7 @@ export default function ArenaPage() {
             </div>
             <div className="space-y-3">
               {topThree.map((seller, index) => (
-                <div key={seller.id} className="flex items-center justify-between bg-slate-800/60 rounded-xl px-4 py-3">
+                <div key={seller.id} className="flex items-center justify-between bg-slate-800/60 rounded-xl px-3 sm:px-4 py-3">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full border-2 border-amber-300 overflow-hidden bg-slate-800 flex items-center justify-center">
                       {seller.avatar_url ? (
@@ -508,7 +508,7 @@ export default function ArenaPage() {
                       <div className="text-xs text-amber-200">{formatCurrency(totals[seller.id] || 0)}</div>
                     </div>
                   </div>
-                  <div className="text-2xl">
+                  <div className="text-xl sm:text-2xl">
                     {index === 0 ? "👑" : index === 1 ? "🥈" : "🥉"}
                   </div>
                 </div>
@@ -519,15 +519,15 @@ export default function ArenaPage() {
             </div>
           </div>
 
-          <div className="bg-slate-900/70 border border-fuchsia-500/30 rounded-2xl p-5">
-            <div className="flex items-center justify-between text-fuchsia-200 uppercase tracking-[0.3em] text-xs mb-4">
+          <div className="bg-slate-900/70 border border-fuchsia-500/30 rounded-2xl p-4 sm:p-5">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-fuchsia-200 uppercase tracking-[0.3em] text-xs mb-4 gap-2">
               <div className="flex items-center gap-2">
                 <Zap className="w-4 h-4" />
                 Premiações da Arena
               </div>
               <span className="text-[10px] text-fuchsia-300">Atualizável no admin</span>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {rewardCards.map((reward) => (
                 <motion.div
                   key={reward.label}
@@ -544,7 +544,7 @@ export default function ArenaPage() {
             </div>
           </div>
 
-          <div className="bg-slate-900/70 border border-purple-500/30 rounded-2xl p-5 flex-1">
+          <div className="bg-slate-900/70 border border-purple-500/30 rounded-2xl p-4 sm:p-5 flex-1">
             <div className="flex items-center gap-2 text-purple-200 uppercase tracking-[0.3em] text-xs mb-4">
               <Zap className="w-4 h-4" />
               Kill Feed
