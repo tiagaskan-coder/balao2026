@@ -87,9 +87,20 @@ export default function ArenaPage() {
     evidenceUrl: ""
   });
   const [celebration, setCelebration] = useState<{ type: "leader" | "overtake" | "sale" | "google"; seller: Seller } | null>(null);
+  const [celebrationQueue, setCelebrationQueue] = useState<{ type: "leader" | "overtake" | "sale" | "google"; seller: Seller }[]>([]);
   const lastRankingsRef = useRef<Record<string, number>>({});
 
   const supabase = useMemo(() => createClient(), []);
+
+  const enqueueCelebration = (evt: { type: "leader" | "overtake" | "sale" | "google"; seller: Seller }) => {
+    setCelebration((current) => {
+      if (current) {
+        setCelebrationQueue((q) => [...q, evt]);
+        return current;
+      }
+      return evt;
+    });
+  };
 
   const handleSubmitRequest = async () => {
     if (!requestForm.sellerId || !requestForm.achievementId) {
@@ -248,12 +259,7 @@ export default function ArenaPage() {
     
     // Only trigger if we had a previous leader (not first load) and it changed
     if (oldLeaderId && newLeader && newLeader.id !== oldLeaderId) {
-      setCelebration(prev => {
-        // If there is already a sale/google celebration, don't overwrite it with leader celebration
-        // unless you want leader to take precedence. Here we prioritize sale/google events.
-        if (prev?.type === 'sale' || prev?.type === 'google') return prev;
-        return { type: "leader", seller: newLeader };
-      });
+      enqueueCelebration({ type: "leader", seller: newLeader });
     }
 
     const boosts = Object.keys(nextRank).filter((id) => prevRank[id] && nextRank[id] < prevRank[id]);
@@ -278,7 +284,15 @@ export default function ArenaPage() {
     if (celebration.type === 'leader') duration = 8000;
     
     const timer = setTimeout(() => {
-      setCelebration(null);
+      setCelebrationQueue((q) => {
+        const [next, ...rest] = q;
+        if (next) {
+          setCelebration(next);
+          return rest;
+        }
+        setCelebration(null);
+        return [];
+      });
     }, duration);
 
     return () => clearTimeout(timer);
@@ -374,9 +388,11 @@ export default function ArenaPage() {
         if (payload.eventType === "INSERT") {
           const sale = payload.new as Sale;
           console.log("New Sale Detected:", sale); // DEBUG LOG
+          let nextTotalsSnapshot: Record<string, number> = {};
           setTotals((prev) => {
             const next = { ...prev };
             next[sale.vendedor_id] = (next[sale.vendedor_id] || 0) + getDelta(sale);
+            nextTotalsSnapshot = next;
             return next;
           });
           const message = buildFeedMessage(sale);
@@ -387,15 +403,28 @@ export default function ArenaPage() {
           
           if (seller) {
             console.log("Celebration Triggered for:", seller.nome);
+            const ranked = [...sellersRef.current].sort(
+              (a, b) => (nextTotalsSnapshot[b.id] || 0) - (nextTotalsSnapshot[a.id] || 0)
+            );
+            const newLeaderId = ranked[0]?.id;
+            const oldLeaderId = Object.keys(prevRankRef.current).find(id => prevRankRef.current[id] === 1);
+            const leaderChanged = oldLeaderId && newLeaderId && newLeaderId !== oldLeaderId;
             if (sale.is_google_bonus) {
-              setCelebration({ type: "google", seller });
+              enqueueCelebration({ type: "google", seller });
+              if (leaderChanged && newLeaderId === seller.id) {
+                enqueueCelebration({ type: "leader", seller });
+              }
             } else {
-              setCelebration({ type: "sale", seller });
+              if (leaderChanged && newLeaderId === seller.id) {
+                enqueueCelebration({ type: "leader", seller });
+              } else {
+                enqueueCelebration({ type: "sale", seller });
+              }
             }
           } else {
             console.warn("Seller not found for celebration:", sale.vendedor_id);
             // Fallback para não perder o evento visualmente
-            setCelebration({ 
+            enqueueCelebration({ 
               type: sale.is_google_bonus ? "google" : "sale", 
               seller: { 
                 id: String(sale.vendedor_id), 
@@ -904,10 +933,10 @@ export default function ArenaPage() {
                  <img 
                    src={
                      celebration.type === 'google' 
-                       ? "https://i.giphy.com/QtvEouZBOE8nPn7yFx.webp" 
+                      ? "https://media.giphy.com/media/3o7aCWJavA6fVfWcIo/giphy.gif" 
                        : (celebration.type === 'sale' 
-                           ? "https://i.pinimg.com/originals/3d/27/11/3d271128514d50a47c22e5f1beecb4fc.gif" 
-                           : "https://i.pinimg.com/originals/a4/d3/ce/a4d3ce7ff09e24bbc4cf265686e9becc.gif")
+                          ? "https://media.giphy.com/media/111ebonMs90YLu/giphy.gif" 
+                          : "https://media.giphy.com/media/l0MYEqEzwMWQfqbqI/giphy.gif")
                    }
                    alt="Celebration" 
                    className={`w-full h-full ${(celebration.type === 'sale' || celebration.type === 'google') ? 'object-contain' : 'object-cover'}`}
