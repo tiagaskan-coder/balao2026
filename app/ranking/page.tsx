@@ -107,8 +107,8 @@ export default function RankingPage() {
 
   // Calculate track scale
   // Max scale is usually the Monthly Goal. If someone exceeds it, we scale up to their sales + buffer.
-  const monthlyGoal = goals.monthly?.target_amount || 20000; // default fallback
-  const maxSales = Math.max(...sellers.map(s => s.total_sales), 0);
+  const monthlyGoal = goals?.monthly?.target_amount || 20000; // default fallback
+  const maxSales = sellers.length > 0 ? Math.max(...sellers.map(s => s.total_sales), 0) : 0;
   const trackMax = Math.max(monthlyGoal, maxSales * 1.1); // Add 10% buffer if goal exceeded
 
   const getPositionPercentage = (value: number) => {
