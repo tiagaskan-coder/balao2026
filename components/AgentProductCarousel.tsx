@@ -12,6 +12,7 @@ interface Product {
   price: number;
   description?: string;
   image_url?: string;
+  image?: string;
 }
 
 export default function AgentProductCarousel({ products }: { products: Product[] }) {
@@ -31,9 +32,9 @@ export default function AgentProductCarousel({ products }: { products: Product[]
               className="min-w-[200px] w-[200px] bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden snap-center flex-shrink-0"
             >
               <div className="relative h-32 w-full bg-gray-100">
-                {product.image_url ? (
+                {product.image_url || product.image ? (
                   <Image 
-                    src={product.image_url} 
+                    src={(product.image_url || product.image) as string} 
                     alt={product.name}
                     fill
                     className="object-contain p-2"

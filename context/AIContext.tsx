@@ -121,10 +121,13 @@ export function AIContextProvider({ children }: { children: React.ReactNode }) {
         };
 
         recognition.onresult = async (event: any) => {
-          // Se o robô estiver falando, ignora input (Cancelamento de Eco via Software)
+          // Barge-in: se o robô estiver falando, interrompe TTS imediatamente e processa usuário
           if (isSpeakingRef.current) {
-              console.log('Ignorando input enquanto robô fala');
-              return;
+              try {
+                  window.speechSynthesis.cancel();
+              } catch {}
+              isSpeakingRef.current = false;
+              console.log('⛔ Interrompendo fala do robô ao ouvir usuário (barge-in)');
           }
 
           const transcript = event.results[event.results.length - 1][0].transcript;
@@ -154,7 +157,16 @@ export function AIContextProvider({ children }: { children: React.ReactNode }) {
       const data = await response.json();
       
       if (data.produtos && data.produtos.length > 0) {
-        setFoundProducts(data.produtos);
+        const normalized = data.produtos.map((p: any) => ({
+          id: String(p.id),
+          name: p.name,
+          price: typeof p.price === 'number' ? p.price : Number(p.price ?? 0),
+          image_url: p.image || p.image_url || null,
+          description: p.description
+        }));
+        setFoundProducts(normalized);
+      } else {
+        setFoundProducts([]);
       }
 
       if (data.fala) {
@@ -173,15 +185,7 @@ export function AIContextProvider({ children }: { children: React.ReactNode }) {
     // Set speaking flag immediately to block onend restart and onresult
     isSpeakingRef.current = true;
 
-    // Stop recognition to prevent echo (Critical for Android)
-    if (recognitionRef.current && isListeningRef.current) {
-        try {
-            recognitionRef.current.stop();
-            console.log('🔇 Pausando microfone para falar (Echo Cancellation)');
-        } catch (e) {
-            // Ignore error
-        }
-    }
+    // Não pausamos o microfone para permitir barge-in (interrupção)
 
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
