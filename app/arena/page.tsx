@@ -502,14 +502,14 @@ export default function ArenaPage() {
               const total = totals[seller.id] || 0;
               const meta = activeChallenge?.meta_global || seller.meta_valor || 1;
               const progress = Math.min(Math.max((total / meta) * 100, 0), 100);
-              const visualProgress = 20 + (progress * 0.8);
+              const visualProgress = 30 + (progress * 0.7);
               const isTurbo = turboIds.includes(seller.id);
               const isZap = zapId === seller.id;
               const isPodium = index < 3;
               return (
                 <motion.div
                   key={seller.id}
-                  className={`relative h-20 sm:h-24 rounded-2xl border overflow-hidden ${
+                  className={`relative min-h-[6rem] sm:min-h-[7rem] h-auto py-3 rounded-2xl border overflow-hidden flex flex-col justify-center ${
                     isPodium ? "border-red-500/60 bg-slate-900/90 shadow-[0_0_25px_rgba(230,0,18,0.15)]" : "border-red-500/30 bg-slate-900/80"
                   }`}
                   animate={salePulse ? { boxShadow: ["0 0 0 rgba(230,0,18,0)", "0 0 22px rgba(230,0,18,0.35)", "0 0 0 rgba(230,0,18,0)"] } : {}}
@@ -520,23 +520,23 @@ export default function ArenaPage() {
                   <div className="absolute top-1/2 left-0 right-0 h-0 border-t-2 border-dashed border-slate-600/30 transform -translate-y-1/2" />
                   
                   <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(230,0,18,0.08),transparent)]" />
-                  <div className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 flex items-center gap-3 relative z-20">
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-red-400 overflow-hidden bg-slate-800 flex items-center justify-center">
+                  <div className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 flex items-center gap-3 relative z-20 w-full pr-[15%]">
+                    <div className="shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-red-400 overflow-hidden bg-slate-800 flex items-center justify-center">
                       {seller.avatar_url ? (
                         <img src={seller.avatar_url} alt={seller.nome} className="w-full h-full object-cover" />
                       ) : (
                         <span className="text-sm font-bold">{seller.nome.slice(0, 2).toUpperCase()}</span>
                       )}
                     </div>
-                    <div className="bg-slate-900/60 px-2 py-1 rounded-lg backdrop-blur-sm flex flex-col gap-1 z-30">
+                    <div className="bg-slate-900/60 px-2 py-1 rounded-lg backdrop-blur-sm flex flex-col gap-1 z-30 max-w-full overflow-hidden">
                       <div>
-                        <div className="text-sm sm:text-base font-semibold">{seller.nome}</div>
+                        <div className="text-sm sm:text-base font-semibold truncate">{seller.nome}</div>
                         <div className="text-[11px] sm:text-xs text-red-200">
                           {formatCurrency(total)} • {Math.round(progress)}%
                         </div>
                       </div>
                       {/* Emblemas */}
-                      <div className="flex flex-wrap gap-1 max-w-[180px]">
+                      <div className="flex flex-wrap gap-1">
                         {achievements.map((ach) => {
                             const hasAchievement = sellerAchievements.some(
                             (sa) => sa.vendedor_id === seller.id && sa.conquista_id === ach.id && sa.status === "aprovado"
@@ -567,7 +567,7 @@ export default function ArenaPage() {
                   <motion.div
                     animate={{ left: `${visualProgress}%`, scale: isTurbo ? 1.12 : 1 }}
                     transition={{ type: "spring", stiffness: 120, damping: 20 }}
-                    className="absolute top-1/2 -translate-y-1/2 z-50"
+                    className="absolute top-1/2 -translate-y-1/2 z-[100]"
                   >
                     <div className="relative flex items-center justify-center">
                       {/* Efeitos de Fogo e Fumaça */}
