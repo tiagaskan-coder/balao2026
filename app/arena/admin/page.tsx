@@ -11,7 +11,15 @@ export default function ArenaAdminPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === "56676009ddmmyyyy") {
+    
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const year = today.getFullYear();
+    const dateStr = `${day}${month}${year}`;
+    const expectedPassword = `56676009${dateStr}`;
+
+    if (password === expectedPassword) {
       setIsAuthenticated(true);
       setError(false);
     } else {
