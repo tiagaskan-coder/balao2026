@@ -10,7 +10,7 @@ import Footer from "@/components/Footer";
 import ProductPreview from "@/components/ProductPreview";
 import AIOverlay from "@/components/AIOverlay"; // Nova Interface de Preview
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
-import { getCategories } from "@/lib/db";
+import { getCategories, getSiteTheme } from "@/lib/db";
 import Sidebar from "@/components/Sidebar";
 import type { Category } from "@/lib/utils";
 
@@ -94,17 +94,29 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   let categories: Category[] = [];
+  let themeKey = "default";
   try {
     categories = await getCategories();
   } catch {
     categories = [];
   }
+  try {
+    themeKey = await getSiteTheme();
+  } catch {}
+
+  const THEMES: Record<string, { background: string; foreground: string; brand: string }> = {
+    default: { background: "#ffffff", foreground: "#000000", brand: "#E60012" },
+    escuro: { background: "#0a0a0a", foreground: "#ededed", brand: "#E60012" },
+    azul: { background: "#ffffff", foreground: "#000000", brand: "#1e40af" }
+  };
+  const t = THEMES[themeKey] || THEMES.default;
 
   return (
     <html lang="pt-BR">
       <body
         className={`antialiased flex flex-col min-h-screen overflow-x-hidden`}
       >
+        <style>{`:root{--background:${t.background};--foreground:${t.foreground};--brand-color:${t.brand};}`}</style>
         <AuthProvider>
           <CartProvider>
             <ToastProvider>

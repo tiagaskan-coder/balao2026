@@ -53,16 +53,33 @@ export default function AdminPage() {
   };
 
   useEffect(() => {
-    const saved = typeof window !== "undefined" ? localStorage.getItem("balao_theme") : null;
-    const key = saved || "default";
-    setSelectedTheme(key);
-    applyTheme(key);
+    const fetchTheme = async () => {
+      try {
+        const res = await fetch("/api/site-settings");
+        const data = await res.json();
+        const key = data?.theme || "default";
+        setSelectedTheme(key);
+        applyTheme(key);
+      } catch {
+        setSelectedTheme("default");
+        applyTheme("default");
+      }
+    };
+    fetchTheme();
   }, []);
 
-  const handleSelectTheme = (key: string) => {
-    setSelectedTheme(key);
-    localStorage.setItem("balao_theme", key);
-    applyTheme(key);
+  const handleSelectTheme = async (key: string) => {
+    try {
+      setSelectedTheme(key);
+      applyTheme(key);
+      await fetch("/api/site-settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ theme: key })
+      });
+    } catch (e) {
+      console.error("Falha ao salvar tema no servidor", e);
+    }
   };
 
   // Keyboard Shortcuts
@@ -685,14 +702,10 @@ export default function AdminPage() {
                                 </div>
                                 <div className="mt-6">
                                     <button
-                                        onClick={() => {
-                                            localStorage.removeItem("balao_theme");
-                                            setSelectedTheme("default");
-                                            applyTheme("default");
-                                        }}
-                                        className="px-3 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-900 transition-colors"
+                                      onClick={() => handleSelectTheme("default")}
+                                      className="px-3 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-900 transition-colors"
                                     >
-                                        Restaurar Padrão
+                                      Restaurar Padrão
                                     </button>
                                 </div>
                             </div>
