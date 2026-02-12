@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     if (!groq) throw new Error('Groq API Key missing');
 
     const productContext = products.length > 0 
-      ? JSON.stringify(products.map(p => ({ id: p.id, name: p.name, price: p.price })))
+      ? JSON.stringify(products.map(p => ({ id: p.id, name: p.name, price: p.price, description: p.description })))
       : "Nenhum produto encontrado.";
 
     // 2. Camada de Inteligência: Gera resposta estruturada
@@ -37,17 +37,15 @@ export async function POST(req: Request) {
             CONTEXTO DE DADOS (Resultados da busca):
             ${productContext}
 
-            INSTRUÇÕES:
+            Linguagem: Português brasileiro natural, humano, acolhedor, sem jargões; não soe como robô.
+            Instruções:
             1. Analise a pergunta do usuário e os produtos encontrados.
-            2. Se houver produtos, destaque o melhor preço ou característica.
-            3. Se NÃO houver produtos, peça mais detalhes gentilmente.
-            4. Responda em Português, de forma curta (max 2 frases faladas).
+            2. Se houver produtos, destaque até 2 opções com preço e benefício.
+            3. Se NÃO houver produtos, peça mais detalhes gentilmente para refinar a busca.
+            4. Responda com frases curtas (máx. 2 frases faladas), tom de conversa.
 
             FORMATO JSON OBRIGATÓRIO:
-            {
-              "fala": "Texto para síntese de voz",
-              "produtos": [ ...lista original de produtos... ]
-            }
+            {"fala":"<texto pt-BR>", "produtos": <lista de produtos do contexto ou vazia>}
           `
         },
         { role: 'user', content: message }

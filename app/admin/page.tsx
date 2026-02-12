@@ -10,10 +10,11 @@ import ProductManager from "@/components/admin/ProductManager";
 import HomeBlocksManager from "@/components/admin/HomeBlocksManager";
 import MarketingManager from "@/components/admin/MarketingManager";
 import CouponManager from "@/components/admin/CouponManager";
-import { ArrowLeft, Upload, CheckCircle, AlertCircle, Layout, Layers, Save, Search, Settings, ShoppingBag, Mail } from "lucide-react";
+import AssistantSettings from "@/components/admin/AssistantSettings";
+import { ArrowLeft, Upload, CheckCircle, AlertCircle, Layout, Layers, Save, Search, Settings, ShoppingBag, Mail, MessageSquare } from "lucide-react";
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState<"import" | "carousel" | "products" | "categories" | "orders" | "home_blocks" | "marketing" | "coupons">("import");
+  const [activeTab, setActiveTab] = useState<"import" | "carousel" | "products" | "categories" | "orders" | "home_blocks" | "marketing" | "coupons" | "assistant">("import");
 
   // Product List State
   const [products, setProducts] = useState<Product[]>([]);
@@ -331,6 +332,13 @@ export default function AdminPage() {
                         Marketing & E-mail
                     </button>
                     <button
+                        onClick={() => setActiveTab("assistant")}
+                        className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${activeTab === "assistant" ? "bg-red-50 text-[#E60012] border-l-4 border-[#E60012]" : "text-gray-600 hover:bg-gray-50"}`}
+                    >
+                        <MessageSquare size={18} />
+                        Assistente
+                    </button>
+                    <button
                         onClick={() => setActiveTab("coupons")}
                         className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${activeTab === "coupons" ? "bg-red-50 text-[#E60012] border-l-4 border-[#E60012]" : "text-gray-600 hover:bg-gray-50"}`}
                     >
@@ -356,6 +364,13 @@ export default function AdminPage() {
                          <div className="animate-in fade-in duration-300">
                              <MarketingManager />
                          </div>
+                    )}
+
+                    {/* ASSISTANT TAB */}
+                    {activeTab === "assistant" && (
+                        <div className="animate-in fade-in duration-300">
+                             <AssistantSettings />
+                        </div>
                     )}
 
                     {/* COUPONS TAB */}

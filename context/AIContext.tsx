@@ -184,7 +184,16 @@ export function AIContextProvider({ children }: { children: React.ReactNode }) {
     // Welcome message logic
     if (!hasWelcomedRef.current) {
         hasWelcomedRef.current = true;
-        speak("Olá! Sou o assistente do Balão da Informática. Como posso te ajudar hoje?");
+        try {
+          const raw = localStorage.getItem("balao_assistant_config");
+          const cfg = raw ? JSON.parse(raw) : null;
+          const greeting = (cfg && typeof cfg.greeting === "string" && cfg.greeting.trim())
+            ? cfg.greeting
+            : "Olá! Sou o assistente do Balão da Informática. Como posso te ajudar hoje?";
+          speak(greeting);
+        } catch {
+          speak("Olá! Sou o assistente do Balão da Informática. Como posso te ajudar hoje?");
+        }
         // Note: speak() will handle the recognition start/stop flow
         return;
     }
