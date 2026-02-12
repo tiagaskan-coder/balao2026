@@ -34,6 +34,9 @@ export function AIContextProvider({ children }: { children: React.ReactNode }) {
     voiceEnabled: true,
     maxResults: 5
   });
+  const engineRef = useRef<string>("groq");
+  const voiceNameRef = useRef<string | null>(null);
+  const fallbackRef = useRef<string>("supabase");
   const sessionIdRef = useRef<string>("");
 
   useEffect(() => {
@@ -48,6 +51,9 @@ export function AIContextProvider({ children }: { children: React.ReactNode }) {
             voiceEnabled: typeof data.voiceEnabled === "boolean" ? data.voiceEnabled : settingsRef.current.voiceEnabled,
             maxResults: Number(data.maxResults ?? settingsRef.current.maxResults)
           };
+          engineRef.current = data.engine ?? "groq";
+          voiceNameRef.current = data.voiceName ?? null;
+          fallbackRef.current = data.fallbackStrategy ?? "supabase";
         }
       } catch {}
       try {
@@ -151,7 +157,7 @@ export function AIContextProvider({ children }: { children: React.ReactNode }) {
           const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message, sessionId: sessionIdRef.current })
+            body: JSON.stringify({ message, sessionId: sessionIdRef.current, engine: engineRef.current, fallback: fallbackRef.current })
       });
 
       const data = await response.json();
@@ -190,6 +196,15 @@ export function AIContextProvider({ children }: { children: React.ReactNode }) {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'pt-BR';
+    try {
+      if (voiceNameRef.current) {
+        const voices = window.speechSynthesis.getVoices();
+        const chosen = voices.find(v => v.name === voiceNameRef.current);
+        if (chosen) {
+          utterance.voice = chosen;
+        }
+      }
+    } catch {}
     
     utterance.onstart = () => { 
         isSpeakingRef.current = true; 

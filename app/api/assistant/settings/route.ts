@@ -11,12 +11,15 @@ export async function GET() {
         greeting: "Olá! Sou o assistente do Balão da Informática. Como posso te ajudar hoje?",
         voiceEnabled: true,
         maxResults: 5,
+        engine: "groq",
+        voiceName: null,
+        fallbackStrategy: "supabase",
       });
     }
 
     const { data, error } = await supabaseAdmin
       .from(TABLE)
-      .select("greeting, voice_enabled, max_results")
+      .select("greeting, voice_enabled, max_results, engine, voice_name, fallback_strategy")
       .eq("key", KEY)
       .single();
 
@@ -25,6 +28,9 @@ export async function GET() {
         greeting: "Olá! Sou o assistente do Balão da Informática. Como posso te ajudar hoje?",
         voiceEnabled: true,
         maxResults: 5,
+        engine: "groq",
+        voiceName: null,
+        fallbackStrategy: "supabase",
       });
     }
 
@@ -32,12 +38,18 @@ export async function GET() {
       greeting: data.greeting ?? "Olá! Sou o assistente do Balão da Informática. Como posso te ajudar hoje?",
       voiceEnabled: Boolean(data.voice_enabled ?? true),
       maxResults: Number(data.max_results ?? 5),
+      engine: data.engine ?? "groq",
+      voiceName: data.voice_name ?? null,
+      fallbackStrategy: data.fallback_strategy ?? "supabase",
     });
   } catch {
     return NextResponse.json({
       greeting: "Olá! Sou o assistente do Balão da Informática. Como posso te ajudar hoje?",
       voiceEnabled: true,
       maxResults: 5,
+      engine: "groq",
+      voiceName: null,
+      fallbackStrategy: "supabase",
     });
   }
 }
@@ -50,6 +62,9 @@ export async function POST(req: Request) {
       greeting: typeof body.greeting === "string" ? body.greeting : null,
       voice_enabled: typeof body.voiceEnabled === "boolean" ? body.voiceEnabled : null,
       max_results: typeof body.maxResults === "number" ? body.maxResults : null,
+      engine: typeof body.engine === "string" ? body.engine : null,
+      voice_name: typeof body.voiceName === "string" ? body.voiceName : null,
+      fallback_strategy: typeof body.fallbackStrategy === "string" ? body.fallbackStrategy : null,
     };
 
     if (!hasAdmin) {

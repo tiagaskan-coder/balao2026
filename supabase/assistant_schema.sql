@@ -4,6 +4,9 @@ create table if not exists public.assistant_settings (
   greeting text,
   voice_enabled boolean default true,
   max_results integer default 5,
+  engine text default 'groq',
+  voice_name text,
+  fallback_strategy text default 'supabase',
   updated_at timestamptz default now()
 );
 

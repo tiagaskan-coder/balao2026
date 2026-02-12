@@ -14,30 +14,57 @@ export async function POST(req: Request) {
   let products: any[] = [];
   let sessionId = '';
   let maxResults = 5;
+  let engine = 'groq';
+  let fallback = 'supabase';
 
   try {
     const body = await req.json();
     message = body.message || '';
     sessionId = body.sessionId || '';
+    engine = body.engine || engine;
+    fallback = body.fallback || fallback;
 
     // 0. Configurações do assistente (limite de resultados)
     if (hasAdmin) {
       try {
         const { data } = await supabaseAdmin
           .from('assistant_settings')
-          .select('max_results')
+          .select('max_results, engine, fallback_strategy')
           .eq('key', 'default')
           .single();
         if (data && typeof data.max_results === 'number') {
           maxResults = data.max_results;
+        }
+        if (data && typeof data.engine === 'string') {
+          engine = data.engine;
+        }
+        if (data && typeof data.fallback_strategy === 'string') {
+          fallback = data.fallback_strategy;
         }
       } catch {}
     }
 
     // 1. Camada de Dados: Busca produtos antes de chamar a IA
     products = await searchProducts(message, maxResults);
+    if ((!products || products.length === 0) && fallback === 'site') {
+      try {
+        const { data: latest } = await supabaseAdmin
+          .from('products')
+          .select('id, name, price, description, image')
+          .order('created_at', { ascending: false })
+          .limit(maxResults);
+        products = latest || [];
+      } catch {}
+    }
 
-    if (!groq) throw new Error('Groq API Key missing');
+    // 1.1 Motor de IA: se engine for "rulebased" ou chave ausente, usa lógica gratuita
+    if (engine === 'rulebased' || !groq) {
+      const fala =
+        products && products.length > 0
+          ? `Separei ${products.length} opção(ões) com ótimo custo-benefício. Posso te detalhar o melhor agora.`
+          : `Não encontrei itens com essa descrição. Pode me dizer marca ou categoria?`;
+      return NextResponse.json({ fala, produtos: products || [] });
+    }
 
     const productContext = products.length > 0 
       ? JSON.stringify(products.map(p => ({ id: p.id, name: p.name, price: p.price, description: p.description })))

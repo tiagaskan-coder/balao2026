@@ -7,6 +7,9 @@ type Config = {
   greeting: string;
   voiceEnabled: boolean;
   maxResults: number;
+  engine: string;
+  voiceName: string | null;
+  fallbackStrategy: string;
 };
 
 export default function AssistantSettings() {
@@ -14,9 +17,13 @@ export default function AssistantSettings() {
     greeting: "Olá! Sou o assistente do Balão da Informática. Como posso te ajudar hoje?",
     voiceEnabled: true,
     maxResults: 5,
+    engine: "groq",
+    voiceName: null,
+    fallbackStrategy: "supabase",
   });
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
 
   useEffect(() => {
     const load = async () => {
@@ -28,6 +35,9 @@ export default function AssistantSettings() {
             greeting: data.greeting ?? config.greeting,
             voiceEnabled: typeof data.voiceEnabled === "boolean" ? data.voiceEnabled : config.voiceEnabled,
             maxResults: Number(data.maxResults) || config.maxResults,
+            engine: data.engine ?? "groq",
+            voiceName: data.voiceName ?? null,
+            fallbackStrategy: data.fallbackStrategy ?? "supabase",
           });
         }
       } finally {
@@ -35,6 +45,18 @@ export default function AssistantSettings() {
       }
     };
     load();
+  }, []);
+  
+  useEffect(() => {
+    const updateVoices = () => {
+      const list = window.speechSynthesis.getVoices();
+      const ptVoices = list.filter(v => (v.lang || "").toLowerCase().startsWith("pt"));
+      setVoices(ptVoices.length > 0 ? ptVoices : list);
+    };
+    updateVoices();
+    if (typeof window !== "undefined") {
+      window.speechSynthesis.onvoiceschanged = updateVoices;
+    }
   }, []);
 
   const handleSave = () => {
@@ -105,6 +127,61 @@ export default function AssistantSettings() {
           <label htmlFor="voiceEnabled" className="text-sm text-gray-700">
             Ativar fala (síntese de voz)
           </label>
+        </div>
+        
+        <div>
+          <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">
+            Voz (pt-BR)
+          </label>
+          <select
+            value={config.voiceName ?? ""}
+            onChange={(e) => setConfig((c) => ({ ...c, voiceName: e.target.value || null }))}
+            className="w-full p-2 border rounded-md"
+          >
+            <option value="">Padrão do navegador</option>
+            {voices.map(v => (
+              <option key={v.voiceURI} value={v.name}>
+                {v.name} ({v.lang})
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-gray-500 mt-1">
+            Lista de vozes disponíveis gratuitamente via navegador.
+          </p>
+        </div>
+        
+        <div>
+          <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">
+            Motor de IA
+          </label>
+          <select
+            value={config.engine}
+            onChange={(e) => setConfig((c) => ({ ...c, engine: e.target.value }))}
+            className="w-full p-2 border rounded-md"
+          >
+            <option value="groq">Groq (se chave estiver configurada)</option>
+            <option value="rulebased">Grátis (lógico sobre produtos)</option>
+          </select>
+          <p className="text-xs text-gray-500 mt-1">
+            Seleciona o cérebro: pago (Groq) ou gratuito (regra lógica).
+          </p>
+        </div>
+        
+        <div>
+          <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">
+            Fallback de dados
+          </label>
+          <select
+            value={config.fallbackStrategy}
+            onChange={(e) => setConfig((c) => ({ ...c, fallbackStrategy: e.target.value }))}
+            className="w-full p-2 border rounded-md"
+          >
+            <option value="supabase">Supabase (preferido)</option>
+            <option value="site">Site (recuperar produtos genéricos)</option>
+          </select>
+          <p className="text-xs text-gray-500 mt-1">
+            Caso a busca não retorne itens, usar fallback configurado.
+          </p>
         </div>
       </div>
 
