@@ -643,7 +643,7 @@ export default function ArenaPage() {
                   <motion.div
                     animate={{ left: `${visualProgress}%`, scale: isTurbo ? 1.12 : 1 }}
                     transition={{ type: "spring", stiffness: 120, damping: 20 }}
-                    className="absolute top-1/2 -translate-y-1/2 z-[100]"
+                    className="absolute top-[45%] -translate-y-1/2 z-[100]"
                   >
                     <div className="relative flex items-center justify-center">
                       {/* Efeitos de Fogo e Fumaça */}
@@ -819,17 +819,6 @@ export default function ArenaPage() {
             Solicitar Conquista
           </button>
           
-          {/* Debug Button - Remover em produção se necessário */}
-          <button
-            onClick={() => {
-              console.log("Simulando Venda...");
-              const fakeSeller = sellers[0] || { id: "test", nome: "Teste Vendedor", avatar_url: "", meta_valor: 0, criado_em: "" };
-              setCelebration({ type: "sale", seller: fakeSeller });
-            }}
-            className="w-full mt-2 bg-red-900/20 hover:bg-red-900/40 border border-red-900/30 text-red-500/50 hover:text-red-500 py-1 rounded-lg text-[10px] uppercase tracking-wider transition-colors"
-          >
-            Simular Venda (Teste)
-          </button>
         </aside>
       </div>
 
@@ -933,10 +922,10 @@ export default function ArenaPage() {
                  <img 
                    src={
                      celebration.type === 'google' 
-                      ? "https://media.giphy.com/media/3o7aCWJavA6fVfWcIo/giphy.gif" 
+                     ? "https://i.pinimg.com/originals/9d/77/22/9d772245853f9b0e013181845ebb2c1a.gif" 
                        : (celebration.type === 'sale' 
-                          ? "https://media.giphy.com/media/111ebonMs90YLu/giphy.gif" 
-                          : "https://media.giphy.com/media/l0MYEqEzwMWQfqbqI/giphy.gif")
+                         ? "https://i.pinimg.com/originals/3d/27/11/3d271128514d50a47c22e5f1beecb4fc.gif" 
+                         : "https://i.pinimg.com/originals/a4/d3/ce/a4d3ce7ff09e24bbc4cf265686e9becc.gif")
                    }
                    alt="Celebration" 
                    className={`w-full h-full ${(celebration.type === 'sale' || celebration.type === 'google') ? 'object-contain' : 'object-cover'}`}
