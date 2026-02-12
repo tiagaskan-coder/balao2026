@@ -271,7 +271,14 @@ export default function AdminPage() {
                 <h1 className="text-xl font-bold text-gray-800">Painel Administrativo</h1>
              </div>
              <div className="flex gap-2">
-                 {/* Quick Status/User info could go here */}
+                 <Link
+                   href="/fechamento"
+                   className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-[#E60012] text-white text-sm font-medium hover:bg-red-700 transition-colors"
+                   title="Ir para Fechamento"
+                 >
+                   <CheckCircle size={16} />
+                   Fechamento
+                 </Link>
              </div>
         </div>
       </header>
