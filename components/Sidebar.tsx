@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Category, buildCategoryTree } from "@/lib/utils";
 import { 
@@ -9,13 +9,13 @@ import {
   Laptop, Cpu, Keyboard, Mouse, Watch, Tablet, Headphones, Camera,
   Tag, Wrench, Handshake,
   Lock, Ghost, Key, Armchair, Square, Disc, Mic, Cable, RefreshCcw, Usb, Backpack, Lightbulb, Zap, Video, Bell, Radio, Power, ToggleLeft, User, Star, Smile, Shirt, Coffee, Image, Gift, FileText, PenTool, Table, Move, CreditCard, Copy, Droplet, Cylinder, Scan, Gamepad2, Box, Server, Book, Feather, Aperture, CircuitBoard, MemoryStick, Fan, Network, Battery,
-  Filter as FilterIcon, Check, XCircle
+  Filter as FilterIcon, Check, XCircle, X
 } from "lucide-react";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useSidebar } from "@/context/SidebarContext";
-import { X } from "lucide-react";
 
-// Icon mapping
+// --- Configuration & Icons ---
+
 const iconMap: Record<string, any> = {
   "Monitor": Monitor,
   "Smartphone": Smartphone,
@@ -30,7 +30,7 @@ const iconMap: Record<string, any> = {
   "Briefcase": Briefcase,
   "Shield": Shield,
   "List": List,
-  "Apple": Laptop, // Fallback for Apple
+  "Apple": Laptop,
   "Notebooks": Laptop,
   "Computadores": Monitor,
   "Hardware": Cpu,
@@ -39,7 +39,6 @@ const iconMap: Record<string, any> = {
   "Tablets": Tablet,
   "Fones": Headphones,
   "Câmeras": Camera,
-  // Added mappings for seed data
   "Laptop": Laptop,
   "Cpu": Cpu,
   "Keyboard": Keyboard,
@@ -105,19 +104,55 @@ interface SidebarProps {
 export default function Sidebar({ categories, mobileOnly = false, availableTags: propTags, selectedTags: propSelectedTags }: SidebarProps) {
   const dbTree = buildCategoryTree(categories);
   const router = useRouter();
-  const { availableTags: contextTags } = useSidebar();
-  
-  // Use props if provided, otherwise fallback to context
-  const availableTags = propTags || contextTags;
-  
-  // Get selected tags from URL if not provided via props
+  const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { isOpen, closeSidebar, availableTags: contextTags } = useSidebar();
+  
+  // State for expanded categories
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+
+  // Merge tags
+  const availableTags = propTags || contextTags;
   const urlTags = searchParams.get('tags')?.split(',').filter(Boolean) || [];
   const selectedTags = propSelectedTags || urlTags;
-
-  const pathname = usePathname();
   const currentCategory = searchParams.get("category");
-  const { isOpen, closeSidebar } = useSidebar();
+
+  // --- Helpers ---
+
+  const getIcon = (iconName?: string) => {
+    if (!iconName) return null;
+    const IconComponent = iconMap[iconName] || iconMap[Object.keys(iconMap).find(k => iconName.includes(k)) || ""] || null;
+    return IconComponent ? <IconComponent size={18} /> : null;
+  };
+
+  const toggleExpand = (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const handleTagToggle = (tagName: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    const currentTags = params.get('tags')?.split(',') || [];
+    let newTags = currentTags.includes(tagName) 
+      ? currentTags.filter(t => t !== tagName)
+      : [...currentTags, tagName];
+    
+    if (newTags.length > 0) params.set('tags', newTags.join(','));
+    else params.delete('tags');
+    
+    if (params.has('page')) params.set('page', '1');
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const clearFilters = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('tags');
+    if (params.has('page')) params.set('page', '1');
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  // --- Data Preparation ---
 
   const allProductsItem: Category = {
     id: "all-products",
@@ -132,256 +167,219 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
 
   const tree = [allProductsItem, ...dbTree];
 
-  // Custom tool item
-  const monteSeuPcItem = {
-    name: "Monte seu PC",
-    slug: "monteseupc",
-    icon: Wrench,
-    href: "/monteseupc"
-  };
+  // --- Components ---
 
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-
-  const toggleExpand = (id: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setExpanded((prev: Record<string, boolean>) => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const handleTagToggle = (tagName: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    const currentTags = params.get('tags')?.split(',') || [];
+  const CategoryNode = ({ node, level }: { node: Category, level: number }) => {
+    const hasChildren = node.children && node.children.length > 0;
+    const isExpanded = expanded[node.id];
+    // Active state logic
+    const isActive = currentCategory === node.name || (!!pathname && pathname.startsWith("/categoria/") && !!node.slug && pathname.endsWith(`/${node.slug}`));
     
-    let newTags: string[];
-    if (currentTags.includes(tagName)) {
-        newTags = currentTags.filter(t => t !== tagName);
-    } else {
-        newTags = [...currentTags, tagName];
-    }
-    
-    if (newTags.length > 0) {
-        params.set('tags', newTags.join(','));
-    } else {
-        params.delete('tags');
-    }
-    
-    // Reset page when filtering
-    if (params.has('page')) {
-        params.set('page', '1');
-    }
-    
-    router.push(`${pathname}?${params.toString()}`);
+    const Icon = level === 0 ? getIcon(node.icon || node.name) : null;
+
+    return (
+      <div className="w-full">
+        <div 
+           className={`
+             group flex items-center justify-between px-4 py-2.5 text-sm transition-all duration-200 cursor-pointer select-none rounded-r-full mr-2
+             ${isActive 
+               ? 'bg-red-50 text-[#E60012] font-semibold border-l-4 border-[#E60012]' 
+               : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 border-l-4 border-transparent'}
+           `}
+           style={{ paddingLeft: level === 0 ? '16px' : `${level * 16 + 16}px` }}
+        >
+          <Link 
+              href={`/categoria/${encodeURIComponent(node.slug)}`} 
+              className="flex-1 flex items-center gap-3 truncate"
+              onClick={closeSidebar}
+          >
+              {Icon && <span className={`${isActive ? 'text-[#E60012]' : 'text-gray-400 group-hover:text-gray-600'}`}>{Icon}</span>}
+              <span>{node.name}</span>
+           </Link>
+           
+           {hasChildren && (
+               <button 
+                   onClick={(e) => toggleExpand(node.id, e)}
+                   className={`p-1 rounded-full transition-colors ${isActive ? 'hover:bg-red-100 text-red-400' : 'hover:bg-gray-200 text-gray-400'}`}
+               >
+                   {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+               </button>
+           )}
+        </div>
+        
+        {/* Animated Submenu */}
+        <div className={`grid transition-all duration-300 ease-in-out ${hasChildren && isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+           <div className="overflow-hidden">
+               {node.children?.map(child => (
+                   <CategoryNode key={child.id} node={child} level={level + 1} />
+               ))}
+           </div>
+        </div>
+      </div>
+    );
   };
 
-  const clearFilters = () => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete('tags');
-    if (params.has('page')) {
-        params.set('page', '1');
-    }
-    router.push(`${pathname}?${params.toString()}`);
+  const CustomLink = ({ href, icon: Icon, label }: { href: string, icon: any, label: string }) => {
+    const isActive = pathname === href;
+    return (
+      <Link 
+        href={href} 
+        className={`
+          flex items-center gap-3 px-4 py-2.5 text-sm transition-all duration-200 rounded-r-full mr-2
+          ${isActive 
+            ? 'bg-red-50 text-[#E60012] font-semibold border-l-4 border-[#E60012]' 
+            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 border-l-4 border-transparent'}
+        `}
+        onClick={closeSidebar}
+      >
+        <span className={`${isActive ? 'text-[#E60012]' : 'text-gray-400'}`}><Icon size={18} /></span>
+        <span>{label}</span>
+      </Link>
+    );
   };
 
-  const getIcon = (iconName?: string) => {
-    if (!iconName) return null;
-    const IconComponent = iconMap[iconName] || iconMap[Object.keys(iconMap).find(k => iconName.includes(k)) || ""] || null;
-    return IconComponent ? <IconComponent size={18} /> : null;
-  };
+  // --- Render ---
 
-  const CategoryItem = ({ node, level }: { node: Category, level: number }) => {
-     const hasChildren = node.children && node.children.length > 0;
-     const isExpanded = expanded[node.id];
-     const isSelected = currentCategory === node.name || (!!pathname && pathname.startsWith("/categoria/") && !!node.slug && pathname.endsWith(`/${node.slug}`));
-     const Icon = level === 0 ? getIcon(node.icon || node.name) : null;
+  // Desktop View (Static)
+  if (!mobileOnly) {
+    return (
+      <aside className="w-64 bg-white rounded-xl shadow-sm border border-gray-100 hidden lg:flex flex-col h-fit sticky top-24 overflow-hidden">
+        <div className="p-4 border-b border-gray-100 bg-gray-50/50">
+          <div className="flex items-center gap-2 font-bold text-gray-800">
+            <List size={20} className="text-[#E60012]" />
+            <span>Departamentos</span>
+          </div>
+        </div>
+        
+        <div className="py-2 flex-1 overflow-y-auto max-h-[calc(100vh-150px)] custom-scrollbar">
+          {tree.map(node => <CategoryNode key={node.id} node={node} level={0} />)}
+          
+          <div className="my-2 border-t border-gray-100 mx-4" />
+          
+          <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Serviços</div>
+          <CustomLink href="/servicos-e-ofertas" icon={Gift} label="Serviços e Ofertas" />
+          <CustomLink href="/pcgamer" icon={Gamepad} label="PC Gamer" />
+          <CustomLink href="/notebooks" icon={Laptop} label="Notebooks" />
+          <CustomLink href="/promocao" icon={Tag} label="Promoção" />
+          <CustomLink href="/manutencao" icon={Wrench} label="Manutenção" />
+          <CustomLink href="/consignacao" icon={Handshake} label="Consignação" />
 
-     return (
-       <div className="w-full">
-         <div 
-            className={`flex items-center justify-between px-3 py-2 text-sm transition-colors cursor-pointer select-none
-                ${isSelected 
-                    ? 'text-[#E60012] font-medium bg-red-50' 
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-[#E60012]'}
-                ${level === 0 ? 'mb-1 font-medium' : 'font-normal'}
-            `}
-            style={{ 
-                paddingLeft: level === 0 ? '12px' : `${level * 16 + 12}px`,
-                borderLeft: isSelected ? '3px solid #E60012' : '3px solid transparent'
-            }}
-         >
-           <Link 
-               href={`/categoria/${encodeURIComponent(node.slug)}`} 
-                className="flex-1 flex items-center gap-3 truncate"
-                onClick={closeSidebar}
-            >
-               {Icon && <span className="text-gray-400">{Icon}</span>}
-               <span>{node.name}</span>
-            </Link>
-            
-            {hasChildren && (
-                <button 
-                    onClick={(e: React.MouseEvent) => toggleExpand(node.id, e)}
-                    className="p-1 hover:bg-gray-200 rounded text-gray-400"
-                >
-                    {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                </button>
-            )}
-         </div>
-         
-         {hasChildren && isExpanded && (
-            <div className="mt-1 mb-2">
-                {node.children!.map(child => (
-                    <CategoryItem key={child.id} node={child} level={level + 1} />
-                ))}
+          {availableTags && availableTags.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-gray-100 mx-4">
+              <div className="flex items-center justify-between mb-3">
+                 <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
+                    <FilterIcon size={16} className="text-[#E60012]" />
+                    <span>Filtros</span>
+                 </div>
+                 {selectedTags.length > 0 && (
+                    <button onClick={clearFilters} className="text-xs text-red-600 hover:text-red-800 font-medium flex items-center gap-1">
+                      <XCircle size={12} /> Limpar
+                    </button>
+                 )}
+              </div>
+              <div className="space-y-1">
+                {availableTags.map(tag => {
+                   const isSelected = selectedTags.includes(tag.name);
+                   return (
+                     <div key={tag.name} onClick={() => handleTagToggle(tag.name)} className="flex items-center gap-2 py-1.5 cursor-pointer group">
+                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-[#E60012] border-[#E60012]' : 'bg-white border-gray-300 group-hover:border-red-300'}`}>
+                           {isSelected && <Check size={10} className="text-white" strokeWidth={3} />}
+                        </div>
+                        <span className={`text-sm flex-1 truncate ${isSelected ? 'font-medium text-gray-900' : 'text-gray-500 group-hover:text-gray-700'}`}>{tag.name}</span>
+                        <span className="text-[10px] text-gray-400 bg-gray-100 px-1.5 rounded-full">{tag.count}</span>
+                     </div>
+                   );
+                })}
+              </div>
             </div>
-         )}
-       </div>
-     );
-  };
+          )}
+        </div>
+      </aside>
+    );
+  }
 
+  // Mobile View (Overlay + Drawer)
   return (
     <>
-        {/* Mobile Overlay */}
-        {isOpen && (
-            <div 
-                className="fixed inset-0 bg-black/50 z-[990] lg:hidden transition-opacity"
-                onClick={closeSidebar}
-            />
-        )}
+      {/* Backdrop */}
+      <div 
+        className={`fixed inset-0 bg-black/60 z-[9990] transition-opacity duration-300 lg:hidden backdrop-blur-sm
+          ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}
+        `}
+        onClick={closeSidebar}
+      />
 
-        {/* Sidebar Container */}
-        <aside className={`
-            bg-white rounded-lg shadow-md border border-gray-100 flex-shrink-0 flex flex-col
-            fixed inset-y-0 left-0 z-[1000] w-[280px] transform transition-transform duration-300 ease-in-out
-            ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-            ${mobileOnly ? 'lg:hidden' : 'lg:w-64 lg:static lg:block lg:h-fit lg:translate-x-0'}
-        `}>
-            <div className="p-4 bg-gray-50 border-b border-gray-100 font-bold text-gray-700 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <List size={20} className="text-[#E60012]" />
-                    <span>Categorias</span>
-                </div>
-                <button 
-                    onClick={closeSidebar}
-                    className="lg:hidden text-gray-500 hover:text-red-600"
-                >
-                    <X size={20} />
-                </button>
+      {/* Drawer */}
+      <aside className={`
+          fixed inset-y-0 left-0 z-[10000] w-[85%] max-w-[320px] bg-white shadow-2xl flex flex-col transform transition-transform duration-300 ease-out lg:hidden
+          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+         {/* Mobile Header */}
+         <div className="p-4 bg-[#E60012] text-white flex items-center justify-between shadow-md">
+            <div className="flex items-center gap-2 font-bold text-lg">
+              <Menu size={24} />
+              <span>Menu</span>
             </div>
+            <button onClick={closeSidebar} className="p-1 hover:bg-white/20 rounded-full transition-colors">
+               <X size={24} />
+            </button>
+         </div>
 
+         {/* Mobile Content */}
+         <div className="flex-1 overflow-y-auto py-4">
+            <div className="px-4 mb-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Categorias</div>
+            {tree.map(node => <CategoryNode key={node.id} node={node} level={0} />)}
+            
+            <div className="my-4 border-t border-gray-100 mx-4" />
+            
+            <div className="px-4 mb-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Serviços</div>
+            <CustomLink href="/servicos-e-ofertas" icon={Gift} label="Serviços e Ofertas" />
+            <CustomLink href="/pcgamer" icon={Gamepad} label="PC Gamer" />
+            <CustomLink href="/notebooks" icon={Laptop} label="Notebooks" />
+            <CustomLink href="/promocao" icon={Tag} label="Promoção" />
+            <CustomLink href="/manutencao" icon={Wrench} label="Manutenção" />
+            <CustomLink href="/consignacao" icon={Handshake} label="Consignação" />
 
-            <div className="py-2 overflow-y-auto max-h-[calc(100vh-60px)] lg:max-h-none custom-scrollbar">
-                {tree.map(node => (
-                    <CategoryItem key={node.id} node={node} level={0} />
-                ))}
-
-                {/* Custom Links */}
-                <div className="mt-4 pt-4 border-t border-gray-100">
-                    <div className="px-4 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                        Serviços e Ofertas
-                    </div>
-                    
-                    <Link 
-                        href="/servicos-e-ofertas" 
-                        className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#E60012] transition-colors pl-[12px] border-l-[3px] border-transparent hover:border-l-[#E60012]"
-                        onClick={closeSidebar}
-                    >
-                        <span className="text-gray-400"><Gift size={18} /></span>
-                        <span>Serviços e Ofertas</span>
-                    </Link>
-                    
-                    <Link 
-                        href="/pcgamer" 
-                        className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#E60012] transition-colors pl-[12px] border-l-[3px] border-transparent hover:border-l-[#E60012]"
-                        onClick={closeSidebar}
-                    >
-                        <span className="text-gray-400"><Gamepad size={18} /></span>
-                        <span>PC Gamer</span>
-                    </Link>
-
-                    <Link 
-                        href="/notebooks" 
-                        className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#E60012] transition-colors pl-[12px] border-l-[3px] border-transparent hover:border-l-[#E60012]"
-                        onClick={closeSidebar}
-                    >
-                        <span className="text-gray-400"><Laptop size={18} /></span>
-                        <span>Notebooks</span>
-                    </Link>
-
-                    <Link 
-                        href="/promocao" 
-                        className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#E60012] transition-colors pl-[12px] border-l-[3px] border-transparent hover:border-l-[#E60012]"
-                        onClick={closeSidebar}
-                    >
-                        <span className="text-gray-400"><Tag size={18} /></span>
-                        <span>Promoção</span>
-                    </Link>
-
-                    <Link 
-                        href="/manutencao" 
-                        className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#E60012] transition-colors pl-[12px] border-l-[3px] border-transparent hover:border-l-[#E60012]"
-                        onClick={closeSidebar}
-                    >
-                        <span className="text-gray-400"><Wrench size={18} /></span>
-                        <span>Manutenção</span>
-                    </Link>
-
-                    <Link 
-                        href="/consignacao" 
-                        className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#E60012] transition-colors pl-[12px] border-l-[3px] border-transparent hover:border-l-[#E60012]"
-                        onClick={closeSidebar}
-                    >
-                        <span className="text-gray-400"><Handshake size={18} /></span>
-                        <span>Consignação</span>
-                    </Link>
-                </div>
-
-                {/* FILTERS SECTION */}
-                {availableTags && availableTags.length > 0 && (
-                    <div className="border-t border-gray-100 mt-4 pt-4">
-                        <div className="px-4 py-2 bg-white font-bold text-gray-700 flex items-center justify-between">
-                            <div className="flex items-center gap-2 text-sm">
-                                <FilterIcon size={16} className="text-[#E60012]" />
-                                <span>Filtrar</span>
-                            </div>
-                            {selectedTags.length > 0 && (
-                                <button 
-                                    onClick={clearFilters}
-                                    className="text-xs text-red-600 hover:text-red-800 flex items-center gap-1 font-medium transition-colors"
-                                    title="Limpar todos os filtros"
-                                >
-                                    <XCircle size={14} /> Limpar
-                                </button>
-                            )}
+            {/* Mobile Filters */}
+            {availableTags && availableTags.length > 0 && (
+            <div className="mt-6 pt-4 border-t border-gray-100 mx-4 bg-gray-50 p-4 rounded-lg">
+              <div className="flex items-center justify-between mb-3">
+                 <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
+                    <FilterIcon size={16} className="text-[#E60012]" />
+                    <span>Filtros</span>
+                 </div>
+                 {selectedTags.length > 0 && (
+                    <button onClick={clearFilters} className="text-xs text-red-600 hover:text-red-800 font-medium flex items-center gap-1">
+                      <XCircle size={12} /> Limpar
+                    </button>
+                 )}
+              </div>
+              <div className="space-y-2">
+                {availableTags.map(tag => {
+                   const isSelected = selectedTags.includes(tag.name);
+                   return (
+                     <div key={tag.name} onClick={() => handleTagToggle(tag.name)} className="flex items-center gap-3 py-2 cursor-pointer border-b border-gray-100 last:border-0">
+                        <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-[#E60012] border-[#E60012]' : 'bg-white border-gray-300'}`}>
+                           {isSelected && <Check size={12} className="text-white" strokeWidth={3} />}
                         </div>
-                        <div className="px-4 pb-4 space-y-2">
-                            {availableTags.map(tag => {
-                                const isSelected = selectedTags.includes(tag.name);
-                                return (
-                                    <div 
-                                        key={tag.name} 
-                                        className="flex items-center gap-2 cursor-pointer group"
-                                        onClick={() => handleTagToggle(tag.name)}
-                                    >
-                                        <div className={`
-                                            w-4 h-4 rounded border flex items-center justify-center transition-all duration-200
-                                            ${isSelected ? 'bg-[#E60012] border-[#E60012]' : 'bg-white border-gray-300 group-hover:border-red-400'}
-                                        `}>
-                                            {isSelected && <Check size={12} className="text-white" strokeWidth={3} />}
-                                        </div>
-                                        <span className={`text-sm flex-1 truncate ${isSelected ? 'font-medium text-gray-900' : 'text-gray-600 group-hover:text-gray-900'}`}>
-                                            {tag.name}
-                                        </span>
-                                        <span className="text-xs text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded-full">
-                                            {tag.count}
-                                        </span>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                )}
+                        <span className={`text-sm flex-1 truncate ${isSelected ? 'font-medium text-gray-900' : 'text-gray-600'}`}>{tag.name}</span>
+                        <span className="text-xs text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full">{tag.count}</span>
+                     </div>
+                   );
+                })}
+              </div>
             </div>
-        </aside>
+          )}
+         </div>
+         
+         {/* Mobile Footer (Account/Help) */}
+         <div className="p-4 border-t border-gray-100 bg-gray-50">
+             <Link href="/conta" className="flex items-center gap-3 text-gray-700 hover:text-[#E60012]" onClick={closeSidebar}>
+                 <User size={20} />
+                 <span className="font-medium">Minha Conta</span>
+             </Link>
+         </div>
+      </aside>
     </>
   );
 }
