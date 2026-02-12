@@ -10,10 +10,11 @@ import ProductManager from "@/components/admin/ProductManager";
 import HomeBlocksManager from "@/components/admin/HomeBlocksManager";
 import MarketingManager from "@/components/admin/MarketingManager";
 import CouponManager from "@/components/admin/CouponManager";
-import { ArrowLeft, Upload, CheckCircle, AlertCircle, Layout, Layers, Save, Search, Settings, ShoppingBag, Mail } from "lucide-react";
+import { ArrowLeft, Upload, CheckCircle, AlertCircle, Layout, Layers, Save, Search, Settings, ShoppingBag, Mail, Trophy } from "lucide-react";
+import RankingAdminPanel from "@/components/admin/RankingAdminPanel";
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState<"import" | "carousel" | "products" | "categories" | "orders" | "home_blocks" | "marketing" | "coupons">("import");
+  const [activeTab, setActiveTab] = useState<"import" | "carousel" | "products" | "categories" | "orders" | "home_blocks" | "marketing" | "coupons" | "ranking">("import");
 
   // Product List State
   const [products, setProducts] = useState<Product[]>([]);
@@ -344,6 +345,13 @@ export default function AdminPage() {
                         <Settings size={18} />
                         Cupons
                     </button>
+                    <button
+                        onClick={() => setActiveTab("ranking")}
+                        className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${activeTab === "ranking" ? "bg-red-50 text-[#E60012] border-l-4 border-[#E60012]" : "text-gray-600 hover:bg-gray-50"}`}
+                    >
+                        <Trophy size={18} />
+                        Ranking
+                    </button>
                 </nav>
             </aside>
 
@@ -627,6 +635,19 @@ export default function AdminPage() {
                         </div>
                     )}
 
+                    {/* RANKING TAB */}
+                    {activeTab === "ranking" && (
+                        <div className="animate-in fade-in duration-300">
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                    <Trophy className="text-[#E60012]" />
+                                    Ranking de Vendas (Admin)
+                                </h2>
+                                <Link href="/ranking" className="text-sm text-[#E60012] underline">Ver Página /ranking</Link>
+                            </div>
+                            <RankingAdminPanel />
+                        </div>
+                    )}
                     
                 </div>
             </div>
