@@ -478,18 +478,8 @@ export default function ArenaPage() {
                         <div className="absolute inset-0 -m-2 rounded-full bg-blue-500/40 blur-lg animate-pulse" />
                       )}
                       
-                      {/* Foguete (atrás) */}
-                      <div className="absolute -left-6 text-4xl sm:text-5xl transform rotate-45 z-0 filter drop-shadow-lg">
+                      <div className="text-4xl sm:text-5xl transform rotate-45 filter drop-shadow-lg">
                         🚀
-                      </div>
-
-                      {/* Avatar (frente) */}
-                      <div className="relative z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-amber-300 overflow-hidden bg-slate-800 shadow-xl">
-                        {seller.avatar_url ? (
-                          <img src={seller.avatar_url} alt={seller.nome} className="w-full h-full object-cover" />
-                        ) : (
-                          <span className="text-sm font-bold text-white">{seller.nome.slice(0, 2).toUpperCase()}</span>
-                        )}
                       </div>
                     </div>
                   </motion.div>
