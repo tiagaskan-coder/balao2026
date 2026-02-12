@@ -549,7 +549,6 @@ export default function ArenaPage() {
                 <Zap className="w-4 h-4" />
                 Premiações da Arena
               </div>
-              <span className="text-[10px] text-fuchsia-300">Atualizável no admin</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {rewardCards.map((reward) => (
