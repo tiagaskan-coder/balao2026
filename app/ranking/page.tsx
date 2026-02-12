@@ -12,12 +12,21 @@ type Seller = {
   total_sales: number;
   hire_date: string;
   google_reviews_count: number;
+  badge_key?: string | null;
 };
 
 type Goals = {
   daily?: { target_amount: number; prize_description: string };
   weekly?: { target_amount: number; prize_description: string };
   monthly?: { target_amount: number; prize_description: string };
+};
+
+type FlashChallenge = {
+  id: string;
+  title: string;
+  prize_value: number;
+  active: boolean;
+  created_at: string;
 };
 
 // --- Sound Helpers ---
@@ -53,11 +62,83 @@ const playSound = (type: 'levelup' | 'overtake') => {
   }
 };
 
+const playSiren = () => {
+  try {
+    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0.25, ctx.currentTime);
+    const start = ctx.currentTime;
+    osc.frequency.setValueAtTime(440, start);
+    osc.frequency.linearRampToValueAtTime(880, start + 0.3);
+    osc.frequency.linearRampToValueAtTime(440, start + 0.6);
+    osc.frequency.linearRampToValueAtTime(880, start + 0.9);
+    osc.frequency.linearRampToValueAtTime(440, start + 1.2);
+    osc.start();
+    osc.stop(start + 1.3);
+  } catch (e) {
+    console.error("Siren playback failed", e);
+  }
+};
+
+const speakChallenge = (text: string) => {
+  try {
+    if (!window.speechSynthesis) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'pt-BR';
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+  } catch (e) {
+    console.error("Speech synthesis failed", e);
+  }
+};
+
 export default function RankingPage() {
   const [sellers, setSellers] = useState<Seller[]>([]);
   const [goals, setGoals] = useState<Goals>({});
   const [loading, setLoading] = useState(true);
+  const [flashChallenge, setFlashChallenge] = useState<FlashChallenge | null>(null);
+  const [showFlash, setShowFlash] = useState(false);
+  const [battleIds, setBattleIds] = useState<string[]>([]);
   const prevSellersRef = useRef<Seller[]>([]);
+  const lastChallengeIdRef = useRef<string | null>(null);
+  const battleTimeoutsRef = useRef<Record<string, number>>({});
+
+  const badgeOptions = [
+    { key: 'shield-ruby', colors: ['#E60012', '#8B0B14'] },
+    { key: 'shield-emerald', colors: ['#19C37D', '#0B6B45'] },
+    { key: 'shield-sapphire', colors: ['#3B82F6', '#1E3A8A'] },
+    { key: 'shield-amber', colors: ['#F59E0B', '#92400E'] },
+    { key: 'shield-onyx', colors: ['#111827', '#4B5563'] }
+  ];
+
+  const renderBadge = (badgeKey: string, size = 28) => {
+    const badge = badgeOptions.find(b => b.key === badgeKey);
+    if (!badge) return null;
+    return (
+      <svg width={size} height={size} viewBox="0 0 64 64">
+        <defs>
+          <linearGradient id={`${badgeKey}-g`} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor={badge.colors[0]} />
+            <stop offset="100%" stopColor={badge.colors[1]} />
+          </linearGradient>
+        </defs>
+        <path
+          d="M32 4L54 12V30C54 43 45 54 32 60C19 54 10 43 10 30V12L32 4Z"
+          fill={`url(#${badgeKey}-g)`}
+          stroke="#0B0B0B"
+          strokeWidth="2"
+        />
+        <circle cx="32" cy="30" r="10" fill="#0B0B0B" opacity="0.35" />
+        <path d="M32 16L36 26L46 26L38 32L41 42L32 36L23 42L26 32L18 26L28 26Z" fill="#F8FAFC" opacity="0.9" />
+      </svg>
+    );
+  };
 
   // Polling Data
   const fetchData = async () => {
@@ -96,7 +177,8 @@ export default function RankingPage() {
             : typeof sellerData?.hired_at === 'string'
               ? sellerData.hired_at
               : '',
-          google_reviews_count: Number.isFinite(reviewsCount) ? reviewsCount : 0
+          google_reviews_count: Number.isFinite(reviewsCount) ? reviewsCount : 0,
+          badge_key: typeof sellerData?.badge_key === 'string' ? sellerData.badge_key : null
         };
       });
 
@@ -115,6 +197,24 @@ export default function RankingPage() {
 
         if (hasNewSales) playSound('levelup');
         if (hasOvertaken) playSound('overtake');
+
+        const overtakes = sorted
+          .map((s, i) => {
+            const prevIndex = prevSellersRef.current.findIndex(p => p.id === s.id);
+            return prevIndex !== -1 && prevIndex > i ? s.id : null;
+          })
+          .filter((id): id is string => Boolean(id));
+
+        if (overtakes.length > 0) {
+          setBattleIds(prev => Array.from(new Set([...prev, ...overtakes])));
+          overtakes.forEach((id) => {
+            if (battleTimeoutsRef.current[id]) window.clearTimeout(battleTimeoutsRef.current[id]);
+            battleTimeoutsRef.current[id] = window.setTimeout(() => {
+              setBattleIds(current => current.filter(item => item !== id));
+              delete battleTimeoutsRef.current[id];
+            }, 1800);
+          });
+        }
       }
 
       setSellers(sorted);
@@ -131,6 +231,7 @@ export default function RankingPage() {
         weekly: normalizeGoal(goalsData.weekly ?? goalsData.week),
         monthly: normalizeGoal(goalsData.monthly ?? goalsData.month)
       });
+      setFlashChallenge(data.flashChallenge ?? null);
       prevSellersRef.current = sorted;
     } catch (e) {
       console.error(e);
@@ -145,6 +246,20 @@ export default function RankingPage() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    if (!flashChallenge?.active) {
+      setShowFlash(false);
+      return;
+    }
+    if (flashChallenge.id && flashChallenge.id !== lastChallengeIdRef.current) {
+      lastChallengeIdRef.current = flashChallenge.id;
+      setShowFlash(true);
+      playSiren();
+      speakChallenge(`${flashChallenge.title}. Prêmio de ${flashChallenge.prize_value} reais. Boas vendas desafiantes.`);
+      window.setTimeout(() => setShowFlash(false), 12000);
+    }
+  }, [flashChallenge]);
+
   // Calculate track scale
   // Max scale is usually the Monthly Goal. If someone exceeds it, we scale up to their sales + buffer.
   const monthlyGoal = goals?.monthly?.target_amount || 20000; // default fallback
@@ -154,6 +269,12 @@ export default function RankingPage() {
   const getPositionPercentage = (value: number) => {
     return Math.min((value / trackMax) * 100, 100);
   };
+
+  const goalMarkers = [
+    { key: 'day', goal: goals.daily },
+    { key: 'week', goal: goals.weekly },
+    { key: 'month', goal: goals.monthly }
+  ];
 
   if (loading && sellers.length === 0) {
     return (
@@ -203,6 +324,26 @@ export default function RankingPage() {
         </div>
       </header>
 
+      {showFlash && flashChallenge?.active && (
+        <div className="absolute inset-x-0 top-24 z-30 flex justify-center px-6">
+          <div className="bg-red-600/90 text-white px-6 py-4 rounded-2xl shadow-[0_0_30px_rgba(230,0,18,0.45)] border border-red-300/40 backdrop-blur flex items-center gap-4">
+            <div className="text-3xl">🚨</div>
+            <div className="flex flex-col">
+              <div className="text-sm uppercase tracking-widest text-red-100">Desafio Flash</div>
+              <div className="text-lg font-bold">{flashChallenge.title}</div>
+              <div className="text-sm text-red-100">Prêmio: R$ {flashChallenge.prize_value.toLocaleString('pt-BR')}</div>
+              <div className="text-xs text-red-200">Boas vendas desafiantes</div>
+            </div>
+            <button
+              onClick={() => setShowFlash(false)}
+              className="ml-4 px-3 py-1 rounded-full bg-black/30 text-xs font-semibold"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* --- TRACK AREA --- */}
       <main className="flex-grow relative overflow-y-auto overflow-x-hidden p-8 perspective-1000">
         
@@ -246,6 +387,7 @@ export default function RankingPage() {
             {sellers.map((seller, index) => {
               const progress = getPositionPercentage(seller.total_sales);
               const isLead = index === 0;
+              const isBattle = battleIds.includes(seller.id);
               
               return (
                 <motion.div
@@ -260,6 +402,22 @@ export default function RankingPage() {
                     boxShadow: isLead ? '0 0 20px rgba(230,0,18,0.1)' : 'none'
                   }}
                 >
+                  <AnimatePresence>
+                    {isBattle && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none"
+                      >
+                        <div className="px-4 py-2 rounded-full bg-red-600/80 text-white text-sm font-bold flex items-center gap-2 shadow-lg">
+                          <span className="text-xl">⚔️</span>
+                          ULTRAPASSAGEM
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   {/* Lane Markings */}
                   <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent" />
                   
@@ -280,6 +438,22 @@ export default function RankingPage() {
 
                   {/* The Racer (Progress Bar + Avatar) */}
                   <div className="absolute left-0 top-0 bottom-0 right-8 flex items-center">
+                    <div className="absolute left-0 right-0 top-2 flex items-center pointer-events-none">
+                      {goalMarkers.map((marker) => {
+                        if (!marker.goal) return null;
+                        const achieved = seller.total_sales >= marker.goal.target_amount;
+                        const emoji = achieved ? '💰' : '💵';
+                        return (
+                          <div
+                            key={`${seller.id}-${marker.key}`}
+                            className={`absolute -top-4 ${achieved ? 'drop-shadow-[0_0_8px_rgba(255,215,0,0.6)]' : 'opacity-60'}`}
+                            style={{ left: `${getPositionPercentage(marker.goal.target_amount)}%` }}
+                          >
+                            <span className="text-lg">{emoji}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
                     {/* Progress Track (Empty) */}
                     <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden absolute"></div>
                     
@@ -313,6 +487,11 @@ export default function RankingPage() {
                             <div className="w-full h-full flex items-center justify-center font-bold text-xl">{seller.name.charAt(0)}</div>
                           )}
                         </div>
+                        {seller.badge_key && (
+                          <div className="absolute -top-2 -right-2">
+                            {renderBadge(seller.badge_key, 24)}
+                          </div>
+                        )}
                         <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 bg-black/80 text-white text-[10px] font-semibold py-1 px-2 rounded border border-gray-700 whitespace-nowrap max-w-[140px] truncate">
                           {seller.name}
                         </div>

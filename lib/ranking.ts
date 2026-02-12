@@ -4,6 +4,8 @@ export interface Seller {
   id: string;
   name: string;
   photo?: string;
+  photo_url?: string;
+  badge_key?: string | null;
   hired_at: string;
 }
 
@@ -13,6 +15,14 @@ export interface Goal {
   target: number;
   prize: string;
   updated_at: string;
+}
+
+export interface FlashChallenge {
+  id: string;
+  title: string;
+  prize_value: number;
+  active: boolean;
+  created_at: string;
 }
 
 export async function getGoals(): Promise<Goal[]> {
@@ -31,10 +41,11 @@ export async function upsertGoals(goals: Partial<Goal>[]) {
   }
 }
 
-export async function createSeller(seller: Omit<Seller, 'id'>) {
+export async function createSeller(seller: Partial<Omit<Seller, 'id'>>) {
+  const hired_at = seller.hired_at || new Date().toISOString().slice(0, 10);
   const { data, error } = await supabaseAdmin
     .from('sellers')
-    .insert(seller)
+    .insert({ name: seller.name, photo: seller.photo, badge_key: seller.badge_key, hired_at })
     .select()
     .single();
   if (error) throw error;
@@ -70,10 +81,52 @@ export async function getMonthlyStats() {
   return data || [];
 }
 
+export async function updateSellerBadge(sellerId: string, badgeKey: string | null) {
+  const { error } = await supabaseAdmin
+    .from('sellers')
+    .update({ badge_key: badgeKey })
+    .eq('id', sellerId);
+  if (error) throw error;
+}
+
+export async function getActiveFlashChallenge(): Promise<FlashChallenge | null> {
+  const { data } = await supabaseAdmin
+    .from('flash_challenges')
+    .select('*')
+    .eq('active', true)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return (data as FlashChallenge) || null;
+}
+
+export async function setFlashChallenge(title: string, prizeValue: number) {
+  await supabaseAdmin
+    .from('flash_challenges')
+    .update({ active: false })
+    .eq('active', true);
+  const { data, error } = await supabaseAdmin
+    .from('flash_challenges')
+    .insert({ title, prize_value: prizeValue, active: true })
+    .select()
+    .single();
+  if (error) throw error;
+  return data as FlashChallenge;
+}
+
+export async function clearFlashChallenge() {
+  const { error } = await supabaseAdmin
+    .from('flash_challenges')
+    .update({ active: false })
+    .eq('active', true);
+  if (error) throw error;
+}
+
 export async function getRankingSummary() {
   const sellers = await getSellers();
   const goals = await getGoals();
   const stats = await getMonthlyStats();
+  const flashChallenge = await getActiveFlashChallenge();
 
   const monthGoal = goals.find(g => g.type === 'month');
   const weekGoal = goals.find(g => g.type === 'week');
@@ -126,6 +179,7 @@ export async function getRankingSummary() {
     stats: {
       google_reviews_this_month: (reviewCount as any)?.length ?? 0,
       sales_this_month: (salesCount as any)?.length ?? 0
-    }
+    },
+    flashChallenge
   };
 }

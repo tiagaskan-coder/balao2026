@@ -5,7 +5,7 @@ import { Save, Award, DollarSign, UserPlus, ExternalLink, Trophy, Users, Trendin
 import Link from "next/link";
 
 export default function RankingAdminPanel() {
-  const [sellers, setSellers] = useState<{ id: string; name: string }[]>([]);
+  const [sellers, setSellers] = useState<{ id: string; name: string; badge_key?: string | null }[]>([]);
   const [selectedSeller, setSelectedSeller] = useState<string>("");
   const [saleValue, setSaleValue] = useState<number | ''>('');
   const [bonusValue, setBonusValue] = useState<number>(50);
@@ -19,14 +19,47 @@ export default function RankingAdminPanel() {
     monthPrize: "Grande Prêmio",
   });
 
-  const [newSeller, setNewSeller] = useState<{ name: string; photo?: string; hired_at: string }>({
+  const [newSeller, setNewSeller] = useState<{ name: string; photo?: string }>({
     name: "",
-    photo: "",
-    hired_at: new Date().toISOString().slice(0, 10),
+    photo: ""
   });
 
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+  const [flashChallenge, setFlashChallenge] = useState<{ id?: string; title: string; prize_value: number; active?: boolean } | null>(null);
+  const [challengeTitle, setChallengeTitle] = useState("");
+  const [challengePrize, setChallengePrize] = useState<number | ''>('');
+
+  const badgeOptions = [
+    { key: 'shield-ruby', label: 'Rubi', colors: ['#E60012', '#8B0B14'] },
+    { key: 'shield-emerald', label: 'Esmeralda', colors: ['#19C37D', '#0B6B45'] },
+    { key: 'shield-sapphire', label: 'Safira', colors: ['#3B82F6', '#1E3A8A'] },
+    { key: 'shield-amber', label: 'Âmbar', colors: ['#F59E0B', '#92400E'] },
+    { key: 'shield-onyx', label: 'Ônix', colors: ['#111827', '#4B5563'] }
+  ];
+
+  const renderBadge = (badgeKey: string, size = 36) => {
+    const badge = badgeOptions.find(b => b.key === badgeKey);
+    if (!badge) return null;
+    return (
+      <svg width={size} height={size} viewBox="0 0 64 64">
+        <defs>
+          <linearGradient id={`${badgeKey}-g`} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor={badge.colors[0]} />
+            <stop offset="100%" stopColor={badge.colors[1]} />
+          </linearGradient>
+        </defs>
+        <path
+          d="M32 4L54 12V30C54 43 45 54 32 60C19 54 10 43 10 30V12L32 4Z"
+          fill={`url(#${badgeKey}-g)`}
+          stroke="#0B0B0B"
+          strokeWidth="2"
+        />
+        <circle cx="32" cy="30" r="10" fill="#0B0B0B" opacity="0.35" />
+        <path d="M32 16L36 26L46 26L38 32L41 42L32 36L23 42L26 32L18 26L28 26Z" fill="#F8FAFC" opacity="0.9" />
+      </svg>
+    );
+  };
 
   useEffect(() => {
     fetchSellers();
@@ -36,7 +69,7 @@ export default function RankingAdminPanel() {
     fetch("/api/ranking")
       .then(res => res.json())
       .then(data => {
-        const sellers = (data.sellers || []).map((s: any) => s.seller);
+        const sellers = (data.sellers || []).map((s: any) => s.seller ?? s);
         setSellers(sellers);
         if (sellers.length > 0 && !selectedSeller) setSelectedSeller(sellers[0].id);
         const g = data.goals || {};
@@ -48,6 +81,7 @@ export default function RankingAdminPanel() {
           monthTarget: Number(g.month?.target ?? 20000),
           monthPrize: g.month?.prize ?? "Grande Prêmio",
         });
+        setFlashChallenge(data.flashChallenge || null);
       })
       .catch(() => {});
   };
@@ -102,14 +136,46 @@ export default function RankingAdminPanel() {
   };
 
   const createSeller = async () => {
-    if (!newSeller.name || !newSeller.hired_at) return;
+    if (!newSeller.name) return;
     await fetch("/api/ranking", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "create_seller", ...newSeller })
     });
-    setNewSeller({ name: "", photo: "", hired_at: new Date().toISOString().slice(0, 10) });
+    setNewSeller({ name: "", photo: "" });
   };
+
+  const setBadge = async (badgeKey: string | null) => {
+    if (!selectedSeller) return;
+    await fetch("/api/ranking", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "set_badge", sellerId: selectedSeller, badgeKey })
+    });
+  };
+
+  const submitFlashChallenge = async () => {
+    if (!challengeTitle || !challengePrize) return;
+    await fetch("/api/ranking", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "set_flash_challenge", title: challengeTitle, prizeValue: Number(challengePrize) })
+    });
+    setChallengeTitle("");
+    setChallengePrize("");
+  };
+
+  const clearFlash = async () => {
+    await fetch("/api/ranking", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "clear_flash_challenge" })
+    });
+    setChallengeTitle("");
+    setChallengePrize("");
+  };
+
+  const selectedSellerData = sellers.find(s => s.id === selectedSeller);
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -318,6 +384,97 @@ export default function RankingAdminPanel() {
         </div>
       </section>
 
+      <section className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="p-4 border-b bg-gray-50 flex items-center gap-2">
+          <Award className="text-[#E60012]" />
+          <h3 className="font-bold text-gray-800">Escudos dos Vendedores</h3>
+        </div>
+        <div className="p-6 space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Vendedor</label>
+            <select
+              value={selectedSeller}
+              onChange={(e) => setSelectedSeller(e.target.value)}
+              className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-[#E60012] focus:border-[#E60012] p-2.5 bg-gray-50"
+            >
+              {sellers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 items-center">
+            <button
+              onClick={() => handleAction(() => setBadge(null), 'Escudo removido com sucesso!')}
+              className="border border-gray-200 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              Sem escudo
+            </button>
+            {badgeOptions.map(badge => {
+              const isActive = selectedSellerData?.badge_key === badge.key;
+              return (
+                <button
+                  key={badge.key}
+                  onClick={() => handleAction(() => setBadge(badge.key), 'Escudo atualizado com sucesso!')}
+                  className={`border rounded-lg p-2 flex items-center justify-center transition-colors ${isActive ? 'border-[#E60012] bg-red-50' : 'border-gray-200 hover:bg-gray-50'}`}
+                >
+                  {renderBadge(badge.key, 40)}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="p-4 border-b bg-gray-50 flex items-center gap-2">
+          <Trophy className="text-red-600" />
+          <h3 className="font-bold text-gray-800">Desafio Flash</h3>
+        </div>
+        <div className="p-6 space-y-6">
+          {flashChallenge?.active && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+              <div className="font-semibold">Ativo agora</div>
+              <div className="text-sm">{flashChallenge.title} • R$ {flashChallenge.prize_value}</div>
+            </div>
+          )}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-end">
+            <div className="lg:col-span-2">
+              <label className="block text-xs font-medium text-gray-700 mb-1">Descrição do desafio</label>
+              <input
+                type="text"
+                value={challengeTitle}
+                onChange={(e) => setChallengeTitle(e.target.value)}
+                className="w-full border-gray-300 rounded-lg p-2.5 focus:ring-[#E60012] focus:border-[#E60012]"
+                placeholder="Ex: 5 vendas em 1 hora"
+              />
+            </div>
+            <div className="lg:col-span-1">
+              <label className="block text-xs font-medium text-gray-700 mb-1">Prêmio (R$)</label>
+              <input
+                type="number"
+                value={challengePrize}
+                onChange={(e) => setChallengePrize(Number(e.target.value))}
+                className="w-full border-gray-300 rounded-lg p-2.5 focus:ring-[#E60012] focus:border-[#E60012]"
+              />
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={() => handleAction(submitFlashChallenge, 'Desafio flash publicado!')}
+              disabled={loading || !challengeTitle || !challengePrize}
+              className="bg-[#E60012] text-white px-5 py-2.5 rounded-lg font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+            >
+              Ativar Desafio
+            </button>
+            <button
+              onClick={() => handleAction(clearFlash, 'Desafio flash encerrado!')}
+              disabled={loading || !flashChallenge?.active}
+              className="bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-black transition-colors disabled:opacity-50"
+            >
+              Encerrar Desafio
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* Seller Management */}
       <section className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-4 border-b bg-gray-50 flex items-center gap-2">
@@ -325,7 +482,7 @@ export default function RankingAdminPanel() {
           <h3 className="font-bold text-gray-800">Cadastro de Vendedores</h3>
         </div>
         <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
             <div className="md:col-span-1">
               <label className="block text-xs font-medium text-gray-700 mb-1">Nome Completo</label>
               <input 
@@ -344,15 +501,6 @@ export default function RankingAdminPanel() {
                 onChange={(e) => setNewSeller({ ...newSeller, photo: e.target.value })} 
                 className="w-full border-gray-300 rounded-lg p-2.5 focus:ring-[#E60012] focus:border-[#E60012]" 
                 placeholder="https://..."
-              />
-            </div>
-            <div className="md:col-span-1">
-              <label className="block text-xs font-medium text-gray-700 mb-1">Data Contratação</label>
-              <input 
-                type="date" 
-                value={newSeller.hired_at} 
-                onChange={(e) => setNewSeller({ ...newSeller, hired_at: e.target.value })} 
-                className="w-full border-gray-300 rounded-lg p-2.5 focus:ring-[#E60012] focus:border-[#E60012]" 
               />
             </div>
             <div className="md:col-span-1">
