@@ -383,7 +383,7 @@ export default function ArenaPage() {
           setSalesFeed((prev) => [{ id: sale.id, message, isGoogle: sale.is_google_bonus, createdAt: sale.criado_em }, ...prev].slice(0, 5));
           
           // Trigger Sale Celebration
-          const seller = sellersRef.current.find(s => s.id === sale.vendedor_id);
+          const seller = sellersRef.current.find(s => String(s.id) === String(sale.vendedor_id));
           
           if (seller) {
             console.log("Celebration Triggered for:", seller.nome);
@@ -394,7 +394,7 @@ export default function ArenaPage() {
             setCelebration({ 
               type: "sale", 
               seller: { 
-                id: sale.vendedor_id, 
+                id: String(sale.vendedor_id), 
                 nome: "Vendedor", 
                 avatar_url: "", 
                 meta_valor: 0, 
@@ -879,10 +879,11 @@ export default function ArenaPage() {
       <AnimatePresence>
         {celebration && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
+            key="celebration-modal"
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+            initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.5 }}
-            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+            exit={{ opacity: 0, scale: 0.8 }}
             onClick={() => setCelebration(null)}
           >
             <div className="relative flex flex-col items-center justify-center max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
@@ -900,6 +901,10 @@ export default function ArenaPage() {
                    src={celebration.type === 'sale' ? "https://i.pinimg.com/originals/3d/27/11/3d271128514d50a47c22e5f1beecb4fc.gif" : "https://i.pinimg.com/originals/a4/d3/ce/a4d3ce7ff09e24bbc4cf265686e9becc.gif"}
                    alt="Celebration" 
                    className={`w-full h-full ${celebration.type === 'sale' ? 'object-contain' : 'object-cover'}`}
+                   onError={(e) => {
+                     // Fallback se a imagem falhar
+                     e.currentTarget.style.display = 'none';
+                   }}
                  />
                  {/* Overlay do Avatar do Vendedor */}
                  <div className="absolute bottom-4 right-4 w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-white shadow-lg overflow-hidden bg-slate-800">
