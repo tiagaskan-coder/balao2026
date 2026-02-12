@@ -10,6 +10,7 @@ import Footer from "@/components/Footer";
 import ProductPreview from "@/components/ProductPreview";
 import AIOverlay from "@/components/AIOverlay"; // Nova Interface de Preview
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
+import ThemeEffects from "@/components/ThemeEffects";
 import { getCategories, getSiteTheme } from "@/lib/db";
 import Sidebar from "@/components/Sidebar";
 import type { Category } from "@/lib/utils";
@@ -107,7 +108,10 @@ export default async function RootLayout({
   const THEMES: Record<string, { background: string; foreground: string; brand: string }> = {
     default: { background: "#ffffff", foreground: "#000000", brand: "#E60012" },
     escuro: { background: "#0a0a0a", foreground: "#ededed", brand: "#E60012" },
-    azul: { background: "#ffffff", foreground: "#000000", brand: "#1e40af" }
+    azul: { background: "#ffffff", foreground: "#000000", brand: "#1e40af" },
+    matrix: { background: "#000000", foreground: "#00ff00", brand: "#00ff00" },
+    carnaval: { background: "#ffffff", foreground: "#000000", brand: "#E60012" },
+    chuva: { background: "#eaf2ff", foreground: "#000000", brand: "#1e40af" }
   };
   const t = THEMES[themeKey] || THEMES.default;
 
@@ -117,6 +121,7 @@ export default async function RootLayout({
         className={`antialiased flex flex-col min-h-screen overflow-x-hidden`}
       >
         <style>{`:root{--background:${t.background};--foreground:${t.foreground};--brand-color:${t.brand};}`}</style>
+        <ThemeEffects themeKey={themeKey} />
         <AuthProvider>
           <CartProvider>
             <ToastProvider>

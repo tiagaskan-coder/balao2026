@@ -40,7 +40,10 @@ export default function AdminPage() {
   const AVAILABLE_THEMES = [
     { key: "default", name: "Padrão", background: "#ffffff", foreground: "#000000", brand: "#E60012" },
     { key: "escuro", name: "Escuro", background: "#0a0a0a", foreground: "#ededed", brand: "#E60012" },
-    { key: "azul", name: "Azul", background: "#ffffff", foreground: "#000000", brand: "#1e40af" }
+    { key: "azul", name: "Azul", background: "#ffffff", foreground: "#000000", brand: "#1e40af" },
+    { key: "matrix", name: "Matrix", background: "#000000", foreground: "#00ff00", brand: "#00ff00" },
+    { key: "carnaval", name: "Carnaval", background: "#ffffff", foreground: "#000000", brand: "#E60012" },
+    { key: "chuva", name: "Chuva", background: "#eaf2ff", foreground: "#000000", brand: "#1e40af" }
   ];
   const [selectedTheme, setSelectedTheme] = useState<string>("default");
 
