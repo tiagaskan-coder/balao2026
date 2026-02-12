@@ -41,6 +41,33 @@ export async function getProducts(): Promise<Product[]> {
   }
 }
 
+export async function getProductById(id: string): Promise<Product | null> {
+  try {
+    // Try admin client first (more reliable on server)
+    try {
+      const { data, error } = await supabaseAdmin
+        .from('products')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (!error && data) return data as Product;
+    } catch {}
+
+    // Fallback to anon client
+    const { data: anonData, error: anonError } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', id)
+      .single();
+    if (!anonError && anonData) return anonData as Product;
+
+    return null;
+  } catch (error) {
+    console.error("Error fetching product by id:", error);
+    return null;
+  }
+}
+
 export async function saveProducts(products: Product[]) {
   try {
      if (!products || products.length === 0) return;

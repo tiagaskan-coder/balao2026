@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { getProducts, getCategories } from '@/lib/db';
+import { getCategories, getProductById } from '@/lib/db';
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
 import Image from 'next/image';
@@ -14,9 +14,8 @@ type Props = {
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const products = await getProducts();
   const { id } = params;
-  const product = products.find((p) => p.id === id);
+  const product = await getProductById(id);
 
   if (!product) {
     return {
@@ -52,11 +51,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Props) {
   const { id } = params;
-  const [products, categories] = await Promise.all([
-    getProducts(),
+  const [product, categories] = await Promise.all([
+    getProductById(id),
     getCategories()
   ]);
-  const product = products.find((p) => p.id === id);
 
   if (!product) return notFound();
 
