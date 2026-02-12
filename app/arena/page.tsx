@@ -570,7 +570,17 @@ export default function ArenaPage() {
                       item.isGoogle ? "border-blue-400/50 bg-blue-500/10" : "border-amber-400/30 bg-slate-800/60"
                     }`}
                   >
-                    {item.message}
+                    <div className="flex flex-col gap-1">
+                      <span>{item.message}</span>
+                      <span className="text-[10px] text-slate-400 text-right">
+                        {new Date(item.createdAt).toLocaleString("pt-BR", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit"
+                        })}
+                      </span>
+                    </div>
                   </motion.div>
                 ))}
               </AnimatePresence>
