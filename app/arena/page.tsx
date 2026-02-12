@@ -66,14 +66,7 @@ export default function ArenaPage() {
   }, [sellers]);
 
   useEffect(() => {
-    const updateOverflow = () => {
-      document.body.style.overflow = window.innerWidth >= 1024 ? "hidden" : "auto";
-    };
-    updateOverflow();
-    window.addEventListener("resize", updateOverflow);
     return () => {
-      window.removeEventListener("resize", updateOverflow);
-      document.body.style.overflow = "";
       if (battleLoopRef.current) window.clearInterval(battleLoopRef.current);
       ambientSourceRef.current?.stop();
       audioContextRef.current?.close();
@@ -364,7 +357,7 @@ export default function ArenaPage() {
   );
 
   return (
-    <div className="min-h-screen w-screen overflow-x-hidden overflow-y-auto lg:overflow-hidden bg-slate-950 text-white">
+    <div className="flex flex-col min-h-screen w-full lg:h-screen lg:overflow-hidden overflow-y-auto bg-slate-950 text-white">
       <motion.div
         key={battlePulse}
         className="absolute inset-0 pointer-events-none"
@@ -388,9 +381,9 @@ export default function ArenaPage() {
           />
         ))}
       </div>
-      <div className="relative z-10 min-h-screen w-full grid grid-cols-1 xl:grid-cols-[1.6fr_0.7fr] gap-4 xl:gap-6 p-4 sm:p-6 pb-12">
+      <div className="relative z-10 w-full lg:h-full grid grid-cols-1 lg:grid-cols-[1.6fr_0.7fr] gap-4 lg:gap-6 p-4 sm:p-6 pb-12 lg:pb-6 overflow-hidden">
         <motion.div
-          className="flex flex-col gap-6"
+          className="flex flex-col gap-6 lg:h-full lg:overflow-hidden"
           animate={overtakePulse ? { x: [0, -6, 6, -4, 0] } : { x: 0 }}
           transition={{ duration: 0.4 }}
         >
@@ -421,7 +414,7 @@ export default function ArenaPage() {
             </div>
           </header>
 
-          <div className="flex-1 flex flex-col gap-4 overflow-hidden">
+          <div className="flex-1 flex flex-col gap-4 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
             {rankedSellers.map((seller, index) => {
               const total = totals[seller.id] || 0;
               const meta = activeChallenge?.meta_global || seller.meta_valor || 1;
@@ -495,7 +488,7 @@ export default function ArenaPage() {
           </div>
         </motion.div>
 
-        <aside className="flex flex-col gap-4 sm:gap-6">
+        <aside className="flex flex-col gap-4 sm:gap-6 lg:h-full lg:overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
           <div className="bg-slate-900/70 border border-amber-500/30 rounded-2xl p-5">
             <div className="flex items-center gap-2 text-amber-200 uppercase tracking-[0.3em] text-xs mb-4">
               <Crown className="w-4 h-4" />
