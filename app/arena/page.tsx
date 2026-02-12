@@ -370,8 +370,10 @@ export default function ArenaPage() {
     const channel = supabase
       .channel("arena_vendas")
       .on("postgres_changes", { event: "*", schema: "public", table: "vendas" }, (payload) => {
+        console.log("Realtime Event Received:", payload); // DEBUG LOG
         if (payload.eventType === "INSERT") {
           const sale = payload.new as Sale;
+          console.log("New Sale Detected:", sale); // DEBUG LOG
           setTotals((prev) => {
             const next = { ...prev };
             next[sale.vendedor_id] = (next[sale.vendedor_id] || 0) + getDelta(sale);
@@ -382,8 +384,23 @@ export default function ArenaPage() {
           
           // Trigger Sale Celebration
           const seller = sellersRef.current.find(s => s.id === sale.vendedor_id);
+          
           if (seller) {
+            console.log("Celebration Triggered for:", seller.nome);
             setCelebration({ type: "sale", seller });
+          } else {
+            console.warn("Seller not found for celebration:", sale.vendedor_id);
+            // Fallback para não perder o evento visualmente
+            setCelebration({ 
+              type: "sale", 
+              seller: { 
+                id: sale.vendedor_id, 
+                nome: "Vendedor", 
+                avatar_url: "", 
+                meta_valor: 0, 
+                criado_em: ""
+              } 
+            });
           }
 
           if (sale.is_google_bonus) {
@@ -767,6 +784,18 @@ export default function ArenaPage() {
           >
             <Trophy size={14} />
             Solicitar Conquista
+          </button>
+          
+          {/* Debug Button - Remover em produção se necessário */}
+          <button
+            onClick={() => {
+              console.log("Simulando Venda...");
+              const fakeSeller = sellers[0] || { id: "test", nome: "Teste Vendedor", avatar_url: "", meta_valor: 0, criado_em: "" };
+              setCelebration({ type: "sale", seller: fakeSeller });
+            }}
+            className="w-full mt-2 bg-red-900/20 hover:bg-red-900/40 border border-red-900/30 text-red-500/50 hover:text-red-500 py-1 rounded-lg text-[10px] uppercase tracking-wider transition-colors"
+          >
+            Simular Venda (Teste)
           </button>
         </aside>
       </div>
