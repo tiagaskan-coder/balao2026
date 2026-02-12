@@ -4,13 +4,9 @@ import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { AuthProvider } from "@/context/AuthContext";
-import { SidebarProvider } from "@/context/SidebarContext";
-import Footer from "@/components/Footer";
-import ProductPreview from "@/components/ProductPreview";
-import FloatingWhatsApp from "@/components/FloatingWhatsApp";
- 
+import LayoutWrapper from "@/components/LayoutWrapper";
+
 import { getCategories } from "@/lib/db";
-import Sidebar from "@/components/Sidebar";
 import type { Category } from "@/lib/utils";
 
 export const viewport: Viewport = {
@@ -108,16 +104,9 @@ export default async function RootLayout({
           <CartProvider>
             <ToastProvider>
               <Suspense>
-                <SidebarProvider>
-                  <Sidebar categories={categories} mobileOnly />
-                  <div className="flex flex-col min-h-screen">
-                    <main className="flex-grow">
-                      {children}
-                    </main>
-                    <Footer />
-                    <FloatingWhatsApp />
-                  </div>
-                </SidebarProvider>
+                <LayoutWrapper categories={categories}>
+                  {children}
+                </LayoutWrapper>
               </Suspense>
             </ToastProvider>
           </CartProvider>

@@ -91,9 +91,10 @@ export default function RankingPage() {
       setSellers(sortedSellers);
       setGoals(data.goals || {});
       prevSellersRef.current = sortedSellers;
-      setLoading(false);
     } catch (error) {
       console.error('Error fetching ranking:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -164,9 +165,21 @@ export default function RankingPage() {
 
       {/* Main Race Track */}
       <main className="relative z-10 max-w-7xl mx-auto px-8 py-4">
-        <div className="space-y-4">
-          <AnimatePresence>
-            {sellers.map((seller, index) => {
+        {loading && sellers.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-64 text-[#E60012] animate-pulse">
+            <div className="text-2xl font-black uppercase tracking-widest mb-2">Carregando Pilotos...</div>
+            <div className="w-64 h-2 bg-gray-900 rounded-full overflow-hidden">
+              <motion.div 
+                className="h-full bg-[#E60012]"
+                animate={{ x: [-256, 256] }}
+                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <AnimatePresence>
+              {sellers.map((seller, index) => {
               const maxSales = Math.max(...sellers.map(s => s.total_sales), 1); // Avoid division by zero
               const percentage = Math.min((seller.total_sales / (goals.monthly?.target_amount || maxSales * 1.2)) * 100, 100);
               
@@ -258,7 +271,8 @@ export default function RankingPage() {
               );
             })}
           </AnimatePresence>
-        </div>
+          </div>
+        )}
       </main>
       
       {/* Footer Info */}
