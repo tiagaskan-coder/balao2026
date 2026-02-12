@@ -40,6 +40,23 @@ type FeedItem = {
   createdAt: string;
 };
 
+type Achievement = {
+  id: string;
+  nome: string;
+  descricao: string;
+  icone_url: string;
+  xp_valor: number;
+  tipo: "automatico" | "manual";
+};
+
+type SellerAchievement = {
+  id: string;
+  vendedor_id: string;
+  conquista_id: string;
+  data_conquista: string;
+  status: "pendente" | "aprovado";
+};
+
 const getDelta = (sale: Sale) => Number(sale.valor || 0) + (sale.is_google_bonus ? 100 : 0);
 
 export default function ArenaPage() {
@@ -47,6 +64,8 @@ export default function ArenaPage() {
   const [totals, setTotals] = useState<Record<string, number>>({});
   const [activeChallenge, setActiveChallenge] = useState<Challenge | null>(null);
   const [salesFeed, setSalesFeed] = useState<FeedItem[]>([]);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [sellerAchievements, setSellerAchievements] = useState<SellerAchievement[]>([]);
   const [turboIds, setTurboIds] = useState<string[]>([]);
   const [zapId, setZapId] = useState<string | null>(null);
   const sellersRef = useRef<Seller[]>([]);
@@ -112,6 +131,8 @@ export default function ArenaPage() {
       setSellers(fetchedSellers);
       setTotals(data.totals || {});
       setActiveChallenge(data.activeChallenge || null);
+      setAchievements(data.achievements || []);
+      setSellerAchievements(data.sellerAchievements || []);
       const initialFeed = (data.salesFeed || []).map((sale: Sale) => ({
         id: sale.id,
         message: buildFeedMessage(sale),
@@ -131,6 +152,8 @@ export default function ArenaPage() {
       sellersRef.current = fetchedSellers;
       setSellers(fetchedSellers);
       setActiveChallenge(data.activeChallenge || null);
+      setAchievements(data.achievements || []);
+      setSellerAchievements(data.sellerAchievements || []);
     }
   };
 
@@ -445,10 +468,33 @@ export default function ArenaPage() {
                         <span className="text-sm font-bold">{seller.nome.slice(0, 2).toUpperCase()}</span>
                       )}
                     </div>
-                    <div className="bg-slate-900/60 px-2 py-1 rounded-lg backdrop-blur-sm">
-                      <div className="text-sm sm:text-base font-semibold">{seller.nome}</div>
-                      <div className="text-[11px] sm:text-xs text-amber-200">
-                        {formatCurrency(total)} • {Math.round(progress)}%
+                    <div className="bg-slate-900/60 px-2 py-1 rounded-lg backdrop-blur-sm flex flex-col gap-1 z-30">
+                      <div>
+                        <div className="text-sm sm:text-base font-semibold">{seller.nome}</div>
+                        <div className="text-[11px] sm:text-xs text-amber-200">
+                          {formatCurrency(total)} • {Math.round(progress)}%
+                        </div>
+                      </div>
+                      {/* Emblemas */}
+                      <div className="flex flex-wrap gap-1 max-w-[180px]">
+                        {achievements.map((ach) => {
+                            const hasAchievement = sellerAchievements.some(
+                            (sa) => sa.vendedor_id === seller.id && sa.conquista_id === ach.id && sa.status === "aprovado"
+                            );
+                            return (
+                            <div
+                                key={ach.id}
+                                title={hasAchievement ? `${ach.nome}: ${ach.descricao}` : `${ach.nome} (Bloqueado)`}
+                                className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] cursor-help transition-all ${
+                                hasAchievement
+                                    ? "bg-amber-400/20 text-amber-100 border border-amber-400/50 shadow-[0_0_5px_rgba(251,191,36,0.3)] scale-100"
+                                    : "bg-slate-800 text-slate-600 border border-slate-700 grayscale opacity-30 scale-90"
+                                }`}
+                            >
+                                <span>{ach.icone_url}</span>
+                            </div>
+                            );
+                        })}
                       </div>
                     </div>
                     {isPodium && (

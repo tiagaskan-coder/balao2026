@@ -74,6 +74,26 @@ export async function GET(request: Request) {
       .select("id, vendedor_id, valor, is_google_bonus, criado_em");
     if (allSalesError) throw allSalesError;
 
+    // Buscar conquistas e conquistas dos vendedores
+    const { data: achievements, error: achievementsError } = await supabaseAdmin
+      .from("conquistas")
+      .select("*");
+    
+    // Se a tabela não existir ainda (erro), retornamos array vazio para não quebrar
+    // Mas se for erro de conexão, deveria lançar. Como acabamos de criar o SQL, assumimos que o user vai rodar.
+    // Vamos apenas logar se der erro e seguir.
+    if (achievementsError && achievementsError.code !== '42P01') {
+       console.error("Erro ao buscar conquistas:", achievementsError);
+    }
+
+    const { data: sellerAchievements, error: sellerAchievementsError } = await supabaseAdmin
+      .from("vendedor_conquistas")
+      .select("*");
+
+    if (sellerAchievementsError && sellerAchievementsError.code !== '42P01') {
+        console.error("Erro ao buscar conquistas de vendedores:", sellerAchievementsError);
+    }
+
     const totals = calculateTotals((allSales || []) as Sale[]);
     const activeChallenge = (challenges && challenges[0]) || null;
 
@@ -82,7 +102,9 @@ export async function GET(request: Request) {
       challenges: (challenges || []) as Challenge[],
       activeChallenge,
       salesFeed: (salesFeed || []) as Sale[],
-      totals
+      totals,
+      achievements: (achievements || []),
+      sellerAchievements: (sellerAchievements || [])
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Erro inesperado";
@@ -255,6 +277,53 @@ export async function POST(req: Request) {
         .eq("id", id);
       if (error) throw error;
       return NextResponse.json({ ok: true });
+    }
+
+    if (action === "add_achievement") {
+      const { vendedor_id, conquista_id, status } = body as {
+        vendedor_id: string;
+        conquista_id: string;
+        status?: "pendente" | "aprovado";
+      };
+      const { data, error } = await supabaseAdmin
+        .from("vendedor_conquistas")
+        .insert({
+          vendedor_id,
+          conquista_id,
+          status: status || "pendente"
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        if (error.code === '23505') { 
+            return NextResponse.json({ message: "Conquista já atribuída/solicitada" });
+        }
+        throw error;
+      }
+      return NextResponse.json(data);
+    }
+
+    if (action === "approve_achievement") {
+        const { id } = body as { id: string };
+        const { data, error } = await supabaseAdmin
+            .from("vendedor_conquistas")
+            .update({ status: "aprovado" })
+            .eq("id", id)
+            .select()
+            .single();
+        if (error) throw error;
+        return NextResponse.json(data);
+    }
+
+    if (action === "remove_achievement") {
+         const { id } = body as { id: string };
+         const { error } = await supabaseAdmin
+            .from("vendedor_conquistas")
+            .delete()
+            .eq("id", id);
+         if (error) throw error;
+         return NextResponse.json({ ok: true });
     }
 
     return NextResponse.json({ error: "Ação inválida" }, { status: 400 });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Save, Trash2, Edit, X, Upload, Zap, Box, Crown, UserPlus } from "lucide-react";
+import { Save, Trash2, Edit, X, Upload, Zap, Box, Crown, UserPlus, Trophy } from "lucide-react";
 
 type Seller = {
   id: string;
@@ -31,13 +31,33 @@ type Challenge = {
   criado_em: string;
 };
 
+type Achievement = {
+  id: string;
+  nome: string;
+  descricao: string;
+  icone_url: string;
+  tipo: "automatico" | "manual";
+};
+
+type SellerAchievement = {
+  id: string;
+  vendedor_id: string;
+  conquista_id: string;
+  data_conquista: string;
+  status: "pendente" | "aprovado";
+};
+
 export default function ArenaAdminPanel() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [sellers, setSellers] = useState<Seller[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [sellerAchievements, setSellerAchievements] = useState<SellerAchievement[]>([]);
+  
   const [selectedSellerId, setSelectedSellerId] = useState("");
+  const [selectedAchievementId, setSelectedAchievementId] = useState("");
   const [saleValue, setSaleValue] = useState<number | "">("");
   const [googleBonus, setGoogleBonus] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -107,12 +127,61 @@ export default function ArenaAdminPanel() {
       setSellers(data.sellers || []);
       setSales(data.salesFeed || []);
       setChallenges(data.challenges || []);
+      setAchievements(data.achievements || []);
+      setSellerAchievements(data.sellerAchievements || []);
       if (!selectedSellerId && data.sellers?.length) {
         setSelectedSellerId(data.sellers[0].id);
+      }
+      if (!selectedAchievementId && data.achievements?.length) {
+          setSelectedAchievementId(data.achievements[0].id);
       }
     } finally {
       setLoading(false);
     }
+  };
+
+  const approveAchievement = async (id: string) => {
+    setLoading(true);
+    try {
+        setErrorMessage(null);
+        const res = await fetch("/api/arena", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "approve_achievement", id })
+        });
+        if (!res.ok) {
+            setErrorMessage(await parseError(res));
+            return;
+        }
+        await fetchData();
+    } finally {
+        setLoading(false);
+    }
+  };
+
+  const assignAchievement = async () => {
+      if (!selectedSellerId || !selectedAchievementId) return;
+      setLoading(true);
+      try {
+          setErrorMessage(null);
+          const res = await fetch("/api/arena", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ 
+                  action: "add_achievement", 
+                  vendedor_id: selectedSellerId, 
+                  conquista_id: selectedAchievementId,
+                  status: "aprovado"
+              })
+          });
+          if (!res.ok) {
+              setErrorMessage(await parseError(res));
+              return;
+          }
+          await fetchData();
+      } finally {
+          setLoading(false);
+      }
   };
 
   const activeChallenge = useMemo(() => challenges[0] || null, [challenges]);
@@ -930,6 +999,77 @@ export default function ArenaAdminPanel() {
               )}
             </tbody>
           </table>
+        </div>
+      </section>
+      <section className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+        <div className="flex items-center gap-2 text-gray-800 font-bold">
+          <Trophy className="w-5 h-5 text-[#E60012]" />
+          Gerenciar Conquistas
+        </div>
+
+        {/* Atribuir Manualmente */}
+        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <h4 className="text-sm font-semibold text-gray-700 mb-3">Atribuir Conquista Manualmente</h4>
+          <div className="flex flex-col md:flex-row gap-3 items-end">
+             <div className="flex-1 w-full">
+                <label className="text-xs text-gray-500 mb-1 block">Vendedor</label>
+                <select 
+                    value={selectedSellerId}
+                    onChange={(e) => setSelectedSellerId(e.target.value)}
+                    className="w-full border rounded-md px-3 py-2"
+                >
+                    {sellers.map(s => <option key={s.id} value={s.id}>{s.nome}</option>)}
+                </select>
+             </div>
+             <div className="flex-1 w-full">
+                <label className="text-xs text-gray-500 mb-1 block">Conquista</label>
+                <select 
+                    value={selectedAchievementId}
+                    onChange={(e) => setSelectedAchievementId(e.target.value)}
+                    className="w-full border rounded-md px-3 py-2"
+                >
+                    {achievements.map(a => <option key={a.id} value={a.id}>{a.nome} ({a.tipo})</option>)}
+                </select>
+             </div>
+             <button
+                onClick={assignAchievement}
+                disabled={loading}
+                className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-md font-semibold disabled:opacity-50"
+             >
+                Atribuir
+             </button>
+          </div>
+        </div>
+
+        {/* Lista de Solicitações Pendentes */}
+        <div>
+            <h4 className="text-sm font-semibold text-gray-700 mb-3">Solicitações Pendentes</h4>
+            {sellerAchievements.filter(sa => sa.status === 'pendente').length === 0 ? (
+                <div className="text-sm text-gray-500 italic">Nenhuma solicitação pendente.</div>
+            ) : (
+                <div className="space-y-2">
+                    {sellerAchievements.filter(sa => sa.status === 'pendente').map(sa => {
+                        const seller = sellers.find(s => s.id === sa.vendedor_id);
+                        const ach = achievements.find(a => a.id === sa.conquista_id);
+                        return (
+                            <div key={sa.id} className="flex items-center justify-between bg-yellow-50 border border-yellow-200 p-3 rounded-lg">
+                                <div>
+                                    <div className="font-semibold text-gray-800">{seller?.nome || 'Desconhecido'}</div>
+                                    <div className="text-sm text-gray-600">Solicitou: <span className="font-medium">{ach?.nome}</span></div>
+                                    <div className="text-xs text-gray-500">{new Date(sa.data_conquista).toLocaleString()}</div>
+                                </div>
+                                <button
+                                    onClick={() => approveAchievement(sa.id)}
+                                    disabled={loading}
+                                    className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded-md"
+                                >
+                                    Aprovar
+                                </button>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
         </div>
       </section>
     </div>
