@@ -86,13 +86,108 @@ export default function ArenaPage() {
     justification: "",
     evidenceUrl: ""
   });
-  const [celebration, setCelebration] = useState<{ type: "leader" | "overtake" | "sale" | "google"; seller: Seller } | null>(null);
-  const [celebrationQueue, setCelebrationQueue] = useState<{ type: "leader" | "overtake" | "sale" | "google"; seller: Seller }[]>([]);
+  const [celebration, setCelebration] = useState<{ type: string; seller: Seller; customMessage?: string } | null>(null);
+  const [celebrationQueue, setCelebrationQueue] = useState<{ type: string; seller: Seller; customMessage?: string }[]>([]);
+  const [eventConfigs, setEventConfigs] = useState<Record<string, { title: string; message: string; gif_url: string; audio_url?: string; duration: number }>>({});
   const lastRankingsRef = useRef<Record<string, number>>({});
+  const lastSaleTimeRef = useRef<Record<string, number>>({});
+  const lastIceBreakRef = useRef<Record<string, number>>({});
 
   const supabase = useMemo(() => createClient(), []);
 
-  const enqueueCelebration = (evt: { type: "leader" | "overtake" | "sale" | "google"; seller: Seller }) => {
+  // Configuração padrão dos GIFs e Mensagens
+  const DEFAULT_EVENT_CONFIG: Record<string, { title: string; message: string; gif_url: string; audio_url?: string; duration: number }> = {
+    sale: {
+      title: "NOVA VENDA!",
+      message: "Mais uma pra conta! 💸",
+      gif_url: "https://media.giphy.com/media/l0Ex6kAKAoFRsFh6M/giphy.gif",
+      audio_url: "https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3",
+      duration: 5000
+    },
+    google: {
+      title: "GOOGLE BÔNUS!",
+      message: "Dominou o Google! 🚀",
+      gif_url: "https://media.giphy.com/media/3oKIPm3BynUpUysTHW/giphy.gif",
+      audio_url: "https://cdn.freesound.org/previews/171/171671_2437358-lq.mp3",
+      duration: 5000
+    },
+    leader: {
+      title: "NOVO LÍDER!",
+      message: "Assumiu a ponta! 👑",
+      gif_url: "https://media.giphy.com/media/xT5LMHxhOfscxPfIfm/giphy.gif",
+      audio_url: "https://cdn.freesound.org/previews/270/270404_5123851-lq.mp3",
+      duration: 8000
+    },
+    big_sale: {
+      title: "BIG SALE!!!",
+      message: "Venda GIGANTE detectada! 💰💰💰",
+      gif_url: "https://media.giphy.com/media/vxTbZfV7T1h56/giphy.gif",
+      audio_url: "https://cdn.freesound.org/previews/320/320653_5260872-lq.mp3",
+      duration: 7000
+    },
+    level_up: {
+      title: "META BATIDA!",
+      message: "Superou 100% da meta! 🌟",
+      gif_url: "https://media.giphy.com/media/mi6DsSSNKDbUY/giphy.gif",
+      audio_url: "https://cdn.freesound.org/previews/320/320655_5260872-lq.mp3",
+      duration: 6000
+    },
+    combo: {
+      title: "COMBO BREAKER!",
+      message: "Vendas em sequência! 🔥",
+      gif_url: "https://media.giphy.com/media/CjmvTCZf2U3p09Cn0h/giphy.gif",
+      audio_url: "https://cdn.freesound.org/previews/270/270545_5123851-lq.mp3",
+      duration: 5000
+    },
+    global_goal: {
+      title: "META GLOBAL ATINGIDA!",
+      message: "PARABÉNS TIME!!! 🎉🎉🎉",
+      gif_url: "https://media.giphy.com/media/VuTqN2H7Vf9jK/giphy.gif",
+      audio_url: "https://cdn.freesound.org/previews/270/270402_5123851-lq.mp3",
+      duration: 10000
+    },
+    last_mile: {
+      title: "RETA FINAL!",
+      message: "Falta muito pouco! Vamos lá! 🚨",
+      gif_url: "https://media.giphy.com/media/l0HlOaQcLJ2hHpYcw/giphy.gif",
+      audio_url: "https://cdn.freesound.org/previews/171/171673_2437358-lq.mp3",
+      duration: 5000
+    },
+    early_bird: {
+      title: "EARLY BIRD!",
+      message: "Abriu a porteira do dia! 🌅",
+      gif_url: "https://media.giphy.com/media/12noFudALzfIynTgLv/giphy.gif",
+      audio_url: "https://cdn.freesound.org/previews/270/270396_5123851-lq.mp3",
+      duration: 5000
+    },
+    synergy: {
+      title: "SINERGIA!",
+      message: "Vendas simultâneas! Toca aqui! ✋",
+      gif_url: "https://media.giphy.com/media/xT5LMHxhOfscxPfIfu/giphy.gif",
+      audio_url: "https://cdn.freesound.org/previews/270/270409_5123851-lq.mp3",
+      duration: 5000
+    },
+    bounty: {
+      title: "NA MOSCA!",
+      message: "Valor exato! Que precisão! 🎯",
+      gif_url: "https://media.giphy.com/media/3o7qDEq2bMbcbPRQ2c/giphy.gif",
+      audio_url: "https://cdn.freesound.org/previews/320/320672_5260872-lq.mp3",
+      duration: 5000
+    },
+    ice_breaker: {
+      title: "QUEBROU O GELO!",
+      message: "De volta ao jogo! 🧊🔨",
+      gif_url: "https://media.giphy.com/media/3o7aCS5o3M7KxY3iQ8/giphy.gif",
+      audio_url: "https://cdn.freesound.org/previews/320/320654_5260872-lq.mp3",
+      duration: 5000
+    }
+  };
+
+  const getEventConfig = (type: string) => {
+      return eventConfigs[type] || DEFAULT_EVENT_CONFIG[type] || DEFAULT_EVENT_CONFIG['sale'];
+  };
+
+  const enqueueCelebration = (evt: { type: string; seller: Seller; customMessage?: string }) => {
     setCelebration((current) => {
       if (current) {
         setCelebrationQueue((q) => [...q, evt]);
@@ -191,6 +286,13 @@ export default function ArenaPage() {
       setActiveChallenge(data.activeChallenge || null);
       setAchievements(data.achievements || []);
       setSellerAchievements(data.sellerAchievements || []);
+      
+      const loadedConfigs: Record<string, any> = {};
+      (data.eventConfig || []).forEach((cfg: any) => {
+          loadedConfigs[cfg.id] = cfg;
+      });
+      setEventConfigs(loadedConfigs);
+
       const initialFeed = (data.salesFeed || []).map((sale: Sale) => ({
         id: sale.id,
         message: buildFeedMessage(sale),
@@ -276,12 +378,20 @@ export default function ArenaPage() {
     updateRanks(totals);
   }, [totals]);
 
-  // Effect to handle celebration timeouts
+    // Effect to handle celebration timeouts
   useEffect(() => {
     if (!celebration) return;
 
-    let duration = 3000; // Default 3s (sale/google)
-    if (celebration.type === 'leader') duration = 8000;
+    const config = getEventConfig(celebration.type);
+    const duration = config.duration;
+
+    // Play audio if available
+    let audio: HTMLAudioElement | null = null;
+    if (config.audio_url) {
+        audio = new Audio(config.audio_url);
+        audio.volume = 0.5;
+        audio.play().catch(e => console.error("Error playing audio:", e));
+    }
     
     const timer = setTimeout(() => {
       setCelebrationQueue((q) => {
@@ -293,9 +403,20 @@ export default function ArenaPage() {
         setCelebration(null);
         return [];
       });
+      
+      if (audio) {
+          audio.pause();
+          audio = null;
+      }
     }, duration);
 
-    return () => clearTimeout(timer);
+    return () => {
+        clearTimeout(timer);
+        if (audio) {
+            audio.pause();
+            audio = null;
+        }
+    };
   }, [celebration]);
 
   const playTone = (freq: number, duration: number, type: OscillatorType, gainValue: number) => {
@@ -409,16 +530,88 @@ export default function ArenaPage() {
             const newLeaderId = ranked[0]?.id;
             const oldLeaderId = Object.keys(prevRankRef.current).find(id => prevRankRef.current[id] === 1);
             const leaderChanged = oldLeaderId && newLeaderId && newLeaderId !== oldLeaderId;
+            
+            // --- DETECÇÃO DE EVENTOS ESPECIAIS ---
+            const now = Date.now();
+            const saleValue = Number(sale.valor || 0);
+            const sellerTotalBefore = (totals[seller.id] || 0);
+            const sellerTotalAfter = sellerTotalBefore + getDelta(sale);
+            const sellerMeta = seller.meta_valor || 1;
+            
+            // 1. Big Sale (> R$ 3.000)
+            if (saleValue >= 3000) {
+              enqueueCelebration({ type: "big_sale", seller });
+            }
+
+            // 2. Level Up (Cruzou a meta)
+            if (sellerTotalBefore < sellerMeta && sellerTotalAfter >= sellerMeta) {
+              enqueueCelebration({ type: "level_up", seller });
+            }
+
+            // 3. Combo (Venda em menos de 10 min da anterior do mesmo vendedor)
+            const lastSale = lastSaleTimeRef.current[seller.id];
+            if (lastSale && (now - lastSale) < 10 * 60 * 1000) {
+               enqueueCelebration({ type: "combo", seller, customMessage: "Vendas em sequência! 🔥" });
+            }
+            lastSaleTimeRef.current[seller.id] = now;
+
+            // 4. Meta Global
+            const newGlobalTotal = Object.values(nextTotalsSnapshot).reduce((a, b) => a + b, 0);
+            const globalMeta = Number(activeChallenge?.meta_global || 1);
+            const oldGlobalTotal = newGlobalTotal - getDelta(sale);
+            
+            if (oldGlobalTotal < globalMeta && newGlobalTotal >= globalMeta) {
+               // Enfileira com prioridade (colocando no inicio se possível, mas aqui vai pro fim da fila)
+               // Como é um evento de time, usamos o vendedor da venda final como "herói" ou criamos um dummy
+               enqueueCelebration({ type: "global_goal", seller });
+            } 
+            // 5. Reta Final (Cruzou 90%)
+            else if (oldGlobalTotal < (globalMeta * 0.9) && newGlobalTotal >= (globalMeta * 0.9)) {
+               enqueueCelebration({ type: "last_mile", seller });
+            }
+
+            // 6. Early Bird (Primeira venda do dia)
+            // Lógica simplificada: se for a primeira venda carregada no feed local... 
+            // Melhor: se salesFeed estava vazio ou a última venda é de outro dia.
+            // Para simplificar: vamos assumir que se o feed está vazio é o começo.
+            // Mas em produção real, ideal comparar datas.
+            // Vamos pular lógica complexa de data aqui para não bugar, focar nos eventos certos.
+
+            // 7. Sinergia (Venda concomitante - menos de 30s de outra venda de OUTRO vendedor)
+            const otherSellersLastSales = Object.entries(lastSaleTimeRef.current)
+                .filter(([id]) => id !== seller.id)
+                .map(([, time]) => time);
+            const recentSynergy = otherSellersLastSales.some(time => (now - time) < 30 * 1000);
+            if (recentSynergy) {
+                enqueueCelebration({ type: "synergy", seller });
+            }
+
+            // 8. Bounty Hunter (Valor Exato - ex: termina em 00 ou 500)
+            if (saleValue % 500 === 0 && saleValue > 0) {
+                enqueueCelebration({ type: "bounty", seller });
+            }
+
+            // 9. Quebra Gelo (Mais de 4h sem vender)
+            // Se tinha lastSale e foi há muito tempo
+            if (lastSale && (now - lastSale) > 4 * 60 * 60 * 1000) {
+                enqueueCelebration({ type: "ice_breaker", seller });
+            }
+
+            // Eventos Originais (Google, Leader, Sale)
             if (sale.is_google_bonus) {
               enqueueCelebration({ type: "google", seller });
               if (leaderChanged && newLeaderId === seller.id) {
                 enqueueCelebration({ type: "leader", seller });
               }
             } else {
+              // Se não foi nenhum evento especial "grande", mostramos a venda normal ou líder
               if (leaderChanged && newLeaderId === seller.id) {
                 enqueueCelebration({ type: "leader", seller });
               } else {
-                enqueueCelebration({ type: "sale", seller });
+                // Só mostra venda comum se NÃO for Big Sale (pra não ficar redundante)
+                if (saleValue < 3000) {
+                    enqueueCelebration({ type: "sale", seller });
+                }
               }
             }
           } else {
@@ -915,20 +1108,14 @@ export default function ArenaPage() {
                 transition={{ delay: 0.2 }}
                 className="text-4xl sm:text-6xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent tracking-wider mb-4 text-center"
               >
-                {celebration.type === 'google' ? 'REI DO GOOGLE!' : (celebration.type === 'sale' ? 'NOVO PEDIDO DETECTADO!' : 'NOVO LÍDER!')}
+                {celebration.customMessage || getEventConfig(celebration.type).title || "NOVA CONQUISTA!"}
               </motion.div>
               
               <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-full border-4 border-cyan-400/30 shadow-[0_0_50px_rgba(6,182,212,0.3)] overflow-hidden bg-slate-900/80 mb-6 flex items-center justify-center backdrop-blur-sm">
                  <img 
-                   src={
-                     celebration.type === 'google' 
-                     ? "https://i.pinimg.com/originals/9d/77/22/9d772245853f9b0e013181845ebb2c1a.gif" 
-                       : (celebration.type === 'sale' 
-                         ? "https://i.pinimg.com/originals/3d/27/11/3d271128514d50a47c22e5f1beecb4fc.gif" 
-                         : "https://i.pinimg.com/originals/a4/d3/ce/a4d3ce7ff09e24bbc4cf265686e9becc.gif")
-                   }
+                   src={getEventConfig(celebration.type).gif_url}
                    alt="Celebration" 
-                   className={`w-full h-full ${(celebration.type === 'sale' || celebration.type === 'google') ? 'object-contain' : 'object-cover'}`}
+                   className="w-full h-full object-cover"
                    onError={(e) => {
                      // Fallback se a imagem falhar
                      e.currentTarget.style.display = 'none';
@@ -961,7 +1148,7 @@ export default function ArenaPage() {
                 transition={{ delay: 0.8 }}
                 className="mt-4 text-cyan-300 text-lg sm:text-xl font-medium"
               >
-                {celebration.type === 'google' ? 'Dominou o Google! 🚀' : (celebration.type === 'sale' ? 'Parabéns pela venda! 🎉' : 'Assumiu a 1ª Posição! 👑')}
+                {celebration.customMessage ? "" : (getEventConfig(celebration.type).message || "Parabéns!")}
               </motion.div>
 
               <button 

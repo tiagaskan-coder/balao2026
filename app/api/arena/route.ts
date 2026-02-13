@@ -94,6 +94,14 @@ export async function GET(request: Request) {
         console.error("Erro ao buscar conquistas de vendedores:", sellerAchievementsError);
     }
 
+    const { data: eventConfig, error: eventConfigError } = await supabaseAdmin
+        .from("arena_events")
+        .select("*");
+    
+    if (eventConfigError && eventConfigError.code !== '42P01') {
+         console.error("Erro ao buscar configurações de eventos:", eventConfigError);
+    }
+
     const totals = calculateTotals((allSales || []) as Sale[]);
     const activeChallenge = (challenges && challenges[0]) || null;
 
@@ -104,7 +112,8 @@ export async function GET(request: Request) {
       salesFeed: (salesFeed || []) as Sale[],
       totals,
       achievements: (achievements || []),
-      sellerAchievements: (sellerAchievements || [])
+      sellerAchievements: (sellerAchievements || []),
+      eventConfig: (eventConfig || [])
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Erro inesperado";
@@ -326,6 +335,37 @@ export async function POST(req: Request) {
         .eq("id", id)
         .select()
         .single();
+      if (error) throw error;
+      return NextResponse.json(data);
+    }
+
+    if (action === "update_event_config") {
+      const { id, updates } = body as {
+          id: string;
+          updates: {
+              title?: string;
+              message?: string;
+              gif_url?: string;
+              audio_url?: string;
+              duration?: number;
+              active?: boolean;
+          }
+      };
+      
+      const { data, error } = await supabaseAdmin
+        .from("arena_events")
+        .update({
+            title: updates.title,
+            message: updates.message,
+            gif_url: updates.gif_url,
+            audio_url: updates.audio_url,
+            duration: updates.duration,
+            active: updates.active
+        })
+        .eq("id", id)
+        .select()
+        .single();
+        
       if (error) throw error;
       return NextResponse.json(data);
     }

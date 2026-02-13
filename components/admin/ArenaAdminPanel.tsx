@@ -49,7 +49,17 @@ type SellerAchievement = {
   evidencia_url?: string;
 };
 
-export default function ArenaAdminPanel() {
+type EventConfig = {
+    id: string;
+    title: string;
+    message: string;
+    gif_url: string;
+    audio_url?: string;
+    duration: number;
+    active: boolean;
+  };
+
+  export default function ArenaAdminPanel() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [sellers, setSellers] = useState<Seller[]>([]);
@@ -57,6 +67,10 @@ export default function ArenaAdminPanel() {
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [sellerAchievements, setSellerAchievements] = useState<SellerAchievement[]>([]);
+  const [eventConfigs, setEventConfigs] = useState<EventConfig[]>([]);
+
+  const [editingEventId, setEditingEventId] = useState<string | null>(null);
+  const [editingEvent, setEditingEvent] = useState<Partial<EventConfig>>({});
   
   const [selectedSellerId, setSelectedSellerId] = useState("");
   const [selectedAchievementId, setSelectedAchievementId] = useState("");
@@ -131,6 +145,7 @@ export default function ArenaAdminPanel() {
       setChallenges(data.challenges || []);
       setAchievements(data.achievements || []);
       setSellerAchievements(data.sellerAchievements || []);
+      setEventConfigs(data.eventConfig || []);
       if (!selectedSellerId && data.sellers?.length) {
         setSelectedSellerId(data.sellers[0].id);
       }
@@ -205,6 +220,36 @@ export default function ArenaAdminPanel() {
       } finally {
           setLoading(false);
       }
+  };
+
+  const saveEventConfig = async () => {
+    if (!editingEventId) return;
+    setLoading(true);
+    try {
+      setErrorMessage(null);
+      const res = await fetch("/api/arena", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update_event_config",
+          id: editingEventId,
+          updates: editingEvent
+        })
+      });
+      if (!res.ok) {
+        setErrorMessage(await parseError(res));
+        return;
+      }
+      setEditingEventId(null);
+      await fetchData();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const startEditEvent = (evt: EventConfig) => {
+    setEditingEventId(evt.id);
+    setEditingEvent({ ...evt });
   };
 
   const activeChallenge = useMemo(() => challenges[0] || null, [challenges]);
@@ -552,6 +597,123 @@ export default function ArenaAdminPanel() {
           </span>
         </div>
       </div>
+
+      <section className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+        <div className="flex items-center gap-2 text-gray-800 font-bold">
+          <Zap className="w-5 h-5 text-[#E60012]" />
+          Configuração de Celebrações (GIFs)
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead className="text-left text-gray-500">
+              <tr>
+                <th className="py-2">Evento</th>
+                <th className="py-2">Título / Mensagem</th>
+                <th className="py-2">GIF URL</th>
+                <th className="py-2">Audio URL</th>
+                <th className="py-2">Duração (ms)</th>
+                <th className="py-2 text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {eventConfigs.map((evt) => (
+                <tr key={evt.id} className="border-t">
+                  <td className="py-3 font-medium text-gray-700">
+                    {evt.id}
+                  </td>
+                  <td className="py-3">
+                    {editingEventId === evt.id ? (
+                      <div className="flex flex-col gap-2">
+                        <input
+                          value={editingEvent.title}
+                          onChange={(e) => setEditingEvent((prev) => ({ ...prev, title: e.target.value }))}
+                          className="border rounded px-2 py-1 w-full"
+                          placeholder="Título"
+                        />
+                        <input
+                          value={editingEvent.message}
+                          onChange={(e) => setEditingEvent((prev) => ({ ...prev, message: e.target.value }))}
+                          className="border rounded px-2 py-1 w-full"
+                          placeholder="Mensagem"
+                        />
+                      </div>
+                    ) : (
+                      <div>
+                        <div className="font-semibold text-gray-900">{evt.title}</div>
+                        <div className="text-xs text-gray-500">{evt.message}</div>
+                      </div>
+                    )}
+                  </td>
+                  <td className="py-3">
+                    {editingEventId === evt.id ? (
+                      <input
+                        value={editingEvent.gif_url}
+                        onChange={(e) => setEditingEvent((prev) => ({ ...prev, gif_url: e.target.value }))}
+                        className="border rounded px-2 py-1 w-full"
+                        placeholder="https://..."
+                      />
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <img src={evt.gif_url} alt="GIF" className="w-10 h-10 object-cover rounded bg-gray-100" />
+                        <span className="text-xs text-gray-400 truncate max-w-[150px]">{evt.gif_url}</span>
+                      </div>
+                    )}
+                  </td>
+                  <td className="py-3">
+                    {editingEventId === evt.id ? (
+                      <input
+                        value={editingEvent.audio_url || ""}
+                        onChange={(e) => setEditingEvent((prev) => ({ ...prev, audio_url: e.target.value }))}
+                        className="border rounded px-2 py-1 w-full"
+                        placeholder="https://..."
+                      />
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-400 truncate max-w-[150px]">{evt.audio_url || "Sem áudio"}</span>
+                      </div>
+                    )}
+                  </td>
+                  <td className="py-3">
+                    {editingEventId === evt.id ? (
+                       <input
+                        type="number"
+                        value={editingEvent.duration}
+                        onChange={(e) => setEditingEvent((prev) => ({ ...prev, duration: Number(e.target.value) }))}
+                        className="border rounded px-2 py-1 w-20"
+                      />
+                    ) : (
+                      <span className="text-gray-600">{evt.duration}ms</span>
+                    )}
+                  </td>
+                  <td className="py-3 text-right">
+                    {editingEventId === evt.id ? (
+                      <div className="flex justify-end gap-2">
+                        <button onClick={saveEventConfig} className="p-2 text-green-600 hover:bg-green-50 rounded">
+                          <Save size={16} />
+                        </button>
+                        <button onClick={() => setEditingEventId(null)} className="p-2 text-gray-500 hover:bg-gray-50 rounded">
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ) : (
+                      <button onClick={() => startEditEvent(evt)} className="p-2 text-blue-600 hover:bg-blue-50 rounded">
+                        <Edit size={16} />
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+              {eventConfigs.length === 0 && (
+                 <tr>
+                    <td colSpan={5} className="py-6 text-center text-gray-500">
+                      Nenhuma configuração encontrada.
+                    </td>
+                 </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
       <section className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
         <div className="flex items-center gap-2 text-gray-800 font-bold">
