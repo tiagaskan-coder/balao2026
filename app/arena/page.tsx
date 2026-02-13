@@ -189,7 +189,7 @@ export default function ArenaPage() {
 
   const addEventsToQueue = (events: { type: string; seller: Seller; customMessage?: string }[]) => {
     if (events.length === 0) return;
-    setCelebrationQueue((prev) => [...prev, ...events]);
+    setCelebrationQueue((prev: { type: string; seller: Seller; customMessage?: string }[]) => [...prev, ...events]);
   };
 
   const handleSubmitRequest = async () => {
@@ -321,7 +321,7 @@ export default function ArenaPage() {
   };
 
   const buildFeedMessage = (sale: Sale) => {
-    const seller = sellersRef.current.find((s) => s.id === sale.vendedor_id);
+    const seller = sellersRef.current.find((s: Seller) => s.id === sale.vendedor_id);
     const base = formatCurrency(Number(sale.valor || 0));
     const total = formatCurrency(getDelta(sale));
     if (sale.is_google_bonus) {
@@ -331,10 +331,10 @@ export default function ArenaPage() {
   };
 
   const triggerTurbo = (ids: string[]) => {
-    setTurboIds((prev) => Array.from(new Set([...prev, ...ids])));
+    setTurboIds((prev: string[]) => Array.from(new Set([...prev, ...ids])));
     ids.forEach((id) => {
       setTimeout(() => {
-        setTurboIds((prev) => prev.filter((entry) => entry !== id));
+        setTurboIds((prev: string[]) => prev.filter((entry: string) => entry !== id));
       }, 1200);
     });
   };
@@ -376,11 +376,9 @@ export default function ArenaPage() {
   // Effect to consume queue
   useEffect(() => {
     if (!celebration && celebrationQueue.length > 0) {
-        setCelebrationQueue((prev) => {
-            const [next, ...rest] = prev;
-            setCelebration(next);
-            return rest;
-        });
+        const next = celebrationQueue[0];
+        setCelebration(next);
+        setCelebrationQueue((prev: { type: string; seller: Seller; customMessage?: string }[]) => prev.slice(1));
     }
   }, [celebration, celebrationQueue]);
 
@@ -503,7 +501,7 @@ export default function ArenaPage() {
     const refreshInterval = window.setInterval(() => refreshData(), 20000);
     const channel = supabase
       .channel("arena_vendas")
-      .on("postgres_changes", { event: "*", schema: "public", table: "vendas" }, (payload) => {
+      .on("postgres_changes", { event: "*", schema: "public", table: "vendas" }, (payload: any) => {
         console.log("Realtime Event Received:", payload); // DEBUG LOG
         if (payload.eventType === "INSERT") {
           const sale = payload.new as Sale;
@@ -511,7 +509,7 @@ export default function ArenaPage() {
           
           let nextTotalsSnapshot: Record<string, number> = {};
           
-          setTotals((prev) => {
+          setTotals((prev: Record<string, number>) => {
             const next = { ...prev };
             next[sale.vendedor_id] = (next[sale.vendedor_id] || 0) + getDelta(sale);
             nextTotalsSnapshot = next;
@@ -519,10 +517,10 @@ export default function ArenaPage() {
           });
           
           const message = buildFeedMessage(sale);
-          setSalesFeed((prev) => [{ id: sale.id, message, isGoogle: sale.is_google_bonus, createdAt: sale.criado_em }, ...prev].slice(0, 5));
+          setSalesFeed((prev: FeedItem[]) => [{ id: sale.id, message, isGoogle: sale.is_google_bonus, createdAt: sale.criado_em }, ...prev].slice(0, 5));
           
           // Trigger Celebration Logic
-          const seller = sellersRef.current.find(s => String(s.id) === String(sale.vendedor_id));
+          const seller = sellersRef.current.find((s: Seller) => String(s.id) === String(sale.vendedor_id));
           
           if (seller) {
             console.log("[ARENA_DEBUG] Celebration Triggered for:", seller.nome);
@@ -590,8 +588,8 @@ export default function ArenaPage() {
             // 7. Sinergia
             const otherSellersLastSales = Object.entries(lastSaleTimeRef.current)
                 .filter(([id]) => id !== seller.id)
-                .map(([, time]) => time);
-            const recentSynergy = otherSellersLastSales.some(time => (now - time) < 30 * 1000);
+                .map(([, time]) => time as number);
+            const recentSynergy = otherSellersLastSales.some((time) => (now - time) < 30 * 1000);
             if (recentSynergy) {
                 console.log("[ARENA_DEBUG] Event Detected: SYNERGY");
                 eventsToTrigger.push({ type: "synergy", seller });
@@ -678,7 +676,7 @@ export default function ArenaPage() {
         if (payload.eventType === "UPDATE") {
           const oldSale = payload.old as Sale;
           const newSale = payload.new as Sale;
-          setTotals((prev) => {
+          setTotals((prev: Record<string, number>) => {
             const next = { ...prev };
             next[oldSale.vendedor_id] = (next[oldSale.vendedor_id] || 0) - getDelta(oldSale);
             next[newSale.vendedor_id] = (next[newSale.vendedor_id] || 0) + getDelta(newSale);
@@ -687,7 +685,7 @@ export default function ArenaPage() {
         }
         if (payload.eventType === "DELETE") {
           const oldSale = payload.old as Sale;
-          setTotals((prev) => {
+          setTotals((prev: Record<string, number>) => {
             const next = { ...prev };
             next[oldSale.vendedor_id] = (next[oldSale.vendedor_id] || 0) - getDelta(oldSale);
             return next;
@@ -714,7 +712,7 @@ export default function ArenaPage() {
 
   const topThree = rankedSellers.slice(0, 3);
   const globalTotal = useMemo(
-    () => Object.values(totals).reduce((acc, value) => acc + Number(value || 0), 0),
+    () => Object.values(totals).reduce((acc: number, value) => acc + Number(value || 0), 0),
     [totals]
   );
   const globalProgress = activeChallenge?.meta_global
@@ -751,7 +749,7 @@ export default function ArenaPage() {
   useEffect(() => {
     const toggleDebug = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === 'd') {
-        setShowDebug(prev => !prev);
+        setShowDebug((prev: boolean) => !prev);
       }
     };
     window.addEventListener('keydown', toggleDebug);
