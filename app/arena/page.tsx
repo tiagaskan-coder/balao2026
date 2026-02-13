@@ -1193,18 +1193,21 @@ export default function ArenaPage() {
                 {celebration.customMessage || getEventConfig(celebration.type).title || "NOVA CONQUISTA!"}
               </motion.div>
               
-              <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-full border-4 border-cyan-400/30 shadow-[0_0_50px_rgba(6,182,212,0.3)] overflow-hidden bg-slate-900/80 mb-6 flex items-center justify-center backdrop-blur-sm">
-                 <img 
-                   src={getEventConfig(celebration.type).gif_url}
-                   alt="Celebration" 
-                   className="w-full h-full object-cover"
-                   onError={(e) => {
-                     // Fallback se a imagem falhar
-                     e.currentTarget.style.display = 'none';
-                   }}
-                 />
-                 {/* Overlay do Avatar do Vendedor */}
-                 <div className="absolute bottom-4 right-4 w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-cyan-400 shadow-lg overflow-hidden bg-slate-800">
+              <div className="relative w-64 h-64 sm:w-80 sm:h-80 mb-6 flex items-center justify-center">
+                 {/* Círculo Principal com GIF */}
+                 <div className="absolute inset-0 rounded-full border-4 border-cyan-400/30 shadow-[0_0_50px_rgba(6,182,212,0.3)] overflow-hidden bg-slate-900/80 backdrop-blur-sm">
+                    <img 
+                      src={getEventConfig(celebration.type).gif_url}
+                      alt="Celebration" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                 </div>
+                 
+                 {/* Overlay do Avatar do Vendedor - Agora fora do overflow hidden do pai */}
+                 <div className="absolute -bottom-2 -right-2 w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.5)] overflow-hidden bg-slate-800 z-10">
                     {celebration.seller.avatar_url ? (
                       <img src={celebration.seller.avatar_url} alt={celebration.seller.nome} className="w-full h-full object-cover" />
                     ) : (
