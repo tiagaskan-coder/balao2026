@@ -97,94 +97,17 @@ export default function ArenaPage() {
 
   // Configuração padrão dos GIFs e Mensagens
   const DEFAULT_EVENT_CONFIG: Record<string, { title: string; message: string; gif_url: string; audio_url?: string; duration: number }> = {
-    sale: {
-      title: "NOVA VENDA!",
-      message: "Mais uma pra conta! 💸",
-      gif_url: "https://media.giphy.com/media/l0Ex6kAKAoFRsFh6M/giphy.gif",
-      audio_url: "https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3",
-      duration: 5000
-    },
-    google: {
-      title: "GOOGLE BÔNUS!",
-      message: "Dominou o Google! 🚀",
-      gif_url: "https://media.giphy.com/media/3oKIPm3BynUpUysTHW/giphy.gif",
-      audio_url: "https://cdn.freesound.org/previews/171/171671_2437358-lq.mp3",
-      duration: 5000
-    },
     leader: {
       title: "NOVO LÍDER!",
       message: "Assumiu a ponta! 👑",
       gif_url: "https://media.giphy.com/media/xT5LMHxhOfscxPfIfm/giphy.gif",
       audio_url: "https://cdn.freesound.org/previews/270/270404_5123851-lq.mp3",
       duration: 8000
-    },
-    big_sale: {
-      title: "BIG SALE!!!",
-      message: "Venda GIGANTE detectada! 💰💰💰",
-      gif_url: "https://media.giphy.com/media/vxTbZfV7T1h56/giphy.gif",
-      audio_url: "https://cdn.freesound.org/previews/320/320653_5260872-lq.mp3",
-      duration: 7000
-    },
-    level_up: {
-      title: "META BATIDA!",
-      message: "Superou 100% da meta! 🌟",
-      gif_url: "https://media.giphy.com/media/mi6DsSSNKDbUY/giphy.gif",
-      audio_url: "https://cdn.freesound.org/previews/320/320655_5260872-lq.mp3",
-      duration: 6000
-    },
-    combo: {
-      title: "COMBO BREAKER!",
-      message: "Vendas em sequência! 🔥",
-      gif_url: "https://media.giphy.com/media/CjmvTCZf2U3p09Cn0h/giphy.gif",
-      audio_url: "https://cdn.freesound.org/previews/270/270545_5123851-lq.mp3",
-      duration: 5000
-    },
-    global_goal: {
-      title: "META GLOBAL ATINGIDA!",
-      message: "PARABÉNS TIME!!! 🎉🎉🎉",
-      gif_url: "https://media.giphy.com/media/VuTqN2H7Vf9jK/giphy.gif",
-      audio_url: "https://cdn.freesound.org/previews/270/270402_5123851-lq.mp3",
-      duration: 10000
-    },
-    last_mile: {
-      title: "RETA FINAL!",
-      message: "Falta muito pouco! Vamos lá! 🚨",
-      gif_url: "https://media.giphy.com/media/l0HlOaQcLJ2hHpYcw/giphy.gif",
-      audio_url: "https://cdn.freesound.org/previews/171/171673_2437358-lq.mp3",
-      duration: 5000
-    },
-    early_bird: {
-      title: "EARLY BIRD!",
-      message: "Abriu a porteira do dia! 🌅",
-      gif_url: "https://media.giphy.com/media/12noFudALzfIynTgLv/giphy.gif",
-      audio_url: "https://cdn.freesound.org/previews/270/270396_5123851-lq.mp3",
-      duration: 5000
-    },
-    synergy: {
-      title: "SINERGIA!",
-      message: "Vendas simultâneas! Toca aqui! ✋",
-      gif_url: "https://media.giphy.com/media/xT5LMHxhOfscxPfIfu/giphy.gif",
-      audio_url: "https://cdn.freesound.org/previews/270/270409_5123851-lq.mp3",
-      duration: 5000
-    },
-    bounty: {
-      title: "NA MOSCA!",
-      message: "Valor exato! Que precisão! 🎯",
-      gif_url: "https://media.giphy.com/media/3o7qDEq2bMbcbPRQ2c/giphy.gif",
-      audio_url: "https://cdn.freesound.org/previews/320/320672_5260872-lq.mp3",
-      duration: 5000
-    },
-    ice_breaker: {
-      title: "QUEBROU O GELO!",
-      message: "De volta ao jogo! 🧊🔨",
-      gif_url: "https://media.giphy.com/media/3o7aCS5o3M7KxY3iQ8/giphy.gif",
-      audio_url: "https://cdn.freesound.org/previews/320/320654_5260872-lq.mp3",
-      duration: 5000
     }
   };
 
   const getEventConfig = (type: string) => {
-      return eventConfigs[type] || DEFAULT_EVENT_CONFIG[type] || DEFAULT_EVENT_CONFIG['sale'];
+      return eventConfigs[type] || DEFAULT_EVENT_CONFIG[type] || DEFAULT_EVENT_CONFIG['leader'];
   };
 
   const enqueueCelebration = (evt: { type: string; seller: Seller; customMessage?: string }) => {
@@ -560,79 +483,9 @@ export default function ArenaPage() {
             // We collect all valid events and then enqueue them
             const eventsToTrigger: Array<{ type: string; seller: Seller; customMessage?: string }> = [];
 
-            // 1. Big Sale (> R$ 3.000)
-            if (saleValue >= 3000) {
-              console.log("[ARENA_DEBUG] Event Detected: BIG SALE");
-              eventsToTrigger.push({ type: "big_sale", seller });
-            }
-
-            // 2. Level Up (Cruzou a meta)
-            if (sellerTotalBefore < sellerMeta && sellerTotalAfter >= sellerMeta) {
-              console.log("[ARENA_DEBUG] Event Detected: LEVEL UP");
-              eventsToTrigger.push({ type: "level_up", seller });
-            }
-
-            // 3. Combo (Venda em menos de 10 min da anterior do mesmo vendedor)
-            const lastSale = lastSaleTimeRef.current[seller.id];
-            if (lastSale && (now - lastSale) < 10 * 60 * 1000) {
-               console.log("[ARENA_DEBUG] Event Detected: COMBO");
-               eventsToTrigger.push({ type: "combo", seller, customMessage: "Vendas em sequência! 🔥" });
-            }
-            lastSaleTimeRef.current[seller.id] = now;
-
-            // 4. Meta Global
-            if (oldGlobalTotal < globalMeta && newGlobalTotal >= globalMeta) {
-               console.log("[ARENA_DEBUG] Event Detected: GLOBAL GOAL");
-               eventsToTrigger.push({ type: "global_goal", seller });
-            } 
-            // 5. Reta Final (Cruzou 90%)
-            else if (oldGlobalTotal < (globalMeta * 0.9) && newGlobalTotal >= (globalMeta * 0.9)) {
-               console.log("[ARENA_DEBUG] Event Detected: LAST MILE");
-               eventsToTrigger.push({ type: "last_mile", seller });
-            }
-
-            // 7. Sinergia
-            const otherSellersLastSales = Object.entries(lastSaleTimeRef.current)
-                .filter(([id]) => id !== seller.id)
-                .map(([, time]) => time);
-            const recentSynergy = otherSellersLastSales.some(time => (now - time) < 30 * 1000);
-            if (recentSynergy) {
-                console.log("[ARENA_DEBUG] Event Detected: SYNERGY");
-                eventsToTrigger.push({ type: "synergy", seller });
-            }
-
-            // 8. Bounty Hunter
-            if (saleValue % 500 === 0 && saleValue > 0) {
-                console.log("[ARENA_DEBUG] Event Detected: BOUNTY");
-                eventsToTrigger.push({ type: "bounty", seller });
-            }
-
-            // 9. Quebra Gelo
-            if (lastSale && (now - lastSale) > 4 * 60 * 60 * 1000) {
-                console.log("[ARENA_DEBUG] Event Detected: ICE BREAKER");
-                eventsToTrigger.push({ type: "ice_breaker", seller });
-            }
-
-            // 10. Google Bonus & Leader
-            if (sale.is_google_bonus) {
-              console.log("[ARENA_DEBUG] Event Detected: GOOGLE BONUS");
-              eventsToTrigger.push({ type: "google", seller });
-            }
-
             if (leaderChanged && newLeaderId === seller.id) {
                console.log("[ARENA_DEBUG] Event Detected: LEADER");
                eventsToTrigger.push({ type: "leader", seller });
-            }
-
-            // 11. Standard Sale (ONLY if no other "big" event happened)
-            // Big events: big_sale, level_up, global_goal, leader, google
-            const hasMajorEvent = eventsToTrigger.some(e => 
-                ["big_sale", "level_up", "global_goal", "leader", "google"].includes(e.type)
-            );
-
-            if (!hasMajorEvent && saleValue < 3000) {
-                 console.log("[ARENA_DEBUG] Event Detected: SALE (Standard)");
-                 eventsToTrigger.push({ type: "sale", seller });
             }
 
             // Enqueue all detected events
