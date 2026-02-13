@@ -512,72 +512,83 @@ export default function ArenaPage() {
         if (payload.eventType === "INSERT") {
           const sale = payload.new as Sale;
           console.log("New Sale Detected:", sale); // DEBUG LOG
+          
           let nextTotalsSnapshot: Record<string, number> = {};
+          
           setTotals((prev) => {
             const next = { ...prev };
             next[sale.vendedor_id] = (next[sale.vendedor_id] || 0) + getDelta(sale);
             nextTotalsSnapshot = next;
             return next;
           });
+          
           const message = buildFeedMessage(sale);
           setSalesFeed((prev) => [{ id: sale.id, message, isGoogle: sale.is_google_bonus, createdAt: sale.criado_em }, ...prev].slice(0, 5));
           
-          // Trigger Celebration
+          // Trigger Celebration Logic
           const seller = sellersRef.current.find(s => String(s.id) === String(sale.vendedor_id));
           
           if (seller) {
             console.log("[ARENA_DEBUG] Celebration Triggered for:", seller.nome);
+            
+            // Recalculate ranking with new totals
             const ranked = [...sellersRef.current].sort(
               (a, b) => (nextTotalsSnapshot[b.id] || 0) - (nextTotalsSnapshot[a.id] || 0)
             );
+            
             const newLeaderId = ranked[0]?.id;
             const oldLeaderId = Object.keys(prevRankRef.current).find(id => prevRankRef.current[id] === 1);
             const leaderChanged = oldLeaderId && newLeaderId && newLeaderId !== oldLeaderId;
             
             console.log(`[ARENA_DEBUG] Leader Changed: ${leaderChanged} (Old: ${oldLeaderId}, New: ${newLeaderId})`);
 
-            // --- DETECÇÃO DE EVENTOS ESPECIAIS ---
+            // --- ANALYSIS VARIABLES ---
             const now = Date.now();
             const saleValue = Number(sale.valor || 0);
             const sellerTotalBefore = (totals[seller.id] || 0);
             const sellerTotalAfter = sellerTotalBefore + getDelta(sale);
             const sellerMeta = seller.meta_valor || 1;
             
+            // Global totals
+            const newGlobalTotal = Object.values(nextTotalsSnapshot).reduce((a, b) => a + b, 0);
+            const globalMeta = Number(activeChallenge?.meta_global || 1);
+            const oldGlobalTotal = newGlobalTotal - getDelta(sale);
+
             console.log(`[ARENA_DEBUG] Sale Analysis: Value=${saleValue}, TotalBefore=${sellerTotalBefore}, TotalAfter=${sellerTotalAfter}, Meta=${sellerMeta}`);
+
+            // --- EVENT DETECTION QUEUE ---
+            // We collect all valid events and then enqueue them
+            const eventsToTrigger: Array<{ type: string; seller: Seller; customMessage?: string }> = [];
 
             // 1. Big Sale (> R$ 3.000)
             if (saleValue >= 3000) {
               console.log("[ARENA_DEBUG] Event Detected: BIG SALE");
-              enqueueCelebration({ type: "big_sale", seller });
+              eventsToTrigger.push({ type: "big_sale", seller });
             }
 
             // 2. Level Up (Cruzou a meta)
             if (sellerTotalBefore < sellerMeta && sellerTotalAfter >= sellerMeta) {
               console.log("[ARENA_DEBUG] Event Detected: LEVEL UP");
-              enqueueCelebration({ type: "level_up", seller });
+              eventsToTrigger.push({ type: "level_up", seller });
             }
 
             // 3. Combo (Venda em menos de 10 min da anterior do mesmo vendedor)
             const lastSale = lastSaleTimeRef.current[seller.id];
             if (lastSale && (now - lastSale) < 10 * 60 * 1000) {
                console.log("[ARENA_DEBUG] Event Detected: COMBO");
-               enqueueCelebration({ type: "combo", seller, customMessage: "Vendas em sequência! 🔥" });
+               eventsToTrigger.push({ type: "combo", seller, customMessage: "Vendas em sequência! 🔥" });
             }
             lastSaleTimeRef.current[seller.id] = now;
 
             // 4. Meta Global
-            const newGlobalTotal = Object.values(nextTotalsSnapshot).reduce((a, b) => a + b, 0);
-            const globalMeta = Number(activeChallenge?.meta_global || 1);
-            const oldGlobalTotal = newGlobalTotal - getDelta(sale);
-            
             if (oldGlobalTotal < globalMeta && newGlobalTotal >= globalMeta) {
                console.log("[ARENA_DEBUG] Event Detected: GLOBAL GOAL");
-               enqueueCelebration({ type: "global_goal", seller });
+               eventsToTrigger.push({ type: "global_goal", seller });
             } 
             // 5. Reta Final (Cruzou 90%)
             else if (oldGlobalTotal < (globalMeta * 0.9) && newGlobalTotal >= (globalMeta * 0.9)) {
                console.log("[ARENA_DEBUG] Event Detected: LAST MILE");
-               enqueueCelebration({ type: "last_mile", seller });
+               eventsToTrigger.push({ type: "last_mile", seller });
             }
 
             // 7. Sinergia
@@ -587,44 +598,46 @@ export default function ArenaPage() {
             const recentSynergy = otherSellersLastSales.some(time => (now - time) < 30 * 1000);
             if (recentSynergy) {
                 console.log("[ARENA_DEBUG] Event Detected: SYNERGY");
-                enqueueCelebration({ type: "synergy", seller });
+                eventsToTrigger.push({ type: "synergy", seller });
             }
 
             // 8. Bounty Hunter
             if (saleValue % 500 === 0 && saleValue > 0) {
                 console.log("[ARENA_DEBUG] Event Detected: BOUNTY");
-                enqueueCelebration({ type: "bounty", seller });
+                eventsToTrigger.push({ type: "bounty", seller });
             }
 
             // 9. Quebra Gelo
             if (lastSale && (now - lastSale) > 4 * 60 * 60 * 1000) {
                 console.log("[ARENA_DEBUG] Event Detected: ICE BREAKER");
-                enqueueCelebration({ type: "ice_breaker", seller });
+                eventsToTrigger.push({ type: "ice_breaker", seller });
             }
 
-            // Eventos Originais (Google, Leader, Sale)
+            // 10. Google Bonus & Leader
             if (sale.is_google_bonus) {
               console.log("[ARENA_DEBUG] Event Detected: GOOGLE BONUS");
-              enqueueCelebration({ type: "google", seller });
-              if (leaderChanged && newLeaderId === seller.id) {
-                console.log("[ARENA_DEBUG] Event Detected: LEADER (via Google)");
-                enqueueCelebration({ type: "leader", seller });
-              }
-            } else {
-              // Se não foi nenhum evento especial "grande", mostramos a venda normal ou líder
-              if (leaderChanged && newLeaderId === seller.id) {
-                console.log("[ARENA_DEBUG] Event Detected: LEADER");
-                enqueueCelebration({ type: "leader", seller });
-              } else {
-                // Só mostra venda comum se NÃO for Big Sale (pra não ficar redundante)
-                if (saleValue < 3000) {
-                    console.log("[ARENA_DEBUG] Event Detected: SALE (Standard)");
-                    enqueueCelebration({ type: "sale", seller });
-                } else {
-                    console.log("[ARENA_DEBUG] Sale standard skipped (Big Sale took precedence)");
-                }
-              }
+              eventsToTrigger.push({ type: "google", seller });
             }
+
+            if (leaderChanged && newLeaderId === seller.id) {
+               console.log("[ARENA_DEBUG] Event Detected: LEADER");
+               eventsToTrigger.push({ type: "leader", seller });
+            }
+
+            // 11. Standard Sale (ONLY if no other "big" event happened)
+            // Big events: big_sale, level_up, global_goal, leader, google
+            const hasMajorEvent = eventsToTrigger.some(e => 
+                ["big_sale", "level_up", "global_goal", "leader", "google"].includes(e.type)
+            );
+
+            if (!hasMajorEvent && saleValue < 3000) {
+                 console.log("[ARENA_DEBUG] Event Detected: SALE (Standard)");
+                 eventsToTrigger.push({ type: "sale", seller });
+            }
+
+            // Enqueue all detected events
+            eventsToTrigger.forEach(evt => enqueueCelebration(evt));
+
           } else {
             console.warn("[ARENA_DEBUG] Seller not found for celebration:", sale.vendedor_id);
             // Fallback para não perder o evento visualmente
