@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Crown, Zap, Swords, Trophy, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { DEFAULT_EVENT_CONFIG, getFinalEventConfig, isEventActive } from "@/lib/arena-events";
 
 type Seller = {
   id: string;
@@ -95,101 +96,29 @@ export default function ArenaPage() {
 
   const supabase = useMemo(() => createClient(), []);
 
-  // Configuração padrão dos GIFs e Mensagens
-  const DEFAULT_EVENT_CONFIG: Record<string, { title: string; message: string; gif_url: string; audio_url?: string; duration: number }> = {
-    leader: {
-      title: "NOVO LÍDER!",
-      message: "Assumiu a ponta! 👑",
-      gif_url: "https://media.giphy.com/media/xT5LMHxhOfscxPfIfm/giphy.gif",
-      audio_url: "https://cdn.freesound.org/previews/270/270404_5123851-lq.mp3",
-      duration: 8000
-    },
-    sale: {
-      title: "NOVA VENDA!",
-      message: "Mais uma pra conta! 💸",
-      gif_url: "https://media.giphy.com/media/l0Ex6kAKAoFRsFh6M/giphy.gif",
-      audio_url: "https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3",
-      duration: 5000
-    },
-    big_sale: {
-      title: "BIG SALE!!!",
-      message: "Venda GIGANTE detectada! 💰💰💰",
-      gif_url: "https://media.giphy.com/media/vxTbZfV7T1h56/giphy.gif",
-      audio_url: "https://cdn.freesound.org/previews/320/320653_5260872-lq.mp3",
-      duration: 7000
-    },
-    level_up: {
-      title: "META BATIDA!",
-      message: "Superou 100% da meta! 🌟",
-      gif_url: "https://media.giphy.com/media/mi6DsSSNKDbUY/giphy.gif",
-      audio_url: "https://cdn.freesound.org/previews/320/320655_5260872-lq.mp3",
-      duration: 6000
-    },
-    combo: {
-      title: "COMBO BREAKER!",
-      message: "Vendas em sequência! 🔥",
-      gif_url: "https://media.giphy.com/media/CjmvTCZf2U3p09Cn0h/giphy.gif",
-      audio_url: "https://cdn.freesound.org/previews/270/270545_5123851-lq.mp3",
-      duration: 5000
-    },
-    global_goal: {
-      title: "META GLOBAL ATINGIDA!",
-      message: "PARABÉNS TIME!!! 🎉🎉🎉",
-      gif_url: "https://media.giphy.com/media/VuTqN2H7Vf9jK/giphy.gif",
-      audio_url: "https://cdn.freesound.org/previews/270/270402_5123851-lq.mp3",
-      duration: 10000
-    },
-    last_mile: {
-      title: "RETA FINAL!",
-      message: "Falta muito pouco! Vamos lá! 🚨",
-      gif_url: "https://media.giphy.com/media/l0HlOaQcLJ2hHpYcw/giphy.gif",
-      audio_url: "https://cdn.freesound.org/previews/171/171673_2437358-lq.mp3",
-      duration: 5000
-    },
-    early_bird: {
-      title: "EARLY BIRD!",
-      message: "Abriu a porteira do dia! 🌅",
-      gif_url: "https://media.giphy.com/media/12noFudALzfIynTgLv/giphy.gif",
-      audio_url: "https://cdn.freesound.org/previews/270/270396_5123851-lq.mp3",
-      duration: 5000
-    },
-    synergy: {
-      title: "SINERGIA!",
-      message: "Vendas simultâneas! Toca aqui! ✋",
-      gif_url: "https://media.giphy.com/media/xT5LMHxhOfscxPfIfu/giphy.gif",
-      audio_url: "https://cdn.freesound.org/previews/270/270409_5123851-lq.mp3",
-      duration: 5000
-    },
-    bounty: {
-      title: "NA MOSCA!",
-      message: "Valor exato! Que precisão! 🎯",
-      gif_url: "https://media.giphy.com/media/3o7qDEq2bMbcbPRQ2c/giphy.gif",
-      audio_url: "https://cdn.freesound.org/previews/320/320672_5260872-lq.mp3",
-      duration: 5000
-    },
-    ice_breaker: {
-      title: "QUEBROU O GELO!",
-      message: "De volta ao jogo! 🧊🔨",
-      gif_url: "https://media.giphy.com/media/3o7aCS5o3M7KxY3iQ8/giphy.gif",
-      audio_url: "https://cdn.freesound.org/previews/320/320654_5260872-lq.mp3",
-      duration: 5000
-    },
-    google: {
-      title: "GOOGLE BÔNUS!",
-      message: "Dominou o Google! 🚀",
-      gif_url: "https://media.giphy.com/media/3oKIPm3BynUpUysTHW/giphy.gif",
-      audio_url: "https://cdn.freesound.org/previews/171/171671_2437358-lq.mp3",
-      duration: 5000
-    }
-  };
-
   const getEventConfig = (type: string) => {
-      return eventConfigs[type] || DEFAULT_EVENT_CONFIG[type] || DEFAULT_EVENT_CONFIG['leader'];
+    const cfg = getFinalEventConfig(eventConfigs, type);
+    console.log(`[ARENA_DEBUG] Config usada para ${type}:`, cfg);
+    return {
+      title: cfg.title,
+      message: cfg.message,
+      gif_url: cfg.gif_url,
+      audio_url: cfg.audio_url,
+      duration: cfg.duration
+    };
   };
 
   const addEventsToQueue = (events: { type: string; seller: Seller; customMessage?: string }[]) => {
     if (events.length === 0) return;
-    setCelebrationQueue((prev: { type: string; seller: Seller; customMessage?: string }[]) => [...prev, ...events]);
+    const filtered = events.filter(e => {
+      const active = isEventActive(eventConfigs, e.type);
+      if (!active) {
+        console.warn(`[ARENA_DEBUG] Evento '${e.type}' está desativado. Ignorando.`);
+      }
+      return active;
+    });
+    if (filtered.length === 0) return;
+    setCelebrationQueue((prev: { type: string; seller: Seller; customMessage?: string }[]) => [...prev, ...filtered]);
   };
 
   const handleSubmitRequest = async () => {
@@ -394,8 +323,14 @@ export default function ArenaPage() {
     
     if (audioEnabled && config?.audio_url) {
         audio = new Audio(config.audio_url);
+        audio.crossOrigin = "anonymous";
         audio.volume = 0.5;
-        audio.play().catch(e => console.error("[ARENA_DEBUG] Audio play error:", e));
+        try {
+          audio.load();
+          audio.play().catch(e => console.error("[ARENA_DEBUG] Audio play error:", e));
+        } catch (e) {
+          console.error("[ARENA_DEBUG] Audio play exception:", e);
+        }
     }
 
     const timer = setTimeout(() => {
@@ -503,6 +438,7 @@ export default function ArenaPage() {
       .channel("arena_vendas")
       .on("postgres_changes", { event: "*", schema: "public", table: "vendas" }, (payload: any) => {
         console.log("Realtime Event Received:", payload); // DEBUG LOG
+        try {
         if (payload.eventType === "INSERT") {
           const sale = payload.new as Sale;
           console.log("New Sale Detected:", sale); // DEBUG LOG
@@ -672,6 +608,9 @@ export default function ArenaPage() {
             next[oldSale.vendedor_id] = (next[oldSale.vendedor_id] || 0) - getDelta(oldSale);
             return next;
           });
+        }
+        } catch (e) {
+          console.error("[ARENA_DEBUG] Erro no processamento de evento realtime:", e);
         }
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "vendedores" }, () => {
