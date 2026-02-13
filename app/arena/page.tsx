@@ -187,14 +187,9 @@ export default function ArenaPage() {
       return eventConfigs[type] || DEFAULT_EVENT_CONFIG[type] || DEFAULT_EVENT_CONFIG['leader'];
   };
 
-  const enqueueCelebration = (evt: { type: string; seller: Seller; customMessage?: string }) => {
-    setCelebration((current) => {
-      if (current) {
-        setCelebrationQueue((q) => [...q, evt]);
-        return current;
-      }
-      return evt;
-    });
+  const addEventsToQueue = (events: { type: string; seller: Seller; customMessage?: string }[]) => {
+    if (events.length === 0) return;
+    setCelebrationQueue((prev) => [...prev, ...events]);
   };
 
   const handleSubmitRequest = async () => {
@@ -361,7 +356,7 @@ export default function ArenaPage() {
     
     // Only trigger if we had a previous leader (not first load) and it changed
     if (oldLeaderId && newLeader && newLeader.id !== oldLeaderId) {
-      enqueueCelebration({ type: "leader", seller: newLeader });
+      addEventsToQueue([{ type: "leader", seller: newLeader }]);
     }
 
     const boosts = Object.keys(nextRank).filter((id) => prevRank[id] && nextRank[id] < prevRank[id]);
@@ -378,7 +373,18 @@ export default function ArenaPage() {
     updateRanks(totals);
   }, [totals]);
 
-    // Effect to handle celebration timeouts
+  // Effect to consume queue
+  useEffect(() => {
+    if (!celebration && celebrationQueue.length > 0) {
+        setCelebrationQueue((prev) => {
+            const [next, ...rest] = prev;
+            setCelebration(next);
+            return rest;
+        });
+    }
+  }, [celebration, celebrationQueue]);
+
+  // Effect to handle celebration timeouts
   useEffect(() => {
     if (!celebration) return;
     
@@ -388,8 +394,6 @@ export default function ArenaPage() {
     
     let audio: HTMLAudioElement | null = null;
     
-    // Se o contexto estiver suspenso (sem clique), tenta dar resume ou usa elemento HTMLAudioElement simples como fallback
-    // HTMLAudioElement é mais confiável para autoplay simples se não precisar de efeitos complexos WebAudio
     if (audioEnabled && config?.audio_url) {
         audio = new Audio(config.audio_url);
         audio.volume = 0.5;
@@ -397,15 +401,7 @@ export default function ArenaPage() {
     }
 
     const timer = setTimeout(() => {
-      setCelebrationQueue((prev) => {
-        if (prev.length === 0) {
-            setCelebration(null);
-            return [];
-        }
-        const [next, ...rest] = prev;
-        setCelebration(next);
-        return rest;
-      });
+      setCelebration(null);
       
       if (audio) {
           audio.pause();
@@ -654,12 +650,12 @@ export default function ArenaPage() {
             }
 
             // Enqueue all detected events
-            eventsToTrigger.forEach(evt => enqueueCelebration(evt));
+            addEventsToQueue(eventsToTrigger);
 
           } else {
             console.warn("[ARENA_DEBUG] Seller not found for celebration:", sale.vendedor_id);
             // Fallback para não perder o evento visualmente
-            enqueueCelebration({ 
+            addEventsToQueue([{ 
               type: sale.is_google_bonus ? "google" : "sale", 
               seller: { 
                 id: String(sale.vendedor_id), 
@@ -668,7 +664,7 @@ export default function ArenaPage() {
                 meta_valor: 0, 
                 criado_em: ""
               } 
-            });
+            }]);
           }
 
           if (sale.is_google_bonus) {
@@ -771,7 +767,7 @@ export default function ArenaPage() {
       criado_em: new Date().toISOString()
     };
     console.log(`[ARENA_DEBUG] Testando evento: ${type} com vendedor ${mockSeller.nome}`);
-    enqueueCelebration({ type, seller: mockSeller });
+    addEventsToQueue([{ type, seller: mockSeller }]);
   };
 
   return (
