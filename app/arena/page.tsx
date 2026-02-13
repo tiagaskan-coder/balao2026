@@ -381,27 +381,30 @@ export default function ArenaPage() {
     // Effect to handle celebration timeouts
   useEffect(() => {
     if (!celebration) return;
-
+    
+    // Play audio logic
     const config = getEventConfig(celebration.type);
-    const duration = config.duration;
-
-    // Play audio if available
+    const duration = config?.duration || 5000;
+    
     let audio: HTMLAudioElement | null = null;
-    if (config.audio_url) {
+    
+    // Se o contexto estiver suspenso (sem clique), tenta dar resume ou usa elemento HTMLAudioElement simples como fallback
+    // HTMLAudioElement é mais confiável para autoplay simples se não precisar de efeitos complexos WebAudio
+    if (audioEnabled && config?.audio_url) {
         audio = new Audio(config.audio_url);
         audio.volume = 0.5;
-        audio.play().catch(e => console.error("Error playing audio:", e));
+        audio.play().catch(e => console.error("[ARENA_DEBUG] Audio play error:", e));
     }
-    
+
     const timer = setTimeout(() => {
-      setCelebrationQueue((q) => {
-        const [next, ...rest] = q;
-        if (next) {
-          setCelebration(next);
-          return rest;
+      setCelebrationQueue((prev) => {
+        if (prev.length === 0) {
+            setCelebration(null);
+            return [];
         }
-        setCelebration(null);
-        return [];
+        const [next, ...rest] = prev;
+        setCelebration(next);
+        return rest;
       });
       
       if (audio) {
@@ -417,7 +420,7 @@ export default function ArenaPage() {
             audio = null;
         }
     };
-  }, [celebration]);
+  }, [celebration, audioEnabled]);
 
   const playTone = (freq: number, duration: number, type: OscillatorType, gainValue: number) => {
     const ctx = audioContextRef.current;
@@ -523,7 +526,7 @@ export default function ArenaPage() {
           const seller = sellersRef.current.find(s => String(s.id) === String(sale.vendedor_id));
           
           if (seller) {
-            console.log("Celebration Triggered for:", seller.nome);
+            console.log("[ARENA_DEBUG] Celebration Triggered for:", seller.nome);
             const ranked = [...sellersRef.current].sort(
               (a, b) => (nextTotalsSnapshot[b.id] || 0) - (nextTotalsSnapshot[a.id] || 0)
             );
@@ -531,6 +534,8 @@ export default function ArenaPage() {
             const oldLeaderId = Object.keys(prevRankRef.current).find(id => prevRankRef.current[id] === 1);
             const leaderChanged = oldLeaderId && newLeaderId && newLeaderId !== oldLeaderId;
             
+            console.log(`[ARENA_DEBUG] Leader Changed: ${leaderChanged} (Old: ${oldLeaderId}, New: ${newLeaderId})`);
+
             // --- DETECÇÃO DE EVENTOS ESPECIAIS ---
             const now = Date.now();
             const saleValue = Number(sale.valor || 0);
@@ -538,19 +543,24 @@ export default function ArenaPage() {
             const sellerTotalAfter = sellerTotalBefore + getDelta(sale);
             const sellerMeta = seller.meta_valor || 1;
             
+            console.log(`[ARENA_DEBUG] Sale Analysis: Value=${saleValue}, TotalBefore=${sellerTotalBefore}, TotalAfter=${sellerTotalAfter}, Meta=${sellerMeta}`);
+
             // 1. Big Sale (> R$ 3.000)
             if (saleValue >= 3000) {
+              console.log("[ARENA_DEBUG] Event Detected: BIG SALE");
               enqueueCelebration({ type: "big_sale", seller });
             }
 
             // 2. Level Up (Cruzou a meta)
             if (sellerTotalBefore < sellerMeta && sellerTotalAfter >= sellerMeta) {
+              console.log("[ARENA_DEBUG] Event Detected: LEVEL UP");
               enqueueCelebration({ type: "level_up", seller });
             }
 
             // 3. Combo (Venda em menos de 10 min da anterior do mesmo vendedor)
             const lastSale = lastSaleTimeRef.current[seller.id];
             if (lastSale && (now - lastSale) < 10 * 60 * 1000) {
+               console.log("[ARENA_DEBUG] Event Detected: COMBO");
                enqueueCelebration({ type: "combo", seller, customMessage: "Vendas em sequência! 🔥" });
             }
             lastSaleTimeRef.current[seller.id] = now;
@@ -561,61 +571,62 @@ export default function ArenaPage() {
             const oldGlobalTotal = newGlobalTotal - getDelta(sale);
             
             if (oldGlobalTotal < globalMeta && newGlobalTotal >= globalMeta) {
-               // Enfileira com prioridade (colocando no inicio se possível, mas aqui vai pro fim da fila)
-               // Como é um evento de time, usamos o vendedor da venda final como "herói" ou criamos um dummy
+               console.log("[ARENA_DEBUG] Event Detected: GLOBAL GOAL");
                enqueueCelebration({ type: "global_goal", seller });
             } 
             // 5. Reta Final (Cruzou 90%)
             else if (oldGlobalTotal < (globalMeta * 0.9) && newGlobalTotal >= (globalMeta * 0.9)) {
+               console.log("[ARENA_DEBUG] Event Detected: LAST MILE");
                enqueueCelebration({ type: "last_mile", seller });
             }
 
-            // 6. Early Bird (Primeira venda do dia)
-            // Lógica simplificada: se for a primeira venda carregada no feed local... 
-            // Melhor: se salesFeed estava vazio ou a última venda é de outro dia.
-            // Para simplificar: vamos assumir que se o feed está vazio é o começo.
-            // Mas em produção real, ideal comparar datas.
-            // Vamos pular lógica complexa de data aqui para não bugar, focar nos eventos certos.
-
-            // 7. Sinergia (Venda concomitante - menos de 30s de outra venda de OUTRO vendedor)
+            // 7. Sinergia
             const otherSellersLastSales = Object.entries(lastSaleTimeRef.current)
                 .filter(([id]) => id !== seller.id)
                 .map(([, time]) => time);
             const recentSynergy = otherSellersLastSales.some(time => (now - time) < 30 * 1000);
             if (recentSynergy) {
+                console.log("[ARENA_DEBUG] Event Detected: SYNERGY");
                 enqueueCelebration({ type: "synergy", seller });
             }
 
-            // 8. Bounty Hunter (Valor Exato - ex: termina em 00 ou 500)
+            // 8. Bounty Hunter
             if (saleValue % 500 === 0 && saleValue > 0) {
+                console.log("[ARENA_DEBUG] Event Detected: BOUNTY");
                 enqueueCelebration({ type: "bounty", seller });
             }
 
-            // 9. Quebra Gelo (Mais de 4h sem vender)
-            // Se tinha lastSale e foi há muito tempo
+            // 9. Quebra Gelo
             if (lastSale && (now - lastSale) > 4 * 60 * 60 * 1000) {
+                console.log("[ARENA_DEBUG] Event Detected: ICE BREAKER");
                 enqueueCelebration({ type: "ice_breaker", seller });
             }
 
             // Eventos Originais (Google, Leader, Sale)
             if (sale.is_google_bonus) {
+              console.log("[ARENA_DEBUG] Event Detected: GOOGLE BONUS");
               enqueueCelebration({ type: "google", seller });
               if (leaderChanged && newLeaderId === seller.id) {
+                console.log("[ARENA_DEBUG] Event Detected: LEADER (via Google)");
                 enqueueCelebration({ type: "leader", seller });
               }
             } else {
               // Se não foi nenhum evento especial "grande", mostramos a venda normal ou líder
               if (leaderChanged && newLeaderId === seller.id) {
+                console.log("[ARENA_DEBUG] Event Detected: LEADER");
                 enqueueCelebration({ type: "leader", seller });
               } else {
                 // Só mostra venda comum se NÃO for Big Sale (pra não ficar redundante)
                 if (saleValue < 3000) {
+                    console.log("[ARENA_DEBUG] Event Detected: SALE (Standard)");
                     enqueueCelebration({ type: "sale", seller });
+                } else {
+                    console.log("[ARENA_DEBUG] Sale standard skipped (Big Sale took precedence)");
                 }
               }
             }
           } else {
-            console.warn("Seller not found for celebration:", sale.vendedor_id);
+            console.warn("[ARENA_DEBUG] Seller not found for celebration:", sale.vendedor_id);
             // Fallback para não perder o evento visualmente
             enqueueCelebration({ 
               type: sale.is_google_bonus ? "google" : "sale", 
@@ -708,8 +719,54 @@ export default function ArenaPage() {
     []
   );
 
+  const [showDebug, setShowDebug] = useState(false);
+
+  useEffect(() => {
+    const toggleDebug = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === 'd') {
+        setShowDebug(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', toggleDebug);
+    return () => window.removeEventListener('keydown', toggleDebug);
+  }, []);
+
+  const testCelebration = (type: string) => {
+    const mockSeller = sellers[0] || {
+      id: "mock",
+      nome: "Vendedor Teste",
+      avatar_url: null,
+      meta_valor: 1000,
+      criado_em: new Date().toISOString()
+    };
+    console.log(`[ARENA_DEBUG] Testando evento: ${type} com vendedor ${mockSeller.nome}`);
+    enqueueCelebration({ type, seller: mockSeller });
+  };
+
   return (
     <div className="flex flex-col min-h-screen w-full lg:h-screen lg:overflow-hidden overflow-y-auto bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 text-white">
+      {showDebug && (
+        <div className="fixed top-4 left-4 z-[10000] bg-slate-900/90 border border-red-500/50 p-4 rounded-xl shadow-2xl backdrop-blur-md">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-red-400 font-bold text-xs uppercase tracking-widest">Debug Mode</h3>
+            <button onClick={() => setShowDebug(false)} className="text-slate-400 hover:text-white"><X size={14} /></button>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {Object.keys(DEFAULT_EVENT_CONFIG).map(type => (
+              <button
+                key={type}
+                onClick={() => testCelebration(type)}
+                className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-xs text-cyan-300 rounded border border-slate-700 transition-colors text-left"
+              >
+                ▶ {type}
+              </button>
+            ))}
+          </div>
+          <div className="mt-2 text-[10px] text-slate-500 font-mono">
+            Queue: {celebrationQueue.length} | Current: {celebration?.type || 'None'}
+          </div>
+        </div>
+      )}
       <motion.div
         key={battlePulse}
         className="absolute inset-0 pointer-events-none"
