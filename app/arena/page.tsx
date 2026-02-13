@@ -618,31 +618,13 @@ export default function ArenaPage() {
                eventsToTrigger.push({ type: "leader", seller });
             }
 
-            // 11. Standard Sale (ONLY if no other "big" event happened)
-            // Big events: big_sale, level_up, global_goal, leader, google
-            const hasMajorEvent = eventsToTrigger.some(e => 
-                ["big_sale", "level_up", "global_goal", "leader", "google"].includes(e.type)
-            );
-
+            // 11. Standard Sale
             // Always trigger standard sale if < 3000, regardless of other events (unless it's already a big_sale)
-            // We want the sound and animation for every sale, even if other events happen.
-            // But if we have multiple events, they are queued.
-            // The issue might be that "sale" is considered "minor" and skipped if "major" exists.
-            // Let's relax this: if it's not a BIG SALE, it's a SALE.
             if (saleValue < 3000) {
-                 console.log("[ARENA_DEBUG] Event Detected: SALE (Standard)");
-                 // Only add if not already present (e.g. via combo/synergy which are distinct)
-                 // Actually, "sale" is the base event. 
-                 // If we have "combo", do we want "sale" too? Maybe yes, maybe no.
-                 // Let's keep it simple: If it's NOT a big_sale, trigger 'sale' UNLESS 'google' is present (google has its own animation)
-                 // But wait, user said "did not trigger new sale events".
-                 // R$ 345 is < 3000. It should hit here.
-                 // If `hasMajorEvent` was true (e.g. leader change), it skipped.
-                 // We should allow 'sale' + 'leader'.
-                 
                  const alreadyHasSaleType = eventsToTrigger.some(e => ["sale", "big_sale", "google"].includes(e.type));
                  
                  if (!alreadyHasSaleType) {
+                    console.log("[ARENA_DEBUG] Event Detected: SALE (Standard)");
                     eventsToTrigger.push({ type: "sale", seller });
                  }
             }
