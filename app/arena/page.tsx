@@ -1189,11 +1189,11 @@ export default function ArenaPage() {
                  </div>
                  
                  {/* Overlay do Avatar do Vendedor - Agora fora do overflow hidden do pai */}
-                 <div className="absolute -bottom-2 -right-2 w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.5)] overflow-hidden bg-slate-800 z-10">
+                 <div className="absolute -bottom-4 -right-4 w-28 h-28 sm:w-32 sm:h-32 rounded-full border-[6px] border-slate-900 shadow-[0_0_30px_rgba(6,182,212,0.6)] overflow-hidden bg-slate-800 z-50">
                     {celebration.seller.avatar_url ? (
                       <img src={celebration.seller.avatar_url} alt={celebration.seller.nome} className="w-full h-full object-cover" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center font-bold text-xl text-cyan-400 bg-slate-900">
+                      <div className="w-full h-full flex items-center justify-center font-bold text-2xl text-cyan-400 bg-slate-900">
                         {celebration.seller.nome.slice(0, 2).toUpperCase()}
                       </div>
                     )}
