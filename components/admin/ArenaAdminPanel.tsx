@@ -612,6 +612,7 @@ type EventConfig = {
                 <th className="py-2">GIF URL</th>
                 <th className="py-2">Audio URL</th>
                 <th className="py-2">Duração (ms)</th>
+                <th className="py-2">Ativo</th>
                 <th className="py-2 text-right">Ações</th>
               </tr>
             </thead>
@@ -685,6 +686,22 @@ type EventConfig = {
                       <span className="text-gray-600">{evt.duration}ms</span>
                     )}
                   </td>
+                  <td className="py-3">
+                    {editingEventId === evt.id ? (
+                      <button
+                        onClick={() => setEditingEvent((prev) => ({ ...prev, active: !prev.active }))}
+                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                          editingEvent.active ? "bg-green-600 text-white" : "bg-gray-100 text-gray-600"
+                        }`}
+                      >
+                        {editingEvent.active ? "Ativo" : "Inativo"}
+                      </button>
+                    ) : (
+                      <span className={evt.active ? "text-green-700 font-semibold" : "text-gray-600"}>
+                        {evt.active ? "Ativo" : "Inativo"}
+                      </span>
+                    )}
+                  </td>
                   <td className="py-3 text-right">
                     {editingEventId === evt.id ? (
                       <div className="flex justify-end gap-2">
@@ -705,7 +722,7 @@ type EventConfig = {
               ))}
               {eventConfigs.length === 0 && (
                  <tr>
-                    <td colSpan={5} className="py-6 text-center text-gray-500">
+                     <td colSpan={7} className="py-6 text-center text-gray-500">
                       Nenhuma configuração encontrada.
                     </td>
                  </tr>
