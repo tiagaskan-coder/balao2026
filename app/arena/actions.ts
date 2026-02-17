@@ -30,7 +30,10 @@ export async function criarVendedor(formData: FormData) {
   const avatar_url = formData.get('avatar_url') as string;
   const veiculo_emoji = formData.get('veiculo_emoji') as string;
   const meta_valor = parseFloat(formData.get('meta_valor') as string);
-  const vendas_atual = parseFloat(formData.get('vendas_atual') as string);
+  
+  // Se vier vendas_atual, usa, senão 0
+  const vendas_atual_raw = formData.get('vendas_atual');
+  const vendas_atual = vendas_atual_raw ? parseFloat(vendas_atual_raw as string) : 0;
 
   const { error } = await supabaseAdmin
     .from('arena_vendedores')
@@ -77,6 +80,39 @@ export async function removerVendedor(id: string) {
     .eq('id', id);
 
   if (error) throw new Error('Erro ao remover vendedor: ' + error.message);
+  revalidatePath('/arena/admin');
+  revalidatePath('/arena');
+}
+
+export async function adicionarVenda(id: string, valor: number) {
+  // Busca vendedor atual para somar
+  const { data: vendedor, error: fetchError } = await supabaseAdmin
+    .from('arena_vendedores')
+    .select('vendas_atual')
+    .eq('id', id)
+    .single();
+
+  if (fetchError || !vendedor) throw new Error('Vendedor não encontrado');
+
+  const novaVenda = (vendedor.vendas_atual || 0) + valor;
+
+  const { error } = await supabaseAdmin
+    .from('arena_vendedores')
+    .update({ vendas_atual: novaVenda })
+    .eq('id', id);
+
+  if (error) throw new Error('Erro ao adicionar venda: ' + error.message);
+  revalidatePath('/arena/admin');
+  revalidatePath('/arena');
+}
+
+export async function resetarVendas() {
+  const { error } = await supabaseAdmin
+    .from('arena_vendedores')
+    .update({ vendas_atual: 0 })
+    .neq('id', '00000000-0000-0000-0000-000000000000'); // Update all rows workaround if needed, but neq id 0 works usually or just without filter
+
+  if (error) throw new Error('Erro ao resetar vendas: ' + error.message);
   revalidatePath('/arena/admin');
   revalidatePath('/arena');
 }
