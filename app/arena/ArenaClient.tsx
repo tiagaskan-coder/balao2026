@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Vendedor, ArenaConfig, EventoMidia, Venda } from './types';
 import { supabase } from '@/utils/supabase';
-import { Trophy, Flag, Zap, Target, AlertCircle, RefreshCw, X, Clock, DollarSign } from 'lucide-react';
+import { Trophy, Flag, Zap, Target, AlertCircle, RefreshCw, X, Clock, DollarSign, Flame } from 'lucide-react';
 
 // Cores e Temas para os Corredores
 const RANK_COLORS = [
