@@ -39,6 +39,7 @@ export default function ArenaClient({
   const [eventosConfig, setEventosConfig] = useState<EventoMidia[]>(eventosIniciais || []);
   const [filaEventos, setFilaEventos] = useState<FilaEvento[]>([]);
   const [eventoAtual, setEventoAtual] = useState<FilaEvento | null>(null);
+  const [shouldReload, setShouldReload] = useState(false);
   
   const [vendasRecentes, setVendasRecentes] = useState<Venda[]>(vendasRecentesIniciais || []);
 
@@ -116,8 +117,14 @@ export default function ArenaClient({
       const proximo = filaEventos[0];
       setEventoAtual(proximo);
       setFilaEventos(prev => prev.slice(1));
+    } else if (!eventoAtual && filaEventos.length === 0 && shouldReload) {
+      // Pequeno delay para garantir que a última animação fechou completamente visualmente
+      const timer = setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+      return () => clearTimeout(timer);
     }
-  }, [eventoAtual, filaEventos]);
+  }, [eventoAtual, filaEventos, shouldReload]);
 
   // Função para detectar e disparar eventos
   const processarEventos = (novoVendedor: Vendedor) => {
@@ -262,6 +269,7 @@ export default function ArenaClient({
 
     if (eventosDisparados.length > 0) {
       setFilaEventos(prev => [...prev, ...eventosDisparados]);
+      setShouldReload(true);
     }
   };
 
