@@ -1,8 +1,13 @@
 'use server';
 
-import { supabaseAdmin } from '@/lib/supabase-admin';
+import { createClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
-import { Vendedor, ArenaConfig } from './types';
+import { Vendedor, ArenaConfig, EventoMidia } from './types';
+
+// Inicializa o cliente Supabase Admin
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
 // --- Vendedores ---
 
@@ -23,17 +28,18 @@ export async function getVendedores(): Promise<Vendedor[]> {
 export async function criarVendedor(formData: FormData) {
   const nome = formData.get('nome') as string;
   const avatar_url = formData.get('avatar_url') as string;
-  const veiculo_emoji = formData.get('veiculo_emoji') as string || '🚗';
-  const meta_valor = parseFloat(formData.get('meta_valor') as string) || 0;
+  const veiculo_emoji = formData.get('veiculo_emoji') as string;
+  const meta_valor = parseFloat(formData.get('meta_valor') as string);
+  const vendas_atual = parseFloat(formData.get('vendas_atual') as string);
 
   const { error } = await supabaseAdmin
     .from('arena_vendedores')
     .insert({
       nome,
-      avatar_url: avatar_url || null,
+      avatar_url,
       veiculo_emoji,
       meta_valor,
-      vendas_atual: 0
+      vendas_atual
     });
 
   if (error) throw new Error('Erro ao criar vendedor: ' + error.message);
@@ -52,7 +58,7 @@ export async function atualizarVendedor(id: string, formData: FormData) {
     .from('arena_vendedores')
     .update({
       nome,
-      avatar_url: avatar_url || null,
+      avatar_url,
       veiculo_emoji,
       meta_valor,
       vendas_atual
@@ -60,29 +66,6 @@ export async function atualizarVendedor(id: string, formData: FormData) {
     .eq('id', id);
 
   if (error) throw new Error('Erro ao atualizar vendedor: ' + error.message);
-  revalidatePath('/arena/admin');
-  revalidatePath('/arena');
-}
-
-export async function adicionarVenda(id: string, valorAdicional: number) {
-  // Busca o valor atual primeiro para garantir consistência (ou usa procedure RPC se preferir atômico, mas aqui vamos de simples leitura+escrita por enquanto)
-  const { data: vendedor, error: fetchError } = await supabaseAdmin
-    .from('arena_vendedores')
-    .select('vendas_atual')
-    .eq('id', id)
-    .single();
-
-  if (fetchError || !vendedor) throw new Error('Vendedor não encontrado');
-
-  const novoTotal = (vendedor.vendas_atual || 0) + valorAdicional;
-
-  const { error } = await supabaseAdmin
-    .from('arena_vendedores')
-    .update({ vendas_atual: novoTotal })
-    .eq('id', id);
-
-  if (error) throw new Error('Erro ao adicionar venda: ' + error.message);
-  
   revalidatePath('/arena/admin');
   revalidatePath('/arena');
 }
@@ -98,29 +81,16 @@ export async function removerVendedor(id: string) {
   revalidatePath('/arena');
 }
 
-export async function resetarVendas() {
-  const { error } = await supabaseAdmin
-    .from('arena_vendedores')
-    .update({ vendas_atual: 0 });
-
-  if (error) throw new Error('Erro ao resetar vendas: ' + error.message);
-  revalidatePath('/arena/admin');
-  revalidatePath('/arena');
-}
-
 // --- Configuração ---
 
 export async function getConfig(): Promise<ArenaConfig | null> {
   const { data, error } = await supabaseAdmin
     .from('arena_config')
     .select('*')
+    .limit(1)
     .single();
 
-  if (error) {
-    // Se não existir, tenta criar
-    if (error.code === 'PGRST116') {
-      return { id: 1, ativo: false, titulo: 'Arena de Vendas', atualizado_em: new Date().toISOString() };
-    }
+  if (error && error.code !== 'PGRST116') {
     console.error('Erro ao buscar config:', error);
     return null;
   }
@@ -128,24 +98,99 @@ export async function getConfig(): Promise<ArenaConfig | null> {
   return data as ArenaConfig;
 }
 
-export async function toggleArena(ativo: boolean) {
-  const { error } = await supabaseAdmin
-    .from('arena_config')
-    .upsert({ id: 1, ativo })
-    .select();
+export async function atualizarConfig(formData: FormData) {
+  const titulo = formData.get('titulo') as string;
+  const ativo = formData.get('ativo') === 'true';
 
-  if (error) throw new Error('Erro ao alterar status da arena: ' + error.message);
+  // Verifica se já existe config
+  const config = await getConfig();
+
+  let error;
+  if (config) {
+    const result = await supabaseAdmin
+      .from('arena_config')
+      .update({ titulo, ativo, atualizado_em: new Date().toISOString() })
+      .eq('id', config.id);
+    error = result.error;
+  } else {
+    const result = await supabaseAdmin
+      .from('arena_config')
+      .insert({ titulo, ativo });
+    error = result.error;
+  }
+
+  if (error) throw new Error('Erro ao atualizar config: ' + error.message);
   revalidatePath('/arena/admin');
   revalidatePath('/arena');
 }
 
-export async function atualizarTitulo(titulo: string) {
-  const { error } = await supabaseAdmin
-    .from('arena_config')
-    .upsert({ id: 1, titulo })
-    .select();
+// --- Eventos de Mídia ---
 
-  if (error) throw new Error('Erro ao alterar título: ' + error.message);
+export async function getEventosMidia(): Promise<EventoMidia[]> {
+  const { data, error } = await supabaseAdmin
+    .from('arena_eventos_midia')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Erro ao buscar eventos de mídia:', error);
+    return [];
+  }
+
+  return data as EventoMidia[];
+}
+
+export async function criarEventoMidia(formData: FormData) {
+  const evento_tipo = formData.get('evento_tipo') as string;
+  const gif_url = formData.get('gif_url') as string;
+  const titulo = formData.get('titulo') as string;
+  const mensagem_template = formData.get('mensagem_template') as string;
+
+  const { error } = await supabaseAdmin
+    .from('arena_eventos_midia')
+    .insert({
+      evento_tipo,
+      gif_url,
+      titulo,
+      mensagem_template,
+      ativo: true
+    });
+
+  if (error) throw new Error('Erro ao criar evento de mídia: ' + error.message);
+  revalidatePath('/arena/admin');
+  revalidatePath('/arena');
+}
+
+export async function atualizarEventoMidia(id: string, formData: FormData) {
+  const evento_tipo = formData.get('evento_tipo') as string;
+  const gif_url = formData.get('gif_url') as string;
+  const titulo = formData.get('titulo') as string;
+  const mensagem_template = formData.get('mensagem_template') as string;
+  const ativo = formData.get('ativo') === 'true';
+
+  const { error } = await supabaseAdmin
+    .from('arena_eventos_midia')
+    .update({
+      evento_tipo,
+      gif_url,
+      titulo,
+      mensagem_template,
+      ativo
+    })
+    .eq('id', id);
+
+  if (error) throw new Error('Erro ao atualizar evento de mídia: ' + error.message);
+  revalidatePath('/arena/admin');
+  revalidatePath('/arena');
+}
+
+export async function removerEventoMidia(id: string) {
+  const { error } = await supabaseAdmin
+    .from('arena_eventos_midia')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw new Error('Erro ao remover evento de mídia: ' + error.message);
   revalidatePath('/arena/admin');
   revalidatePath('/arena');
 }

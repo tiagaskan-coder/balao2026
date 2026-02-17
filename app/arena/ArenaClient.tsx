@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Vendedor, ArenaConfig } from './types';
+import { Vendedor, ArenaConfig, EventoMidia } from './types';
 import { supabase } from '@/utils/supabase';
-import { Trophy, Flag, Zap, Target, Crown, Flame, AlertCircle, RefreshCw } from 'lucide-react';
+import { Trophy, Flag, Zap, Target, Crown, Flame, AlertCircle, RefreshCw, X } from 'lucide-react';
 
 // Cores e Temas para os Corredores
 const RANK_COLORS = [
@@ -14,25 +14,205 @@ const RANK_COLORS = [
   'from-blue-500 via-indigo-500 to-purple-500', // Outros
 ];
 
+type FilaEvento = {
+  id: string;
+  gif_url: string;
+  titulo: string;
+  mensagem: string;
+  tipo: string;
+};
+
 export default function ArenaClient({
   vendedoresIniciais,
-  configInicial
+  configInicial,
+  eventosIniciais
 }: {
   vendedoresIniciais: Vendedor[],
-  configInicial: ArenaConfig | null
+  configInicial: ArenaConfig | null,
+  eventosIniciais: EventoMidia[]
 }) {
   const [vendedores, setVendedores] = useState<Vendedor[]>(vendedoresIniciais || []);
   const [config, setConfig] = useState<ArenaConfig | null>(configInicial);
+  const [eventosConfig, setEventosConfig] = useState<EventoMidia[]>(eventosIniciais || []);
+  const [filaEventos, setFilaEventos] = useState<FilaEvento[]>([]);
+  const [eventoAtual, setEventoAtual] = useState<FilaEvento | null>(null);
+  
   const [lastUpdate, setLastUpdate] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<string>('CONNECTING');
+
+  // Refs para acesso no callback do realtime
+  const vendedoresRef = useRef(vendedores);
+  const eventosConfigRef = useRef(eventosConfig);
+  const comboCounterRef = useRef<{ id: string, count: number }>({ id: '', count: 0 });
+
+  useEffect(() => {
+    vendedoresRef.current = vendedores;
+  }, [vendedores]);
+
+  useEffect(() => {
+    eventosConfigRef.current = eventosConfig;
+  }, [eventosConfig]);
 
   // Logs de Debug
   useEffect(() => {
     console.log('--- ARENA DEBUG ---');
     console.log('Vendedores Iniciais:', vendedoresIniciais);
     console.log('Config Inicial:', configInicial);
+    console.log('Eventos Iniciais:', eventosIniciais);
     console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Definido' : 'Indefinido');
-  }, [vendedoresIniciais, configInicial]);
+  }, [vendedoresIniciais, configInicial, eventosIniciais]);
+
+  // Processamento da Fila de Eventos
+  useEffect(() => {
+    if (!eventoAtual && filaEventos.length > 0) {
+      const proximo = filaEventos[0];
+      setEventoAtual(proximo);
+      setFilaEventos(prev => prev.slice(1));
+    }
+  }, [eventoAtual, filaEventos]);
+
+  // Função para detectar e disparar eventos
+  const processarEventos = (novoVendedor: Vendedor) => {
+    const antigos = vendedoresRef.current;
+    const antigoVendedor = antigos.find(v => v.id === novoVendedor.id);
+    
+    if (!antigoVendedor) return; // Novo vendedor (insert) não dispara eventos de mudança por enquanto
+
+    const eventosDisparados: FilaEvento[] = [];
+    const configsAtivas = eventosConfigRef.current.filter(e => e.ativo);
+
+    // 1. Nova Venda
+    if (novoVendedor.vendas_atual > antigoVendedor.vendas_atual) {
+      const config = configsAtivas.find(e => e.evento_tipo === 'nova_venda');
+      if (config) {
+        eventosDisparados.push({
+          id: crypto.randomUUID(),
+          gif_url: config.gif_url,
+          titulo: config.titulo,
+          mensagem: config.mensagem_template?.replace('{vendedor}', novoVendedor.nome).replace('{valor}', `R$ ${(novoVendedor.vendas_atual - antigoVendedor.vendas_atual).toLocaleString('pt-BR')}`) || `Nova venda de ${novoVendedor.nome}!`,
+          tipo: 'nova_venda'
+        });
+      }
+
+      // 1.1 Venda Alta (ex: > 5000 de diferença)
+      const diff = novoVendedor.vendas_atual - antigoVendedor.vendas_atual;
+      if (diff >= 5000) {
+        const configAlta = configsAtivas.find(e => e.evento_tipo === 'venda_alta');
+        if (configAlta) {
+          eventosDisparados.push({
+            id: crypto.randomUUID(),
+            gif_url: configAlta.gif_url,
+            titulo: configAlta.titulo,
+            mensagem: configAlta.mensagem_template?.replace('{vendedor}', novoVendedor.nome).replace('{valor}', `R$ ${diff.toLocaleString('pt-BR')}`) || `VENDAÇO de ${novoVendedor.nome}!`,
+            tipo: 'venda_alta'
+          });
+        }
+      }
+
+      // 1.2 Combo de Vendas (3 seguidas do mesmo vendedor)
+      if (comboCounterRef.current.id === novoVendedor.id) {
+        comboCounterRef.current.count += 1;
+      } else {
+        comboCounterRef.current = { id: novoVendedor.id, count: 1 };
+      }
+
+      if (comboCounterRef.current.count >= 3) {
+        const configCombo = configsAtivas.find(e => e.evento_tipo === 'combo_vendas');
+        if (configCombo) {
+          eventosDisparados.push({
+            id: crypto.randomUUID(),
+            gif_url: configCombo.gif_url,
+            titulo: configCombo.titulo,
+            mensagem: configCombo.mensagem_template?.replace('{vendedor}', novoVendedor.nome).replace('{count}', comboCounterRef.current.count.toString()) || `${novoVendedor.nome} está ON FIRE! ${comboCounterRef.current.count}x seguidas!`,
+            tipo: 'combo_vendas'
+          });
+        }
+      }
+
+      // 1.3 Meta Global Batida
+      const totalMeta = antigos.reduce((acc, v) => acc + v.meta_valor, 0);
+      const totalVendasAntigo = antigos.reduce((acc, v) => acc + v.vendas_atual, 0);
+      const totalVendasNovo = totalVendasAntigo + diff;
+
+      if (totalVendasAntigo < totalMeta && totalVendasNovo >= totalMeta) {
+        const configGlobal = configsAtivas.find(e => e.evento_tipo === 'meta_global');
+        if (configGlobal) {
+          eventosDisparados.push({
+            id: crypto.randomUUID(),
+            gif_url: configGlobal.gif_url,
+            titulo: configGlobal.titulo,
+            mensagem: configGlobal.mensagem_template?.replace('{valor}', `R$ ${totalMeta.toLocaleString('pt-BR')}`) || `META GLOBAL BATIDA! PARABÉNS EQUIPE!`,
+            tipo: 'meta_global'
+          });
+        }
+      }
+    }
+
+    // 2. Meta Batida
+    if (antigoVendedor.vendas_atual < antigoVendedor.meta_valor && novoVendedor.vendas_atual >= novoVendedor.meta_valor) {
+      const config = configsAtivas.find(e => e.evento_tipo === 'meta_batida');
+      if (config) {
+        eventosDisparados.push({
+          id: crypto.randomUUID(),
+          gif_url: config.gif_url,
+          titulo: config.titulo,
+          mensagem: config.mensagem_template?.replace('{vendedor}', novoVendedor.nome) || `${novoVendedor.nome} BATEU A META!`,
+          tipo: 'meta_batida'
+        });
+      }
+    }
+
+    // 3. Ranking (Ultrapassagem e Liderança)
+    // Recalcula ranking antigo
+    const rankingAntigo = [...antigos].sort((a, b) => {
+      const progA = a.meta_valor > 0 ? a.vendas_atual / a.meta_valor : 0;
+      const progB = b.meta_valor > 0 ? b.vendas_atual / b.meta_valor : 0;
+      return progB - progA;
+    });
+    const indexAntigo = rankingAntigo.findIndex(v => v.id === novoVendedor.id);
+
+    // Recalcula ranking novo (simulado)
+    const novosVendedoresSimulados = antigos.map(v => v.id === novoVendedor.id ? novoVendedor : v);
+    const rankingNovo = [...novosVendedoresSimulados].sort((a, b) => {
+      const progA = a.meta_valor > 0 ? a.vendas_atual / a.meta_valor : 0;
+      const progB = b.meta_valor > 0 ? b.vendas_atual / b.meta_valor : 0;
+      return progB - progA;
+    });
+    const indexNovo = rankingNovo.findIndex(v => v.id === novoVendedor.id);
+
+    if (indexAntigo !== -1 && indexNovo !== -1 && indexNovo < indexAntigo) {
+      // Subiu no ranking
+      if (indexNovo === 0) {
+        // Assumiu Liderança
+        const config = configsAtivas.find(e => e.evento_tipo === 'lideranca');
+        if (config) {
+          eventosDisparados.push({
+            id: crypto.randomUUID(),
+            gif_url: config.gif_url,
+            titulo: config.titulo,
+            mensagem: config.mensagem_template?.replace('{vendedor}', novoVendedor.nome) || `${novoVendedor.nome} assumiu a LIDERANÇA!`,
+            tipo: 'lideranca'
+          });
+        }
+      } else {
+        // Ultrapassagem normal
+        const config = configsAtivas.find(e => e.evento_tipo === 'ultrapassagem');
+        if (config) {
+          eventosDisparados.push({
+            id: crypto.randomUUID(),
+            gif_url: config.gif_url,
+            titulo: config.titulo,
+            mensagem: config.mensagem_template?.replace('{vendedor}', novoVendedor.nome) || `${novoVendedor.nome} subiu para #${indexNovo + 1}!`,
+            tipo: 'ultrapassagem'
+          });
+        }
+      }
+    }
+
+    if (eventosDisparados.length > 0) {
+      setFilaEventos(prev => [...prev, ...eventosDisparados]);
+    }
+  };
 
   // Ordenação e Estatísticas
   const { sortedVendedores, totalVendas, totalMeta, progressoGeral } = useMemo(() => {
@@ -72,7 +252,11 @@ export default function ArenaClient({
                 return [...prev, payload.new as Vendedor];
             });
           } else if (payload.eventType === 'UPDATE') {
-            setVendedores(prev => prev.map(v => v.id === payload.new.id ? payload.new as Vendedor : v));
+            const novoVendedor = payload.new as Vendedor;
+            // Detecta eventos ANTES de atualizar o estado
+            processarEventos(novoVendedor);
+            
+            setVendedores(prev => prev.map(v => v.id === novoVendedor.id ? novoVendedor : v));
           } else if (payload.eventType === 'DELETE') {
             setVendedores(prev => prev.filter(v => v.id !== payload.old.id));
           }
@@ -88,6 +272,20 @@ export default function ArenaClient({
           }
         }
       )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'arena_eventos_midia' },
+        (payload) => {
+            console.log('⚡ Realtime Event (Eventos Midia):', payload);
+            if (payload.eventType === 'INSERT') {
+                setEventosConfig(prev => [...prev, payload.new as EventoMidia]);
+            } else if (payload.eventType === 'UPDATE') {
+                setEventosConfig(prev => prev.map(e => e.id === payload.new.id ? payload.new as EventoMidia : e));
+            } else if (payload.eventType === 'DELETE') {
+                setEventosConfig(prev => prev.filter(e => e.id !== payload.old.id));
+            }
+        }
+      )
       .subscribe((status) => {
         console.log('Status da Conexão:', status);
         setConnectionStatus(status);
@@ -97,7 +295,7 @@ export default function ArenaClient({
       console.log('Limpando canais...');
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, []); // Dependências vazias pois usamos refs para acessar estados atualizados
 
   if (!config?.ativo) {
     return <WaitingScreen title={config?.titulo} status={connectionStatus} />;
@@ -105,18 +303,29 @@ export default function ArenaClient({
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-white overflow-hidden flex flex-col font-sans relative">
-      {/* Camada de Debug (Visível apenas se houver erro crítico ou status estranho) */}
+      {/* Camada de Debug */}
       {connectionStatus !== 'SUBSCRIBED' && (
          <div className="absolute top-0 right-0 bg-red-600 text-white text-xs px-2 py-1 z-[100]">
             Status: {connectionStatus}
          </div>
       )}
 
+      {/* Overlay de Eventos */}
+      <AnimatePresence>
+        {eventoAtual && (
+          <EventOverlay 
+            key={eventoAtual.id}
+            evento={eventoAtual} 
+            onClose={() => setEventoAtual(null)} 
+          />
+        )}
+      </AnimatePresence>
+
       {/* Background Effects (Z-0) */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-900/20 blur-[120px] rounded-full mix-blend-screen" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-900/20 blur-[120px] rounded-full mix-blend-screen" />
-        <div className="absolute inset-0 bg-slate-900/50" /> {/* Fallback background */}
+        <div className="absolute inset-0 bg-slate-900/50" />
       </div>
 
       {/* Header (Z-50) */}
@@ -207,6 +416,92 @@ export default function ArenaClient({
 }
 
 // --- Componentes Auxiliares ---
+
+function EventOverlay({ evento, onClose }: { evento: FilaEvento, onClose: () => void }) {
+  // Fecha automaticamente após 8 segundos
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onClose();
+    }, 8000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 1.1 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+    >
+      <div className="absolute top-4 right-4 z-50">
+        <button onClick={onClose} className="p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors">
+          <X className="w-6 h-6" />
+        </button>
+      </div>
+
+      <div className="relative max-w-4xl w-full flex flex-col items-center text-center">
+        {/* Título */}
+        <motion.div
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="mb-8"
+        >
+          <h2 className="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 to-yellow-600 drop-shadow-[0_0_15px_rgba(234,179,8,0.5)] uppercase tracking-tighter transform -rotate-2">
+            {evento.titulo}
+          </h2>
+        </motion.div>
+
+        {/* GIF Container */}
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 200, damping: 20, delay: 0.1 }}
+          className="relative w-full max-w-2xl aspect-video rounded-3xl overflow-hidden border-4 border-yellow-500/50 shadow-[0_0_100px_rgba(234,179,8,0.4)] bg-black"
+        >
+          <img src={evento.gif_url} alt={evento.titulo} className="w-full h-full object-contain" />
+        </motion.div>
+
+        {/* Mensagem */}
+        <motion.div
+          initial={{ y: 50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="mt-8 bg-slate-900/90 border border-white/20 px-8 py-4 rounded-2xl shadow-2xl backdrop-blur-xl"
+        >
+          <p className="text-2xl md:text-3xl font-bold text-white leading-relaxed">
+            {evento.mensagem}
+          </p>
+        </motion.div>
+      </div>
+
+      {/* Confete / Partículas (Simplificado) */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {[...Array(20)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-2 h-2 bg-yellow-400 rounded-full"
+            initial={{ 
+              x: Math.random() * window.innerWidth, 
+              y: -20,
+              scale: Math.random() * 0.5 + 0.5
+            }}
+            animate={{ 
+              y: window.innerHeight + 20,
+              rotate: 360
+            }}
+            transition={{ 
+              duration: Math.random() * 2 + 2, 
+              repeat: Infinity,
+              ease: "linear",
+              delay: Math.random() * 2
+            }}
+          />
+        ))}
+      </div>
+    </motion.div>
+  );
+}
 
 function StatCard({ icon, label, value, subtext }: { icon: any, label: string, value: string, subtext?: string }) {
   return (

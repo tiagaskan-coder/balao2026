@@ -1,41 +1,61 @@
 'use client';
 
 import { useState } from 'react';
-import { Vendedor, ArenaConfig, VEICULOS_DISPONIVEIS } from '../types';
-import { criarVendedor, atualizarVendedor, removerVendedor, resetarVendas, adicionarVenda } from '../actions'; // adicionarVenda importado
-import { Trash2, Edit, Plus, Save, Trophy, Car, RotateCcw, Power, X, DollarSign, Users, Settings, Search } from 'lucide-react';
+import { Vendedor, ArenaConfig, VEICULOS_DISPONIVEIS, EventoMidia, TIPOS_EVENTOS } from '../types';
+import { criarVendedor, atualizarVendedor, removerVendedor, resetarVendas, adicionarVenda, criarEventoMidia, atualizarEventoMidia, removerEventoMidia } from '../actions';
+import { Trash2, Edit, Plus, Save, Trophy, Car, RotateCcw, Power, X, DollarSign, Users, Settings, Search, Image as ImageIcon, Video } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AdminClient({ 
   vendedoresIniciais, 
-  configInicial 
+  configInicial,
+  eventosMidiaIniciais
 }: { 
   vendedoresIniciais: Vendedor[], 
-  configInicial: ArenaConfig | null 
+  configInicial: ArenaConfig | null,
+  eventosMidiaIniciais: EventoMidia[]
 }) {
+  const [activeTab, setActiveTab] = useState<'vendedores' | 'eventos'>('vendedores');
+  
+  // Dados
   const [vendedores, setVendedores] = useState(vendedoresIniciais);
+  const [eventosMidia, setEventosMidia] = useState(eventosMidiaIniciais);
   const [config, setConfig] = useState(configInicial);
+  
+  // Modais
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddSaleModalOpen, setIsAddSaleModalOpen] = useState(false);
+  const [isEventoModalOpen, setIsEventoModalOpen] = useState(false);
+  
+  // Edição
   const [editingVendedor, setEditingVendedor] = useState<Vendedor | null>(null);
   const [saleVendedor, setSaleVendedor] = useState<Vendedor | null>(null);
+  const [editingEvento, setEditingEvento] = useState<EventoMidia | null>(null);
+  
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Estados do formulário de Vendedor
+  // --- Estados do formulário de Vendedor ---
   const [nome, setNome] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [veiculoEmoji, setVeiculoEmoji] = useState('🚗');
   const [metaValor, setMetaValor] = useState(1000);
   
-  // Estados do formulário de Venda
+  // --- Estados do formulário de Venda ---
   const [valorVenda, setValorVenda] = useState('');
+
+  // --- Estados do formulário de Evento ---
+  const [eventoTipo, setEventoTipo] = useState(TIPOS_EVENTOS[0].id);
+  const [gifUrl, setGifUrl] = useState('');
+  const [tituloEvento, setTituloEvento] = useState('');
+  const [msgTemplate, setMsgTemplate] = useState('');
+  const [eventoAtivo, setEventoAtivo] = useState(true);
 
   const filteredVendedores = vendedores.filter(v => 
     v.nome.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // --- Modal de CRUD Vendedor ---
+  // --- CRUD Vendedor ---
   const openEditModal = (vendedor?: Vendedor) => {
     if (vendedor) {
       setEditingVendedor(vendedor);
@@ -63,7 +83,6 @@ export default function AdminClient({
     formData.append('veiculo_emoji', veiculoEmoji);
     formData.append('meta_valor', metaValor.toString());
     
-    // Se for edição, mantém o valor atual de vendas
     if (editingVendedor) {
         formData.append('vendas_atual', editingVendedor.vendas_atual.toString());
     }
@@ -83,7 +102,7 @@ export default function AdminClient({
     }
   };
 
-  // --- Modal de Adicionar Venda ---
+  // --- Nova Venda ---
   const openSaleModal = (vendedor: Vendedor) => {
     setSaleVendedor(vendedor);
     setValorVenda('');
@@ -104,6 +123,65 @@ export default function AdminClient({
       window.location.reload();
     } catch (error) {
       alert('Erro ao adicionar venda: ' + error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- CRUD Eventos ---
+  const openEventoModal = (evento?: EventoMidia) => {
+    if (evento) {
+      setEditingEvento(evento);
+      setEventoTipo(evento.evento_tipo);
+      setGifUrl(evento.gif_url);
+      setTituloEvento(evento.titulo);
+      setMsgTemplate(evento.mensagem_template || '');
+      setEventoAtivo(evento.ativo);
+    } else {
+      setEditingEvento(null);
+      setEventoTipo(TIPOS_EVENTOS[0].id);
+      setGifUrl('');
+      setTituloEvento('');
+      setMsgTemplate('');
+      setEventoAtivo(true);
+    }
+    setIsEventoModalOpen(true);
+  };
+
+  const handleSaveEvento = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const formData = new FormData();
+    formData.append('evento_tipo', eventoTipo);
+    formData.append('gif_url', gifUrl);
+    formData.append('titulo', tituloEvento);
+    formData.append('mensagem_template', msgTemplate);
+    formData.append('ativo', String(eventoAtivo));
+
+    try {
+      if (editingEvento) {
+        await atualizarEventoMidia(editingEvento.id, formData);
+      } else {
+        await criarEventoMidia(formData);
+      }
+      setIsEventoModalOpen(false);
+      window.location.reload();
+    } catch (error) {
+      alert('Erro ao salvar evento: ' + error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteEvento = async (id: string) => {
+    if (!confirm('Remover este evento?')) return;
+    setLoading(true);
+    try {
+      await removerEventoMidia(id);
+      window.location.reload();
+    } catch (error) {
+      alert('Erro ao remover: ' + error);
     } finally {
       setLoading(false);
     }
@@ -146,6 +224,20 @@ export default function AdminClient({
           </div>
           <h1 className="text-xl font-bold text-slate-800">Arena Admin</h1>
         </div>
+        <div className="flex gap-2">
+            <button 
+                onClick={() => setActiveTab('vendedores')}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === 'vendedores' ? 'bg-blue-100 text-blue-700' : 'text-slate-600 hover:bg-slate-100'}`}
+            >
+                Competidores
+            </button>
+            <button 
+                onClick={() => setActiveTab('eventos')}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === 'eventos' ? 'bg-purple-100 text-purple-700' : 'text-slate-600 hover:bg-slate-100'}`}
+            >
+                GIFs e Eventos
+            </button>
+        </div>
         <div className="flex gap-3">
             <button 
                 onClick={handleReset}
@@ -154,62 +246,104 @@ export default function AdminClient({
                 <RotateCcw className="w-4 h-4" />
                 Zerar Temporada
             </button>
-            <button 
-                onClick={() => openEditModal()}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-lg shadow-blue-600/20 text-sm font-medium"
-            >
-                <Plus className="w-4 h-4" />
-                Novo Vendedor
-            </button>
+            {activeTab === 'vendedores' ? (
+                <button 
+                    onClick={() => openEditModal()}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-lg shadow-blue-600/20 text-sm font-medium"
+                >
+                    <Plus className="w-4 h-4" />
+                    Novo Vendedor
+                </button>
+            ) : (
+                <button 
+                    onClick={() => openEventoModal()}
+                    className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors shadow-lg shadow-purple-600/20 text-sm font-medium"
+                >
+                    <Plus className="w-4 h-4" />
+                    Novo Evento
+                </button>
+            )}
         </div>
       </nav>
 
       <main className="max-w-7xl mx-auto p-6">
         
-        {/* Filtros e Stats Rápidos */}
-        <div className="mb-8 flex flex-col md:flex-row gap-4 justify-between items-end">
-            <div className="relative w-full md:w-96">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input 
-                    type="text" 
-                    placeholder="Buscar vendedor..." 
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                />
-            </div>
-            <div className="text-sm text-slate-500">
-                {filteredVendedores.length} competidores ativos
-            </div>
-        </div>
-
-        {/* Grid de Vendedores */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <AnimatePresence>
-                {filteredVendedores.map((v) => (
-                    <VendedorCard 
-                        key={v.id} 
-                        vendedor={v} 
-                        onEdit={() => openEditModal(v)}
-                        onAddSale={() => openSaleModal(v)}
-                        onDelete={() => handleDelete(v.id)}
-                    />
-                ))}
-            </AnimatePresence>
-            
-            {/* Botão Adicionar Vazio */}
-            <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => openEditModal()}
-                className="flex flex-col items-center justify-center gap-4 bg-slate-100 border-2 border-dashed border-slate-300 rounded-2xl h-[280px] hover:bg-slate-200/50 hover:border-slate-400 transition-colors cursor-pointer text-slate-400 hover:text-slate-600"
-            >
-                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm">
-                    <Plus className="w-8 h-8" />
+        {activeTab === 'vendedores' ? (
+            <>
+                {/* Filtros e Stats Rápidos */}
+                <div className="mb-8 flex flex-col md:flex-row gap-4 justify-between items-end">
+                    <div className="relative w-full md:w-96">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <input 
+                            type="text" 
+                            placeholder="Buscar vendedor..." 
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        />
+                    </div>
+                    <div className="text-sm text-slate-500">
+                        {filteredVendedores.length} competidores ativos
+                    </div>
                 </div>
-                <span className="font-medium">Adicionar Vendedor</span>
-            </motion.button>
-        </div>
+
+                {/* Grid de Vendedores */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <AnimatePresence>
+                        {filteredVendedores.map((v) => (
+                            <VendedorCard 
+                                key={v.id} 
+                                vendedor={v} 
+                                onEdit={() => openEditModal(v)}
+                                onAddSale={() => openSaleModal(v)}
+                                onDelete={() => handleDelete(v.id)}
+                            />
+                        ))}
+                    </AnimatePresence>
+                    
+                    {/* Botão Adicionar Vazio */}
+                    <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => openEditModal()}
+                        className="flex flex-col items-center justify-center gap-4 bg-slate-100 border-2 border-dashed border-slate-300 rounded-2xl h-[280px] hover:bg-slate-200/50 hover:border-slate-400 transition-colors cursor-pointer text-slate-400 hover:text-slate-600"
+                    >
+                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm">
+                            <Plus className="w-8 h-8" />
+                        </div>
+                        <span className="font-medium">Adicionar Vendedor</span>
+                    </motion.button>
+                </div>
+            </>
+        ) : (
+            <>
+                {/* Grid de Eventos */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <AnimatePresence>
+                        {eventosMidia.map((evento) => (
+                            <EventoCard
+                                key={evento.id}
+                                evento={evento}
+                                onEdit={() => openEventoModal(evento)}
+                                onDelete={() => handleDeleteEvento(evento.id)}
+                            />
+                        ))}
+                    </AnimatePresence>
+                    
+                     <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => openEventoModal()}
+                        className="flex flex-col items-center justify-center gap-4 bg-slate-100 border-2 border-dashed border-slate-300 rounded-2xl h-[200px] hover:bg-slate-200/50 hover:border-slate-400 transition-colors cursor-pointer text-slate-400 hover:text-slate-600"
+                    >
+                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm">
+                            <Video className="w-8 h-8" />
+                        </div>
+                        <span className="font-medium">Adicionar GIF/Evento</span>
+                    </motion.button>
+                </div>
+            </>
+        )}
       </main>
 
       {/* --- MODAL DE NOVA VENDA --- */}
@@ -267,7 +401,7 @@ export default function AdminClient({
         )}
       </AnimatePresence>
 
-      {/* --- MODAL DE EDIÇÃO/CRIAÇÃO --- */}
+      {/* --- MODAL DE EDIÇÃO/CRIAÇÃO VENDEDOR --- */}
       <AnimatePresence>
         {isModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
@@ -357,6 +491,111 @@ export default function AdminClient({
           </div>
         )}
       </AnimatePresence>
+
+      {/* --- MODAL DE EDIÇÃO/CRIAÇÃO EVENTO --- */}
+      <AnimatePresence>
+        {isEventoModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden"
+            >
+              <div className="bg-purple-900 p-6 text-white flex justify-between items-center">
+                <h2 className="text-xl font-bold">{editingEvento ? 'Editar Evento' : 'Novo Evento'}</h2>
+                <button onClick={() => setIsEventoModalOpen(false)} className="text-slate-400 hover:text-white">
+                    <X className="w-6 h-6" />
+                </button>
+              </div>
+              
+              <form onSubmit={handleSaveEvento} className="p-6 space-y-4">
+                <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Tipo de Gatilho</label>
+                    <select 
+                        value={eventoTipo}
+                        onChange={(e) => setEventoTipo(e.target.value)}
+                        className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+                    >
+                        {TIPOS_EVENTOS.map(t => (
+                            <option key={t.id} value={t.id}>{t.label}</option>
+                        ))}
+                    </select>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Título Exibido</label>
+                    <input 
+                        type="text" 
+                        required
+                        value={tituloEvento}
+                        onChange={(e) => setTituloEvento(e.target.value)}
+                        placeholder="Ex: NOVA VENDA!"
+                        className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+                    />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">URL do GIF</label>
+                    <input 
+                        type="url" 
+                        required
+                        value={gifUrl}
+                        onChange={(e) => setGifUrl(e.target.value)}
+                        placeholder="https://media.giphy.com/..."
+                        className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+                    />
+                    {gifUrl && (
+                        <div className="mt-2 h-32 rounded-lg overflow-hidden bg-black flex items-center justify-center">
+                            <img src={gifUrl} alt="Preview" className="h-full object-contain" />
+                        </div>
+                    )}
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Mensagem (Template)</label>
+                    <input 
+                        type="text" 
+                        value={msgTemplate}
+                        onChange={(e) => setMsgTemplate(e.target.value)}
+                        placeholder="Ex: {vendedor} acabou de vender!"
+                        className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+                    />
+                    <p className="text-xs text-slate-500 mt-1">Variáveis disponíveis: {'{vendedor}'}, {'{valor}'}</p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <input 
+                        type="checkbox"
+                        id="ativo"
+                        checked={eventoAtivo}
+                        onChange={(e) => setEventoAtivo(e.target.checked)}
+                        className="w-4 h-4 text-purple-600"
+                    />
+                    <label htmlFor="ativo" className="text-sm font-medium text-slate-700">Evento Ativo</label>
+                </div>
+
+                <div className="pt-4 flex justify-end gap-3">
+                    <button 
+                        type="button" 
+                        onClick={() => setIsEventoModalOpen(false)}
+                        className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        type="submit" 
+                        disabled={loading}
+                        className="px-6 py-2 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
+                    >
+                        {loading ? 'Salvando...' : 'Salvar'}
+                    </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -437,6 +676,47 @@ function VendedorCard({ vendedor, onEdit, onAddSale, onDelete }: {
                 >
                     <Plus className="w-5 h-5" />
                     Adicionar Venda
+                </button>
+            </div>
+        </motion.div>
+    );
+}
+
+function EventoCard({ evento, onEdit, onDelete }: { 
+    evento: EventoMidia, 
+    onEdit: () => void, 
+    onDelete: () => void 
+}) {
+    return (
+        <motion.div 
+            layout
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col relative group"
+        >
+            <div className="h-40 bg-black flex items-center justify-center overflow-hidden">
+                <img src={evento.gif_url} alt={evento.titulo} className="h-full w-full object-cover opacity-80" />
+            </div>
+            
+            <div className="p-4">
+                <div className="flex justify-between items-start mb-2">
+                    <span className="text-xs font-bold px-2 py-1 bg-purple-100 text-purple-700 rounded-full uppercase">
+                        {TIPOS_EVENTOS.find(t => t.id === evento.evento_tipo)?.label || evento.evento_tipo}
+                    </span>
+                    {!evento.ativo && (
+                        <span className="text-xs font-bold px-2 py-1 bg-slate-100 text-slate-500 rounded-full">Inativo</span>
+                    )}
+                </div>
+                <h3 className="font-bold text-lg text-slate-800">{evento.titulo}</h3>
+                <p className="text-sm text-slate-500 truncate">{evento.mensagem_template}</p>
+            </div>
+
+            <div className="p-4 pt-0 flex gap-2">
+                <button onClick={onEdit} className="flex-1 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 font-medium rounded-lg transition-colors text-sm">
+                    Editar
+                </button>
+                <button onClick={onDelete} className="py-2 px-3 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors">
+                    <Trash2 className="w-4 h-4" />
                 </button>
             </div>
         </motion.div>
