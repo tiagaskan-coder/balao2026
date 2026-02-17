@@ -538,7 +538,7 @@ export default function ArenaClient({
       </div>
 
       {/* Pista de Corrida (Z-10) */}
-      <main className="flex-1 relative overflow-y-auto custom-scrollbar p-4 md:p-8 z-10">
+      <main className="flex-1 relative overflow-y-auto custom-scrollbar p-4 md:p-8 z-10 xl:pr-96">
         <div className="max-w-[1800px] mx-auto space-y-4 pb-20 relative">
           
           {/* Grid Lines Background */}
