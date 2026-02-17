@@ -45,7 +45,7 @@ export default function AdminClient({
   const [valorVenda, setValorVenda] = useState('');
 
   // --- Estados do formulário de Evento ---
-  const [eventoTipo, setEventoTipo] = useState(TIPOS_EVENTOS[0].id);
+  const [eventoTipo, setEventoTipo] = useState<EventoMidia['evento_tipo']>(TIPOS_EVENTOS[0].id);
   const [gifUrl, setGifUrl] = useState('');
   const [tituloEvento, setTituloEvento] = useState('');
   const [msgTemplate, setMsgTemplate] = useState('');

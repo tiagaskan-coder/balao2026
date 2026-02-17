@@ -1,6 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
+import { Bangers } from "next/font/google";
 import "./globals.css";
+
+const bangers = Bangers({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-bangers",
+});
 import { CartProvider } from "@/context/CartContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { AuthProvider } from "@/context/AuthContext";
@@ -98,7 +105,7 @@ export default async function RootLayout({
   return (
     <html lang="pt-BR">
       <body
-        className={`antialiased flex flex-col min-h-screen overflow-x-hidden`}
+        className={`${bangers.variable} antialiased flex flex-col min-h-screen overflow-x-hidden`}
       >
         <AuthProvider>
           <CartProvider>
