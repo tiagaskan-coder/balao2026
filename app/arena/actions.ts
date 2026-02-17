@@ -64,6 +64,29 @@ export async function atualizarVendedor(id: string, formData: FormData) {
   revalidatePath('/arena');
 }
 
+export async function adicionarVenda(id: string, valorAdicional: number) {
+  // Busca o valor atual primeiro para garantir consistência (ou usa procedure RPC se preferir atômico, mas aqui vamos de simples leitura+escrita por enquanto)
+  const { data: vendedor, error: fetchError } = await supabaseAdmin
+    .from('arena_vendedores')
+    .select('vendas_atual')
+    .eq('id', id)
+    .single();
+
+  if (fetchError || !vendedor) throw new Error('Vendedor não encontrado');
+
+  const novoTotal = (vendedor.vendas_atual || 0) + valorAdicional;
+
+  const { error } = await supabaseAdmin
+    .from('arena_vendedores')
+    .update({ vendas_atual: novoTotal })
+    .eq('id', id);
+
+  if (error) throw new Error('Erro ao adicionar venda: ' + error.message);
+  
+  revalidatePath('/arena/admin');
+  revalidatePath('/arena');
+}
+
 export async function removerVendedor(id: string) {
   const { error } = await supabaseAdmin
     .from('arena_vendedores')
