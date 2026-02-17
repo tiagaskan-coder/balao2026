@@ -587,11 +587,11 @@ export default function ArenaClient({
 // --- Componentes Auxiliares ---
 
 function EventOverlay({ evento, onClose }: { evento: FilaEvento, onClose: () => void }) {
-  // Fecha automaticamente após 10 segundos
+  // Fecha automaticamente após 8 segundos
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
-    }, 10000);
+    }, 8000);
     return () => clearTimeout(timer);
   }, [onClose]);
 
@@ -626,7 +626,7 @@ function EventOverlay({ evento, onClose }: { evento: FilaEvento, onClose: () => 
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 200, damping: 20, delay: 0.1 }}
-          className="relative w-full max-w-2xl aspect-video rounded-3xl overflow-hidden border-4 border-yellow-500/50 shadow-[0_0_100px_rgba(234,179,8,0.4)] bg-black"
+          className="relative w-64 h-64 md:w-96 md:h-96 rounded-full overflow-hidden border-8 border-yellow-500/50 shadow-[0_0_100px_rgba(234,179,8,0.4)] bg-black flex items-center justify-center"
         >
           <img src={evento.gif_url} alt={evento.titulo} className="w-full h-full object-contain" />
         </motion.div>
