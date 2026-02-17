@@ -20,6 +20,7 @@ type FilaEvento = {
   titulo: string;
   mensagem: string;
   tipo: string;
+  vendedor_avatar?: string | null;
 };
 
 export default function ArenaClient({
@@ -137,7 +138,8 @@ export default function ArenaClient({
           gif_url: config.gif_url,
           titulo: config.titulo,
           mensagem: config.mensagem_template?.replace('{vendedor}', novoVendedor.nome).replace('{valor}', `R$ ${(novoVendedor.vendas_atual - antigoVendedor.vendas_atual).toLocaleString('pt-BR')}`) || `Nova venda de ${novoVendedor.nome}!`,
-          tipo: 'nova_venda'
+          tipo: 'nova_venda',
+          vendedor_avatar: novoVendedor.avatar_url
         });
       }
 
@@ -151,7 +153,8 @@ export default function ArenaClient({
             gif_url: configAlta.gif_url,
             titulo: configAlta.titulo,
             mensagem: configAlta.mensagem_template?.replace('{vendedor}', novoVendedor.nome).replace('{valor}', `R$ ${diff.toLocaleString('pt-BR')}`) || `VENDAÇO de ${novoVendedor.nome}!`,
-            tipo: 'venda_alta'
+            tipo: 'venda_alta',
+            vendedor_avatar: novoVendedor.avatar_url
           });
         }
       }
@@ -171,7 +174,8 @@ export default function ArenaClient({
             gif_url: configCombo.gif_url,
             titulo: configCombo.titulo,
             mensagem: configCombo.mensagem_template?.replace('{vendedor}', novoVendedor.nome).replace('{count}', comboCounterRef.current.count.toString()) || `${novoVendedor.nome} está ON FIRE! ${comboCounterRef.current.count}x seguidas!`,
-            tipo: 'combo_vendas'
+            tipo: 'combo_vendas',
+            vendedor_avatar: novoVendedor.avatar_url
           });
         }
       }
@@ -189,7 +193,8 @@ export default function ArenaClient({
             gif_url: configGlobal.gif_url,
             titulo: configGlobal.titulo,
             mensagem: configGlobal.mensagem_template?.replace('{valor}', `R$ ${totalMeta.toLocaleString('pt-BR')}`) || `META GLOBAL BATIDA! PARABÉNS EQUIPE!`,
-            tipo: 'meta_global'
+            tipo: 'meta_global',
+            vendedor_avatar: novoVendedor.avatar_url
           });
         }
       }
@@ -204,7 +209,8 @@ export default function ArenaClient({
           gif_url: config.gif_url,
           titulo: config.titulo,
           mensagem: config.mensagem_template?.replace('{vendedor}', novoVendedor.nome) || `${novoVendedor.nome} BATEU A META!`,
-          tipo: 'meta_batida'
+          tipo: 'meta_batida',
+          vendedor_avatar: novoVendedor.avatar_url
         });
       }
     }
@@ -212,18 +218,14 @@ export default function ArenaClient({
     // 3. Ranking (Ultrapassagem e Liderança)
     // Recalcula ranking antigo
     const rankingAntigo = [...antigos].sort((a, b) => {
-      const progA = a.meta_valor > 0 ? a.vendas_atual / a.meta_valor : 0;
-      const progB = b.meta_valor > 0 ? b.vendas_atual / b.meta_valor : 0;
-      return progB - progA;
+      return b.vendas_atual - a.vendas_atual;
     });
     const indexAntigo = rankingAntigo.findIndex(v => v.id === novoVendedor.id);
 
     // Recalcula ranking novo (simulado)
     const novosVendedoresSimulados = antigos.map(v => v.id === novoVendedor.id ? novoVendedor : v);
     const rankingNovo = [...novosVendedoresSimulados].sort((a, b) => {
-      const progA = a.meta_valor > 0 ? a.vendas_atual / a.meta_valor : 0;
-      const progB = b.meta_valor > 0 ? b.vendas_atual / b.meta_valor : 0;
-      return progB - progA;
+      return b.vendas_atual - a.vendas_atual;
     });
     const indexNovo = rankingNovo.findIndex(v => v.id === novoVendedor.id);
 
@@ -238,7 +240,8 @@ export default function ArenaClient({
             gif_url: config.gif_url,
             titulo: config.titulo,
             mensagem: config.mensagem_template?.replace('{vendedor}', novoVendedor.nome) || `${novoVendedor.nome} assumiu a LIDERANÇA!`,
-            tipo: 'lideranca'
+            tipo: 'lideranca',
+            vendedor_avatar: novoVendedor.avatar_url
           });
         }
       } else {
@@ -250,7 +253,8 @@ export default function ArenaClient({
             gif_url: config.gif_url,
             titulo: config.titulo,
             mensagem: config.mensagem_template?.replace('{vendedor}', novoVendedor.nome) || `${novoVendedor.nome} subiu para #${indexNovo + 1}!`,
-            tipo: 'ultrapassagem'
+            tipo: 'ultrapassagem',
+            vendedor_avatar: novoVendedor.avatar_url
           });
         }
       }
@@ -268,9 +272,7 @@ export default function ArenaClient({
     }
 
     const sorted = [...vendedores].sort((a, b) => {
-      const progA = a.meta_valor > 0 ? a.vendas_atual / a.meta_valor : 0;
-      const progB = b.meta_valor > 0 ? b.vendas_atual / b.meta_valor : 0;
-      return progB - progA; // Maior % primeiro
+      return b.vendas_atual - a.vendas_atual; // Maior valor primeiro
     });
 
     const totalVendas = vendedores.reduce((acc, v) => acc + v.vendas_atual, 0);
@@ -397,6 +399,10 @@ export default function ArenaClient({
       supabase.removeChannel(channel);
     };
   }, []); // Dependências vazias pois usamos refs para acessar estados atualizados
+
+  const handleCloseEvento = () => {
+    setEventoAtual(null);
+  };
 
   if (!config?.ativo) {
     return <WaitingScreen title={config?.titulo} status={connectionStatus} />;
@@ -622,14 +628,28 @@ function EventOverlay({ evento, onClose }: { evento: FilaEvento, onClose: () => 
         </motion.div>
 
         {/* GIF Container */}
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 200, damping: 20, delay: 0.1 }}
-          className="relative w-64 h-64 md:w-96 md:h-96 rounded-full overflow-hidden border-8 border-yellow-500/50 shadow-[0_0_100px_rgba(234,179,8,0.4)] bg-black flex items-center justify-center"
-        >
-          <img src={evento.gif_url} alt={evento.titulo} className="w-full h-full object-contain" />
-        </motion.div>
+        <div className="relative inline-block">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 200, damping: 20, delay: 0.1 }}
+            className="relative w-64 h-64 md:w-96 md:h-96 rounded-full overflow-hidden border-8 border-yellow-500/50 shadow-[0_0_100px_rgba(234,179,8,0.4)] bg-black flex items-center justify-center"
+          >
+            <img src={evento.gif_url} alt={evento.titulo} className="w-full h-full object-cover" />
+          </motion.div>
+
+          {/* Avatar do Vendedor (Aro Menor) */}
+          {evento.vendedor_avatar && (
+            <motion.div
+              initial={{ scale: 0, opacity: 0, x: 20, y: 20 }}
+              animate={{ scale: 1, opacity: 1, x: 0, y: 0 }}
+              transition={{ delay: 0.5, type: "spring", stiffness: 300, damping: 20 }}
+              className="absolute -bottom-4 -right-4 md:bottom-0 md:right-0 w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-yellow-400 shadow-[0_0_30px_rgba(0,0,0,0.6)] overflow-hidden z-20 bg-slate-800"
+            >
+              <img src={evento.vendedor_avatar} alt="Vendedor" className="w-full h-full object-cover" />
+            </motion.div>
+          )}
+        </div>
 
         {/* Mensagem */}
         <motion.div
