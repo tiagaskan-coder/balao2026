@@ -62,6 +62,43 @@ export default function ArenaClient({
     console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Definido' : 'Indefinido');
   }, [vendedoresIniciais, configInicial, eventosIniciais]);
 
+  // Sincroniza estado com props (revalidatePath)
+  useEffect(() => {
+    if (vendedoresIniciais) {
+      setVendedores(prevVendedores => {
+        // Se for a primeira carga (prev vazio), não dispara eventos
+        if (prevVendedores.length === 0) return vendedoresIniciais;
+
+        let mudou = false;
+        vendedoresIniciais.forEach((novo) => {
+          const antigo = prevVendedores.find(v => v.id === novo.id);
+          if (antigo && JSON.stringify(antigo) !== JSON.stringify(novo)) {
+            mudou = true;
+            // Só dispara eventos se a diferença de vendas for positiva
+            if (novo.vendas_atual > antigo.vendas_atual) {
+               processarEventos(novo);
+            }
+          }
+        });
+        
+        // Verifica se houve novos vendedores (insert)
+        const novosIds = vendedoresIniciais.map(v => v.id);
+        const prevIds = prevVendedores.map(v => v.id);
+        if (novosIds.length !== prevIds.length) mudou = true;
+
+        return mudou ? vendedoresIniciais : prevVendedores;
+      });
+    }
+  }, [vendedoresIniciais]);
+
+  useEffect(() => {
+    if (configInicial) setConfig(configInicial);
+  }, [configInicial]);
+
+  useEffect(() => {
+    if (eventosIniciais) setEventosConfig(eventosIniciais);
+  }, [eventosIniciais]);
+
   // Processamento da Fila de Eventos
   useEffect(() => {
     if (!eventoAtual && filaEventos.length > 0) {
@@ -252,9 +289,7 @@ export default function ArenaClient({
               mudou = true;
               // Só dispara eventos se a diferença de vendas for positiva
               if (novo.vendas_atual > antigo.vendas_atual) {
-                 if (connectionStatus !== 'SUBSCRIBED') {
-                    processarEventos(novo);
-                 }
+                 processarEventos(novo);
               }
             }
           });
