@@ -718,6 +718,11 @@ function RacerRow({ data, rank, isLeader }: { data: Vendedor, rank: number, isLe
   const progressoLimitado = Math.min(Math.max(progresso, 0), 100);
   const bateuMeta = progresso >= 100;
 
+  // Emojis que nativamente apontam para a esquerda e precisam ser espelhados para a direita
+  const FLIP_EMOJIS = ['🚗', '🚙', '🚕', '🛺', '🚌', '🚎', '🚓', '🚑', '🚒', '🚐', '🛻', '🚚', '🚛', '🚜', '🦽', '🦼', '🚲', '🛴'];
+  const emoji = data.veiculo_emoji || '🏎️';
+  const shouldFlip = FLIP_EMOJIS.includes(emoji);
+
   // Cores dinâmicas baseadas no Rank
   const rankColor = rank <= 3 ? RANK_COLORS[rank - 1] : RANK_COLORS[3];
   
@@ -839,7 +844,9 @@ function RacerRow({ data, rank, isLeader }: { data: Vendedor, rank: number, isLe
                 }}
                 className="text-4xl filter drop-shadow-2xl transform transition-transform hover:scale-110"
               >
-                {data.veiculo_emoji || '🏎️'}
+                <div className={shouldFlip ? "scale-x-[-1]" : ""}>
+                  {emoji}
+                </div>
               </motion.div>
               
               {/* Efeitos Especiais (Fogo/Nitro) */}
