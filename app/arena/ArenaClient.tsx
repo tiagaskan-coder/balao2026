@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Vendedor, ArenaConfig, EventoMidia } from './types';
+import { Vendedor, ArenaConfig, EventoMidia, Venda } from './types';
 import { supabase } from '@/utils/supabase';
-import { Trophy, Flag, Zap, Target, Crown, Flame, AlertCircle, RefreshCw, X } from 'lucide-react';
+import { Trophy, Flag, Zap, Target, Crown, Flame, AlertCircle, RefreshCw, X, Clock, DollarSign } from 'lucide-react';
 
 // Cores e Temas para os Corredores
 const RANK_COLORS = [
@@ -25,11 +25,13 @@ type FilaEvento = {
 export default function ArenaClient({
   vendedoresIniciais,
   configInicial,
-  eventosIniciais
+  eventosIniciais,
+  vendasRecentesIniciais
 }: {
   vendedoresIniciais: Vendedor[],
   configInicial: ArenaConfig | null,
-  eventosIniciais: EventoMidia[]
+  eventosIniciais: EventoMidia[],
+  vendasRecentesIniciais?: Venda[]
 }) {
   const [vendedores, setVendedores] = useState<Vendedor[]>(vendedoresIniciais || []);
   const [config, setConfig] = useState<ArenaConfig | null>(configInicial);
@@ -37,12 +39,15 @@ export default function ArenaClient({
   const [filaEventos, setFilaEventos] = useState<FilaEvento[]>([]);
   const [eventoAtual, setEventoAtual] = useState<FilaEvento | null>(null);
   
+  const [vendasRecentes, setVendasRecentes] = useState<Venda[]>(vendasRecentesIniciais || []);
+
   const [lastUpdate, setLastUpdate] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<string>('CONNECTING');
 
   // Refs para acesso no callback do realtime
   const vendedoresRef = useRef(vendedores);
   const eventosConfigRef = useRef(eventosConfig);
+  const vendasRecentesRef = useRef(vendasRecentes);
   const comboCounterRef = useRef<{ id: string, count: number }>({ id: '', count: 0 });
 
   useEffect(() => {
@@ -52,6 +57,10 @@ export default function ArenaClient({
   useEffect(() => {
     eventosConfigRef.current = eventosConfig;
   }, [eventosConfig]);
+  
+  useEffect(() => {
+    vendasRecentesRef.current = vendasRecentes;
+  }, [vendasRecentes]);
 
   // Logs de Debug
   useEffect(() => {
@@ -59,8 +68,9 @@ export default function ArenaClient({
     console.log('Vendedores Iniciais:', vendedoresIniciais);
     console.log('Config Inicial:', configInicial);
     console.log('Eventos Iniciais:', eventosIniciais);
+    console.log('Vendas Recentes Iniciais:', vendasRecentesIniciais);
     console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Definido' : 'Indefinido');
-  }, [vendedoresIniciais, configInicial, eventosIniciais]);
+  }, [vendedoresIniciais, configInicial, eventosIniciais, vendasRecentesIniciais]);
 
   // Sincroniza estado com props (revalidatePath)
   useEffect(() => {
@@ -365,6 +375,18 @@ export default function ArenaClient({
             }
         }
       )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'arena_vendas' },
+        (payload) => {
+            console.log('⚡ Realtime Event (Vendas):', payload);
+            const novaVenda = payload.new as Venda;
+            // Encontrar vendedor para preencher dados visuais
+            const vendedor = vendedoresRef.current.find(v => v.id === novaVenda.vendedor_id);
+            const vendaCompleta = { ...novaVenda, vendedor };
+            setVendasRecentes(prev => [vendaCompleta, ...prev].slice(0, 50));
+        }
+      )
       .subscribe((status) => {
         console.log('Status da Conexão:', status);
         setConnectionStatus(status);
@@ -449,6 +471,71 @@ export default function ArenaClient({
           </div>
         </div>
       </header>
+
+      {/* Painel de Últimas Vendas (Lateral Direito - Desktop) */}
+      <div className="fixed top-32 right-8 w-80 max-h-[calc(100vh-10rem)] z-30 flex flex-col gap-4 pointer-events-none hidden xl:flex">
+        <div className="bg-slate-900/80 backdrop-blur-md border border-white/10 p-4 rounded-xl shadow-2xl pointer-events-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-emerald-500/10 rounded-lg">
+              <Clock className="w-5 h-5 text-emerald-400" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Últimas Vendas</h3>
+              <div className="text-[10px] text-emerald-400 font-mono">Tempo Real</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto custom-scrollbar pointer-events-auto space-y-2 pr-2 pb-4">
+          <AnimatePresence initial={false}>
+            {vendasRecentes.map((venda, i) => (
+              <motion.div
+                key={venda.id}
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ delay: i * 0.05 }}
+                className="group relative bg-slate-800/60 hover:bg-slate-800/90 backdrop-blur-sm border border-white/5 hover:border-white/20 p-3 rounded-xl transition-all flex items-center gap-3 overflow-hidden"
+              >
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500/50" />
+                
+                <div className="relative w-10 h-10 rounded-full bg-slate-700 overflow-hidden border border-slate-600 group-hover:border-white/30 transition-colors flex-shrink-0">
+                  {venda.vendedor?.avatar_url ? (
+                    <img src={venda.vendedor.avatar_url} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-sm font-bold text-slate-400">
+                      {venda.vendedor?.nome?.charAt(0) || '?'}
+                    </div>
+                  )}
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex justify-between items-start">
+                    <span className="font-bold text-slate-200 text-sm truncate pr-2">
+                      {venda.vendedor?.nome || 'Desconhecido'}
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-mono whitespace-nowrap">
+                      {new Date(venda.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 mt-0.5">
+                    <DollarSign className="w-3 h-3 text-emerald-500" />
+                    <span className="font-bold text-emerald-400 text-sm font-mono">
+                      {venda.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+          
+          {vendasRecentes.length === 0 && (
+             <div className="text-center py-8 text-slate-500 text-xs italic">
+               Aguardando vendas...
+             </div>
+          )}
+        </div>
+      </div>
 
       {/* Pista de Corrida (Z-10) */}
       <main className="flex-1 relative overflow-y-auto custom-scrollbar p-4 md:p-8 z-10">

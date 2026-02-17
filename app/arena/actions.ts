@@ -2,12 +2,75 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
-import { Vendedor, ArenaConfig, EventoMidia } from './types';
+import { Vendedor, ArenaConfig, EventoMidia, Venda } from './types';
 
 // Inicializa o cliente Supabase Admin
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+// --- Vendas (Histórico) ---
+
+export async function getVendasRecentes(limit = 50): Promise<Venda[]> {
+  const { data, error } = await supabaseAdmin
+    .from('arena_vendas')
+    .select('*, vendedor:arena_vendedores(*)')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error('Erro ao buscar vendas:', error);
+    return [];
+  }
+  
+  // Mapeia para garantir a estrutura correta (Supabase retorna array em joins as vezes)
+  return data.map((v: any) => ({
+    ...v,
+    vendedor: Array.isArray(v.vendedor) ? v.vendedor[0] : v.vendedor
+  })) as Venda[];
+}
+
+export async function removerVenda(vendaId: string) {
+  // 1. Busca a venda para saber o valor e o vendedor
+  const { data: venda, error: fetchError } = await supabaseAdmin
+    .from('arena_vendas')
+    .select('*')
+    .eq('id', vendaId)
+    .single();
+
+  if (fetchError || !venda) throw new Error('Venda não encontrada');
+
+  // 2. Busca o vendedor atual
+  const { data: vendedor, error: vendError } = await supabaseAdmin
+    .from('arena_vendedores')
+    .select('vendas_atual')
+    .eq('id', venda.vendedor_id)
+    .single();
+
+  if (vendError || !vendedor) throw new Error('Vendedor não encontrado');
+
+  // 3. Subtrai o valor (garante não ficar negativo)
+  const novoTotal = Math.max(0, (vendedor.vendas_atual || 0) - venda.valor);
+
+  // 4. Atualiza vendedor
+  const { error: updateError } = await supabaseAdmin
+    .from('arena_vendedores')
+    .update({ vendas_atual: novoTotal })
+    .eq('id', venda.vendedor_id);
+
+  if (updateError) throw new Error('Erro ao atualizar total do vendedor');
+
+  // 5. Remove a venda do histórico
+  const { error: deleteError } = await supabaseAdmin
+    .from('arena_vendas')
+    .delete()
+    .eq('id', vendaId);
+
+  if (deleteError) throw new Error('Erro ao remover registro de venda');
+
+  revalidatePath('/arena/admin');
+  revalidatePath('/arena');
+}
 
 // --- Vendedores ---
 
@@ -96,21 +159,38 @@ export async function adicionarVenda(id: string, valor: number) {
 
   const novaVenda = (vendedor.vendas_atual || 0) + valor;
 
+  // 1. Atualiza total
   const { error } = await supabaseAdmin
     .from('arena_vendedores')
     .update({ vendas_atual: novaVenda })
     .eq('id', id);
 
   if (error) throw new Error('Erro ao adicionar venda: ' + error.message);
+
+  // 2. Registra histórico
+  await supabaseAdmin
+    .from('arena_vendas')
+    .insert({
+      vendedor_id: id,
+      valor: valor
+    });
+
   revalidatePath('/arena/admin');
   revalidatePath('/arena');
 }
 
 export async function resetarVendas() {
+  // 1. Limpa histórico
+  await supabaseAdmin
+    .from('arena_vendas')
+    .delete()
+    .neq('id', '00000000-0000-0000-0000-000000000000');
+
+  // 2. Zera totais
   const { error } = await supabaseAdmin
     .from('arena_vendedores')
     .update({ vendas_atual: 0 })
-    .neq('id', '00000000-0000-0000-0000-000000000000'); // Update all rows workaround if needed, but neq id 0 works usually or just without filter
+    .neq('id', '00000000-0000-0000-0000-000000000000'); 
 
   if (error) throw new Error('Erro ao resetar vendas: ' + error.message);
   revalidatePath('/arena/admin');

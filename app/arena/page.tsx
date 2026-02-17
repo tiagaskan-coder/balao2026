@@ -1,14 +1,15 @@
-import { getVendedores, getConfig, getEventosMidia } from './actions';
+import { getVendedores, getConfig, getEventosMidia, getVendasRecentes } from './actions';
 import ArenaClient from './ArenaClient';
 
 // Força renderização dinâmica
 export const dynamic = 'force-dynamic';
 
 export default async function ArenaPage() {
-  const [vendedores, config, eventos] = await Promise.all([
+  const [vendedores, config, eventos, vendasRecentes] = await Promise.all([
     getVendedores(),
     getConfig(),
-    getEventosMidia()
+    getEventosMidia(),
+    getVendasRecentes(10)
   ]);
 
   return (
@@ -16,6 +17,7 @@ export default async function ArenaPage() {
       vendedoresIniciais={vendedores} 
       configInicial={config} 
       eventosIniciais={eventos}
+      vendasRecentesIniciais={vendasRecentes}
     />
   );
 }

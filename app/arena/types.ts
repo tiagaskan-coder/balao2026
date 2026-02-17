@@ -8,6 +8,14 @@ export type Vendedor = {
   criado_em: string;
 };
 
+export type Venda = {
+  id: string;
+  vendedor_id: string;
+  valor: number;
+  created_at: string;
+  vendedor?: Vendedor; // Join opcional
+};
+
 export type ArenaConfig = {
   id: number;
   ativo: boolean;

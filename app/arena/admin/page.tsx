@@ -1,14 +1,15 @@
-import { getVendedores, getConfig, getEventosMidia } from '../actions';
+import { getVendedores, getConfig, getEventosMidia, getVendasRecentes } from '../actions';
 import AdminClient from './AdminClient';
 
 // Força renderização dinâmica pois depende de dados do banco que mudam
 export const dynamic = 'force-dynamic';
 
 export default async function ArenaAdminPage() {
-  const [vendedores, config, eventosMidia] = await Promise.all([
+  const [vendedores, config, eventosMidia, vendasRecentes] = await Promise.all([
     getVendedores(),
     getConfig(),
-    getEventosMidia()
+    getEventosMidia(),
+    getVendasRecentes(100)
   ]);
 
   return (
@@ -16,6 +17,7 @@ export default async function ArenaAdminPage() {
       vendedoresIniciais={vendedores} 
       configInicial={config} 
       eventosMidiaIniciais={eventosMidia}
+      vendasRecentesIniciais={vendasRecentes}
     />
   );
 }

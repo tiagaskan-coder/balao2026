@@ -1,25 +1,28 @@
 'use client';
 
 import { useState } from 'react';
-import { Vendedor, ArenaConfig, VEICULOS_DISPONIVEIS, EventoMidia, TIPOS_EVENTOS } from '../types';
-import { criarVendedor, atualizarVendedor, removerVendedor, resetarVendas, adicionarVenda, criarEventoMidia, atualizarEventoMidia, removerEventoMidia } from '../actions';
-import { Trash2, Edit, Plus, Save, Trophy, Car, RotateCcw, Power, X, DollarSign, Users, Settings, Search, Image as ImageIcon, Video } from 'lucide-react';
+import { Vendedor, ArenaConfig, VEICULOS_DISPONIVEIS, EventoMidia, TIPOS_EVENTOS, Venda } from '../types';
+import { criarVendedor, atualizarVendedor, removerVendedor, resetarVendas, adicionarVenda, criarEventoMidia, atualizarEventoMidia, removerEventoMidia, removerVenda } from '../actions';
+import { Trash2, Edit, Plus, Save, Trophy, Car, RotateCcw, Power, X, DollarSign, Users, Settings, Search, Image as ImageIcon, Video, History, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AdminClient({ 
   vendedoresIniciais, 
   configInicial,
-  eventosMidiaIniciais
+  eventosMidiaIniciais,
+  vendasRecentesIniciais
 }: { 
   vendedoresIniciais: Vendedor[], 
   configInicial: ArenaConfig | null,
-  eventosMidiaIniciais: EventoMidia[]
+  eventosMidiaIniciais: EventoMidia[],
+  vendasRecentesIniciais: Venda[]
 }) {
-  const [activeTab, setActiveTab] = useState<'vendedores' | 'eventos'>('vendedores');
+  const [activeTab, setActiveTab] = useState<'vendedores' | 'eventos' | 'historico'>('vendedores');
   
   // Dados
   const [vendedores, setVendedores] = useState(vendedoresIniciais);
   const [eventosMidia, setEventosMidia] = useState(eventosMidiaIniciais);
+  const [vendasRecentes, setVendasRecentes] = useState(vendasRecentesIniciais);
   const [config, setConfig] = useState(configInicial);
   
   // Modais
@@ -187,6 +190,19 @@ export default function AdminClient({
     }
   };
 
+  const handleDeleteVenda = async (id: string) => {
+    if (!confirm('Remover esta venda? O valor será subtraído do vendedor.')) return;
+    setLoading(true);
+    try {
+      await removerVenda(id);
+      window.location.reload();
+    } catch (error) {
+      alert('Erro ao remover: ' + error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // --- Outras Ações ---
   const handleDelete = async (id: string) => {
     if (!confirm('Tem certeza que deseja remover este vendedor?')) return;
@@ -237,6 +253,12 @@ export default function AdminClient({
             >
                 GIFs e Eventos
             </button>
+            <button 
+                onClick={() => setActiveTab('historico')}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === 'historico' ? 'bg-orange-100 text-orange-700' : 'text-slate-600 hover:bg-slate-100'}`}
+            >
+                Histórico
+            </button>
         </div>
         <div className="flex gap-3">
             <button 
@@ -246,7 +268,7 @@ export default function AdminClient({
                 <RotateCcw className="w-4 h-4" />
                 Zerar Temporada
             </button>
-            {activeTab === 'vendedores' ? (
+            {activeTab === 'vendedores' && (
                 <button 
                     onClick={() => openEditModal()}
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-lg shadow-blue-600/20 text-sm font-medium"
@@ -254,7 +276,8 @@ export default function AdminClient({
                     <Plus className="w-4 h-4" />
                     Novo Vendedor
                 </button>
-            ) : (
+            )}
+            {activeTab === 'eventos' && (
                 <button 
                     onClick={() => openEventoModal()}
                     className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors shadow-lg shadow-purple-600/20 text-sm font-medium"
@@ -268,7 +291,7 @@ export default function AdminClient({
 
       <main className="max-w-7xl mx-auto p-6">
         
-        {activeTab === 'vendedores' ? (
+        {activeTab === 'vendedores' && (
             <>
                 {/* Filtros e Stats Rápidos */}
                 <div className="mb-8 flex flex-col md:flex-row gap-4 justify-between items-end">
@@ -315,7 +338,9 @@ export default function AdminClient({
                     </motion.button>
                 </div>
             </>
-        ) : (
+        )}
+        
+        {activeTab === 'eventos' && (
             <>
                 {/* Grid de Eventos */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -343,6 +368,63 @@ export default function AdminClient({
                     </motion.button>
                 </div>
             </>
+        )}
+
+        {activeTab === 'historico' && (
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div className="p-6 border-b border-slate-200 flex justify-between items-center">
+                    <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <History className="w-5 h-5 text-orange-500" />
+                        Histórico de Vendas Recentes
+                    </h2>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                        <thead className="bg-slate-50 text-slate-500 border-b border-slate-200">
+                            <tr>
+                                <th className="px-6 py-4 font-semibold">Data/Hora</th>
+                                <th className="px-6 py-4 font-semibold">Vendedor</th>
+                                <th className="px-6 py-4 font-semibold">Valor</th>
+                                <th className="px-6 py-4 font-semibold text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {vendasRecentes.map((venda) => (
+                                <tr key={venda.id} className="hover:bg-slate-50 transition-colors">
+                                    <td className="px-6 py-4 text-slate-600">
+                                        {new Date(venda.created_at).toLocaleString('pt-BR')}
+                                    </td>
+                                    <td className="px-6 py-4 font-medium text-slate-900 flex items-center gap-2">
+                                        {venda.vendedor?.avatar_url && (
+                                            <img src={venda.vendedor.avatar_url} alt="" className="w-6 h-6 rounded-full object-cover" />
+                                        )}
+                                        {venda.vendedor?.nome || 'Desconhecido'}
+                                    </td>
+                                    <td className="px-6 py-4 text-emerald-600 font-bold">
+                                        R$ {venda.valor.toLocaleString('pt-BR')}
+                                    </td>
+                                    <td className="px-6 py-4 text-right">
+                                        <button 
+                                            onClick={() => handleDeleteVenda(venda.id)}
+                                            className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors"
+                                            title="Excluir Venda"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                            {vendasRecentes.length === 0 && (
+                                <tr>
+                                    <td colSpan={4} className="px-6 py-12 text-center text-slate-400">
+                                        Nenhuma venda registrada recentemente.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         )}
       </main>
 
