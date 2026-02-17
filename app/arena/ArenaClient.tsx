@@ -233,6 +233,50 @@ export default function ArenaClient({
     return { sortedVendedores: sorted, totalVendas, totalMeta, progressoGeral };
   }, [vendedores]);
 
+  // Polling de Fallback e Atualização de Segurança (a cada 5s)
+  useEffect(() => {
+    const fetchDados = async () => {
+      // Se a conexão estiver saudável, evitamos polling excessivo (opcional, mas seguro manter)
+      // if (connectionStatus === 'SUBSCRIBED') return;
+
+      const { data: novosVendedores } = await supabase.from('arena_vendedores').select('*');
+      
+      if (novosVendedores) {
+        setVendedores(prevVendedores => {
+          let mudou = false;
+          
+          // Verifica mudanças e dispara eventos se necessário (fallback do realtime)
+          novosVendedores.forEach((novo: any) => {
+            const antigo = prevVendedores.find(v => v.id === novo.id);
+            if (antigo && JSON.stringify(antigo) !== JSON.stringify(novo)) {
+              mudou = true;
+              // Só dispara eventos se a diferença de vendas for positiva
+              if (novo.vendas_atual > antigo.vendas_atual) {
+                 if (connectionStatus !== 'SUBSCRIBED') {
+                    processarEventos(novo);
+                 }
+              }
+            }
+          });
+
+          if (mudou) return novosVendedores as Vendedor[];
+          return prevVendedores;
+        });
+      }
+
+      const { data: novaConfig } = await supabase.from('arena_config').select('*').single();
+      if (novaConfig) setConfig(novaConfig as ArenaConfig);
+
+      const { data: novosEventos } = await supabase.from('arena_eventos_midia').select('*');
+      if (novosEventos) setEventosConfig(novosEventos as EventoMidia[]);
+    };
+
+    const interval = setInterval(fetchDados, 5000); // 5 segundos
+    fetchDados(); // Busca imediata
+
+    return () => clearInterval(interval);
+  }, [connectionStatus]); // Recria se o status mudar
+
   // Realtime Subscription
   useEffect(() => {
     console.log('Iniciando conexão Realtime...');
