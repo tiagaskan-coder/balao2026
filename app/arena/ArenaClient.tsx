@@ -145,7 +145,7 @@ export default function ArenaClient({
 
     if (audioFile) {
       const audio = new Audio(audioFile);
-      audio.volume = 0.7; // Volume ajustável
+      audio.volume = 1.0; // Volume máximo para garantir audibilidade
       
       // Tenta reproduzir (pode falhar se não houver interação do usuário antes, policy dos navegadores)
       const playPromise = audio.play();
@@ -153,10 +153,30 @@ export default function ArenaClient({
       if (playPromise !== undefined) {
         playPromise.catch(error => {
           console.log('Reprodução de áudio bloqueada ou falhou:', error);
+          // Tenta forçar play se possível ou logar para debug
         });
       }
     }
   }, [eventoAtual]);
+
+  // Desbloqueio de Áudio (Autoplay Policy)
+  useEffect(() => {
+    const unlockAudio = () => {
+      const audio = new Audio('/sounds/horn.mp3');
+      audio.volume = 0;
+      audio.play().catch(() => {});
+      document.removeEventListener('click', unlockAudio);
+      document.removeEventListener('keydown', unlockAudio);
+    };
+    
+    document.addEventListener('click', unlockAudio);
+    document.addEventListener('keydown', unlockAudio);
+    
+    return () => {
+      document.removeEventListener('click', unlockAudio);
+      document.removeEventListener('keydown', unlockAudio);
+    };
+  }, []);
 
   // Função para detectar e disparar eventos
   const processarEventos = (novoVendedor: Vendedor) => {
