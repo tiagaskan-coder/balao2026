@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Vendedor, ArenaConfig, EventoMidia, Venda } from './types';
 import { supabase } from '@/utils/supabase';
@@ -406,9 +406,9 @@ export default function ArenaClient({
     };
   }, []); // Dependências vazias pois usamos refs para acessar estados atualizados
 
-  const handleCloseEvento = () => {
+  const handleCloseEvento = useCallback(() => {
     setEventoAtual(null);
-  };
+  }, []);
 
   if (!config?.ativo) {
     return <WaitingScreen title={config?.titulo} status={connectionStatus} />;
@@ -441,7 +441,7 @@ export default function ArenaClient({
           <EventOverlay 
             key={eventoAtual.id}
             evento={eventoAtual} 
-            onClose={() => setEventoAtual(null)} 
+            onClose={handleCloseEvento} 
           />
         )}
       </AnimatePresence>
