@@ -131,9 +131,13 @@ export default function ArenaClient({
     let audioFile = '';
     
     // Tipos de evento que disparam corneta
-    if (['nova_venda', 'venda_alta', 'combo_vendas', 'meta_batida', 'meta_global'].includes(eventoAtual.tipo)) {
+    if (['nova_venda', 'combo_vendas', 'meta_batida', 'meta_global'].includes(eventoAtual.tipo)) {
       audioFile = '/sounds/horn.mp3';
     } 
+    // Venda Alta dispara som de caixa registradora (dinheiro)
+    else if (eventoAtual.tipo === 'venda_alta') {
+      audioFile = '/sounds/cash.mp3';
+    }
     // Tipos de evento que disparam carro de corrida
     else if (['ultrapassagem', 'lideranca'].includes(eventoAtual.tipo)) {
       audioFile = '/sounds/race-car.mp3';
@@ -165,21 +169,9 @@ export default function ArenaClient({
     const configsAtivas = eventosConfigRef.current.filter(e => e.ativo);
 
     // 1. Nova Venda
-    if (novoVendedor.vendas_atual > antigoVendedor.vendas_atual) {
-      const config = configsAtivas.find(e => e.evento_tipo === 'nova_venda');
-      if (config) {
-        eventosDisparados.push({
-          id: crypto.randomUUID(),
-          gif_url: config.gif_url,
-          titulo: config.titulo,
-          mensagem: config.mensagem_template?.replace('{vendedor}', novoVendedor.nome).replace('{valor}', `R$ ${(novoVendedor.vendas_atual - antigoVendedor.vendas_atual).toLocaleString('pt-BR')}`) || `Nova venda de ${novoVendedor.nome}!`,
-          tipo: 'nova_venda',
-          vendedor_avatar: novoVendedor.avatar_url
-        });
-      }
-
+    const diff = novoVendedor.vendas_atual - antigoVendedor.vendas_atual;
+    if (diff > 0) {
       // 1.1 Venda Alta (ex: > 5000 de diferença)
-      const diff = novoVendedor.vendas_atual - antigoVendedor.vendas_atual;
       if (diff >= 5000) {
         const configAlta = configsAtivas.find(e => e.evento_tipo === 'venda_alta');
         if (configAlta) {
@@ -189,6 +181,19 @@ export default function ArenaClient({
             titulo: configAlta.titulo,
             mensagem: configAlta.mensagem_template?.replace('{vendedor}', novoVendedor.nome).replace('{valor}', `R$ ${diff.toLocaleString('pt-BR')}`) || `VENDAÇO de ${novoVendedor.nome}!`,
             tipo: 'venda_alta',
+            vendedor_avatar: novoVendedor.avatar_url
+          });
+        }
+      } else {
+        // 1.2 Nova Venda Normal
+        const config = configsAtivas.find(e => e.evento_tipo === 'nova_venda');
+        if (config) {
+          eventosDisparados.push({
+            id: crypto.randomUUID(),
+            gif_url: config.gif_url,
+            titulo: config.titulo,
+            mensagem: config.mensagem_template?.replace('{vendedor}', novoVendedor.nome).replace('{valor}', `R$ ${diff.toLocaleString('pt-BR')}`) || `Nova venda de ${novoVendedor.nome}!`,
+            tipo: 'nova_venda',
             vendedor_avatar: novoVendedor.avatar_url
           });
         }
