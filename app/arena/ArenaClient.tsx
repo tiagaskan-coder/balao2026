@@ -40,6 +40,7 @@ export default function ArenaClient({
   const [filaEventos, setFilaEventos] = useState<FilaEvento[]>([]);
   const [eventoAtual, setEventoAtual] = useState<FilaEvento | null>(null);
   const [shouldReload, setShouldReload] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
   
   const [vendasRecentes, setVendasRecentes] = useState<Venda[]>(vendasRecentesIniciais || []);
 
@@ -118,11 +119,8 @@ export default function ArenaClient({
       setEventoAtual(proximo);
       setFilaEventos(prev => prev.slice(1));
     } else if (!eventoAtual && filaEventos.length === 0 && shouldReload) {
-      // Pequeno delay para garantir que a última animação fechou completamente visualmente
-      const timer = setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-      return () => clearTimeout(timer);
+      // Inicia a animação de saída (Íris Fechando)
+      setIsExiting(true);
     }
   }, [eventoAtual, filaEventos, shouldReload]);
 
@@ -417,7 +415,19 @@ export default function ArenaClient({
   }
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white overflow-hidden flex flex-col font-sans relative">
+    <div className="min-h-screen bg-black text-white font-sans relative">
+      {/* Container com efeito Íris (Clip Path) */}
+      <motion.div 
+        className="min-h-screen bg-[#0f172a] text-white overflow-hidden flex flex-col font-sans relative"
+        initial={{ clipPath: 'circle(0% at 50% 50%)' }}
+        animate={{ clipPath: isExiting ? 'circle(0% at 50% 50%)' : 'circle(150% at 50% 50%)' }}
+        transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
+        onAnimationComplete={(definition) => {
+            if (isExiting) {
+                window.location.reload();
+            }
+        }}
+      >
       {/* Camada de Debug */}
       {connectionStatus !== 'SUBSCRIBED' && (
          <div className="absolute top-0 right-0 bg-red-600 text-white text-xs px-2 py-1 z-[100]">
@@ -594,6 +604,14 @@ export default function ArenaClient({
           </div>
         </div>
       </main>
+      
+      {/* Footer */}
+      <footer className="relative z-50 py-4 px-6 border-t border-white/5 bg-slate-900/50 backdrop-blur-md text-center">
+         <div className="text-slate-500 text-xs font-mono">
+            {config.titulo || 'Arena'} • Atualização em Tempo Real • {lastUpdate || 'Carregando...'}
+         </div>
+      </footer>
+    </motion.div>
     </div>
   );
 }
