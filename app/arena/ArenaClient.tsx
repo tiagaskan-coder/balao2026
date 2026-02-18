@@ -500,10 +500,10 @@ export default function ArenaClient({
 
       {/* Container Principal */}
       <main className="flex-1 relative overflow-y-auto custom-scrollbar p-4 md:p-8 z-10">
-        <div className="max-w-[1800px] mx-auto flex gap-6 items-start">
+        <div className="max-w-[1800px] mx-auto flex flex-col xl:flex-row gap-6 items-start">
           
           {/* Pista de Corrida (Esquerda) */}
-          <div className="flex-1 space-y-4 pb-20 relative min-w-0">
+          <div className="flex-1 space-y-4 pb-20 relative min-w-0 w-full">
           
           {/* Grid Lines Background */}
           <div className="absolute inset-0 z-[-1] pointer-events-none opacity-10" 
@@ -542,7 +542,7 @@ export default function ArenaClient({
           </div>
 
           {/* Painel de Últimas Vendas (Lateral Direito - Desktop) */}
-          <div className="w-80 flex-shrink-0 hidden xl:flex flex-col gap-4">
+          <div className="w-full xl:w-96 flex-shrink-0 flex flex-col gap-4">
             <div className="bg-slate-900/80 backdrop-blur-md border border-white/10 p-4 rounded-xl shadow-2xl flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-emerald-500/10 rounded-lg">
