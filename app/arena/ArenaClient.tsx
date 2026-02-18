@@ -124,6 +124,36 @@ export default function ArenaClient({
     }
   }, [eventoAtual, filaEventos, shouldReload]);
 
+  // Efeitos Sonoros
+  useEffect(() => {
+    if (!eventoAtual) return;
+
+    let audioFile = '';
+    
+    // Tipos de evento que disparam corneta
+    if (['nova_venda', 'venda_alta', 'combo_vendas', 'meta_batida', 'meta_global'].includes(eventoAtual.tipo)) {
+      audioFile = '/sounds/horn.mp3';
+    } 
+    // Tipos de evento que disparam carro de corrida
+    else if (['ultrapassagem', 'lideranca'].includes(eventoAtual.tipo)) {
+      audioFile = '/sounds/race-car.mp3';
+    }
+
+    if (audioFile) {
+      const audio = new Audio(audioFile);
+      audio.volume = 0.7; // Volume ajustável
+      
+      // Tenta reproduzir (pode falhar se não houver interação do usuário antes, policy dos navegadores)
+      const playPromise = audio.play();
+      
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.log('Reprodução de áudio bloqueada ou falhou:', error);
+        });
+      }
+    }
+  }, [eventoAtual]);
+
   // Função para detectar e disparar eventos
   const processarEventos = (novoVendedor: Vendedor) => {
     const antigos = vendedoresRef.current;
