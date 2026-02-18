@@ -158,70 +158,7 @@ export default function ArenaClient({
     }
   }, [eventoAtual]);
 
-  // Função para processar eventos de NOVA VENDA (Realtime INSERT na tabela de vendas)
-  const processarNovaVenda = (venda: Venda) => {
-    const vendedor = vendedoresRef.current.find(v => v.id === venda.vendedor_id);
-    if (!vendedor) return;
-
-    const eventosDisparados: FilaEvento[] = [];
-    const configsAtivas = eventosConfigRef.current.filter(e => e.ativo);
-
-    // 1. Venda Alta (ex: >= 5000)
-    if (venda.valor >= 5000) {
-      const configAlta = configsAtivas.find(e => e.evento_tipo === 'venda_alta');
-      if (configAlta) {
-        eventosDisparados.push({
-          id: crypto.randomUUID(),
-          gif_url: configAlta.gif_url,
-          titulo: configAlta.titulo,
-          mensagem: configAlta.mensagem_template?.replace('{vendedor}', vendedor.nome).replace('{valor}', `R$ ${venda.valor.toLocaleString('pt-BR')}`) || `VENDAÇO de ${vendedor.nome}!`,
-          tipo: 'venda_alta',
-          vendedor_avatar: vendedor.avatar_url
-        });
-      }
-    } else {
-      // 1.2 Nova Venda Normal
-      const config = configsAtivas.find(e => e.evento_tipo === 'nova_venda');
-      if (config) {
-        eventosDisparados.push({
-          id: crypto.randomUUID(),
-          gif_url: config.gif_url,
-          titulo: config.titulo,
-          mensagem: config.mensagem_template?.replace('{vendedor}', vendedor.nome).replace('{valor}', `R$ ${venda.valor.toLocaleString('pt-BR')}`) || `Nova venda de ${vendedor.nome}!`,
-          tipo: 'nova_venda',
-          vendedor_avatar: vendedor.avatar_url
-        });
-      }
-    }
-
-    // 2. Combo de Vendas (3 seguidas do mesmo vendedor)
-    if (comboCounterRef.current.id === vendedor.id) {
-      comboCounterRef.current.count += 1;
-    } else {
-      comboCounterRef.current = { id: vendedor.id, count: 1 };
-    }
-
-    if (comboCounterRef.current.count >= 3) {
-      const configCombo = configsAtivas.find(e => e.evento_tipo === 'combo_vendas');
-      if (configCombo) {
-        eventosDisparados.push({
-          id: crypto.randomUUID(),
-          gif_url: configCombo.gif_url,
-          titulo: configCombo.titulo,
-          mensagem: configCombo.mensagem_template?.replace('{vendedor}', vendedor.nome).replace('{count}', comboCounterRef.current.count.toString()) || `${vendedor.nome} está ON FIRE! ${comboCounterRef.current.count}x seguidas!`,
-          tipo: 'combo_vendas',
-          vendedor_avatar: vendedor.avatar_url
-        });
-      }
-    }
-
-    if (eventosDisparados.length > 0) {
-      setFilaEventos(prev => [...prev, ...eventosDisparados]);
-      setShouldReload(true);
-    }
-  };
-
-  // Função para detectar e disparar eventos de ESTADO (Ranking e Metas)
+  // Função para detectar e disparar eventos
   const processarEventos = (novoVendedor: Vendedor) => {
     const antigos = vendedoresRef.current;
     const antigoVendedor = antigos.find(v => v.id === novoVendedor.id);
@@ -230,12 +167,60 @@ export default function ArenaClient({
 
     const eventosDisparados: FilaEvento[] = [];
     const configsAtivas = eventosConfigRef.current.filter(e => e.ativo);
-    
-    // Calcula diferença apenas para verificar se houve aumento (necessário para meta global)
-    const diff = novoVendedor.vendas_atual - antigoVendedor.vendas_atual;
 
+    // 1. Nova Venda
+    const diff = novoVendedor.vendas_atual - antigoVendedor.vendas_atual;
     if (diff > 0) {
-      // 1. Meta Global Batida
+      // 1.1 Venda Alta (ex: > 5000 de diferença)
+      if (diff >= 5000) {
+        const configAlta = configsAtivas.find(e => e.evento_tipo === 'venda_alta');
+        if (configAlta) {
+          eventosDisparados.push({
+            id: crypto.randomUUID(),
+            gif_url: configAlta.gif_url,
+            titulo: configAlta.titulo,
+            mensagem: configAlta.mensagem_template?.replace('{vendedor}', novoVendedor.nome).replace('{valor}', `R$ ${diff.toLocaleString('pt-BR')}`) || `VENDAÇO de ${novoVendedor.nome}!`,
+            tipo: 'venda_alta',
+            vendedor_avatar: novoVendedor.avatar_url
+          });
+        }
+      } else {
+        // 1.2 Nova Venda Normal
+        const config = configsAtivas.find(e => e.evento_tipo === 'nova_venda');
+        if (config) {
+          eventosDisparados.push({
+            id: crypto.randomUUID(),
+            gif_url: config.gif_url,
+            titulo: config.titulo,
+            mensagem: config.mensagem_template?.replace('{vendedor}', novoVendedor.nome).replace('{valor}', `R$ ${diff.toLocaleString('pt-BR')}`) || `Nova venda de ${novoVendedor.nome}!`,
+            tipo: 'nova_venda',
+            vendedor_avatar: novoVendedor.avatar_url
+          });
+        }
+      }
+
+      // 1.2 Combo de Vendas (3 seguidas do mesmo vendedor)
+      if (comboCounterRef.current.id === novoVendedor.id) {
+        comboCounterRef.current.count += 1;
+      } else {
+        comboCounterRef.current = { id: novoVendedor.id, count: 1 };
+      }
+
+      if (comboCounterRef.current.count >= 3) {
+        const configCombo = configsAtivas.find(e => e.evento_tipo === 'combo_vendas');
+        if (configCombo) {
+          eventosDisparados.push({
+            id: crypto.randomUUID(),
+            gif_url: configCombo.gif_url,
+            titulo: configCombo.titulo,
+            mensagem: configCombo.mensagem_template?.replace('{vendedor}', novoVendedor.nome).replace('{count}', comboCounterRef.current.count.toString()) || `${novoVendedor.nome} está ON FIRE! ${comboCounterRef.current.count}x seguidas!`,
+            tipo: 'combo_vendas',
+            vendedor_avatar: novoVendedor.avatar_url
+          });
+        }
+      }
+
+      // 1.3 Meta Global Batida
       const totalMeta = antigos.reduce((acc, v) => acc + v.meta_valor, 0);
       const totalVendasAntigo = antigos.reduce((acc, v) => acc + v.vendas_atual, 0);
       const totalVendasNovo = totalVendasAntigo + diff;
@@ -439,11 +424,7 @@ export default function ArenaClient({
         (payload) => {
             console.log('⚡ Realtime Event (Vendas):', payload);
             const novaVenda = payload.new as Venda;
-            
-            // Processa animações e sons da nova venda
-            processarNovaVenda(novaVenda);
-
-            // Encontrar vendedor para preencher dados visuais na lista recente
+            // Encontrar vendedor para preencher dados visuais
             const vendedor = vendedoresRef.current.find(v => v.id === novaVenda.vendedor_id);
             const vendaCompleta = { ...novaVenda, vendedor };
             setVendasRecentes(prev => [vendaCompleta, ...prev].slice(0, 50));
