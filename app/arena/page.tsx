@@ -516,26 +516,26 @@ export default function ArenaPage() {
   );
 
   return (
-    <div className="flex flex-col min-h-screen w-full lg:h-screen lg:overflow-hidden overflow-y-auto bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 text-white">
+    <div className="flex flex-col min-h-screen w-full lg:h-screen lg:overflow-hidden overflow-y-auto bg-slate-950 text-white">
       <motion.div
         key={battlePulse}
         className="absolute inset-0 pointer-events-none"
         initial={{ opacity: 0 }}
-        animate={{ opacity: 0.08 }}
+        animate={{ opacity: 0.12 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#06b6d4,transparent_65%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#E60012,transparent_65%)]" />
       </motion.div>
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#1e3a8a,transparent_55%)] opacity-40" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,#1e3a8a,transparent_55%)] opacity-40" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#450a0a,transparent_55%)] opacity-70" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,#450a0a,transparent_55%)] opacity-70" />
       <div className="absolute inset-0 pointer-events-none">
         {ambientParticles.map((particle) => (
           <motion.div
             key={particle.id}
-            className="absolute rounded-full bg-cyan-500/10 blur-xl"
+            className="absolute rounded-full bg-red-500/10 blur-xl"
             style={{ left: `${particle.x}%`, width: particle.size, height: particle.size }}
-            animate={{ y: [0, -40, 0], opacity: [0.1, 0.25, 0.1] }}
+            animate={{ y: [0, -40, 0], opacity: [0.15, 0.35, 0.15] }}
             transition={{ duration: 6 + particle.delay, repeat: Infinity, delay: particle.delay }}
           />
         ))}
@@ -546,28 +546,26 @@ export default function ArenaPage() {
           animate={overtakePulse ? { x: [0, -6, 6, -4, 0] } : { x: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-slate-900/80 to-blue-950/80 border border-cyan-500/30 rounded-2xl px-4 sm:px-6 py-4 shadow-2xl backdrop-blur-sm">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-                <Swords className="w-6 h-6 text-white" />
-              </div>
+          <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-red-600/20 to-red-900/20 border border-red-500/40 rounded-2xl px-4 sm:px-6 py-4 shadow-lg">
+            <div className="flex items-center gap-3">
+              <Swords className="w-7 h-7 sm:w-8 sm:h-8 text-red-500" />
               <div>
-                <div className="text-xs uppercase tracking-[0.2em] text-cyan-400 font-medium">Tech Arena</div>
-                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">Dashboard de Performance</h1>
+                <div className="text-xs sm:text-sm uppercase tracking-[0.3em] text-red-200">Arena Royale</div>
+                <h1 className="text-2xl sm:text-3xl font-['Bangers'] tracking-wide">Corrida de Vendas</h1>
               </div>
             </div>
             <div className="text-left sm:text-right w-full sm:w-auto">
-              <div className="text-xs uppercase tracking-widest text-slate-400 font-medium">Meta Semanal</div>
-              <div className="text-base sm:text-lg font-semibold text-white mb-1">{activeChallenge?.premio_semana || "Defina o prêmio"}</div>
-              <div className="text-xs text-slate-300 mb-2">
-                Meta: {activeChallenge ? formatCurrency(activeChallenge.meta_global) : "—"}
+              <div className="text-xs uppercase tracking-widest text-red-200">Desafio da Semana</div>
+              <div className="text-base sm:text-lg font-semibold">{activeChallenge?.premio_semana || "Defina o prêmio"}</div>
+              <div className="text-xs sm:text-sm text-red-300">
+                Meta global: {activeChallenge ? formatCurrency(activeChallenge.meta_global) : "—"}
               </div>
-              <div className="text-xs text-cyan-300 mb-2">
-                Total: {formatCurrency(globalTotal)}
+              <div className="text-xs text-red-100 mt-2">
+                Total na arena: {formatCurrency(globalTotal)}
               </div>
-              <div className="h-2 w-full sm:w-56 bg-slate-800 rounded-full overflow-hidden sm:ml-auto shadow-inner">
+              <div className="mt-2 h-2 w-full sm:w-56 bg-white/10 rounded-full overflow-hidden sm:ml-auto">
                 <motion.div
-                  className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full"
+                  className="h-full bg-gradient-to-r from-red-600 to-red-400"
                   animate={{ width: `${globalProgress}%` }}
                   transition={{ type: "spring", stiffness: 140, damping: 20 }}
                 />
@@ -587,31 +585,29 @@ export default function ArenaPage() {
               return (
                 <motion.div
                   key={seller.id}
-                  className={`relative min-h-[6rem] sm:min-h-[7rem] h-auto py-3 rounded-2xl border overflow-hidden flex flex-col justify-center backdrop-blur-sm ${
-                    isPodium ? "border-cyan-500/40 bg-slate-900/70 shadow-lg shadow-cyan-500/10" : "border-slate-700/50 bg-slate-900/60"
+                  className={`relative min-h-[6rem] sm:min-h-[7rem] h-auto py-3 rounded-2xl border overflow-hidden flex flex-col justify-center ${
+                    isPodium ? "border-red-500/60 bg-slate-900/90 shadow-[0_0_25px_rgba(230,0,18,0.15)]" : "border-red-500/30 bg-slate-900/80"
                   }`}
-                  animate={salePulse ? { boxShadow: ["0 0 0 rgba(6,182,212,0)", "0 0 22px rgba(6,182,212,0.25)", "0 0 0 rgba(6,182,212,0)"] } : {}}
+                  animate={salePulse ? { boxShadow: ["0 0 0 rgba(230,0,18,0)", "0 0 22px rgba(230,0,18,0.35)", "0 0 0 rgba(230,0,18,0)"] } : {}}
                   transition={{ duration: 0.8 }}
                 >
-                  {/* Tech grid background */}
-                  <div className="absolute inset-0 z-0 opacity-20">
-                    <div className="absolute inset-0 bg-[linear-gradient(rgba(6,182,212,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(6,182,212,0.1)_1px,transparent_1px)] bg-[size:20px_20px]" />
-                  </div>
-                  <div className="absolute top-1/2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
+                  {/* Pista de corrida background */}
+                  <div className="absolute inset-0 z-0 animate-stars opacity-40" />
+                  <div className="absolute top-1/2 left-0 right-0 h-0 border-t-2 border-dashed border-slate-600/30 transform -translate-y-1/2" />
                   
-                  <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(6,182,212,0.05),transparent)]" />
+                  <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(230,0,18,0.08),transparent)]" />
                   <div className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 flex items-center gap-3 relative z-20 w-full pr-[15%]">
-                    <div className="shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl border border-cyan-500/30 overflow-hidden bg-slate-800/80 flex items-center justify-center shadow-lg">
+                    <div className="shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-red-400 overflow-hidden bg-slate-800 flex items-center justify-center">
                       {seller.avatar_url ? (
                         <img src={seller.avatar_url} alt={seller.nome} className="w-full h-full object-cover" />
                       ) : (
-                        <span className="text-sm font-bold text-cyan-400">{seller.nome.slice(0, 2).toUpperCase()}</span>
+                        <span className="text-sm font-bold">{seller.nome.slice(0, 2).toUpperCase()}</span>
                       )}
                     </div>
-                    <div className="bg-slate-800/60 px-3 py-2 rounded-xl backdrop-blur-sm flex flex-col gap-1 z-30 max-w-full overflow-hidden border border-slate-700/50">
+                    <div className="bg-slate-900/60 px-2 py-1 rounded-lg backdrop-blur-sm flex flex-col gap-1 z-30 max-w-full overflow-hidden">
                       <div>
-                        <div className="text-sm sm:text-base font-semibold text-white truncate">{seller.nome}</div>
-                        <div className="text-[11px] sm:text-xs text-cyan-300 font-medium">
+                        <div className="text-sm sm:text-base font-semibold truncate">{seller.nome}</div>
+                        <div className="text-[11px] sm:text-xs text-red-200">
                           {formatCurrency(total)} • {Math.round(progress)}%
                         </div>
                       </div>
@@ -625,10 +621,10 @@ export default function ArenaPage() {
                             <div
                                 key={ach.id}
                                 title={hasAchievement ? `${ach.nome}: ${ach.descricao}` : `${ach.nome} (Bloqueado)`}
-                                className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs cursor-help transition-all ${
+                                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs cursor-help transition-all ${
                                 hasAchievement
-                                    ? "bg-cyan-500/20 text-cyan-100 border border-cyan-500/40 shadow-[0_0_8px_rgba(6,182,212,0.3)] scale-100"
-                                    : "bg-slate-800 text-slate-600 border border-slate-700 grayscale opacity-40 scale-90"
+                                    ? "bg-red-600/20 text-red-100 border border-red-500/50 shadow-[0_0_5px_rgba(230,0,18,0.3)] scale-100"
+                                    : "bg-slate-800 text-slate-600 border border-slate-700 grayscale opacity-30 scale-90"
                                 }`}
                             >
                                 <span>{ach.icone_url}</span>
@@ -637,52 +633,56 @@ export default function ArenaPage() {
                         })}
                       </div>
                     </div>
-                    
+                    {isPodium && (
+                      <div className="text-xs px-2 py-1 rounded-full bg-red-600/20 border border-red-400/40 text-red-100">
+                        #{index + 1}
+                      </div>
+                    )}
                   </div>
-                  <div className="absolute right-4 sm:right-6 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-cyan-500/50 to-transparent" />
+                  <div className="absolute right-4 sm:right-6 top-0 bottom-0 w-1 bg-red-500/70 rounded-full" />
                   <motion.div
                     animate={{ left: `${visualProgress}%`, scale: isTurbo ? 1.12 : 1 }}
                     transition={{ type: "spring", stiffness: 120, damping: 20 }}
-                    className="absolute top-[calc(52%-19px)] -translate-y-1/2 z-[100]"
+                    className="absolute top-1/2 -translate-y-1/2 z-[100]"
                   >
                     <div className="relative flex items-center justify-center">
-                      {/* Tech trail effects */}
+                      {/* Efeitos de Fogo e Fumaça */}
                       <div className="absolute right-full mr-[-10px] top-1/2 -translate-y-1/2 flex items-center flex-row-reverse">
-                         {/* Main trail */}
+                         {/* Fogo principal */}
                          <motion.div 
-                           className="w-6 h-2 bg-gradient-to-l from-cyan-400 via-blue-500 to-transparent rounded-l-full blur-[1px]"
+                           className="w-6 h-3 bg-gradient-to-l from-orange-400 via-red-500 to-transparent rounded-l-full blur-[2px]"
                            animate={{ scaleX: [1, 1.3, 0.9], opacity: [0.8, 1, 0.7] }}
                            transition={{ duration: 0.1, repeat: Infinity, repeatType: "reverse" }}
                          />
-                         {/* Data particles */}
+                         {/* Fumaça */}
                          <motion.div
-                           className="absolute right-2 w-6 h-4 bg-cyan-400/20 rounded-full blur-sm"
-                           animate={{ x: [-5, -25], opacity: [0.6, 0], scale: [0.5, 1.2] }}
+                           className="absolute right-2 w-8 h-6 bg-slate-400/40 rounded-full blur-md"
+                           animate={{ x: [-5, -25], opacity: [0.6, 0], scale: [0.5, 1.5] }}
                            transition={{ duration: 0.6, repeat: Infinity, ease: "easeOut" }}
                          />
-                         {/* Binary particles */}
+                         {/* Partículas extras de fumaça */}
                          <motion.div
-                           className="absolute right-1 w-3 h-3 bg-cyan-300/40 rounded-full blur-xs"
-                           animate={{ x: [-2, -15], y: [-2, 3], opacity: [0.5, 0] }}
+                           className="absolute right-1 w-4 h-4 bg-white/30 rounded-full blur-sm"
+                           animate={{ x: [-2, -15], y: [-2, 5], opacity: [0.5, 0] }}
                            transition={{ duration: 0.4, repeat: Infinity, delay: 0.1 }}
                          />
                       </div>
 
                       {isTurbo && (
-                        <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-cyan-500/30 blur-xl rounded-full animate-pulse" />
+                        <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-14 h-14 bg-red-500/40 blur-xl rounded-full animate-pulse" />
                       )}
                       {isZap && (
-                        <div className="absolute inset-0 -m-2 rounded-full bg-blue-500/30 blur-lg animate-pulse" />
+                        <div className="absolute inset-0 -m-2 rounded-full bg-blue-500/40 blur-lg animate-pulse" />
                       )}
                       
-                      <div className="text-3xl sm:text-4xl transform rotate-45 filter drop-shadow-lg z-[100] relative text-cyan-400">
+                      <div className="text-4xl sm:text-5xl transform rotate-45 filter drop-shadow-lg z-[100] relative">
                         🚀
                       </div>
                     </div>
                   </motion.div>
                   <div className="absolute right-4 sm:right-6 top-0 bottom-0 flex items-center justify-center">
                     <motion.div
-                      className="h-full w-6 sm:w-8 flex flex-col overflow-hidden shadow-lg rounded-lg"
+                      className="h-full w-6 sm:w-8 flex flex-col overflow-hidden shadow-lg"
                       initial={{ skewY: -5 }}
                       animate={{ skewY: 5 }}
                       transition={{ 
@@ -693,15 +693,15 @@ export default function ArenaPage() {
                       }}
                     >
                       <div 
-                        className="w-full h-full opacity-60"
+                        className="w-full h-full opacity-80"
                         style={{
-                          backgroundColor: '#0f172a',
+                          backgroundColor: '#fff',
                           backgroundImage: `
-                            linear-gradient(45deg, rgba(6,182,212,0.1) 25%, transparent 25%, transparent 75%, rgba(6,182,212,0.1) 75%, rgba(6,182,212,0.1)),
-                            linear-gradient(45deg, rgba(6,182,212,0.1) 25%, transparent 25%, transparent 75%, rgba(6,182,212,0.1) 75%, rgba(6,182,212,0.1))
+                            linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000),
+                            linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000)
                           `,
-                          backgroundPosition: '0 0, 8px 8px',
-                          backgroundSize: '16px 16px'
+                          backgroundPosition: '0 0, 10px 10px',
+                          backgroundSize: '20px 20px'
                         }}
                       />
                     </motion.div>
@@ -715,55 +715,121 @@ export default function ArenaPage() {
               </div>
             )}
           </div>
+          
+          {/* Bandeira Quadriculada no final da pista */}
+          <div className="relative mt-4 mb-2">
+            <div className="flex items-center justify-center">
+              <div className="relative">
+                {/* Mastro da bandeira */}
+                <div className="absolute left-0 top-0 w-1 h-20 bg-gray-400 rounded-full" />
+                
+                {/* Bandeira quadriculada */}
+                <motion.div 
+                  className="ml-2 relative overflow-hidden rounded-lg shadow-lg"
+                  animate={{ 
+                    rotate: [0, 5, -5, 0],
+                    scale: [1, 1.02, 1]
+                  }}
+                  transition={{ 
+                    duration: 3, 
+                    repeat: Infinity, 
+                    ease: "easeInOut"
+                  }}
+                >
+                  <div className="grid grid-cols-4 gap-0 w-32 h-20">
+                    {/* Padrão quadriculado vermelho e branco */}
+                    <div className="bg-red-600" />
+                    <div className="bg-white" />
+                    <div className="bg-red-600" />
+                    <div className="bg-white" />
+                    <div className="bg-white" />
+                    <div className="bg-red-600" />
+                    <div className="bg-white" />
+                    <div className="bg-red-600" />
+                    <div className="bg-red-600" />
+                    <div className="bg-white" />
+                    <div className="bg-red-600" />
+                    <div className="bg-white" />
+                    <div className="bg-white" />
+                    <div className="bg-red-600" />
+                    <div className="bg-white" />
+                    <div className="bg-red-600" />
+                  </div>
+                  
+                  {/* Efeito de brilho */}
+                  <motion.div 
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                    animate={{ x: [-100, 100] }}
+                    transition={{ 
+                      duration: 2, 
+                      repeat: Infinity,
+                      ease: "linear"
+                    }}
+                  />
+                </motion.div>
+                
+                {/* Texto "FINISH" */}
+                <motion.div 
+                  className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-white font-bold text-lg tracking-wider"
+                  animate={{ opacity: [0.7, 1, 0.7] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  FINISH
+                </motion.div>
+              </div>
+            </div>
+          </div>
         </motion.div>
 
         <aside className="flex flex-col gap-4 sm:gap-6 lg:h-full lg:overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
-          <div className="bg-slate-900/50 border border-cyan-500/20 rounded-xl p-4 backdrop-blur-sm">
-            <div className="flex items-center gap-2 text-cyan-400 uppercase tracking-[0.2em] text-xs font-medium mb-3">
+          <div className="bg-slate-900/70 border border-red-500/30 rounded-2xl p-5">
+            <div className="flex items-center gap-2 text-red-200 uppercase tracking-[0.3em] text-xs mb-4">
               <Crown className="w-4 h-4" />
               Top 3
             </div>
             <div className="space-y-3">
               {topThree.map((seller, index) => (
-                <div key={seller.id} className="flex items-center justify-between bg-slate-800/40 rounded-lg px-3 py-3 border border-slate-700/30 hover:border-cyan-500/30 transition-colors">
+                <div key={seller.id} className="flex items-center justify-between bg-slate-800/60 rounded-xl px-3 sm:px-4 py-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg border border-cyan-500/30 overflow-hidden bg-slate-800 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full border-2 border-red-400 overflow-hidden bg-slate-800 flex items-center justify-center">
                       {seller.avatar_url ? (
                         <img src={seller.avatar_url} alt={seller.nome} className="w-full h-full object-cover" />
                       ) : (
-                        <span className="text-xs font-bold text-cyan-400">{seller.nome.slice(0, 2).toUpperCase()}</span>
+                        <span className="text-sm font-bold">{seller.nome.slice(0, 2).toUpperCase()}</span>
                       )}
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-white">{seller.nome}</div>
-                      <div className="text-xs text-cyan-300 font-medium">{formatCurrency(totals[seller.id] || 0)}</div>
+                      <div className="font-semibold">{seller.nome}</div>
+                      <div className="text-xs text-red-200">{formatCurrency(totals[seller.id] || 0)}</div>
                     </div>
                   </div>
-                  <div className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                    {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}
+                  <div className="text-xl sm:text-2xl">
+                    {index === 0 ? "👑" : index === 1 ? "🥈" : "🥉"}
                   </div>
                 </div>
               ))}
               {topThree.length === 0 && (
-                <div className="text-slate-400 text-sm text-center py-4">Aguardando participantes...</div>
+                <div className="text-red-200">Sem ranking ainda</div>
               )}
             </div>
           </div>
 
-          <div className="bg-slate-900/50 border border-cyan-500/20 rounded-xl p-4 backdrop-blur-sm">
-            <div className="flex items-center gap-2 text-cyan-400 uppercase tracking-[0.2em] text-xs font-medium mb-3">
-              <Zap className="w-4 h-4" />
-              Prêmios
+          <div className="bg-slate-900/70 border border-red-500/30 rounded-2xl p-4 sm:p-5">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-red-200 uppercase tracking-[0.3em] text-xs mb-4 gap-2">
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4" />
+                Premiações da Arena
+              </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {rewardCards.map((reward) => (
                 <motion.div
                   key={reward.label}
-                  className="rounded-xl border border-slate-700/50 bg-slate-800/40 px-3 py-2 hover:border-cyan-500/40 hover:bg-slate-800/60 transition-all"
+                  className="rounded-xl border border-red-500/20 bg-slate-800/70 px-3 py-2"
                   whileHover={{ scale: 1.02 }}
                 >
-                  <div className="text-xs text-cyan-300 flex items-center gap-2 font-medium">
-                    <span className="text-sm">{reward.icon}</span>
+                  <div className="text-xs text-red-200 flex items-center gap-2">
+                    <span>{reward.icon}</span>
                     {reward.label}
                   </div>
                   <div className="text-sm font-semibold text-white mt-1">{reward.value}</div>
@@ -772,10 +838,10 @@ export default function ArenaPage() {
             </div>
           </div>
 
-          <div className="bg-slate-900/50 border border-cyan-500/20 rounded-2xl p-4 sm:p-5 flex-1 backdrop-blur-sm">
-            <div className="flex items-center gap-2 text-cyan-400 uppercase tracking-[0.2em] text-xs font-medium mb-4">
+          <div className="bg-slate-900/70 border border-red-500/30 rounded-2xl p-4 sm:p-5 flex-1">
+            <div className="flex items-center gap-2 text-red-200 uppercase tracking-[0.3em] text-xs mb-4">
               <Zap className="w-4 h-4" />
-              Atividade
+              Kill Feed
             </div>
             <div className="space-y-3">
               <AnimatePresence>
@@ -785,13 +851,13 @@ export default function ArenaPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className={`rounded-xl px-4 py-3 text-sm border backdrop-blur-sm ${
-                      item.isGoogle ? "border-blue-400/30 bg-blue-500/10" : "border-slate-700/50 bg-slate-800/40"
+                    className={`rounded-xl px-4 py-3 text-sm border ${
+                      item.isGoogle ? "border-blue-400/50 bg-blue-500/10" : "border-red-500/30 bg-slate-800/60"
                     }`}
                   >
                     <div className="flex flex-col gap-1">
-                      <span className="text-slate-200">{item.message}</span>
-                      <span className="text-xs text-slate-500 text-right font-mono">
+                      <span>{item.message}</span>
+                      <span className="text-[10px] text-slate-400 text-right">
                         {new Date(item.createdAt).toLocaleString("pt-BR", {
                           day: "2-digit",
                           month: "2-digit",
@@ -804,16 +870,16 @@ export default function ArenaPage() {
                 ))}
               </AnimatePresence>
               {salesFeed.length === 0 && (
-                <div className="text-slate-500 text-sm text-center py-4">Aguardando novas vendas...</div>
+                <div className="text-red-200 text-sm">Aguardando novas vendas...</div>
               )}
             </div>
           </div>
           
           <button
             onClick={() => setShowRequestModal(true)}
-            className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 border border-cyan-500/50 text-white py-3 rounded-xl text-sm font-medium uppercase tracking-wider transition-all shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/30 flex items-center justify-center gap-2"
+            className="w-full bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700 text-slate-400 hover:text-white py-2 rounded-lg text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2"
           >
-            <Trophy size={16} />
+            <Trophy size={14} />
             Solicitar Conquista
           </button>
           
@@ -822,28 +888,26 @@ export default function ArenaPage() {
 
       {showRequestModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="bg-slate-900/90 border border-cyan-500/30 rounded-2xl p-6 w-full max-w-md relative backdrop-blur-lg shadow-2xl shadow-cyan-500/10">
+          <div className="bg-slate-900 border border-slate-700 rounded-xl p-6 w-full max-w-md relative">
             <button 
               onClick={() => setShowRequestModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-cyan-400 transition-colors"
+              className="absolute top-4 right-4 text-slate-400 hover:text-white"
             >
               <X size={20} />
             </button>
             
-            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
-                <Trophy className="w-4 h-4 text-white" />
-              </div>
+            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+              <Trophy className="text-red-500" />
               Solicitar Conquista
             </h3>
 
             <div className="space-y-4">
               <div>
-                <label className="text-sm text-slate-300 mb-2 block font-medium">Vendedor</label>
+                <label className="text-sm text-slate-400 mb-1 block">Vendedor</label>
                 <select 
                   value={requestForm.sellerId}
                   onChange={(e) => setRequestForm({...requestForm, sellerId: e.target.value})}
-                  className="w-full bg-slate-800/60 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-colors"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-red-500"
                 >
                   <option value="">Selecione...</option>
                   {sellers.map(s => <option key={s.id} value={s.id}>{s.nome}</option>)}
@@ -851,11 +915,11 @@ export default function ArenaPage() {
               </div>
 
               <div>
-                <label className="text-sm text-slate-300 mb-2 block font-medium">Conquista</label>
+                <label className="text-sm text-slate-400 mb-1 block">Conquista</label>
                 <select 
                   value={requestForm.achievementId}
                   onChange={(e) => setRequestForm({...requestForm, achievementId: e.target.value})}
-                  className="w-full bg-slate-800/60 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-colors"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-red-500"
                 >
                   <option value="">Selecione...</option>
                   {achievements
@@ -866,22 +930,22 @@ export default function ArenaPage() {
               </div>
 
               <div>
-                <label className="text-sm text-slate-300 mb-2 block font-medium">Justificativa</label>
+                <label className="text-sm text-slate-400 mb-1 block">Justificativa</label>
                 <textarea 
                   value={requestForm.justification}
                   onChange={(e) => setRequestForm({...requestForm, justification: e.target.value})}
-                  className="w-full bg-slate-800/60 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-colors min-h-[80px] resize-none"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-red-500 min-h-[80px]"
                   placeholder="Descreva por que você merece esta conquista..."
                 />
               </div>
 
               <div>
-                <label className="text-sm text-slate-300 mb-2 block font-medium">Link da Evidência (Opcional)</label>
+                <label className="text-sm text-slate-400 mb-1 block">Link da Evidência (Opcional)</label>
                 <input 
                   type="text"
                   value={requestForm.evidenceUrl}
                   onChange={(e) => setRequestForm({...requestForm, evidenceUrl: e.target.value})}
-                  className="w-full bg-slate-800/60 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-colors"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-red-500"
                   placeholder="https://..."
                 />
               </div>
@@ -889,7 +953,7 @@ export default function ArenaPage() {
               <button
                 onClick={handleSubmitRequest}
                 disabled={loadingRequest}
-                className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold py-3 rounded-lg transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+                className="w-full bg-red-600 hover:bg-red-700 text-slate-900 font-bold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loadingRequest ? "Enviando..." : "Enviar Solicitação"}
               </button>
@@ -913,19 +977,19 @@ export default function ArenaPage() {
                 initial={{ y: -50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
-                className="text-4xl sm:text-6xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent tracking-wider mb-4 text-center"
+                className="text-4xl sm:text-6xl font-['Bangers'] text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.8)] tracking-wider mb-4 text-center"
               >
                 {celebration.type === 'google' ? 'REI DO GOOGLE!' : (celebration.type === 'sale' ? 'NOVO PEDIDO DETECTADO!' : 'NOVO LÍDER!')}
               </motion.div>
               
-              <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-full border-4 border-cyan-400/30 shadow-[0_0_50px_rgba(6,182,212,0.3)] overflow-hidden bg-slate-900/80 mb-6 flex items-center justify-center backdrop-blur-sm">
+              <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-full border-4 border-yellow-400/50 shadow-[0_0_50px_rgba(250,204,21,0.4)] overflow-hidden bg-slate-900 mb-6 flex items-center justify-center">
                  <img 
                    src={
                      celebration.type === 'google' 
-                     ? "https://i.pinimg.com/originals/9d/77/22/9d772245853f9b0e013181845ebb2c1a.gif" 
+                      ? "https://media.giphy.com/media/3o7aCWJavA6fVfWcIo/giphy.gif" 
                        : (celebration.type === 'sale' 
-                         ? "https://i.pinimg.com/originals/3d/27/11/3d271128514d50a47c22e5f1beecb4fc.gif" 
-                         : "https://i.pinimg.com/originals/a4/d3/ce/a4d3ce7ff09e24bbc4cf265686e9becc.gif")
+                          ? "https://media.giphy.com/media/111ebonMs90YLu/giphy.gif" 
+                          : "https://media.giphy.com/media/l0MYEqEzwMWQfqbqI/giphy.gif")
                    }
                    alt="Celebration" 
                    className={`w-full h-full ${(celebration.type === 'sale' || celebration.type === 'google') ? 'object-contain' : 'object-cover'}`}
@@ -935,11 +999,11 @@ export default function ArenaPage() {
                    }}
                  />
                  {/* Overlay do Avatar do Vendedor */}
-                 <div className="absolute bottom-4 right-4 w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-cyan-400 shadow-lg overflow-hidden bg-slate-800">
+                 <div className="absolute bottom-4 right-4 w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-white shadow-lg overflow-hidden bg-slate-800">
                     {celebration.seller.avatar_url ? (
                       <img src={celebration.seller.avatar_url} alt={celebration.seller.nome} className="w-full h-full object-cover" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center font-bold text-xl text-cyan-400 bg-slate-900">
+                      <div className="w-full h-full flex items-center justify-center font-bold text-xl text-white bg-slate-700">
                         {celebration.seller.nome.slice(0, 2).toUpperCase()}
                       </div>
                     )}
@@ -959,14 +1023,14 @@ export default function ArenaPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.8 }}
-                className="mt-4 text-cyan-300 text-lg sm:text-xl font-medium"
+                className="mt-4 text-yellow-200 text-lg sm:text-xl font-medium"
               >
                 {celebration.type === 'google' ? 'Dominou o Google! 🚀' : (celebration.type === 'sale' ? 'Parabéns pela venda! 🎉' : 'Assumiu a 1ª Posição! 👑')}
               </motion.div>
 
               <button 
                 onClick={() => setCelebration(null)}
-                className="absolute top-0 right-0 p-2 text-white/50 hover:text-cyan-400 transition-colors"
+                className="absolute top-0 right-0 p-2 text-white/50 hover:text-white transition-colors"
               >
                 <X size={32} />
               </button>
@@ -979,8 +1043,8 @@ export default function ArenaPage() {
                    key={i}
                    className={`absolute w-3 h-3 rounded-sm ${
                       celebration.type === 'google' 
-                      ? ['bg-cyan-500', 'bg-blue-500', 'bg-indigo-500', 'bg-teal-500'][i % 4] 
-                      : 'bg-cyan-400'
+                      ? ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500'][i % 4] 
+                      : 'bg-yellow-400'
                    }`}
                    initial={{ 
                      x: Math.random() * window.innerWidth, 
