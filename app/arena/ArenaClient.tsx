@@ -470,10 +470,10 @@ export default function ArenaClient({
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0000] text-white font-sans relative">
+    <div className="min-h-screen bg-black text-white font-sans relative">
       {/* Container com efeito Íris (Clip Path) */}
       <motion.div 
-        className="min-h-screen bg-[radial-gradient(circle_at_top,_#E60012_0%,_#1a0000_45%,_#050000_100%)] text-white overflow-hidden flex flex-col font-sans relative"
+        className="min-h-screen bg-[#0f172a] text-white overflow-hidden flex flex-col font-sans relative"
         initial={{ clipPath: 'circle(0% at 50% 50%)' }}
         animate={{ clipPath: isExiting ? 'circle(0% at 50% 50%)' : 'circle(150% at 50% 50%)' }}
         transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
@@ -503,28 +503,28 @@ export default function ArenaClient({
 
       {/* Background Effects (Z-0) */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-red-900/25 blur-[120px] rounded-full mix-blend-screen" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-red-700/20 blur-[120px] rounded-full mix-blend-screen" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-red-950/80 to-black" />
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-900/20 blur-[120px] rounded-full mix-blend-screen" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-900/20 blur-[120px] rounded-full mix-blend-screen" />
+        <div className="absolute inset-0 bg-slate-900/50" />
       </div>
 
       {/* Header (Z-50) */}
-      <header className="relative z-50 p-6 border-b border-red-500/40 bg-gradient-to-r from-red-950/80 to-black/80 backdrop-blur-xl shadow-2xl">
+      <header className="relative z-50 p-6 border-b border-white/5 bg-slate-900/80 backdrop-blur-xl shadow-2xl">
         <div className="max-w-[1800px] mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           
           {/* Título e Status */}
           <div className="flex items-center gap-5">
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-red-400 blur-lg opacity-50 rounded-xl" />
-              <div className="relative bg-black/80 p-3 rounded-xl border border-red-500/40 shadow-inner">
-                <Flag className="w-8 h-8 text-red-400" />
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 blur-lg opacity-50 rounded-xl" />
+              <div className="relative bg-slate-900 p-3 rounded-xl border border-white/10 shadow-inner">
+                <Flag className="w-8 h-8 text-blue-400" />
               </div>
             </div>
             <div>
-              <h1 className="text-4xl font-black tracking-tighter bg-gradient-to-r from-white via-red-100 to-red-300 bg-clip-text text-transparent uppercase italic">
+              <h1 className="text-4xl font-black tracking-tighter bg-gradient-to-r from-white via-blue-100 to-slate-400 bg-clip-text text-transparent uppercase italic">
                 {config.titulo || 'Arena de Vendas'}
               </h1>
-              <div className="flex items-center gap-2 text-xs font-mono text-red-200/80">
+              <div className="flex items-center gap-2 text-xs font-mono text-blue-300/80">
                 <span className={`relative flex h-2 w-2`}>
                   <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${connectionStatus === 'SUBSCRIBED' ? 'bg-green-400' : 'bg-red-400'}`}></span>
                   <span className={`relative inline-flex rounded-full h-2 w-2 ${connectionStatus === 'SUBSCRIBED' ? 'bg-green-500' : 'bg-red-500'}`}></span>
@@ -563,7 +563,7 @@ export default function ArenaClient({
           {/* Grid Lines Background */}
           <div className="absolute inset-0 z-[-1] pointer-events-none opacity-10" 
                style={{ 
-                 backgroundImage: 'linear-gradient(to right, #7f1d1d 1px, transparent 1px), linear-gradient(to bottom, #7f1d1d 1px, transparent 1px)',
+                 backgroundImage: 'linear-gradient(to right, #334155 1px, transparent 1px), linear-gradient(to bottom, #334155 1px, transparent 1px)',
                  backgroundSize: '100px 100px',
                }} 
           />
@@ -581,13 +581,13 @@ export default function ArenaClient({
 
           {(!sortedVendedores || sortedVendedores.length === 0) && (
             <div className="text-center py-32 relative z-20 flex flex-col items-center">
-              <div className="inline-block p-6 rounded-full bg-black/60 mb-4 border border-red-500/40 animate-pulse">
-                <AlertCircle className="w-12 h-12 text-red-400" />
+              <div className="inline-block p-6 rounded-full bg-slate-800/50 mb-4 border border-white/5 animate-pulse">
+                <AlertCircle className="w-12 h-12 text-slate-500" />
               </div>
-              <p className="text-red-100 text-lg font-light mb-4">Nenhum competidor encontrado.</p>
+              <p className="text-slate-400 text-lg font-light mb-4">Nenhum competidor encontrado.</p>
               <button 
                 onClick={() => window.location.reload()}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm"
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm"
               >
                 <RefreshCw className="w-4 h-4" />
                 Atualizar Página
@@ -598,7 +598,7 @@ export default function ArenaClient({
 
           {/* Painel de Últimas Vendas (Lateral Direito - Desktop) */}
           <div className="w-full xl:w-96 flex-shrink-0 flex flex-col gap-4">
-            <div className="bg-black/70 backdrop-blur-md border border-red-500/30 p-4 rounded-xl shadow-2xl flex items-center justify-between">
+            <div className="bg-slate-900/80 backdrop-blur-md border border-white/10 p-4 rounded-xl shadow-2xl flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-emerald-500/10 rounded-lg">
                   <Clock className="w-5 h-5 text-emerald-400" />
@@ -619,10 +619,10 @@ export default function ArenaClient({
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ delay: i * 0.05 }}
-                    className="group relative bg-[#160000]/70 hover:bg-[#220000]/90 backdrop-blur-sm border border-red-500/25 hover:border-red-400/40 p-3 rounded-xl transition-all flex items-center gap-3 overflow-hidden"
+                    className="group relative bg-slate-800/60 hover:bg-slate-800/90 backdrop-blur-sm border border-white/5 hover:border-white/20 p-3 rounded-xl transition-all flex items-center gap-3 overflow-hidden"
                   >
                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500/50" />
-                    <div className="relative w-10 h-10 rounded-full bg-black overflow-hidden border border-red-500/40 group-hover:border-red-300 transition-colors flex-shrink-0">
+                    <div className="relative w-10 h-10 rounded-full bg-slate-700 overflow-hidden border border-slate-600 group-hover:border-white/30 transition-colors flex-shrink-0">
                       {venda.vendedor?.avatar_url ? (
                         <img src={venda.vendedor.avatar_url} alt="" className="w-full h-full object-cover" />
                       ) : (
@@ -651,7 +651,7 @@ export default function ArenaClient({
                 ))}
               </AnimatePresence>
               {vendasRecentes.length === 0 && (
-                <div className="text-center py-8 text-red-200 text-xs italic">
+                <div className="text-center py-8 text-slate-500 text-xs italic">
                   Aguardando vendas...
                 </div>
               )}
@@ -661,8 +661,8 @@ export default function ArenaClient({
       </main>
       
       {/* Footer */}
-      <footer className="relative z-50 py-4 px-6 border-t border-red-500/40 bg-black/80 backdrop-blur-md text-center">
-         <div className="text-red-200/80 text-xs font-mono">
+      <footer className="relative z-50 py-4 px-6 border-t border-white/5 bg-slate-900/50 backdrop-blur-md text-center">
+         <div className="text-slate-500 text-xs font-mono">
             {config.titulo || 'Arena'} • Atualização em Tempo Real • {lastUpdate || 'Carregando...'}
          </div>
       </footer>
@@ -775,13 +775,13 @@ function EventOverlay({ evento, onClose }: { evento: FilaEvento, onClose: () => 
 
 function StatCard({ icon, label, value, subtext }: { icon: any, label: string, value: string, subtext?: string }) {
   return (
-    <div className="bg-black/60 backdrop-blur-md border border-red-500/40 px-5 py-3 rounded-xl min-w-[160px] shadow-lg">
-      <div className="flex items-center gap-2 text-red-200 text-xs font-bold uppercase tracking-wider mb-1">
+    <div className="bg-slate-800/80 backdrop-blur-md border border-white/10 px-5 py-3 rounded-xl min-w-[160px] shadow-lg">
+      <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">
         {icon}
         {label}
       </div>
       <div className="text-2xl font-black text-white tracking-tight">{value}</div>
-      {subtext && <div className="text-[10px] text-red-200/70 font-mono mt-1">{subtext}</div>}
+      {subtext && <div className="text-[10px] text-slate-500 font-mono mt-1">{subtext}</div>}
     </div>
   );
 }
@@ -814,21 +814,21 @@ function RacerRow({ data, rank, isLeader }: { data: Vendedor, rank: number, isLe
         <div className="absolute -inset-1 bg-gradient-to-r from-yellow-500/20 to-transparent blur-xl rounded-lg opacity-75 animate-pulse" />
       )}
 
-      <div className="relative flex items-center gap-4 bg-black/70 backdrop-blur-md border border-red-500/40 p-2 rounded-2xl pr-6 shadow-xl hover:border-red-400/60 transition-all hover:bg-[#180000]/90">
+      <div className="relative flex items-center gap-4 bg-slate-900/80 backdrop-blur-md border border-white/10 p-2 rounded-2xl pr-6 shadow-xl hover:border-white/20 transition-all hover:bg-slate-800/80">
         
         {/* Info Card (Esquerda) */}
-        <div className="w-56 md:w-64 flex-shrink-0 flex items-center gap-4 bg-[#160000]/90 p-3 rounded-xl border border-red-500/25 relative overflow-hidden z-20">
+        <div className="w-56 md:w-64 flex-shrink-0 flex items-center gap-4 bg-slate-800/90 p-3 rounded-xl border border-white/5 relative overflow-hidden z-20">
           {/* Rank Badge */}
           <div className={`absolute top-0 left-0 px-2 py-0.5 text-[10px] font-black italic text-white rounded-br-lg z-20 bg-gradient-to-br ${rankColor} shadow-sm`}>
             #{rank}
           </div>
 
           <div className="relative">
-            <div className={`w-14 h-14 rounded-xl overflow-hidden border-2 ${bateuMeta ? 'border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.3)]' : 'border-red-700'} relative z-10 bg-black`}>
+            <div className={`w-14 h-14 rounded-xl overflow-hidden border-2 ${bateuMeta ? 'border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.3)]' : 'border-slate-600'} relative z-10 bg-slate-700`}>
               {data.avatar_url ? (
                 <img src={data.avatar_url} alt={data.nome} className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-xl font-bold text-red-100 bg-[#220000]">
+                <div className="w-full h-full flex items-center justify-center text-xl font-bold text-slate-400 bg-slate-800">
                   {data.nome.charAt(0)}
                 </div>
               )}
@@ -846,10 +846,10 @@ function RacerRow({ data, rank, isLeader }: { data: Vendedor, rank: number, isLe
           <div className="min-w-0 flex-1">
             <h3 className="font-bold text-white truncate text-sm leading-tight">{data.nome}</h3>
             <div className="flex flex-col mt-1">
-              <span className="text-xs font-mono text-red-200">R$ {data.vendas_atual.toLocaleString('pt-BR', { notation: 'compact' })}</span>
-              <div className="w-full h-1 bg-black/60 rounded-full mt-1 overflow-hidden">
+              <span className="text-xs font-mono text-blue-300">R$ {data.vendas_atual.toLocaleString('pt-BR', { notation: 'compact' })}</span>
+              <div className="w-full h-1 bg-slate-700 rounded-full mt-1 overflow-hidden">
                 <div 
-                  className={`h-full rounded-full ${bateuMeta ? 'bg-yellow-400' : 'bg-red-600'}`} 
+                  className={`h-full rounded-full ${bateuMeta ? 'bg-yellow-400' : 'bg-blue-500'}`} 
                   style={{ width: `${Math.min(progresso, 100)}%` }} 
                 />
               </div>
@@ -860,7 +860,7 @@ function RacerRow({ data, rank, isLeader }: { data: Vendedor, rank: number, isLe
         {/* Pista */}
         <div className="flex-1 relative h-16 flex items-center mx-4 z-10">
           {/* Trilho de fundo */}
-          <div className="absolute inset-x-0 h-3 bg-black/60 rounded-full overflow-hidden border border-red-500/30 shadow-inner">
+          <div className="absolute inset-x-0 h-3 bg-slate-800/50 rounded-full overflow-hidden border border-white/5 shadow-inner">
             {/* Marcadores de Distância */}
             {[25, 50, 75].map(m => (
               <div key={m} className="absolute top-0 bottom-0 w-[1px] bg-white/10" style={{ left: `${m}%` }} />
@@ -877,7 +877,7 @@ function RacerRow({ data, rank, isLeader }: { data: Vendedor, rank: number, isLe
             <div className={`w-full h-full bg-gradient-to-r ${
               bateuMeta 
                 ? 'from-yellow-600 via-yellow-400 to-yellow-200 shadow-[0_0_20px_rgba(250,204,21,0.4)]' 
-                : 'from-red-900 via-red-600 to-red-400 shadow-[0_0_18px_rgba(220,38,38,0.4)]'
+                : 'from-blue-900 via-blue-500 to-cyan-400 shadow-[0_0_15px_rgba(59,130,246,0.3)]'
             }`} />
             <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.4),transparent)] w-1/2 h-full -skew-x-12 animate-shimmer" />
           </motion.div>
@@ -897,7 +897,7 @@ function RacerRow({ data, rank, isLeader }: { data: Vendedor, rank: number, isLe
               className={`mb-1 px-2 py-0.5 rounded-lg text-[10px] font-bold backdrop-blur-md border shadow-lg whitespace-nowrap ${
                 bateuMeta 
                   ? 'bg-yellow-500/20 border-yellow-400 text-yellow-300' 
-                  : 'bg-[#1a0000]/90 border-red-700 text-red-100'
+                  : 'bg-slate-800/90 border-slate-600 text-slate-300'
               }`}
             >
               {progresso.toFixed(0)}%
@@ -936,21 +936,9 @@ function RacerRow({ data, rank, isLeader }: { data: Vendedor, rank: number, isLe
           </motion.div>
 
           {/* Meta Flag */}
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 flex flex-col items-center gap-2 z-0">
-            <div className="h-20 w-1 bg-white/40 rounded-full" />
-            <div
-              className="absolute -top-6 right-2 w-8 h-6 rounded-sm border border-white/80 shadow-[0_0_12px_rgba(0,0,0,0.6)]"
-              style={{
-                backgroundColor: '#ffffff',
-                backgroundImage: `
-                  linear-gradient(45deg, #000000 25%, transparent 25%, transparent 75%, #000000 75%, #000000),
-                  linear-gradient(45deg, #000000 25%, transparent 25%, transparent 75%, #000000 75%, #000000)
-                `,
-                backgroundSize: '8px 8px',
-                backgroundPosition: '0 0, 4px 4px',
-              }}
-            />
-            <div className="absolute top-0 transform -translate-y-full text-[10px] font-black text-red-200 uppercase tracking-[0.3em] rotate-90 origin-bottom-left ml-4">
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 flex flex-col items-center gap-1 z-0">
+            <div className="h-16 w-1 bg-white/10" />
+            <div className="absolute top-0 transform -translate-y-full text-xs font-black text-white/20 uppercase tracking-widest rotate-90 origin-bottom-left ml-3">
               Finish
             </div>
           </div>
@@ -958,8 +946,8 @@ function RacerRow({ data, rank, isLeader }: { data: Vendedor, rank: number, isLe
 
         {/* Info Meta (Direita) */}
         <div className="w-24 text-right hidden md:block z-20">
-          <div className="text-[10px] text-red-200/80 uppercase font-bold tracking-wider">Meta</div>
-          <div className="text-sm font-bold text-white">
+          <div className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Meta</div>
+          <div className="text-sm font-bold text-slate-300">
             {data.meta_valor > 0 ? (data.meta_valor / 1000).toFixed(0) + 'k' : '-'}
           </div>
         </div>
