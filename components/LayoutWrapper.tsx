@@ -15,11 +15,6 @@ export default function LayoutWrapper({
   categories: Category[] 
 }) {
   const pathname = usePathname();
-  const isArena = pathname === "/arena" || pathname?.startsWith("/arena/");
-
-  if (isArena) {
-    return <>{children}</>;
-  }
 
   return (
     <SidebarProvider>

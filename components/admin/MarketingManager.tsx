@@ -1,11 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Mail, Calendar, Send, Plus, Trash, Search, Eye, BarChart, Users, Settings, FileText, ShoppingBag, X } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { 
+  Mail, Calendar, Send, Plus, Trash, Search, Eye, 
+  BarChart, Users, Settings, FileText, ShoppingBag, X,
+  LayoutTemplate, Smartphone, Monitor, CheckCircle, AlertCircle, Upload
+} from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import Image from "next/image";
+import { generateEmailHtml, EMAIL_TEMPLATES, TemplateType, EmailTemplateProduct } from "@/lib/email-templates";
 
-// Tipos
 interface Campaign {
     id: string;
     title: string;
@@ -35,22 +39,30 @@ export default function MarketingManager() {
     const { showToast } = useToast();
 
     // Editor State
-    const [editingCampaign, setEditingCampaign] = useState<Partial<Campaign>>({
+    const [editingCampaign, setEditingCampaign] = useState<{
+        title: string;
+        subject: string;
+        message: string;
+        target_audience: string;
+        scheduled_at: string;
+        template: TemplateType;
+    }>({
         title: "",
         subject: "",
-        content: "",
+        message: "",
         target_audience: "all",
-        scheduled_at: ""
+        scheduled_at: "",
+        template: "grid"
     });
 
-    // Preview State
-    const [showPreview, setShowPreview] = useState(false);
-
-    // Product Selector State
+    // Products State for Editor
+    const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
     const [showProductSelector, setShowProductSelector] = useState(false);
     const [products, setProducts] = useState<Product[]>([]);
     const [productSearch, setProductSearch] = useState("");
-    const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
+
+    // Preview State
+    const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
 
     useEffect(() => {
         if (view === "list") fetchCampaigns();
@@ -86,11 +98,54 @@ export default function MarketingManager() {
     const fetchProducts = async () => {
         try {
             const res = await fetch("/api/products");
-            if (res.ok) setProducts(await res.json());
+            if (res.ok) {
+                const data = await res.json();
+                const normalizedProducts = data.map((p: any) => ({
+                    ...p,
+                    price: typeof p.price === 'number' 
+                        ? p.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) 
+                        : p.price
+                }));
+                setProducts(normalizedProducts);
+            }
         } catch (error) {
             console.error(error);
+            showToast("Erro ao carregar produtos", "error");
         }
     };
+
+    const fetchSubscribers = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch("/api/marketing/subscribers");
+            if (res.ok) setSubscribers(await res.json());
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Live Preview Generation
+    const generatedHtml = useMemo(() => {
+        const templateProducts: EmailTemplateProduct[] = selectedProducts.map(p => ({
+            id: p.id,
+            name: p.name,
+            price: p.price,
+            image: p.image,
+            link: `${typeof window !== 'undefined' ? window.location.origin : ''}/product/${p.id}`,
+            description: p.category
+        }));
+
+        return generateEmailHtml(editingCampaign.template, {
+            subject: editingCampaign.subject || "Sem Assunto",
+            message: editingCampaign.message,
+            products: templateProducts,
+            logoUrl: "https://balao2026.vercel.app/logo-white.png", 
+            primaryColor: "#E60012",
+            companyName: "Balão da Informática"
+        });
+    }, [editingCampaign, selectedProducts]);
 
     // Actions
     const handleSaveCampaign = async () => {
@@ -99,18 +154,23 @@ export default function MarketingManager() {
             return;
         }
 
+        const campaignData = {
+            ...editingCampaign,
+            content: generatedHtml
+        };
+
         try {
             const res = await fetch("/api/marketing/campaigns", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(editingCampaign),
+                body: JSON.stringify(campaignData),
             });
 
             if (!res.ok) throw new Error("Erro ao salvar");
 
             showToast("Campanha salva com sucesso!", "success");
             setView("list");
-            setEditingCampaign({ title: "", subject: "", content: "", target_audience: "all", scheduled_at: "" });
+            setEditingCampaign({ title: "", subject: "", message: "", target_audience: "all", scheduled_at: "", template: "grid" });
             setSelectedProducts([]);
         } catch (error) {
             showToast("Erro ao salvar campanha", "error");
@@ -135,459 +195,520 @@ export default function MarketingManager() {
         }
     };
 
-    const handleSendCampaign = async (id: string) => {
-        if (!confirm("Tem certeza que deseja enviar esta campanha para TODOS os inscritos?")) return;
-        
+    const handleDeleteCampaign = async (id: string) => {
+        if (!confirm("Tem certeza que deseja excluir esta campanha?")) return;
         try {
-            const res = await fetch(`/api/marketing/campaigns/${id}/send`, { method: "POST" });
+            const res = await fetch(`/api/marketing/campaigns?id=${id}`, { method: "DELETE" });
             if (res.ok) {
-                showToast("Envio iniciado!", "success");
+                showToast("Campanha excluída", "success");
                 fetchCampaigns();
-            } else throw new Error();
-        } catch (e) {
-            showToast("Erro ao iniciar envio", "error");
-        }
-    };
-
-    const handleDelete = async (id: string) => {
-        if (!confirm("Excluir campanha?")) return;
-        try {
-            await fetch(`/api/marketing/campaigns?id=${id}`, { method: "DELETE" });
-            fetchCampaigns();
-            showToast("Campanha excluída", "success");
+            }
         } catch (e) {
             showToast("Erro ao excluir", "error");
         }
     };
 
-    // Product Insertion
-    const insertProduct = (product: Product) => {
-        const productHtml = `
-            <div style="border: 1px solid #eee; padding: 16px; margin: 10px 0; text-align: center; border-radius: 8px;">
-                <img src="${product.image}" alt="${product.name}" style="max-width: 150px; height: auto; margin-bottom: 10px;" />
-                <h3 style="margin: 0; font-size: 16px; color: #333;">${product.name}</h3>
-                <p style="font-weight: bold; color: #E60012; font-size: 18px; margin: 8px 0;">${product.price}</p>
-                <a href="${window.location.origin}/product/${product.id}" style="display: inline-block; background-color: #E60012; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; margin-top: 8px;">Ver Oferta</a>
-            </div>
-        `;
-        setEditingCampaign((prev: Partial<Campaign>) => ({
-            ...prev,
-            content: (prev.content || "") + productHtml
-        }));
-        setShowProductSelector(false);
-    };
-
-    // Subscribers Actions
-    const fetchSubscribers = async () => {
-        setLoading(true);
+    const handleDeleteSubscriber = async (email: string) => {
+        if (!confirm("Remover este inscrito?")) return;
         try {
-            const res = await fetch("/api/marketing/subscribers");
-            if (res.ok) setSubscribers(await res.json());
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleDeleteSubscriber = async (id: string) => {
-        if (!confirm("Remover inscrito?")) return;
-        try {
-            await fetch(`/api/marketing/subscribers?id=${id}`, { method: "DELETE" });
-            fetchSubscribers();
-            showToast("Inscrito removido", "success");
+            const res = await fetch(`/api/marketing/subscribers?email=${email}`, { method: "DELETE" });
+            if (res.ok) {
+                showToast("Inscrito removido", "success");
+                fetchSubscribers();
+            }
         } catch (e) {
-            showToast("Erro ao remover", "error");
+            showToast("Erro ao remover inscrito", "error");
         }
     };
 
-    const handleImportCSV = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImportSubscribers = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        const text = await file.text();
-        const lines = text.split('\n');
-        // Assume header: email,name,source
-        const newSubscribers = lines.slice(1)
-            .filter((line: string) => line.trim())
-            .map((line: string) => {
-                const [email, name, source] = line.split(',').map((s: string) => s.trim());
-                return { email, name, source: source || 'import' };
-            })
-            .filter((s: { email: string }) => s.email && s.email.includes('@'));
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+            const csv = event.target?.result as string;
+            const lines = csv.split('\n').filter(line => line.trim() !== '');
+            // Assume first line is header or just emails
+            const emails = lines.map(line => {
+                const parts = line.split(',');
+                // Tenta achar algo que pareça um email
+                return parts.find(p => p.includes('@'))?.trim() || parts[0].trim();
+            }).filter(e => e.includes('@'));
 
-        if (newSubscribers.length === 0) {
-            showToast("Nenhum contato válido encontrado no CSV", "error");
-            return;
-        }
-
-        try {
-            const res = await fetch("/api/marketing/subscribers", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(newSubscribers),
-            });
-
-            if (res.ok) {
-                showToast(`${newSubscribers.length} contatos importados!`, "success");
-                fetchSubscribers();
-            } else {
-                throw new Error();
+            if (emails.length === 0) {
+                showToast("Nenhum email válido encontrado", "error");
+                return;
             }
-        } catch (e) {
-            showToast("Erro na importação", "error");
+
+            try {
+                const res = await fetch("/api/marketing/subscribers", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ emails }),
+                });
+
+                if (res.ok) {
+                    showToast(`${emails.length} inscritos importados`, "success");
+                    fetchSubscribers();
+                }
+            } catch (error) {
+                showToast("Erro na importação", "error");
+            }
+        };
+        reader.readAsText(file);
+    };
+
+    const toggleProductSelection = (product: Product) => {
+        if (selectedProducts.some(p => p.id === product.id)) {
+            setSelectedProducts(selectedProducts.filter(p => p.id !== product.id));
+        } else {
+            setSelectedProducts([...selectedProducts, product]);
         }
-        
-        // Reset input
-        e.target.value = '';
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                    <Mail className="text-[#E60012]" />
-                    Marketing & Campanhas
-                </h2>
-                <div className="flex gap-2">
-                    <button 
-                        onClick={() => setView("subscribers")}
-                        className={`px-4 py-2 text-sm border rounded-md ${view === 'subscribers' ? 'bg-gray-100' : 'bg-white hover:bg-gray-50'}`}
-                    >
-                        <Users size={16} className="inline mr-1"/> Inscritos
-                    </button>
-                    <button 
-                        onClick={() => setView("logs")}
-                        className={`px-4 py-2 text-sm border rounded-md ${view === 'logs' ? 'bg-gray-100' : 'bg-white hover:bg-gray-50'}`}
-                    >
-                        Logs
-                    </button>
-                    <button 
-                        onClick={() => {
-                            setView("list");
-                            fetchCampaigns();
-                        }}
-                        className={`px-4 py-2 text-sm border rounded-md ${view === 'list' ? 'bg-gray-100' : 'bg-white hover:bg-gray-50'}`}
-                    >
-                        Campanhas
-                    </button>
-                    <button 
+        <div className="h-[calc(100vh-100px)] flex flex-col gap-4">
+            {/* Header */}
+            <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                <div>
+                    <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                        <Mail className="text-[#E60012]" />
+                        Marketing Center
+                    </h2>
+                    <p className="text-sm text-gray-500">Gerencie campanhas, listas e automações</p>
+                </div>
+                <div className="flex gap-2 bg-gray-100 p-1 rounded-lg">
+                    {[
+                        { id: 'list', label: 'Campanhas', icon: BarChart },
+                        { id: 'editor', label: 'Criar Nova', icon: Plus },
+                        { id: 'subscribers', label: 'Inscritos', icon: Users },
+                        { id: 'logs', label: 'Logs', icon: FileText }
+                    ].map((tab) => (
+                        <button 
+                            key={tab.id}
                             onClick={() => {
-                                setView("editor");
-                                setEditingCampaign({ title: "", subject: "", content: "", target_audience: "all", scheduled_at: "" });
+                                setView(tab.id as any);
+                                if (tab.id === 'editor') {
+                                    setEditingCampaign({ title: "", subject: "", message: "", target_audience: "all", scheduled_at: "", template: "grid" });
+                                    setSelectedProducts([]);
+                                }
                             }}
-                            className="px-4 py-2 text-sm text-white bg-[#E60012] rounded-md hover:bg-red-700 flex items-center gap-2"
+                            className={`px-4 py-2 text-sm rounded-md flex items-center gap-2 transition-all ${
+                                view === tab.id 
+                                ? 'bg-white text-[#E60012] shadow-sm font-medium' 
+                                : 'text-gray-600 hover:bg-gray-200'
+                            }`}
                         >
-                            <Plus size={16} /> Nova Campanha
+                            <tab.icon size={16} />
+                            {tab.label}
                         </button>
+                    ))}
                 </div>
             </div>
 
-            {/* LIST VIEW */}
-            {view === "list" && (
-                <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campanha</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Criado em</th>
-                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {campaigns.map((camp) => (
-                                <tr key={camp.id}>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="font-medium text-gray-900">{camp.title}</div>
-                                        <div className="text-gray-500 text-sm">{camp.subject}</div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                            ${camp.status === 'sent' ? 'bg-green-100 text-green-800' : 
-                                              camp.status === 'draft' ? 'bg-gray-100 text-gray-800' : 
-                                              'bg-yellow-100 text-yellow-800'}`}>
-                                            {camp.status}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <div>Criado: {new Date(camp.created_at).toLocaleDateString()}</div>
-                                        {camp.scheduled_at && camp.status === 'scheduled' && (
-                                            <div className="text-orange-600 text-xs mt-1">
-                                                Agendado: {new Date(camp.scheduled_at).toLocaleString()}
-                                            </div>
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end gap-2">
-                                        <button onClick={() => handleSendTest(camp.id)} title="Enviar Teste" className="text-blue-600 hover:text-blue-900"><Eye size={18}/></button>
-                                        <button onClick={() => handleSendCampaign(camp.id)} title="Enviar" className="text-green-600 hover:text-green-900"><Send size={18}/></button>
-                                        <button onClick={() => handleDelete(camp.id)} title="Excluir" className="text-red-600 hover:text-red-900"><Trash size={18}/></button>
-                                    </td>
-                                </tr>
-                            ))}
-                            {campaigns.length === 0 && (
-                                <tr>
-                                    <td colSpan={4} className="px-6 py-4 text-center text-gray-500">Nenhuma campanha criada.</td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            )}
-
-            {/* SUBSCRIBERS VIEW */}
-            {view === "subscribers" && (
-                <div className="space-y-4">
-                    <div className="flex justify-end">
-                        <label className="cursor-pointer px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center gap-2">
-                            <FileText size={16} /> Importar CSV
-                            <input type="file" accept=".csv" className="hidden" onChange={handleImportCSV} />
-                        </label>
-                    </div>
-                    <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">E-mail</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fonte</th>
-                                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {subscribers.map((sub) => (
-                                    <tr key={sub.id}>
-                                        <td className="px-6 py-4 text-sm text-gray-900">{sub.email}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-500">{sub.name}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-500">{sub.source}</td>
-                                        <td className="px-6 py-4 text-right">
-                                            <button onClick={() => handleDeleteSubscriber(sub.id)} className="text-red-600 hover:text-red-900"><Trash size={16}/></button>
-                                        </td>
-                                    </tr>
-                                ))}
-                                {subscribers.length === 0 && (
-                                    <tr>
-                                        <td colSpan={4} className="px-6 py-4 text-center text-gray-500">Nenhum inscrito encontrado.</td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
-
-            {/* LOGS VIEW */}
-            {view === "logs" && (
-                <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Evento</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Destinatário</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {logs.map((log) => (
-                                <tr key={log.id}>
-                                    <td className="px-6 py-4 text-sm text-gray-500">{new Date(log.created_at).toLocaleString()}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-900">{log.event}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-500">{log.recipient}</td>
-                                    <td className="px-6 py-4 text-sm">
-                                        <span className={log.status === 'success' ? 'text-green-600' : 'text-red-600'}>
-                                            {log.status}
-                                        </span>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
-
-            {/* EDITOR VIEW */}
-            {view === "editor" && (
-                <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Nome da Campanha (Interno)</label>
-                            <input 
-                                type="text" 
-                                className="mt-1 w-full px-3 py-2 border rounded-md"
-                                value={editingCampaign.title}
-                                onChange={e => setEditingCampaign({...editingCampaign, title: e.target.value})}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Assunto do E-mail</label>
-                            <input 
-                                type="text" 
-                                className="mt-1 w-full px-3 py-2 border rounded-md"
-                                value={editingCampaign.subject}
-                                onChange={e => setEditingCampaign({...editingCampaign, subject: e.target.value})}
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <div className="flex justify-between items-center mb-2">
-                            <label className="block text-sm font-medium text-gray-700">Conteúdo do E-mail (HTML)</label>
+            {/* Content Area */}
+            <div className="flex-1 overflow-hidden">
+                {/* VIEW: LIST */}
+                {view === "list" && (
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-full overflow-hidden flex flex-col">
+                        <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
+                            <h3 className="font-semibold text-gray-700">Minhas Campanhas</h3>
                             <button 
-                                onClick={() => {
-                                    setShowProductSelector(true);
-                                    fetchProducts();
-                                }}
-                                className="text-sm px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border flex items-center gap-1"
+                                onClick={() => setView('editor')}
+                                className="text-xs bg-[#E60012] text-white px-3 py-1.5 rounded hover:bg-red-700 transition-colors flex items-center gap-1"
                             >
-                                <ShoppingBag size={14} /> Inserir Produto
+                                <Plus size={14} /> Nova Campanha
                             </button>
                         </div>
-                        <textarea 
-                            className="mt-1 w-full px-3 py-2 border rounded-md h-64 font-mono text-sm"
-                            value={editingCampaign.content}
-                            onChange={e => setEditingCampaign({...editingCampaign, content: e.target.value})}
-                            placeholder="<h1>Olá!</h1><p>Confira nossas ofertas...</p>"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">
-                            Dica: Use HTML para formatar. O template base já inclui cabeçalho e rodapé.
-                        </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Público Alvo</label>
-                            <select 
-                                className="mt-1 w-full px-3 py-2 border rounded-md"
-                                value={editingCampaign.target_audience}
-                                onChange={e => setEditingCampaign({...editingCampaign, target_audience: e.target.value})}
-                            >
-                                <option value="all">Todos os Inscritos</option>
-                                <option value="buyers">Clientes que já compraram</option>
-                                <option value="leads">Apenas Leads (Newsletter)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Agendar Envio (Opcional)</label>
-                            <input 
-                                type="datetime-local" 
-                                className="mt-1 w-full px-3 py-2 border rounded-md"
-                                value={editingCampaign.scheduled_at ? new Date(editingCampaign.scheduled_at).toISOString().slice(0, 16) : ""}
-                                onChange={e => setEditingCampaign({...editingCampaign, scheduled_at: e.target.value})}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex justify-end gap-3 pt-4 border-t">
-                        <button 
-                            onClick={() => setView("list")}
-                            className="px-4 py-2 border rounded-md hover:bg-gray-50 text-gray-700"
-                        >
-                            Cancelar
-                        </button>
-                        <button 
-                            onClick={() => setShowPreview(true)}
-                            className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 flex items-center gap-2"
-                        >
-                            <Eye size={18} /> Pré-visualizar
-                        </button>
-                        <button 
-                            onClick={handleSaveCampaign}
-                            disabled={!editingCampaign.title || !editingCampaign.subject}
-                            className="px-4 py-2 bg-[#E60012] text-white rounded-md hover:bg-red-700 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            <Send size={18} /> Salvar Campanha
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {/* PREVIEW MODAL */}
-            {showPreview && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-                        <div className="p-4 border-b flex justify-between items-center">
-                            <h3 className="font-bold text-lg">Pré-visualização</h3>
-                            <button onClick={() => setShowPreview(false)} className="text-gray-500 hover:text-gray-700">
-                                <X size={24} />
-                            </button>
-                        </div>
-                        <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
-                            <div className="bg-white border rounded-lg shadow-sm max-w-lg mx-auto overflow-hidden">
-                                <div className="bg-[#E60012] p-4 text-center">
-                                    <img src="https://balao2026.vercel.app/logo-white.png" alt="Logo" className="h-8 mx-auto" />
+                        <div className="overflow-y-auto flex-1 p-4">
+                            {loading ? (
+                                <div className="text-center py-10 text-gray-500">Carregando...</div>
+                            ) : campaigns.length === 0 ? (
+                                <div className="text-center py-20 text-gray-400 flex flex-col items-center">
+                                    <Mail size={48} className="mb-2 opacity-20" />
+                                    <p>Nenhuma campanha criada ainda.</p>
                                 </div>
-                                <div className="p-6" dangerouslySetInnerHTML={{ __html: editingCampaign.content || "" }} />
-                                <div className="bg-gray-100 p-4 text-center text-xs text-gray-500">
-                                    <p>© 2026 Balão da Informática. Todos os direitos reservados.</p>
-                                    <p>Campinas - SP</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* PRODUCT SELECTOR MODAL */}
-            {showProductSelector && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col">
-                        <div className="p-4 border-b flex justify-between items-center">
-                            <h3 className="font-bold text-lg">Selecionar Produto</h3>
-                            <button onClick={() => setShowProductSelector(false)} className="text-gray-500 hover:text-gray-700">
-                                <X size={24} />
-                            </button>
-                        </div>
-                        <div className="p-4 border-b">
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                                <input 
-                                    type="text" 
-                                    placeholder="Buscar produto..." 
-                                    className="w-full pl-10 pr-4 py-2 border rounded-md"
-                                    value={productSearch}
-                                    onChange={e => setProductSearch(e.target.value)}
-                                />
-                            </div>
-                        </div>
-                        <div className="flex-1 overflow-y-auto p-2">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                {products
-                                    .filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase()))
-                                    .slice(0, 20)
-                                    .map(product => (
-                                    <div 
-                                        key={product.id} 
-                                        className="border rounded-md p-3 hover:border-[#E60012] cursor-pointer flex gap-3 items-center group transition-colors"
-                                        onClick={() => insertProduct(product)}
-                                    >
-                                        <div className="w-16 h-16 bg-gray-100 rounded flex-shrink-0 relative overflow-hidden">
-                                            {product.image && (
-                                                <Image 
-                                                    src={product.image} 
-                                                    alt={product.name} 
-                                                    fill
-                                                    className="object-cover"
-                                                />
-                                            )}
+                            ) : (
+                                <div className="grid gap-4">
+                                    {campaigns.map((campaign) => (
+                                        <div key={campaign.id} className="flex items-center justify-between p-4 border rounded-lg hover:shadow-md transition-shadow bg-white">
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <h4 className="font-bold text-gray-800">{campaign.title}</h4>
+                                                    <span className={`text-[10px] uppercase px-2 py-0.5 rounded-full font-bold ${
+                                                        campaign.status === 'sent' ? 'bg-green-100 text-green-700' :
+                                                        campaign.status === 'draft' ? 'bg-gray-100 text-gray-600' :
+                                                        'bg-blue-100 text-blue-700'
+                                                    }`}>
+                                                        {campaign.status}
+                                                    </span>
+                                                </div>
+                                                <p className="text-sm text-gray-500 mb-2">Assunto: {campaign.subject}</p>
+                                                <div className="flex items-center gap-4 text-xs text-gray-400">
+                                                    <span className="flex items-center gap-1"><Calendar size={12} /> {new Date(campaign.created_at).toLocaleDateString()}</span>
+                                                    <span className="flex items-center gap-1"><Users size={12} /> {campaign.target_audience === 'all' ? 'Todos' : campaign.target_audience}</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <button 
+                                                    onClick={() => handleSendTest(campaign.id)}
+                                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg tooltip"
+                                                    title="Enviar Teste"
+                                                >
+                                                    <Send size={18} />
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleDeleteCampaign(campaign.id)}
+                                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg tooltip"
+                                                    title="Excluir"
+                                                >
+                                                    <Trash size={18} />
+                                                </button>
+                                            </div>
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <h4 className="text-sm font-medium text-gray-900 truncate group-hover:text-[#E60012]">{product.name}</h4>
-                                            <p className="text-sm font-bold text-gray-700">{product.price}</p>
-                                        </div>
-                                        <Plus size={20} className="text-gray-400 group-hover:text-[#E60012]" />
-                                    </div>
-                                ))}
-                            </div>
-                            {products.length === 0 && (
-                                <div className="text-center py-8 text-gray-500">
-                                    Carregando produtos...
+                                    ))}
                                 </div>
                             )}
                         </div>
                     </div>
-                </div>
-            )}
+                )}
+
+                {/* VIEW: EDITOR */}
+                {view === "editor" && (
+                    <div className="flex h-full gap-6">
+                        {/* LEFT COLUMN: CONTROLS */}
+                        <div className="w-1/2 overflow-y-auto pr-2 space-y-6 pb-20">
+                            {/* Card 1: Configurações Básicas */}
+                            <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+                                <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                    <Settings size={18} className="text-[#E60012]" /> Configurações
+                                </h3>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-500 uppercase mb-1">Título Interno</label>
+                                        <input 
+                                            type="text" 
+                                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent outline-none transition-all"
+                                            placeholder="Ex: Promoção de Natal 2026"
+                                            value={editingCampaign.title}
+                                            onChange={e => setEditingCampaign({...editingCampaign, title: e.target.value})}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-500 uppercase mb-1">Assunto do E-mail</label>
+                                        <input 
+                                            type="text" 
+                                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent outline-none transition-all"
+                                            placeholder="Ex: Ofertas Imperdíveis para Você!"
+                                            value={editingCampaign.subject}
+                                            onChange={e => setEditingCampaign({...editingCampaign, subject: e.target.value})}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-500 uppercase mb-1">Mensagem Principal</label>
+                                        <textarea 
+                                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent outline-none transition-all h-24 resize-none"
+                                            placeholder="Digite uma mensagem introdutória..."
+                                            value={editingCampaign.message}
+                                            onChange={e => setEditingCampaign({...editingCampaign, message: e.target.value})}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Card 2: Conteúdo e Template */}
+                            <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+                                <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                    <LayoutTemplate size={18} className="text-[#E60012]" /> Aparência & Conteúdo
+                                </h3>
+                                
+                                <div className="mb-6">
+                                    <label className="block text-xs font-medium text-gray-500 uppercase mb-2">Selecione um Template</label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {EMAIL_TEMPLATES.map(t => (
+                                            <div 
+                                                key={t.id}
+                                                onClick={() => setEditingCampaign({...editingCampaign, template: t.id})}
+                                                className={`cursor-pointer border rounded-lg p-3 hover:bg-gray-50 transition-all ${
+                                                    editingCampaign.template === t.id 
+                                                    ? 'border-[#E60012] bg-red-50 ring-1 ring-[#E60012]' 
+                                                    : 'border-gray-200'
+                                                }`}
+                                            >
+                                                <div className="font-medium text-sm text-gray-900">{t.name}</div>
+                                                <div className="text-xs text-gray-500 mt-1">{t.description}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div className="flex justify-between items-center mb-3">
+                                        <label className="block text-xs font-medium text-gray-500 uppercase">
+                                            Produtos Selecionados ({selectedProducts.length})
+                                        </label>
+                                        <button 
+                                            onClick={() => {
+                                                setShowProductSelector(true);
+                                                fetchProducts();
+                                            }}
+                                            className="text-xs px-3 py-1.5 bg-[#E60012] text-white rounded hover:bg-red-700 flex items-center gap-1 transition-colors shadow-sm"
+                                        >
+                                            <Plus size={14} /> Adicionar Produtos
+                                        </button>
+                                    </div>
+                                    
+                                    {selectedProducts.length > 0 && (
+                                        <div className="space-y-2 max-h-60 overflow-y-auto border rounded-md p-2 bg-gray-50">
+                                            {selectedProducts.map(p => (
+                                                <div key={p.id} className="flex items-center gap-3 bg-white p-2 rounded border border-gray-100">
+                                                    <div className="w-10 h-10 relative bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                                                        <Image src={p.image} alt={p.name} fill className="object-cover" />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-xs font-medium truncate">{p.name}</p>
+                                                        <p className="text-xs text-[#E60012] font-bold">{p.price}</p>
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => toggleProductSelection(p)}
+                                                        className="text-gray-400 hover:text-red-500"
+                                                    >
+                                                        <X size={14} />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Action Bar */}
+                            <div className="flex gap-3 pt-4">
+                                <button 
+                                    onClick={handleSaveCampaign}
+                                    className="flex-1 py-3 bg-gray-900 text-white rounded-lg hover:bg-black font-medium shadow-md transition-transform active:scale-95 flex justify-center items-center gap-2"
+                                >
+                                    <Send size={18} /> Salvar & Preparar Envio
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* RIGHT COLUMN: LIVE PREVIEW */}
+                        <div className="w-1/2 flex flex-col bg-gray-800 rounded-xl shadow-2xl border border-gray-700 overflow-hidden">
+                            <div className="bg-gray-900 p-3 flex justify-between items-center border-b border-gray-700">
+                                <div className="flex items-center gap-2 text-white">
+                                    <Eye size={18} className="text-blue-400" />
+                                    <span className="font-medium text-sm">Live Preview</span>
+                                </div>
+                                <div className="flex bg-gray-800 rounded-lg p-1">
+                                    <button 
+                                        onClick={() => setPreviewMode('desktop')}
+                                        className={`p-1.5 rounded ${previewMode === 'desktop' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-white'}`}
+                                        title="Desktop"
+                                    >
+                                        <Monitor size={16} />
+                                    </button>
+                                    <button 
+                                        onClick={() => setPreviewMode('mobile')}
+                                        className={`p-1.5 rounded ${previewMode === 'mobile' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-white'}`}
+                                        title="Mobile"
+                                    >
+                                        <Smartphone size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="flex-1 bg-gray-200 relative overflow-hidden flex justify-center items-start p-8 overflow-y-auto">
+                                <div 
+                                    className={`bg-white shadow-xl transition-all duration-300 overflow-hidden ${
+                                        previewMode === 'mobile' ? 'w-[375px] rounded-3xl min-h-[667px]' : 'w-[600px] rounded-lg min-h-[600px]'
+                                    }`}
+                                >
+                                    <iframe 
+                                        srcDoc={generatedHtml} 
+                                        className="w-full h-full min-h-[600px] border-none"
+                                        title="Email Preview"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* VIEW: SUBSCRIBERS */}
+                {view === "subscribers" && (
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-full flex flex-col">
+                        <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
+                            <h3 className="font-semibold text-gray-700">Gerenciar Inscritos</h3>
+                            <div className="relative">
+                                <input 
+                                    type="file" 
+                                    id="csvImport" 
+                                    className="hidden" 
+                                    accept=".csv,.txt"
+                                    onChange={handleImportSubscribers}
+                                />
+                                <label 
+                                    htmlFor="csvImport"
+                                    className="cursor-pointer text-xs bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 transition-colors flex items-center gap-1"
+                                >
+                                    <Upload size={14} /> Importar CSV
+                                </label>
+                            </div>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-4">
+                            {subscribers.length === 0 ? (
+                                <div className="text-center py-10 text-gray-400">Nenhum inscrito encontrado.</div>
+                            ) : (
+                                <table className="w-full text-sm text-left">
+                                    <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+                                        <tr>
+                                            <th className="px-4 py-3">Email</th>
+                                            <th className="px-4 py-3">Data Inscrição</th>
+                                            <th className="px-4 py-3 text-right">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {subscribers.map((sub: any) => (
+                                            <tr key={sub.id} className="border-b hover:bg-gray-50">
+                                                <td className="px-4 py-3 font-medium text-gray-900">{sub.email}</td>
+                                                <td className="px-4 py-3 text-gray-500">{new Date(sub.created_at).toLocaleDateString()}</td>
+                                                <td className="px-4 py-3 text-right">
+                                                    <button 
+                                                        onClick={() => handleDeleteSubscriber(sub.email)}
+                                                        className="text-red-500 hover:text-red-700"
+                                                    >
+                                                        <Trash size={16} />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* VIEW: LOGS */}
+                {view === "logs" && (
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-full flex flex-col">
+                        <div className="p-4 border-b bg-gray-50">
+                            <h3 className="font-semibold text-gray-700">Logs de Envio</h3>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-4">
+                            {logs.length === 0 ? (
+                                <div className="text-center py-10 text-gray-400">Nenhum log registrado.</div>
+                            ) : (
+                                <div className="space-y-2">
+                                    {logs.map((log: any) => (
+                                        <div key={log.id} className="p-3 border rounded-lg bg-gray-50 text-sm font-mono flex justify-between items-center">
+                                            <div>
+                                                <span className={`font-bold ${log.status === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                                                    [{log.status.toUpperCase()}]
+                                                </span>
+                                                <span className="ml-2 text-gray-700">{log.message}</span>
+                                            </div>
+                                            <div className="text-gray-400 text-xs">
+                                                {new Date(log.created_at).toLocaleString()}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* PRODUCT SELECTOR MODAL */}
+                {showProductSelector && (
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+                        <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden">
+                            <div className="p-4 border-b flex justify-between items-center bg-gray-50">
+                                <h3 className="font-bold text-lg text-gray-800 flex items-center gap-2">
+                                    <ShoppingBag className="text-[#E60012]" /> Selecionar Produtos
+                                </h3>
+                                <button onClick={() => setShowProductSelector(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                                    <X size={24} />
+                                </button>
+                            </div>
+                            
+                            <div className="p-4 border-b bg-white sticky top-0 z-10">
+                                <div className="relative max-w-md mx-auto">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                                    <input 
+                                        type="text" 
+                                        placeholder="Buscar por nome, categoria ou código..." 
+                                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-[#E60012] focus:border-transparent outline-none transition-all"
+                                        value={productSearch}
+                                        onChange={e => setProductSearch(e.target.value)}
+                                        autoFocus
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                                    {products
+                                        .filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase()))
+                                        .slice(0, 50)
+                                        .map(product => {
+                                            const isSelected = selectedProducts.some(p => p.id === product.id);
+                                            return (
+                                                <div 
+                                                    key={product.id} 
+                                                    className={`
+                                                        group relative bg-white border rounded-xl overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-md
+                                                        ${isSelected ? 'ring-2 ring-[#E60012] border-transparent' : 'border-gray-200 hover:border-gray-300'}
+                                                    `}
+                                                    onClick={() => toggleProductSelection(product)}
+                                                >
+                                                    <div className="aspect-square bg-gray-100 relative overflow-hidden">
+                                                        {product.image ? (
+                                                            <Image 
+                                                                src={product.image} 
+                                                                alt={product.name} 
+                                                                fill
+                                                                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                                            />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center text-gray-300">
+                                                                <ShoppingBag size={32} />
+                                                            </div>
+                                                        )}
+                                                        {isSelected && (
+                                                            <div className="absolute top-2 right-2 bg-[#E60012] text-white rounded-full p-1 shadow-lg animate-in zoom-in duration-200">
+                                                                <CheckCircle size={16} />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="p-3">
+                                                        <h4 className="text-sm font-medium text-gray-900 line-clamp-2 h-10 mb-1" title={product.name}>
+                                                            {product.name}
+                                                        </h4>
+                                                        <p className="text-lg font-bold text-[#E60012]">{product.price}</p>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                </div>
+                            </div>
+                            
+                            <div className="p-4 border-t bg-white flex justify-between items-center">
+                                <div className="text-sm text-gray-500">
+                                    <span className="font-bold text-gray-900">{selectedProducts.length}</span> produtos selecionados
+                                </div>
+                                <button 
+                                    onClick={() => setShowProductSelector(false)}
+                                    className="px-6 py-2 bg-[#E60012] text-white rounded-lg hover:bg-red-700 font-medium transition-colors shadow-sm"
+                                >
+                                    Concluir Seleção
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
