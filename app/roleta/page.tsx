@@ -297,28 +297,36 @@ export default function RoletaPage() {
     setTimeout(() => { setLoading(false); setStep('roulette'); }, 2000);
   };
 
-  const spinWheel = () => {
+  const spinWheel = (e: React.MouseEvent) => {
     if (!wheelRef.current) return;
     
     // Iniciar som contínuo
     SoundManager.startSpinSound();
 
-    const lastPrizeId = localStorage.getItem('last_prize_id');
-    let availablePrizes = WINNING_PRIZES;
-    if (lastPrizeId && WINNING_PRIZES.length > 1) {
-      availablePrizes = WINNING_PRIZES.filter(p => p.id.toString() !== lastPrizeId);
-    }
+    let selectedPrize;
 
-    const random = Math.random();
-    const totalProb = availablePrizes.reduce((acc, p) => acc + p.probability, 0);
-    let randomPointer = random * totalProb;
-    let selectedPrize = availablePrizes[0];
-    
-    for (const prize of availablePrizes) {
-      randomPointer -= prize.probability;
-      if (randomPointer <= 0) {
-        selectedPrize = prize;
-        break;
+    // CHEAT MODE: Shift + Click libera prêmios "impossíveis" (PC Gamer ou PS5)
+    if (e.shiftKey) {
+      const cheatPrizes = PRIZES.filter(p => p.id === 2 || p.id === 4);
+      selectedPrize = cheatPrizes[Math.floor(Math.random() * cheatPrizes.length)];
+    } else {
+      const lastPrizeId = localStorage.getItem('last_prize_id');
+      let availablePrizes = WINNING_PRIZES;
+      if (lastPrizeId && WINNING_PRIZES.length > 1) {
+        availablePrizes = WINNING_PRIZES.filter(p => p.id.toString() !== lastPrizeId);
+      }
+
+      const random = Math.random();
+      const totalProb = availablePrizes.reduce((acc, p) => acc + p.probability, 0);
+      let randomPointer = random * totalProb;
+      selectedPrize = availablePrizes[0];
+      
+      for (const prize of availablePrizes) {
+        randomPointer -= prize.probability;
+        if (randomPointer <= 0) {
+          selectedPrize = prize;
+          break;
+        }
       }
     }
 
