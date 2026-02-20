@@ -471,20 +471,20 @@ export default function RoletaPage() {
                         className="absolute w-full h-full top-0 left-0 flex justify-center"
                         style={{ transform: `rotate(${rotation}deg)` }}
                       >
-                        <div className="flex flex-col items-center h-full pt-4">
+                        <div className="flex flex-col items-center h-full pt-2 md:pt-4">
                            {/* Texto na Borda (Topo) */}
                            <span 
-                             className="text-sm md:text-xl font-black text-white bg-black/60 px-3 py-1 rounded-full uppercase tracking-wider max-w-[140px] text-center leading-tight border border-white/10 mb-2"
+                             className="text-[10px] sm:text-xs md:text-xl font-black text-white bg-black/60 px-2 py-0.5 md:px-3 md:py-1 rounded-full uppercase tracking-wider max-w-[120px] md:max-w-[140px] text-center leading-tight border border-white/10 mb-1 md:mb-2"
                            >
                              {prize.text}
                            </span>
 
                            {/* Imagem do Produto (Maior e abaixo do texto) */}
-                           <div className="w-24 h-24 md:w-36 md:h-36 bg-white/10 rounded-2xl p-2 border border-white/20">
+                           <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-36 md:h-36 bg-white/10 rounded-xl md:rounded-2xl p-1 md:p-2 border border-white/20">
                              <img 
                                src={prize.image} 
                                alt={prize.text}
-                               className="w-full h-full object-cover rounded-xl"
+                               className="w-full h-full object-cover rounded-lg md:rounded-xl"
                                loading="eager"
                                decoding="sync"
                              />
