@@ -6,92 +6,251 @@ import gsap from 'gsap';
 import confetti from 'canvas-confetti';
 
 // --- CONFIGURAÇÃO DOS PRÊMIOS ---
-// Ordem na roleta (sentido horário)
-// Ajuste as cores para tema neon/cassino
+// Imagens de placeholders de alta qualidade (Unsplash)
 const PRIZES = [
-  { id: 1, text: 'Fone de Ouvido', color: '#FF0055', type: 'win', probability: 0.3, icon: '🎧' },
-  { id: 2, text: 'PC Gamer', color: '#00FFFF', type: 'loss', probability: 0, icon: '🖥️' },
-  { id: 3, text: 'Cabo USB', color: '#CCFF00', type: 'win', probability: 0.3, icon: '🔌' },
-  { id: 4, text: 'PS5', color: '#9D00FF', type: 'loss', probability: 0, icon: '🎮' },
-  { id: 5, text: '5% OFF', color: '#FF9900', type: 'win', probability: 0.4, icon: '🏷️' },
-  { id: 6, text: '10% OFF', color: '#0099FF', type: 'loss', probability: 0, icon: '💎' },
-  { id: 7, text: 'Mão de Obra', color: '#FF00CC', type: 'loss', probability: 0, icon: '🔧' },
+  { 
+    id: 1, 
+    text: 'Fone Gamer', 
+    color: '#FF0055', 
+    type: 'win', 
+    probability: 0.3, 
+    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=60' 
+  },
+  { 
+    id: 2, 
+    text: 'PC Gamer', 
+    color: '#00FFFF', 
+    type: 'loss', 
+    probability: 0, 
+    image: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&auto=format&fit=crop&q=60' 
+  },
+  { 
+    id: 3, 
+    text: 'Cabo USB', 
+    color: '#CCFF00', 
+    type: 'win', 
+    probability: 0.3, 
+    image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=500&auto=format&fit=crop&q=60' 
+  },
+  { 
+    id: 4, 
+    text: 'PS5', 
+    color: '#9D00FF', 
+    type: 'loss', 
+    probability: 0, 
+    image: 'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=500&auto=format&fit=crop&q=60' 
+  },
+  { 
+    id: 5, 
+    text: '5% OFF', 
+    color: '#FF9900', 
+    type: 'win', 
+    probability: 0.4, 
+    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?w=500&auto=format&fit=crop&q=60' 
+  },
+  { 
+    id: 6, 
+    text: '10% OFF', 
+    color: '#0099FF', 
+    type: 'loss', 
+    probability: 0, 
+    image: 'https://images.unsplash.com/photo-1526304640155-2a8696b52b44?w=500&auto=format&fit=crop&q=60' 
+  },
+  { 
+    id: 7, 
+    text: 'Mão de Obra', 
+    color: '#FF00CC', 
+    type: 'loss', 
+    probability: 0, 
+    image: 'https://images.unsplash.com/photo-1581092921461-eab62e97a782?w=500&auto=format&fit=crop&q=60' 
+  },
 ];
 
-// Prêmios vencedores permitidos pelo "Rigged System"
 const WINNING_PRIZES = PRIZES.filter(p => p.probability > 0);
 
-// --- COMPONENTES AUXILIARES ---
-
-// Robô Animado (SVG Simples com animação CSS)
-const RoboAgent = () => (
-  <div className="w-32 h-32 mx-auto mb-4 relative animate-bounce-slow">
-    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-[0_0_15px_rgba(0,255,255,0.8)]">
-      <defs>
-        <radialGradient id="eyeGlow" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-          <stop offset="0%" style={{stopColor: '#00ffff', stopOpacity: 1}} />
-          <stop offset="100%" style={{stopColor: '#00ffff', stopOpacity: 0}} />
-        </radialGradient>
-      </defs>
-      <circle cx="100" cy="100" r="90" fill="#1a1a2e" stroke="#00ffff" strokeWidth="5" />
-      <rect x="60" y="80" width="80" height="50" rx="10" fill="#00ffff" className="animate-pulse" />
-      <circle cx="85" cy="105" r="12" fill="#000" />
-      <circle cx="115" cy="105" r="12" fill="#000" />
-      <circle cx="85" cy="105" r="4" fill="#fff" />
-      <circle cx="115" cy="105" r="4" fill="#fff" />
-      <path d="M 70 150 Q 100 170 130 150" stroke="#00ffff" strokeWidth="5" fill="none" strokeLinecap="round" />
-      <rect x="95" y="20" width="10" height="30" fill="#00ffff" />
-      <circle cx="100" cy="15" r="8" fill="#ff0055" className="animate-ping" />
-    </svg>
+// --- LOGO COMPONENT (Placeholder SVG se a imagem não carregar) ---
+const Logo = () => (
+  <div className="flex justify-center mb-6">
+    <picture>
+      {/* Aqui você deve colocar o caminho da imagem real quando tiver */}
+      <img 
+        src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/1200px-Google_%22G%22_Logo.svg.png" 
+        srcSet="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/1200px-Google_%22G%22_Logo.svg.png 1x, https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/1200px-Google_%22G%22_Logo.svg.png 2x"
+        alt="Balão da Informática Logo" 
+        className="h-24 md:h-32 object-contain drop-shadow-[0_0_15px_rgba(255,0,0,0.6)]"
+        onError={(e) => {
+          // Fallback para texto estilizado se a imagem falhar
+          e.currentTarget.style.display = 'none';
+          e.currentTarget.parentElement!.innerHTML = `<h1 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-400 drop-shadow-[0_0_10px_rgba(255,0,0,0.8)] tracking-tighter">Balão da<br/>Informática</h1>`;
+        }}
+      />
+    </picture>
   </div>
 );
 
-// Gerador de Som Simples (Web Audio API)
+// --- SOUND MANAGER AVANÇADO ---
 const SoundManager = {
   ctx: null as AudioContext | null,
+  masterGain: null as GainNode | null,
+  spinOsc: null as OscillatorNode | null,
+  spinGain: null as GainNode | null,
+  isMuted: false,
+  volume: 1.0,
+
   init: () => {
     if (typeof window !== 'undefined' && !SoundManager.ctx) {
-      SoundManager.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      SoundManager.ctx = new AudioContext();
+      SoundManager.masterGain = SoundManager.ctx.createGain();
+      SoundManager.masterGain.connect(SoundManager.ctx.destination);
+      
+      // Carregar preferências
+      const savedMute = localStorage.getItem('roleta_muted');
+      const savedVol = localStorage.getItem('roleta_volume');
+      if (savedMute !== null) SoundManager.isMuted = savedMute === 'true';
+      if (savedVol !== null) SoundManager.volume = parseFloat(savedVol);
+      
+      SoundManager.updateVolume();
     }
   },
-  playTick: (speed: number) => { // speed 0 a 1 (1 = rápido)
+
+  updateVolume: () => {
+    if (SoundManager.masterGain && SoundManager.ctx) {
+      const targetVol = SoundManager.isMuted ? 0 : SoundManager.volume;
+      SoundManager.masterGain.gain.setTargetAtTime(targetVol, SoundManager.ctx.currentTime, 0.1);
+    }
+  },
+
+  setMute: (mute: boolean) => {
+    SoundManager.isMuted = mute;
+    localStorage.setItem('roleta_muted', mute.toString());
+    SoundManager.updateVolume();
+  },
+
+  setVolume: (vol: number) => {
+    SoundManager.volume = Math.max(0, Math.min(1, vol));
+    localStorage.setItem('roleta_volume', SoundManager.volume.toString());
+    SoundManager.updateVolume();
+  },
+
+  // Som contínuo de "rumble" da roleta
+  startSpinSound: () => {
     if (!SoundManager.ctx) SoundManager.init();
-    if (!SoundManager.ctx) return;
+    if (!SoundManager.ctx || !SoundManager.masterGain) return;
+
+    // Se já existe, parar anterior
+    if (SoundManager.spinOsc) {
+      SoundManager.stopSpinSound();
+    }
+
+    // Criar ruído rosa/marrom filtrado para simular rolamento mecânico
+    const bufferSize = 2 * SoundManager.ctx.sampleRate;
+    const noiseBuffer = SoundManager.ctx.createBuffer(1, bufferSize, SoundManager.ctx.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      const white = Math.random() * 2 - 1;
+      output[i] = (lastOut + (0.02 * white)) / 1.02;
+      lastOut = output[i];
+      output[i] *= 3.5; 
+    }
+    let lastOut = 0;
+
+    const noise = SoundManager.ctx.createBufferSource();
+    noise.buffer = noiseBuffer;
+    noise.loop = true;
+
+    // Filtro para dar a característica "grave" de uma roda pesada
+    const filter = SoundManager.ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 100; // Começa grave
+
+    SoundManager.spinGain = SoundManager.ctx.createGain();
+    SoundManager.spinGain.gain.value = 0; // Fade in
+
+    noise.connect(filter);
+    filter.connect(SoundManager.spinGain);
+    SoundManager.spinGain.connect(SoundManager.masterGain);
+
+    noise.start();
+    SoundManager.spinOsc = noise as any; // Guardar referência (embora seja buffer source)
+    
+    // Guardar referências para modulação
+    (SoundManager as any).spinFilter = filter;
+  },
+
+  updateSpinSound: (speed: number) => {
+    if (!SoundManager.ctx || !(SoundManager as any).spinFilter || !SoundManager.spinGain) return;
+    
+    // Speed 0 a 1
+    // Aumentar frequência de corte e volume com a velocidade
+    const filter = (SoundManager as any).spinFilter as BiquadFilterNode;
+    const gain = SoundManager.spinGain;
+
+    const targetFreq = 100 + (speed * 800); // 100Hz a 900Hz
+    const targetGain = 0.2 + (speed * 0.8); // Volume aumenta com velocidade
+
+    filter.frequency.setTargetAtTime(targetFreq, SoundManager.ctx.currentTime, 0.1);
+    gain.gain.setTargetAtTime(targetGain, SoundManager.ctx.currentTime, 0.1);
+  },
+
+  stopSpinSound: () => {
+    if (SoundManager.spinGain && SoundManager.ctx) {
+      // Fade out
+      SoundManager.spinGain.gain.setTargetAtTime(0, SoundManager.ctx.currentTime, 0.5);
+      setTimeout(() => {
+        if (SoundManager.spinOsc) {
+          try { (SoundManager.spinOsc as any).stop(); } catch (e) {}
+          SoundManager.spinOsc = null;
+        }
+      }, 600);
+    }
+  },
+
+  playTick: (speed: number) => { 
+    if (!SoundManager.ctx) SoundManager.init();
+    if (!SoundManager.ctx || !SoundManager.masterGain) return;
+    
     const osc = SoundManager.ctx.createOscillator();
     const gain = SoundManager.ctx.createGain();
-    osc.type = 'triangle';
-    // Frequência varia com a velocidade (mais agudo quando rápido)
-    const baseFreq = 600 + (speed * 400); 
-    osc.frequency.setValueAtTime(baseFreq, SoundManager.ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(100, SoundManager.ctx.currentTime + 0.05);
+    osc.type = 'square'; // Click mais "mecânico"
     
-    gain.gain.setValueAtTime(0.1, SoundManager.ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, SoundManager.ctx.currentTime + 0.05);
+    const baseFreq = 800 + (speed * 600); 
+    osc.frequency.setValueAtTime(baseFreq, SoundManager.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(100, SoundManager.ctx.currentTime + 0.03);
+    
+    // Volume curto e seco
+    gain.gain.setValueAtTime(0.3 * speed, SoundManager.ctx.currentTime); // Mais alto se rápido
+    gain.gain.exponentialRampToValueAtTime(0.001, SoundManager.ctx.currentTime + 0.03);
     
     osc.connect(gain);
-    gain.connect(SoundManager.ctx.destination);
+    gain.connect(SoundManager.masterGain);
     osc.start();
     osc.stop(SoundManager.ctx.currentTime + 0.05);
   },
+
   playWin: () => {
     if (!SoundManager.ctx) SoundManager.init();
-    if (!SoundManager.ctx) return;
+    if (!SoundManager.ctx || !SoundManager.masterGain) return;
     const now = SoundManager.ctx.currentTime;
-    // Acorde de Vitória (C Major)
-    [261.63, 329.63, 392.00, 523.25].forEach((freq, i) => {
+    
+    // Fanfarra complexa
+    const notes = [523.25, 659.25, 783.99, 1046.50, 783.99, 1046.50];
+    const times = [0, 0.15, 0.3, 0.45, 0.6, 0.75];
+    
+    notes.forEach((freq, i) => {
       const osc = SoundManager.ctx!.createOscillator();
       const gain = SoundManager.ctx!.createGain();
       osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(freq, now + (i * 0.1));
+      osc.frequency.setValueAtTime(freq, now + times[i]);
       
-      gain.gain.setValueAtTime(0.1, now + (i * 0.1));
-      gain.gain.linearRampToValueAtTime(0.2, now + (i * 0.1) + 0.1);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + (i * 0.1) + 1.5);
+      gain.gain.setValueAtTime(0, now + times[i]);
+      gain.gain.linearRampToValueAtTime(0.3, now + times[i] + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + times[i] + 0.8);
       
       osc.connect(gain);
-      gain.connect(SoundManager.ctx!.destination);
-      osc.start(now + (i * 0.1));
-      osc.stop(now + (i * 0.1) + 1.5);
+      gain.connect(SoundManager.masterGain!);
+      osc.start(now + times[i]);
+      osc.stop(now + times[i] + 1.0);
     });
   }
 };
@@ -100,53 +259,62 @@ export default function RoletaPage() {
   const [step, setStep] = useState<'welcome' | 'challenge1' | 'challenge2' | 'roulette' | 'result'>('welcome');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<typeof PRIZES[0] | null>(null);
+  const [isMuted, setIsMuted] = useState(false);
+  const [volume, setVolume] = useState(100);
+  
   const wheelRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Inicializar Áudio no primeiro clique
+  // Inicializar estado do som
+  useEffect(() => {
+    SoundManager.init();
+    setIsMuted(SoundManager.isMuted);
+    setVolume(SoundManager.volume * 100);
+  }, []);
+
+  const toggleMute = () => {
+    const newVal = !isMuted;
+    setIsMuted(newVal);
+    SoundManager.setMute(newVal);
+  };
+
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value);
+    setVolume(val);
+    SoundManager.setVolume(val / 100);
+  };
+
   const handleStart = () => {
     SoundManager.init();
     setStep('challenge1');
   };
 
-  // Simular verificação do Google Review
   const handleVerifyGoogle = () => {
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setStep('challenge2');
-    }, 2000);
+    setTimeout(() => { setLoading(false); setStep('challenge2'); }, 2000);
   };
 
-  // Simular verificação do Instagram
   const handleVerifyInsta = () => {
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setStep('roulette');
-    }, 2000);
+    setTimeout(() => { setLoading(false); setStep('roulette'); }, 2000);
   };
 
-  // Lógica da Roleta
   const spinWheel = () => {
     if (!wheelRef.current) return;
     
-    // Recuperar último prêmio para evitar repetição
+    // Iniciar som contínuo
+    SoundManager.startSpinSound();
+
     const lastPrizeId = localStorage.getItem('last_prize_id');
-    
-    // Filtrar prêmios disponíveis (excluindo o último ganho se possível)
     let availablePrizes = WINNING_PRIZES;
     if (lastPrizeId && WINNING_PRIZES.length > 1) {
       availablePrizes = WINNING_PRIZES.filter(p => p.id.toString() !== lastPrizeId);
     }
 
-    // Escolher prêmio (Rigged)
     const random = Math.random();
-    // Normalizar probabilidades para o novo subconjunto
     const totalProb = availablePrizes.reduce((acc, p) => acc + p.probability, 0);
     let randomPointer = random * totalProb;
-    
     let selectedPrize = availablePrizes[0];
+    
     for (const prize of availablePrizes) {
       randomPointer -= prize.probability;
       if (randomPointer <= 0) {
@@ -155,270 +323,224 @@ export default function RoletaPage() {
       }
     }
 
-    // Salvar prêmio sorteado
     localStorage.setItem('last_prize_id', selectedPrize.id.toString());
 
-    // Calcular rotação
     const sliceAngle = 360 / PRIZES.length;
     const prizeIndex = PRIZES.findIndex(p => p.id === selectedPrize.id);
-    
-    // NEAR MISS DRAMÁTICO:
-    // Queremos parar bem no início da fatia do prêmio vencedor,
-    // o que significa que passamos "raspando" pelo prêmio anterior (que deve ser um LOSS/GRANDE).
-    // O ponteiro está no topo (0 graus).
-    // Para o prêmio estar no topo, a rotação deve ser: -index * sliceAngle.
-    // O centro da fatia é: -index * sliceAngle - sliceAngle/2.
-    // O início da fatia (borda com o anterior) é: -index * sliceAngle.
-    // Vamos adicionar um pequeno offset para dentro da fatia vencedora.
-    
-    const offsetInsideSlice = sliceAngle * 0.15; // 15% para dentro da fatia (bem no começo)
-    // Rotação base para alinhar o início da fatia com o topo:
+    const offsetInsideSlice = sliceAngle * 0.15;
     const baseRotation = (360 * 8) - (prizeIndex * sliceAngle); 
-    // Ajuste final
     const targetRotation = baseRotation - offsetInsideSlice + (Math.random() * (sliceAngle * 0.2)); 
 
-    // Animação GSAP
     gsap.to(wheelRef.current, {
       rotation: targetRotation,
-      duration: 8, // Aumentado para suspense (requerimento 3-5s+, coloquei 8s para drama)
-      ease: "power2.inOut", // Inicia lento, acelera, desacelera muito
+      duration: 8,
+      ease: "power2.inOut",
       onUpdate: function() {
-        // Calcular velocidade atual para o som (delta de rotação)
-        // O GSAP não expõe velocidade direta facilmente, mas podemos estimar pelo progresso
         const progress = this.progress();
-        const speed = 1 - Math.pow(progress - 0.5, 2) * 4; // Parábola aproximada (pico no meio)
+        const speed = 1 - Math.pow(progress - 0.5, 2) * 4; 
         
-        // Tentar tocar som a cada fatia
+        // Atualizar som contínuo
+        SoundManager.updateSpinSound(speed);
+
         const currentRot = this.targets()[0]._gsap.rotation;
         if (Math.floor(currentRot) % Math.floor(sliceAngle) === 0) {
-           // Passa velocidade normalizada (0 a 1)
-           // No final (progress ~1), speed é baixo.
-           // Ajuste fino para o som:
            const soundSpeed = progress > 0.8 ? (1 - progress) * 5 : 1; 
            SoundManager.playTick(soundSpeed);
         }
       },
       onComplete: () => {
+        SoundManager.stopSpinSound();
         SoundManager.playWin();
         
-        // Confetes Explosivos
         const colors = [selectedPrize.color, '#ffffff', '#ffd700'];
-        confetti({
-          particleCount: 200,
-          spread: 100,
-          origin: { y: 0.6 },
-          colors: colors,
-          disableForReducedMotion: true
-        });
-        
-        // Disparar confetes laterais
+        confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 }, colors: colors, disableForReducedMotion: true });
         setTimeout(() => {
             confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0 }, colors: colors });
             confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1 }, colors: colors });
         }, 300);
         
         setResult(selectedPrize);
-        setTimeout(() => setStep('result'), 1500); // Delay maior para apreciar a vitória
+        setTimeout(() => setStep('result'), 1500);
       }
     });
   };
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans overflow-hidden flex flex-col items-center justify-center p-4 relative"
+    <div className="min-h-screen bg-black text-white font-sans overflow-x-hidden flex flex-col items-center justify-center p-4 relative"
          style={{ background: 'radial-gradient(circle at center, #1a1a2e 0%, #000000 100%)' }}>
       
-      {/* Luzes de Fundo (Ambient) */}
+      {/* Background Ambience */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-0 w-full h-full bg-[url('/grid.svg')] opacity-20"></div>
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600 rounded-full blur-[120px] opacity-20 animate-pulse"></div>
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-pink-600 rounded-full blur-[120px] opacity-20 animate-pulse delay-75"></div>
       </div>
 
-      {/* Conteúdo Principal */}
-      <div className="z-10 w-full max-w-md bg-black/80 backdrop-blur-md border border-slate-800 rounded-3xl p-6 shadow-[0_0_50px_rgba(0,255,255,0.1)]">
-        
-        {/* Cabeçalho */}
-        <header className="text-center mb-6">
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-pink-500 drop-shadow-[0_0_10px_rgba(0,255,255,0.5)]">
-            RODA DA SORTE
-          </h1>
-          <p className="text-cyan-200 text-sm mt-1">Balão da Informática</p>
-        </header>
-
-        {/* TELA 1: BOAS-VINDAS */}
-        {step === 'welcome' && (
-          <div className="text-center animate-fadeIn">
-            <RoboAgent />
-            <div className="bg-gray-800/50 p-4 rounded-xl border border-cyan-500/30 mb-6">
-              <p className="text-lg mb-2">👋 Olá! Sou o assistente virtual do Balão.</p>
-              <p className="text-slate-300">Quer testar sua sorte? Você pode ganhar prêmios incríveis agora mesmo!</p>
-            </div>
-            <button 
-              onClick={handleStart}
-              className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-4 rounded-xl text-xl shadow-[0_0_20px_rgba(0,255,255,0.4)] transition-all transform hover:scale-105 active:scale-95"
-            >
-              QUERO JOGAR 🎰
-            </button>
-          </div>
-        )}
-
-        {/* TELA 2: DESAFIO 1 (GOOGLE) */}
-        {step === 'challenge1' && (
-          <div className="text-center animate-fadeIn">
-            <RoboAgent />
-            <h2 className="text-xl font-bold text-cyan-400 mb-4">Desafio 1 de 2</h2>
-            <div className="bg-white p-4 rounded-xl mx-auto w-fit mb-4 shadow-[0_0_20px_rgba(255,255,255,0.2)]">
-              <QRCodeSVG value="https://g.page/r/CRDiroCe65RREAE/review" size={180} />
-            </div>
-            <p className="text-sm text-slate-400 mb-6">Escaneie para avaliar ou clique no botão abaixo.</p>
-            
-            <a 
-              href="https://g.page/r/CRDiroCe65RREAE/review" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="block mb-4 text-cyan-400 underline"
-            >
-              Abrir Link Direto
-            </a>
-
-            <button 
-              onClick={handleVerifyGoogle}
-              disabled={loading}
-              className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
-            >
-              {loading ? 'Verificando...' : 'JÁ AVALIEI! ✅'}
-            </button>
-          </div>
-        )}
-
-        {/* TELA 3: DESAFIO 2 (INSTAGRAM) */}
-        {step === 'challenge2' && (
-          <div className="text-center animate-fadeIn">
-            <RoboAgent />
-            <h2 className="text-xl font-bold text-pink-500 mb-4">Desafio 2 de 2</h2>
-            <div className="bg-white p-4 rounded-xl mx-auto w-fit mb-4 shadow-[0_0_20px_rgba(255,0,128,0.2)]">
-              <QRCodeSVG value="https://www.instagram.com/balaodainformatica_castelo/" size={180} />
-            </div>
-            <p className="text-sm text-slate-400 mb-6">Siga nosso Instagram para liberar a roleta!</p>
-            
-            <a 
-              href="https://www.instagram.com/balaodainformatica_castelo/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="block mb-4 text-pink-400 underline"
-            >
-              Abrir Instagram
-            </a>
-
-            <button 
-              onClick={handleVerifyInsta}
-              disabled={loading}
-              className="w-full bg-pink-600 hover:bg-pink-500 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
-            >
-              {loading ? 'Verificando...' : 'JÁ SEGUI! 🚀'}
-            </button>
-          </div>
-        )}
-
-        {/* TELA 4: ROLETA */}
-        {step === 'roulette' && (
-          <div className="text-center animate-fadeIn relative">
-            {/* Marcador */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-4 z-20 w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[30px] border-t-white drop-shadow-lg"></div>
-            
-            {/* Container da Roleta */}
-            <div className="relative w-72 h-72 mx-auto mb-8">
-              <div 
-                ref={wheelRef}
-                className="w-full h-full rounded-full border-4 border-yellow-500 shadow-[0_0_30px_rgba(255,215,0,0.3)] overflow-hidden relative"
-                style={{ 
-                  background: `conic-gradient(
-                    ${PRIZES.map((p, i) => `${p.color} ${(i * 100) / PRIZES.length}% ${((i + 1) * 100) / PRIZES.length}%`).join(', ')}
-                  )`,
-                  transform: 'rotate(0deg)'
-                }} 
-              >
-                {/* Textos e Ícones dos Prêmios */}
-                {PRIZES.map((prize, index) => {
-                  const sliceAngle = 360 / PRIZES.length;
-                  const rotation = sliceAngle * index + (sliceAngle / 2); // Centralizar no meio da fatia
-                  return (
-                    <div 
-                      key={prize.id}
-                      className="absolute w-full h-full top-0 left-0 flex justify-center"
-                      style={{ 
-                        transform: `rotate(${rotation}deg)`,
-                      }}
-                    >
-                      <div className="flex flex-col items-center mt-4 transform translate-y-2">
-                         <span className="text-2xl filter drop-shadow-md animate-pulse">{prize.icon}</span>
-                         <span 
-                           className="text-[10px] font-bold text-black mt-1 writing-vertical-rl uppercase tracking-wider"
-                           style={{ 
-                             textShadow: '0 0 2px rgba(255,255,255,0.8)',
-                             height: '80px'
-                           }}
-                         >
-                           {prize.text}
-                         </span>
-                      </div>
-                    </div>
-                  );
-                })}
-
-                
-                {/* Centro da Roleta */}
-                <div className="absolute top-1/2 left-1/2 w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full -translate-x-1/2 -translate-y-1/2 shadow-inner flex items-center justify-center z-10 border-4 border-black">
-                  <span className="text-2xl">🎲</span>
-                </div>
-              </div>
-            </div>
-
-            <button 
-              onClick={spinWheel}
-              className="w-full bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-400 hover:to-orange-500 text-white font-bold py-4 rounded-xl text-xl shadow-[0_0_20px_rgba(255,165,0,0.4)] animate-pulse"
-            >
-              GIRAR AGORA!
-            </button>
-          </div>
-        )}
-
-        {/* TELA 5: RESULTADO */}
-        {step === 'result' && result && (
-          <div className="text-center animate-scaleIn">
-            <h2 className="text-3xl font-bold text-yellow-400 mb-2">PARABÉNS! 🎉</h2>
-            <p className="text-slate-300 mb-6">Você ganhou:</p>
-            
-            <div className="bg-gradient-to-br from-slate-800 to-black p-8 rounded-2xl border-2 border-yellow-500 shadow-[0_0_40px_rgba(255,215,0,0.3)] mb-8 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-yellow-500/10 animate-pulse"></div>
-              
-              <div className="text-8xl mb-4 transform group-hover:scale-110 transition-transform duration-300 drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]">
-                {result.icon}
-              </div>
-              
-              <h3 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-500 relative z-10 uppercase tracking-widest">
-                {result.text}
-              </h3>
-            </div>
-
-            <p className="text-sm text-slate-400 mb-4">
-              Tire um print desta tela e mostre ao vendedor!
-            </p>
-
-            <button 
-              onClick={() => window.location.reload()}
-              className="text-cyan-400 underline hover:text-cyan-300"
-            >
-              Jogar Novamente
-            </button>
-          </div>
-        )}
-
+      {/* Controle de Som Flutuante */}
+      <div className="fixed top-4 right-4 z-50 flex items-center gap-2 bg-black/50 backdrop-blur-md p-2 rounded-full border border-slate-700">
+        <button onClick={toggleMute} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+          {isMuted ? '🔇' : '🔊'}
+        </button>
+        <input 
+          type="range" 
+          min="0" 
+          max="100" 
+          value={volume} 
+          onChange={handleVolumeChange}
+          className="w-24 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+        />
       </div>
 
-      {/* Footer */}
-      <footer className="mt-8 text-slate-400 text-xs text-center z-10">
-        &copy; 2026 Balão da Informática Castelo. Todos os direitos reservados.
+      <div className="z-10 w-full max-w-4xl flex flex-col items-center">
+        
+        {/* LOGO AREA */}
+        <Logo />
+
+        {/* CONTAINER PRINCIPAL */}
+        <div className="w-full bg-black/80 backdrop-blur-md border border-slate-800 rounded-3xl p-6 shadow-[0_0_50px_rgba(0,255,255,0.1)] transition-all duration-500">
+          
+          {step === 'welcome' && (
+            <div className="text-center animate-fadeIn max-w-md mx-auto">
+              <div className="bg-gray-800/50 p-6 rounded-xl border border-cyan-500/30 mb-8">
+                <h2 className="text-2xl font-bold mb-4 text-cyan-400">Bem-vindo ao Clube de Vantagens!</h2>
+                <p className="text-slate-300 text-lg">Gire a roleta e ganhe prêmios exclusivos na hora.</p>
+              </div>
+              <button 
+                onClick={handleStart}
+                className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-6 rounded-2xl text-2xl shadow-[0_0_30px_rgba(0,255,255,0.4)] transition-all transform hover:scale-105 active:scale-95"
+              >
+                QUERO JOGAR 🎰
+              </button>
+            </div>
+          )}
+
+          {(step === 'challenge1' || step === 'challenge2') && (
+             <div className="text-center animate-fadeIn max-w-md mx-auto">
+               <h2 className={`text-2xl font-bold mb-6 ${step === 'challenge1' ? 'text-cyan-400' : 'text-pink-500'}`}>
+                 {step === 'challenge1' ? 'Etapa 1: Avaliação Google' : 'Etapa 2: Siga no Instagram'}
+               </h2>
+               <div className={`bg-white p-6 rounded-2xl mx-auto w-fit mb-8 shadow-[0_0_30px_${step === 'challenge1' ? 'rgba(0,255,255,0.3)' : 'rgba(255,0,128,0.3)'}]`}>
+                 <QRCodeSVG 
+                    value={step === 'challenge1' ? "https://g.page/r/CRDiroCe65RREAE/review" : "https://www.instagram.com/balaodainformatica_castelo/"} 
+                    size={220} 
+                 />
+               </div>
+               
+               <button 
+                 onClick={step === 'challenge1' ? handleVerifyGoogle : handleVerifyInsta}
+                 disabled={loading}
+                 className={`w-full font-bold py-4 rounded-xl transition-all text-xl ${
+                   step === 'challenge1' 
+                     ? 'bg-green-600 hover:bg-green-500 text-white' 
+                     : 'bg-pink-600 hover:bg-pink-500 text-white'
+                 }`}
+               >
+                 {loading ? 'Verificando...' : (step === 'challenge1' ? 'JÁ AVALIEI! ✅' : 'JÁ SEGUI! 🚀')}
+               </button>
+             </div>
+          )}
+
+          {step === 'roulette' && (
+            <div className="text-center animate-fadeIn relative flex flex-col items-center">
+              {/* Marcador */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-6 z-30 w-0 h-0 border-l-[25px] border-l-transparent border-r-[25px] border-r-transparent border-t-[50px] border-t-white drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)] filter hue-rotate-15"></div>
+              
+              {/* Roleta Gigante */}
+              <div className="relative mb-12 transform transition-transform hover:scale-[1.02] duration-500">
+                <div 
+                  ref={wheelRef}
+                  // AUMENTO DE 100%: w-72 (288px) -> w-[576px] ~ w-[600px] responsivo
+                  className="w-[90vw] h-[90vw] max-w-[600px] max-h-[600px] rounded-full border-8 border-yellow-500 shadow-[0_0_60px_rgba(255,215,0,0.4)] overflow-hidden relative"
+                  style={{ 
+                    background: `conic-gradient(
+                      ${PRIZES.map((p, i) => `${p.color} ${(i * 100) / PRIZES.length}% ${((i + 1) * 100) / PRIZES.length}%`).join(', ')}
+                    )`,
+                    transform: 'rotate(0deg)'
+                  }} 
+                >
+                  {/* Itens da Roleta */}
+                  {PRIZES.map((prize, index) => {
+                    const sliceAngle = 360 / PRIZES.length;
+                    const rotation = sliceAngle * index + (sliceAngle / 2);
+                    return (
+                      <div 
+                        key={prize.id}
+                        className="absolute w-full h-full top-0 left-0 flex justify-center"
+                        style={{ transform: `rotate(${rotation}deg)` }}
+                      >
+                        <div className="flex flex-col items-center mt-6 md:mt-12 transform translate-y-4">
+                           {/* Imagem do Produto */}
+                           <div className="w-16 h-16 md:w-24 md:h-24 mb-2 bg-white/20 rounded-full p-2 backdrop-blur-sm shadow-lg">
+                             <img 
+                               src={prize.image} 
+                               alt={prize.text}
+                               className="w-full h-full object-contain drop-shadow-md rounded-full"
+                               loading="lazy"
+                             />
+                           </div>
+                           {/* Texto não cortado */}
+                           <span 
+                             className="text-xs md:text-lg font-black text-white bg-black/30 px-2 py-1 rounded backdrop-blur-sm uppercase tracking-wider max-w-[80px] md:max-w-[120px] text-center leading-tight shadow-sm"
+                             style={{ textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}
+                           >
+                             {prize.text}
+                           </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {/* Centro */}
+                  <div className="absolute top-1/2 left-1/2 w-20 h-20 md:w-32 md:h-32 bg-gradient-to-br from-yellow-400 to-yellow-700 rounded-full -translate-x-1/2 -translate-y-1/2 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] flex items-center justify-center z-20 border-8 border-black">
+                    <span className="text-4xl md:text-6xl filter drop-shadow-lg">🎰</span>
+                  </div>
+                </div>
+              </div>
+
+              <button 
+                onClick={spinWheel}
+                className="w-full max-w-md bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-400 hover:to-orange-500 text-white font-bold py-6 rounded-2xl text-3xl shadow-[0_0_40px_rgba(255,165,0,0.6)] animate-pulse tracking-widest uppercase border-b-4 border-orange-800 active:border-b-0 active:translate-y-1"
+              >
+                GIRAR!
+              </button>
+            </div>
+          )}
+
+          {step === 'result' && result && (
+            <div className="text-center animate-scaleIn">
+              <h2 className="text-4xl md:text-5xl font-black text-yellow-400 mb-4 drop-shadow-lg">PARABÉNS! 🎉</h2>
+              
+              <div className="bg-gradient-to-br from-slate-800 to-black p-10 rounded-3xl border-4 border-yellow-500 shadow-[0_0_60px_rgba(255,215,0,0.4)] mb-8 relative overflow-hidden group max-w-lg mx-auto">
+                <div className="absolute inset-0 bg-yellow-500/10 animate-pulse"></div>
+                
+                <img 
+                  src={result.image} 
+                  alt={result.text}
+                  className="w-48 h-48 md:w-64 md:h-64 object-contain mx-auto mb-6 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] transform group-hover:scale-110 transition-transform duration-500"
+                />
+                
+                <h3 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-500 uppercase tracking-widest relative z-10">
+                  {result.text}
+                </h3>
+              </div>
+
+              <p className="text-slate-400 mb-8 text-lg">
+                Tire um print desta tela e mostre ao vendedor!
+              </p>
+
+              <button 
+                onClick={() => window.location.reload()}
+                className="text-cyan-400 underline hover:text-cyan-300 text-lg"
+              >
+                Jogar Novamente
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <footer className="mt-12 text-slate-500 text-sm text-center z-10">
+        &copy; 2026 Balão da Informática Castelo.
       </footer>
     </div>
   );
