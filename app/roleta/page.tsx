@@ -72,10 +72,9 @@ const WINNING_PRIZES = PRIZES.filter(p => p.probability > 0);
 const Logo = () => (
   <div className="flex justify-center mb-6">
     <picture>
-      {/* Aqui você deve colocar o caminho da imagem real quando tiver */}
+      <source srcSet="/logo.png" type="image/png" />
       <img 
-        src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/1200px-Google_%22G%22_Logo.svg.png" 
-        srcSet="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/1200px-Google_%22G%22_Logo.svg.png 1x, https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/1200px-Google_%22G%22_Logo.svg.png 2x"
+        src="/logo.png" 
         alt="Balão da Informática Logo" 
         className="h-24 md:h-32 object-contain drop-shadow-[0_0_15px_rgba(255,0,0,0.6)]"
         onError={(e) => {
@@ -147,13 +146,13 @@ const SoundManager = {
     const bufferSize = 2 * SoundManager.ctx.sampleRate;
     const noiseBuffer = SoundManager.ctx.createBuffer(1, bufferSize, SoundManager.ctx.sampleRate);
     const output = noiseBuffer.getChannelData(0);
+    let lastOut = 0;
     for (let i = 0; i < bufferSize; i++) {
       const white = Math.random() * 2 - 1;
       output[i] = (lastOut + (0.02 * white)) / 1.02;
       lastOut = output[i];
       output[i] *= 3.5; 
     }
-    let lastOut = 0;
 
     const noise = SoundManager.ctx.createBufferSource();
     noise.buffer = noiseBuffer;
