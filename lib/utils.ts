@@ -13,6 +13,23 @@ export interface Product {
   created_at?: string;
 }
 
+export interface UsedNotebook {
+  id: string;
+  name: string;
+  model: string;
+  processor: string;
+  ram: string;
+  storage: string;
+  gpu?: string;
+  battery: string;
+  price: number;
+  cart_url: string;
+  image_urls: string[];
+  video_url?: string;
+  created_at?: string;
+  highlight?: boolean;
+}
+
 export interface CarouselImage {
   id: string;
   image_url: string;

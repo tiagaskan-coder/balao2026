@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 import { supabaseAdmin } from './supabase-admin';
-import { Product, CarouselImage, Category, HomeBlock } from './utils';
+import { Product, CarouselImage, Category, HomeBlock, UsedNotebook } from './utils';
  
  
 
@@ -209,6 +209,104 @@ export async function getCarouselImages(activeOnly = true): Promise<CarouselImag
   } catch (error) {
     console.error("Error fetching carousel images:", error);
     return [];
+  }
+}
+
+// --- Used Notebooks (Seminovos) ---
+
+export async function getUsedNotebooks(): Promise<UsedNotebook[]> {
+  try {
+    const { data, error } = await supabase
+      .from('used_notebooks')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error("Supabase error (used_notebooks):", error);
+      return [];
+    }
+
+    return (data as any[]) as UsedNotebook[];
+  } catch (error) {
+    console.error("Error fetching used notebooks:", error);
+    return [];
+  }
+}
+
+export async function createUsedNotebook(payload: Partial<UsedNotebook>): Promise<UsedNotebook> {
+  try {
+    const notebook: Partial<UsedNotebook> = {
+      name: payload.name || "",
+      model: payload.model || "",
+      processor: payload.processor || "",
+      ram: payload.ram || "",
+      storage: payload.storage || "",
+      gpu: payload.gpu || "",
+      battery: payload.battery || "",
+      price: payload.price ?? 0,
+      cart_url: payload.cart_url || "",
+      image_urls: payload.image_urls || [],
+      video_url: payload.video_url || "",
+      highlight: payload.highlight ?? false,
+    };
+
+    const { data, error } = await supabaseAdmin
+      .from('used_notebooks')
+      .insert(notebook)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as UsedNotebook;
+  } catch (error) {
+    console.error("Error creating used notebook:", error);
+    throw error;
+  }
+}
+
+export async function updateUsedNotebook(id: string, updates: Partial<UsedNotebook>): Promise<UsedNotebook> {
+  try {
+    const notebookUpdates: Partial<UsedNotebook> = {};
+
+    if (updates.name !== undefined) notebookUpdates.name = updates.name;
+    if (updates.model !== undefined) notebookUpdates.model = updates.model;
+    if (updates.processor !== undefined) notebookUpdates.processor = updates.processor;
+    if (updates.ram !== undefined) notebookUpdates.ram = updates.ram;
+    if (updates.storage !== undefined) notebookUpdates.storage = updates.storage;
+    if (updates.gpu !== undefined) notebookUpdates.gpu = updates.gpu;
+    if (updates.battery !== undefined) notebookUpdates.battery = updates.battery;
+    if (updates.price !== undefined) notebookUpdates.price = updates.price;
+    if (updates.cart_url !== undefined) notebookUpdates.cart_url = updates.cart_url;
+    if (updates.image_urls !== undefined) notebookUpdates.image_urls = updates.image_urls;
+    if (updates.video_url !== undefined) notebookUpdates.video_url = updates.video_url;
+    if (updates.highlight !== undefined) notebookUpdates.highlight = updates.highlight;
+
+    const { data, error } = await supabaseAdmin
+      .from('used_notebooks')
+      .update(notebookUpdates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as UsedNotebook;
+  } catch (error) {
+    console.error("Error updating used notebook:", error);
+    throw error;
+  }
+}
+
+export async function deleteUsedNotebook(id: string): Promise<void> {
+  try {
+    const { error } = await supabaseAdmin
+      .from('used_notebooks')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+  } catch (error) {
+    console.error("Error deleting used notebook:", error);
+    throw error;
   }
 }
 
