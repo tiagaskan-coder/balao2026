@@ -40,22 +40,8 @@ const PRIZES = [
     probability: 0, 
     image: '/images/prizes/ps5.jpg' 
   },
-  { 
-    id: 5, 
-    text: '5% OFF', 
-    color: '#FF9900', 
-    type: 'win', 
-    probability: 0.4, 
-    image: '/images/prizes/discount5.png' 
-  },
-  { 
-    id: 6, 
-    text: '10% OFF', 
-    color: '#0099FF', 
-    type: 'loss', 
-    probability: 0, 
-    image: '/images/prizes/discount10.png' 
-  },
+  { id: 5, text: '5% OFF', color: '#FF9900', type: 'win', probability: 0.4, image: '/images/prizes/discount5.jpg' },
+    { id: 6, text: '10% OFF', color: '#0099FF', type: 'loss', probability: 0, image: '/images/prizes/discount10.jpg' },
   { 
     id: 7, 
     text: 'Mão de Obra', 
