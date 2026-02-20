@@ -376,18 +376,14 @@ export default function RoletaPage() {
       </div>
 
       {/* Controle de Som Flutuante */}
-      <div className="fixed top-4 right-4 z-50 flex items-center gap-2 bg-black/50 backdrop-blur-md p-2 rounded-full border border-slate-700">
-        <button onClick={toggleMute} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+      <div className="fixed top-4 right-4 z-50">
+        <button 
+          onClick={toggleMute} 
+          className="p-3 bg-black/50 hover:bg-white/10 rounded-full transition-colors border border-slate-700 backdrop-blur-sm"
+          title={isMuted ? "Ativar som" : "Silenciar"}
+        >
           {isMuted ? '🔇' : '🔊'}
         </button>
-        <input 
-          type="range" 
-          min="0" 
-          max="100" 
-          value={volume} 
-          onChange={handleVolumeChange}
-          className="w-24 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-cyan-500"
-        />
       </div>
 
       <div className="z-10 w-full max-w-4xl flex flex-col items-center">
@@ -449,7 +445,7 @@ export default function RoletaPage() {
                 <div 
                   ref={wheelRef}
                   // AUMENTO DE 100%: w-72 (288px) -> w-[576px] ~ w-[600px] responsivo
-                  className="w-[90vw] h-[90vw] max-w-[600px] max-h-[600px] rounded-full border-8 border-yellow-500 shadow-[0_0_60px_rgba(255,215,0,0.4)] overflow-hidden relative"
+                  className="w-[90vw] h-[90vw] max-w-[600px] max-h-[600px] rounded-full border-8 border-yellow-500 shadow-[0_0_20px_rgba(255,215,0,0.3)] overflow-hidden relative will-change-transform"
                   style={{ 
                     background: `conic-gradient(
                       ${PRIZES.map((p, i) => `${p.color} ${(i * 100) / PRIZES.length}% ${((i + 1) * 100) / PRIZES.length}%`).join(', ')}
@@ -470,19 +466,19 @@ export default function RoletaPage() {
                         <div className="flex flex-col items-center h-full pt-4">
                            {/* Texto na Borda (Topo) */}
                            <span 
-                             className="text-sm md:text-xl font-black text-white bg-black/40 px-3 py-1 rounded-full backdrop-blur-md uppercase tracking-wider max-w-[140px] text-center leading-tight shadow-sm border border-white/10 mb-2"
-                             style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}
+                             className="text-sm md:text-xl font-black text-white bg-black/60 px-3 py-1 rounded-full uppercase tracking-wider max-w-[140px] text-center leading-tight border border-white/10 mb-2"
                            >
                              {prize.text}
                            </span>
 
                            {/* Imagem do Produto (Maior e abaixo do texto) */}
-                           <div className="w-24 h-24 md:w-36 md:h-36 bg-white/10 rounded-2xl p-2 backdrop-blur-sm shadow-xl border border-white/20 transform hover:scale-110 transition-transform duration-300">
+                           <div className="w-24 h-24 md:w-36 md:h-36 bg-white/10 rounded-2xl p-2 border border-white/20">
                              <img 
                                src={prize.image} 
                                alt={prize.text}
-                               className="w-full h-full object-cover rounded-xl shadow-inner"
-                               loading="lazy"
+                               className="w-full h-full object-cover rounded-xl"
+                               loading="eager"
+                               decoding="sync"
                              />
                            </div>
                         </div>
