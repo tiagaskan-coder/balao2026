@@ -9,13 +9,13 @@ import confetti from 'canvas-confetti';
 // Ordem na roleta (sentido horário)
 // Ajuste as cores para tema neon/cassino
 const PRIZES = [
-  { id: 1, text: 'Fone de Ouvido', color: '#FF0055', type: 'win', probability: 0.3 },
-  { id: 2, text: 'PC Gamer', color: '#00FFFF', type: 'loss', probability: 0 },
-  { id: 3, text: 'Cabo USB', color: '#CCFF00', type: 'win', probability: 0.3 },
-  { id: 4, text: 'PS5', color: '#9D00FF', type: 'loss', probability: 0 },
-  { id: 5, text: '5% OFF', color: '#FF9900', type: 'win', probability: 0.4 },
-  { id: 6, text: '10% OFF', color: '#0099FF', type: 'loss', probability: 0 }, // Isca
-  { id: 7, text: 'Mão de Obra', color: '#FF00CC', type: 'loss', probability: 0 }, // Isca
+  { id: 1, text: 'Fone de Ouvido', color: '#FF0055', type: 'win', probability: 0.3, icon: '🎧' },
+  { id: 2, text: 'PC Gamer', color: '#00FFFF', type: 'loss', probability: 0, icon: '🖥️' },
+  { id: 3, text: 'Cabo USB', color: '#CCFF00', type: 'win', probability: 0.3, icon: '🔌' },
+  { id: 4, text: 'PS5', color: '#9D00FF', type: 'loss', probability: 0, icon: '🎮' },
+  { id: 5, text: '5% OFF', color: '#FF9900', type: 'win', probability: 0.4, icon: '🏷️' },
+  { id: 6, text: '10% OFF', color: '#0099FF', type: 'loss', probability: 0, icon: '💎' },
+  { id: 7, text: 'Mão de Obra', color: '#FF00CC', type: 'loss', probability: 0, icon: '🔧' },
 ];
 
 // Prêmios vencedores permitidos pelo "Rigged System"
@@ -27,11 +27,19 @@ const WINNING_PRIZES = PRIZES.filter(p => p.probability > 0);
 const RoboAgent = () => (
   <div className="w-32 h-32 mx-auto mb-4 relative animate-bounce-slow">
     <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-[0_0_15px_rgba(0,255,255,0.8)]">
+      <defs>
+        <radialGradient id="eyeGlow" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+          <stop offset="0%" style={{stopColor: '#00ffff', stopOpacity: 1}} />
+          <stop offset="100%" style={{stopColor: '#00ffff', stopOpacity: 0}} />
+        </radialGradient>
+      </defs>
       <circle cx="100" cy="100" r="90" fill="#1a1a2e" stroke="#00ffff" strokeWidth="5" />
       <rect x="60" y="80" width="80" height="50" rx="10" fill="#00ffff" className="animate-pulse" />
-      <circle cx="85" cy="105" r="10" fill="#000" />
-      <circle cx="115" cy="105" r="10" fill="#000" />
-      <path d="M 70 150 Q 100 170 130 150" stroke="#00ffff" strokeWidth="5" fill="none" />
+      <circle cx="85" cy="105" r="12" fill="#000" />
+      <circle cx="115" cy="105" r="12" fill="#000" />
+      <circle cx="85" cy="105" r="4" fill="#fff" />
+      <circle cx="115" cy="105" r="4" fill="#fff" />
+      <path d="M 70 150 Q 100 170 130 150" stroke="#00ffff" strokeWidth="5" fill="none" strokeLinecap="round" />
       <rect x="95" y="20" width="10" height="30" fill="#00ffff" />
       <circle cx="100" cy="15" r="8" fill="#ff0055" className="animate-ping" />
     </svg>
@@ -46,37 +54,44 @@ const SoundManager = {
       SoundManager.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
     }
   },
-  playTick: () => {
+  playTick: (speed: number) => { // speed 0 a 1 (1 = rápido)
     if (!SoundManager.ctx) SoundManager.init();
     if (!SoundManager.ctx) return;
     const osc = SoundManager.ctx.createOscillator();
     const gain = SoundManager.ctx.createGain();
     osc.type = 'triangle';
-    osc.frequency.setValueAtTime(800, SoundManager.ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(100, SoundManager.ctx.currentTime + 0.1);
+    // Frequência varia com a velocidade (mais agudo quando rápido)
+    const baseFreq = 600 + (speed * 400); 
+    osc.frequency.setValueAtTime(baseFreq, SoundManager.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(100, SoundManager.ctx.currentTime + 0.05);
+    
     gain.gain.setValueAtTime(0.1, SoundManager.ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, SoundManager.ctx.currentTime + 0.1);
+    gain.gain.exponentialRampToValueAtTime(0.001, SoundManager.ctx.currentTime + 0.05);
+    
     osc.connect(gain);
     gain.connect(SoundManager.ctx.destination);
     osc.start();
-    osc.stop(SoundManager.ctx.currentTime + 0.1);
+    osc.stop(SoundManager.ctx.currentTime + 0.05);
   },
   playWin: () => {
     if (!SoundManager.ctx) SoundManager.init();
     if (!SoundManager.ctx) return;
-    // Sequência de vitória simples
     const now = SoundManager.ctx.currentTime;
-    [0, 0.2, 0.4, 0.6].forEach((t, i) => {
+    // Acorde de Vitória (C Major)
+    [261.63, 329.63, 392.00, 523.25].forEach((freq, i) => {
       const osc = SoundManager.ctx!.createOscillator();
       const gain = SoundManager.ctx!.createGain();
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(440 + (i * 100), now + t);
-      gain.gain.setValueAtTime(0.1, now + t);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + t + 0.3);
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, now + (i * 0.1));
+      
+      gain.gain.setValueAtTime(0.1, now + (i * 0.1));
+      gain.gain.linearRampToValueAtTime(0.2, now + (i * 0.1) + 0.1);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + (i * 0.1) + 1.5);
+      
       osc.connect(gain);
       gain.connect(SoundManager.ctx!.destination);
-      osc.start(now + t);
-      osc.stop(now + t + 0.3);
+      osc.start(now + (i * 0.1));
+      osc.stop(now + (i * 0.1) + 1.5);
     });
   }
 };
@@ -116,63 +131,94 @@ export default function RoletaPage() {
   const spinWheel = () => {
     if (!wheelRef.current) return;
     
+    // Recuperar último prêmio para evitar repetição
+    const lastPrizeId = localStorage.getItem('last_prize_id');
+    
+    // Filtrar prêmios disponíveis (excluindo o último ganho se possível)
+    let availablePrizes = WINNING_PRIZES;
+    if (lastPrizeId && WINNING_PRIZES.length > 1) {
+      availablePrizes = WINNING_PRIZES.filter(p => p.id.toString() !== lastPrizeId);
+    }
+
     // Escolher prêmio (Rigged)
     const random = Math.random();
-    let cumulativeProbability = 0;
-    let selectedPrize = WINNING_PRIZES[0];
+    // Normalizar probabilidades para o novo subconjunto
+    const totalProb = availablePrizes.reduce((acc, p) => acc + p.probability, 0);
+    let randomPointer = random * totalProb;
     
-    for (const prize of WINNING_PRIZES) {
-      cumulativeProbability += prize.probability;
-      if (random <= cumulativeProbability) {
+    let selectedPrize = availablePrizes[0];
+    for (const prize of availablePrizes) {
+      randomPointer -= prize.probability;
+      if (randomPointer <= 0) {
         selectedPrize = prize;
         break;
       }
     }
 
+    // Salvar prêmio sorteado
+    localStorage.setItem('last_prize_id', selectedPrize.id.toString());
+
     // Calcular rotação
-    // Cada fatia tem 360 / 7 graus
     const sliceAngle = 360 / PRIZES.length;
-    // Índice do prêmio selecionado no array original
     const prizeIndex = PRIZES.findIndex(p => p.id === selectedPrize.id);
     
-    // Rotação alvo: Queremos que o prêmio pare no TOPO (ou onde estiver o marcador)
-    // Se o marcador estiver no topo (0 graus), a rotação deve trazer o item para 0.
-    // O centro da fatia 'index' está em: index * sliceAngle + sliceAngle / 2
-    // Para trazer isso para 0, precisamos girar: -(index * sliceAngle + sliceAngle / 2)
-    // Adicionamos voltas completas (360 * 5)
+    // NEAR MISS DRAMÁTICO:
+    // Queremos parar bem no início da fatia do prêmio vencedor,
+    // o que significa que passamos "raspando" pelo prêmio anterior (que deve ser um LOSS/GRANDE).
+    // O ponteiro está no topo (0 graus).
+    // Para o prêmio estar no topo, a rotação deve ser: -index * sliceAngle.
+    // O centro da fatia é: -index * sliceAngle - sliceAngle/2.
+    // O início da fatia (borda com o anterior) é: -index * sliceAngle.
+    // Vamos adicionar um pequeno offset para dentro da fatia vencedora.
     
-    const randomOffset = (Math.random() - 0.5) * (sliceAngle * 0.6); // Margem de segurança
-    const targetRotation = (360 * 8) - (prizeIndex * sliceAngle) - (sliceAngle / 2) + randomOffset;
+    const offsetInsideSlice = sliceAngle * 0.15; // 15% para dentro da fatia (bem no começo)
+    // Rotação base para alinhar o início da fatia com o topo:
+    const baseRotation = (360 * 8) - (prizeIndex * sliceAngle); 
+    // Ajuste final
+    const targetRotation = baseRotation - offsetInsideSlice + (Math.random() * (sliceAngle * 0.2)); 
 
     // Animação GSAP
     gsap.to(wheelRef.current, {
       rotation: targetRotation,
-      duration: 6,
-      ease: "power4.inOut", // Começa devagar, acelera, desacelera
+      duration: 8, // Aumentado para suspense (requerimento 3-5s+, coloquei 8s para drama)
+      ease: "power2.inOut", // Inicia lento, acelera, desacelera muito
       onUpdate: function() {
-        // Tentar tocar som a cada fatia (aproximado)
-        const rotation = this.targets()[0]._gsap.rotation % 360;
-        // Lógica simplificada para som de tick
-        if (Math.floor(rotation) % Math.floor(sliceAngle) === 0) {
-          SoundManager.playTick();
+        // Calcular velocidade atual para o som (delta de rotação)
+        // O GSAP não expõe velocidade direta facilmente, mas podemos estimar pelo progresso
+        const progress = this.progress();
+        const speed = 1 - Math.pow(progress - 0.5, 2) * 4; // Parábola aproximada (pico no meio)
+        
+        // Tentar tocar som a cada fatia
+        const currentRot = this.targets()[0]._gsap.rotation;
+        if (Math.floor(currentRot) % Math.floor(sliceAngle) === 0) {
+           // Passa velocidade normalizada (0 a 1)
+           // No final (progress ~1), speed é baixo.
+           // Ajuste fino para o som:
+           const soundSpeed = progress > 0.8 ? (1 - progress) * 5 : 1; 
+           SoundManager.playTick(soundSpeed);
         }
       },
       onComplete: () => {
-        // Efeito "Quase Vitória" (Totó final)
-        // Se quisermos implementar o "escorregão" do PC Gamer, precisaríamos ajustar a rotação alvo para ficar
-        // bem na borda e depois dar um tween extra.
-        // Simplificação: Apenas mostrar resultado e celebrar.
-        
         SoundManager.playWin();
+        
+        // Confetes Explosivos
+        const colors = [selectedPrize.color, '#ffffff', '#ffd700'];
         confetti({
-          particleCount: 150,
-          spread: 70,
+          particleCount: 200,
+          spread: 100,
           origin: { y: 0.6 },
-          colors: ['#00FFFF', '#FF0055', '#FFD700']
+          colors: colors,
+          disableForReducedMotion: true
         });
         
+        // Disparar confetes laterais
+        setTimeout(() => {
+            confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0 }, colors: colors });
+            confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1 }, colors: colors });
+        }, 300);
+        
         setResult(selectedPrize);
-        setTimeout(() => setStep('result'), 1000);
+        setTimeout(() => setStep('result'), 1500); // Delay maior para apreciar a vitória
       }
     });
   };
@@ -292,7 +338,7 @@ export default function RoletaPage() {
                   transform: 'rotate(0deg)'
                 }} 
               >
-                {/* Textos dos Prêmios */}
+                {/* Textos e Ícones dos Prêmios */}
                 {PRIZES.map((prize, index) => {
                   const sliceAngle = 360 / PRIZES.length;
                   const rotation = sliceAngle * index + (sliceAngle / 2); // Centralizar no meio da fatia
@@ -304,15 +350,18 @@ export default function RoletaPage() {
                         transform: `rotate(${rotation}deg)`,
                       }}
                     >
-                      <span 
-                        className="text-xs font-bold text-black mt-4 writing-vertical-rl"
-                        style={{ 
-                          textShadow: '0 0 2px rgba(255,255,255,0.8)',
-                          transform: 'translateY(10px)'
-                        }}
-                      >
-                        {prize.text}
-                      </span>
+                      <div className="flex flex-col items-center mt-4 transform translate-y-2">
+                         <span className="text-2xl filter drop-shadow-md animate-pulse">{prize.icon}</span>
+                         <span 
+                           className="text-[10px] font-bold text-black mt-1 writing-vertical-rl uppercase tracking-wider"
+                           style={{ 
+                             textShadow: '0 0 2px rgba(255,255,255,0.8)',
+                             height: '80px'
+                           }}
+                         >
+                           {prize.text}
+                         </span>
+                      </div>
                     </div>
                   );
                 })}
@@ -340,9 +389,14 @@ export default function RoletaPage() {
             <h2 className="text-3xl font-bold text-yellow-400 mb-2">PARABÉNS! 🎉</h2>
             <p className="text-slate-300 mb-6">Você ganhou:</p>
             
-            <div className="bg-gradient-to-br from-slate-800 to-black p-8 rounded-2xl border-2 border-yellow-500 shadow-[0_0_40px_rgba(255,215,0,0.3)] mb-8 relative overflow-hidden">
+            <div className="bg-gradient-to-br from-slate-800 to-black p-8 rounded-2xl border-2 border-yellow-500 shadow-[0_0_40px_rgba(255,215,0,0.3)] mb-8 relative overflow-hidden group">
               <div className="absolute inset-0 bg-yellow-500/10 animate-pulse"></div>
-              <h3 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-500 relative z-10">
+              
+              <div className="text-8xl mb-4 transform group-hover:scale-110 transition-transform duration-300 drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]">
+                {result.icon}
+              </div>
+              
+              <h3 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-500 relative z-10 uppercase tracking-widest">
                 {result.text}
               </h3>
             </div>
