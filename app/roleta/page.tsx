@@ -8,14 +8,7 @@ import confetti from 'canvas-confetti';
 // --- CONFIGURAÇÃO DOS PRÊMIOS ---
 // Imagens reais baixadas localmente
 const PRIZES = [
-  { 
-    id: 1, 
-    text: 'Fone Gamer', 
-    color: '#FF0055', 
-    type: 'win', 
-    probability: 0.3, 
-    image: '/images/prizes/headset.jpg' 
-  },
+    { id: 1, text: 'Fone com Fio', color: '#FF0055', type: 'win', probability: 0.3, image: '/images/prizes/headset.jpg' },
   { 
     id: 2, 
     text: 'PC Gamer', 
