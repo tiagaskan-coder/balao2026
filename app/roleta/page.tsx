@@ -6,7 +6,7 @@ import gsap from 'gsap';
 import confetti from 'canvas-confetti';
 
 // --- CONFIGURAÇÃO DOS PRÊMIOS ---
-// Imagens de placeholders de alta qualidade (Unsplash)
+// Imagens reais baixadas localmente
 const PRIZES = [
   { 
     id: 1, 
@@ -14,7 +14,7 @@ const PRIZES = [
     color: '#FF0055', 
     type: 'win', 
     probability: 0.3, 
-    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=60' 
+    image: '/images/prizes/headset.jpg' 
   },
   { 
     id: 2, 
@@ -22,7 +22,7 @@ const PRIZES = [
     color: '#00FFFF', 
     type: 'loss', 
     probability: 0, 
-    image: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&auto=format&fit=crop&q=60' 
+    image: '/images/prizes/pc.jpg' 
   },
   { 
     id: 3, 
@@ -30,7 +30,7 @@ const PRIZES = [
     color: '#CCFF00', 
     type: 'win', 
     probability: 0.3, 
-    image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=500&auto=format&fit=crop&q=60' 
+    image: '/images/prizes/usb.jpg' 
   },
   { 
     id: 4, 
@@ -38,7 +38,7 @@ const PRIZES = [
     color: '#9D00FF', 
     type: 'loss', 
     probability: 0, 
-    image: 'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=500&auto=format&fit=crop&q=60' 
+    image: '/images/prizes/ps5.jpg' 
   },
   { 
     id: 5, 
@@ -46,7 +46,7 @@ const PRIZES = [
     color: '#FF9900', 
     type: 'win', 
     probability: 0.4, 
-    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?w=500&auto=format&fit=crop&q=60' 
+    image: '/images/prizes/discount5.png' 
   },
   { 
     id: 6, 
@@ -54,7 +54,7 @@ const PRIZES = [
     color: '#0099FF', 
     type: 'loss', 
     probability: 0, 
-    image: 'https://images.unsplash.com/photo-1526304640155-2a8696b52b44?w=500&auto=format&fit=crop&q=60' 
+    image: '/images/prizes/discount10.png' 
   },
   { 
     id: 7, 
@@ -62,7 +62,7 @@ const PRIZES = [
     color: '#FF00CC', 
     type: 'loss', 
     probability: 0, 
-    image: 'https://images.unsplash.com/photo-1581092921461-eab62e97a782?w=500&auto=format&fit=crop&q=60' 
+    image: '/images/prizes/repair.png' 
   },
 ];
 
@@ -467,23 +467,24 @@ export default function RoletaPage() {
                         className="absolute w-full h-full top-0 left-0 flex justify-center"
                         style={{ transform: `rotate(${rotation}deg)` }}
                       >
-                        <div className="flex flex-col items-center mt-6 md:mt-12 transform translate-y-4">
-                           {/* Imagem do Produto */}
-                           <div className="w-16 h-16 md:w-24 md:h-24 mb-2 bg-white/20 rounded-full p-2 backdrop-blur-sm shadow-lg">
-                             <img 
-                               src={prize.image} 
-                               alt={prize.text}
-                               className="w-full h-full object-contain drop-shadow-md rounded-full"
-                               loading="lazy"
-                             />
-                           </div>
-                           {/* Texto não cortado */}
+                        <div className="flex flex-col items-center h-full pt-4">
+                           {/* Texto na Borda (Topo) */}
                            <span 
-                             className="text-xs md:text-lg font-black text-white bg-black/30 px-2 py-1 rounded backdrop-blur-sm uppercase tracking-wider max-w-[80px] md:max-w-[120px] text-center leading-tight shadow-sm"
-                             style={{ textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}
+                             className="text-sm md:text-xl font-black text-white bg-black/40 px-3 py-1 rounded-full backdrop-blur-md uppercase tracking-wider max-w-[140px] text-center leading-tight shadow-sm border border-white/10 mb-2"
+                             style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}
                            >
                              {prize.text}
                            </span>
+
+                           {/* Imagem do Produto (Maior e abaixo do texto) */}
+                           <div className="w-24 h-24 md:w-36 md:h-36 bg-white/10 rounded-2xl p-2 backdrop-blur-sm shadow-xl border border-white/20 transform hover:scale-110 transition-transform duration-300">
+                             <img 
+                               src={prize.image} 
+                               alt={prize.text}
+                               className="w-full h-full object-cover rounded-xl shadow-inner"
+                               loading="lazy"
+                             />
+                           </div>
                         </div>
                       </div>
                     );
