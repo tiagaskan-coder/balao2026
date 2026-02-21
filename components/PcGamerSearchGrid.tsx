@@ -29,7 +29,7 @@ export default function PcGamerSearchGrid({ initialProducts }: PcGamerSearchGrid
         </div>
         <input
           type="text"
-          className="block w-full pl-12 pr-4 py-4 bg-white/5 border border-violet-500/30 rounded-full text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all shadow-[0_0_20px_rgba(139,92,246,0.1)] backdrop-blur-sm text-lg"
+          className="block w-full pl-12 pr-4 py-4 bg-zinc-900 border border-violet-500/50 rounded-full text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all shadow-[0_0_20px_rgba(139,92,246,0.1)] text-lg"
           placeholder="Busque por processador, placa de vídeo ou modelo..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}

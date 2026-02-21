@@ -44,17 +44,6 @@ function BlockHero() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-600/20 rounded-full blur-[120px] animate-pulse"></div>
 
       <div className="container relative z-10 px-4 text-center space-y-8">
-        
-        {/* Floating Element - Left */}
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 w-48 h-48 md:w-64 md:h-64 hidden lg:block opacity-60 pointer-events-none">
-           <Image src="/images/prizes/headset.png" alt="Headset Gamer" fill className="object-contain drop-shadow-[0_0_30px_rgba(139,92,246,0.5)] animate-float" />
-        </div>
-
-        {/* Floating Element - Right */}
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 w-64 h-64 md:w-96 md:h-96 hidden lg:block opacity-80 pointer-events-none">
-           <Image src="/images/prizes/pc.png" alt="PC Gamer High End" fill className="object-contain drop-shadow-[0_0_50px_rgba(139,92,246,0.5)] animate-float-delayed" />
-        </div>
-
         <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-violet-500/10 border border-violet-500/30 text-violet-300 text-sm font-bold uppercase tracking-widest animate-in fade-in slide-in-from-bottom-4 duration-700">
           <Gamepad2 className="w-4 h-4 animate-bounce" />
           Campinas e Região
@@ -142,18 +131,18 @@ function BlockPerformance() {
 
 function BlockCustom() {
   return (
-    <section className="min-h-[70vh] flex items-center bg-slate-100 text-slate-900 py-20">
+    <section className="py-12 bg-slate-100 text-slate-900">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row items-center gap-12">
-           <div className="flex-1 space-y-8">
-              <h2 className="text-5xl md:text-7xl font-black tracking-tight text-slate-900">
+        <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
+           <div className="flex-1 space-y-6">
+              <h2 className="text-4xl md:text-6xl font-black tracking-tight text-slate-900 leading-tight">
                 MONTE DO<br/>
                 <span className="text-blue-600">SEU JEITO</span>
               </h2>
-              <p className="text-2xl text-slate-600 leading-relaxed">
+              <p className="text-xl text-slate-600 leading-relaxed max-w-xl">
                  Tem uma configuração dos sonhos em mente? Nós tornamos realidade. Escolha gabinete, cooler, fans RGB e muito mais.
               </p>
-              <ul className="space-y-4 text-xl font-semibold text-slate-700">
+              <ul className="space-y-3 text-lg font-semibold text-slate-700">
                  <li className="flex items-center gap-3">
                     <CheckCircle2 className="w-6 h-6 text-blue-600" />
                     <span>Orçamento personalizado via WhatsApp</span>
