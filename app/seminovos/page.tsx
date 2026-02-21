@@ -1,8 +1,8 @@
 import React from "react";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
-import { getProducts } from "@/lib/db";
-import { Product } from "@/lib/utils";
+import { getProducts, getCategories } from "@/lib/db";
+import { Product, Category } from "@/lib/utils";
 import ProductCard from "@/components/ProductCard";
 import { Laptop2, ShieldCheck, BadgeCheck, Truck, Award, Star } from "lucide-react";
 
@@ -125,11 +125,34 @@ function Testimonials() {
 }
 
 export default async function SeminovosPage() {
-  const allProducts = await getProducts();
+  const [allProducts, categories] = await Promise.all([
+    getProducts(),
+    getCategories(),
+  ]);
+
+  const rootCategory = categories.find(
+    (c: Category) => c.slug === "semi-novo"
+  );
+
+  const validCategories = new Set<string>();
+
+  if (rootCategory) {
+    validCategories.add(rootCategory.name);
+    const stack = [rootCategory.id];
+    while (stack.length > 0) {
+      const currentId = stack.pop() as string;
+      const children = categories.filter((c) => c.parent_id === currentId);
+      for (const child of children) {
+        validCategories.add(child.name);
+        stack.push(child.id);
+      }
+    }
+  }
+
   const seminovos = allProducts.filter((p: Product) => {
-    const category = (p.category || "").toLowerCase();
-    const slug = (p.slug || "").toLowerCase();
-    return category.includes("semi-novo") || slug.includes("semi-novo");
+    if (!rootCategory) return false;
+    if (!p.category) return false;
+    return validCategories.has(p.category);
   });
 
   return (

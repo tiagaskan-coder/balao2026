@@ -8,7 +8,7 @@ import ShareButton from '@/components/ShareButton';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import ProductActions from '@/components/ProductActions';
 import ShippingCalculator from '@/components/ShippingCalculator';
-import ProductVideo from '@/components/ProductVideo';
+import ProductMediaSwitcher from '@/components/ProductMediaSwitcher';
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -73,33 +73,12 @@ export default async function ProductPage({ params }: Props) {
         <main className="flex-1 w-full px-4 lg:px-0">
           <div className="bg-white rounded-lg shadow-lg overflow-hidden">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 p-4 sm:p-6 md:p-8">
-                {/* Image & Video Section */}
                 <div className="flex flex-col gap-4 md:gap-6">
-                    <div className="relative aspect-square bg-white border border-gray-100 rounded-lg flex items-center justify-center p-4">
-                        <Image 
-                            src={product.image}
-                            alt={product.name}
-                            fill
-                            className="object-contain"
-                            priority
-                            unoptimized
-                        />
-                    </div>
-                    
-                    {product.video_url ? (
-                      <ProductVideo videoUrl={product.video_url} productName={product.name} />
-                    ) : (
-                      <div className="relative aspect-video w-full rounded-lg overflow-hidden border border-gray-100 bg-white flex items-center justify-center p-3">
-                        <Image
-                          src={product.image}
-                          alt={product.name}
-                          fill
-                          className="object-contain opacity-80"
-                          priority={false}
-                          unoptimized
-                        />
-                      </div>
-                    )}
+                    <ProductMediaSwitcher
+                      imageUrl={product.image}
+                      videoUrl={product.video_url}
+                      productName={product.name}
+                    />
                 </div>
 
                 {/* Info Section */}
