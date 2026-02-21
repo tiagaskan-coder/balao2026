@@ -254,9 +254,6 @@ export default async function SeminovosPage() {
         {/* BLOCO 1: HERO */}
         <BlockHero />
 
-        {/* BLOCO 2: PAGUE AO RECEBER */}
-        <BlockPayOnDelivery />
-
         {/* PRODUTOS - PARTE PRINCIPAL */}
         <section id="ofertas" className="py-12 md:py-20 bg-gray-50 min-h-[50vh]">
           <div className="container mx-auto px-4">
@@ -278,6 +275,9 @@ export default async function SeminovosPage() {
              )}
           </div>
         </section>
+
+        {/* BLOCO 2: PAGUE AO RECEBER */}
+        <BlockPayOnDelivery />
 
         {/* BLOCO 3: ESTOQUE AO VIVO */}
         <BlockStock />
