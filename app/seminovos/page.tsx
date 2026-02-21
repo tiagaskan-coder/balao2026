@@ -1,9 +1,9 @@
 import React from "react";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
-import { getUsedNotebooks } from "@/lib/db";
-import { UsedNotebook } from "@/lib/utils";
-import Link from "next/link";
+import { getProducts } from "@/lib/db";
+import { Product } from "@/lib/utils";
+import ProductCard from "@/components/ProductCard";
 import { Laptop2, ShieldCheck, BadgeCheck, Truck, Award, Star } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -20,15 +20,7 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-function formatPrice(value: number) {
-  return value.toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-    minimumFractionDigits: 2,
-  });
-}
-
-function NotebookMedia({ item }: { item: UsedNotebook }) {
+function NotebookMedia({ item }: { item: Product }) {
   const firstImage = item.image_urls?.[0];
   const video = item.video_url;
 
@@ -86,7 +78,7 @@ function NotebookMedia({ item }: { item: UsedNotebook }) {
   );
 }
 
-function NotebookBlock({ item }: { item: UsedNotebook }) {
+function NotebookBlock({ item }: { item: Product }) {
   return (
     <section
       className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden flex flex-col md:flex-row gap-0"
@@ -165,33 +157,8 @@ function NotebookBlock({ item }: { item: UsedNotebook }) {
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-auto pt-4 border-t border-gray-100">
-          <div>
-            <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold">
-              Investimento à vista
-            </p>
-            <p className="text-3xl font-extrabold text-[#E60012]">
-              {formatPrice(item.price)}
-            </p>
-            <p className="text-xs text-gray-500">
-              Condições especiais no PIX e parcelamento a consultar.
-            </p>
-          </div>
-          <div className="flex flex-col gap-2 w-full sm:w-auto">
-            <Link
-              href={item.cart_url || "/carrinho"}
-              className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-[#E60012] text-white font-bold text-sm shadow-lg hover:bg-red-700 transition-colors w-full"
-            >
-              Comprar agora
-            </Link>
-            <Link
-              href={`https://wa.me/5519987510267?text=${encodeURIComponent(
-                `Olá, tenho interesse neste notebook seminovo: ${item.name} (${item.model})`
-              )}`}
-              target="_blank"
-              className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-emerald-50 text-emerald-700 font-semibold text-xs border border-emerald-200 hover:bg-emerald-100 transition-colors w-full"
-            >
-              Tirar dúvidas no WhatsApp
-            </Link>
+          <div className="text-xs text-gray-500">
+            Produtos semi novos selecionados pela Balão da Informática, com garantia e suporte.
           </div>
         </div>
       </div>
@@ -304,7 +271,12 @@ function Testimonials() {
 }
 
 export default async function SeminovosPage() {
-  const items = await getUsedNotebooks();
+  const allProducts = await getProducts();
+  const seminovos = allProducts.filter((p: Product) => {
+    const category = (p.category || "").toLowerCase();
+    const slug = (p.slug || "").toLowerCase();
+    return category.includes("semi-novo") || slug.includes("semi-novo");
+  });
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -343,17 +315,16 @@ export default async function SeminovosPage() {
 
         <section className="py-10 md:py-14">
           <div className="container mx-auto px-4 max-w-6xl space-y-6">
-            {items.length === 0 ? (
+            {seminovos.length === 0 ? (
               <div className="bg-white border border-dashed border-gray-300 rounded-3xl p-8 text-center text-sm text-gray-500">
                 Em breve você verá aqui a seleção de notebooks seminovos disponíveis em Campinas.
-                Use o painel administrativo para cadastrar os primeiros anúncios.
               </div>
             ) : (
-              <div className="space-y-6">
-                {items.map((item) => (
-                  <NotebookBlock key={item.id} item={item} />
-                ))}
-              </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {seminovos.map((item) => (
+                    <ProductCard key={item.id} product={item} />
+                  ))}
+                </div>
             )}
           </div>
         </section>

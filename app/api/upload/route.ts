@@ -48,15 +48,15 @@ export async function POST(req: NextRequest) {
         if (!bucketExists) {
             await adminClient.storage.createBucket(bucket, {
                 public: true,
-                fileSizeLimit: 10485760, // 10MB
-                allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'video/mp4', 'video/webm']
+                fileSizeLimit: 10485760,
+                allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'video/mp4', 'video/webm', 'video/quicktime']
             });
         } else {
             // Se o bucket já existe, atualize para garantir que seja público
             await adminClient.storage.updateBucket(bucket, {
                 public: true,
                 fileSizeLimit: 10485760,
-                allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'video/mp4', 'video/webm']
+                allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'video/mp4', 'video/webm', 'video/quicktime']
             });
         }
     } catch (e) {

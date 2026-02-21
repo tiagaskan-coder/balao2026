@@ -5,6 +5,7 @@ import { Product, Category, buildCategoryTree } from "@/lib/utils";
 import { searchProducts } from "@/lib/searchUtils";
 import { Edit, Trash2, Plus, Save, X, Search, CheckSquare, Square, Upload, Copy, AlertTriangle, ImageOff, Image as ImageIcon, Video, DollarSign, Package, ChevronDown, Percent, Sparkles, BrainCircuit, FileText } from "lucide-react";
 import Image from "next/image";
+import ProductVideo from "@/components/ProductVideo";
 
 // Types for AI Enrichment
 interface EnrichmentPreview {
@@ -73,6 +74,10 @@ export default function ProductManager() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
   const [saving, setSaving] = useState(false);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoPreview, setVideoPreview] = useState<string>("");
+  const [videoError, setVideoError] = useState<string | null>(null);
+  const [videoUploading, setVideoUploading] = useState(false);
 
   // Migration State
   const [showMigration, setShowMigration] = useState(false);
@@ -452,6 +457,9 @@ export default function ProductManager() {
     setCurrentProduct(product);
     setImagePreview(product.image);
     setImageFile(null);
+    setVideoFile(null);
+    setVideoPreview(product.video_url || "");
+    setVideoError(null);
     setIsEditing(true);
   };
 
@@ -492,6 +500,7 @@ export default function ProductManager() {
     setSaving(true);
     try {
         let imageUrl = currentProduct.image;
+        let videoUrl = currentProduct.video_url;
 
         // Upload Image if changed
         if (imageFile) {
@@ -513,6 +522,23 @@ export default function ProductManager() {
             return alert("Imagem é obrigatória. Por favor, faça upload de uma imagem.");
         }
 
+        if (videoFile) {
+            setVideoUploading(true);
+            const formDataVideo = new FormData();
+            formDataVideo.append("file", videoFile);
+            formDataVideo.append("bucket", "product-videos");
+
+            const resVideo = await fetch("/api/upload", { method: "POST", body: formDataVideo });
+            if (resVideo.ok) {
+                const dataVideo = await resVideo.json();
+                videoUrl = dataVideo.url;
+            } else {
+                setVideoUploading(false);
+                throw new Error("Erro no upload do vídeo");
+            }
+            setVideoUploading(false);
+        }
+
         // Format price if user entered plain number
         let formattedPrice = currentProduct.price;
         if (!currentProduct.price.includes("R$")) {
@@ -526,6 +552,7 @@ export default function ProductManager() {
             ...currentProduct,
             price: formattedPrice,
             image: imageUrl,
+            video_url: videoUrl,
         };
 
         let res;
@@ -1142,16 +1169,72 @@ export default function ProductManager() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Vídeo (YouTube)</label>
-                                <div className="flex items-center gap-2 border rounded-lg px-3 py-2 focus-within:ring-2 ring-red-500">
-                                    <Video size={20} className="text-gray-400" />
-                                    <input 
-                                        type="text" 
-                                        className="flex-1 outline-none" 
-                                        placeholder="https://youtube.com/watch?v=..." 
-                                        value={currentProduct.video_url || ""}
-                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCurrentProduct({...currentProduct, video_url: e.target.value})}
-                                    />
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Vídeo do Produto</label>
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2 border rounded-lg px-3 py-2 focus-within:ring-2 ring-red-500">
+                                        <Video size={20} className="text-gray-400" />
+                                        <input 
+                                            type="text" 
+                                            className="flex-1 outline-none text-sm" 
+                                            placeholder="Link do vídeo (YouTube, Vimeo ou URL direta)"
+                                            value={currentProduct.video_url || ""}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                const value = e.target.value.trim();
+                                                setCurrentProduct({ ...currentProduct, video_url: value });
+                                                setVideoPreview(value);
+                                                if (!value) {
+                                                    setVideoError(null);
+                                                    return;
+                                                }
+                                                const lower = value.toLowerCase();
+                                                const isValid =
+                                                    lower.startsWith("http://") ||
+                                                    lower.startsWith("https://") ||
+                                                    lower.includes("youtube.com") ||
+                                                    lower.includes("youtu.be") ||
+                                                    lower.includes("vimeo.com");
+                                                setVideoError(isValid ? null : "Formato de link inválido. Use YouTube, Vimeo ou URL direta.");
+                                            }}
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <label className="inline-flex items-center gap-2 text-xs font-medium text-gray-600 cursor-pointer">
+                                            <Upload size={14} className="text-gray-500" />
+                                            <span>Ou enviar arquivo de vídeo (MP4, WebM, MOV)</span>
+                                            <input
+                                                type="file"
+                                                accept="video/mp4,video/webm,video/quicktime"
+                                                className="hidden"
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                    const file = e.target.files?.[0];
+                                                    if (!file) return;
+                                                    if (!file.type.startsWith("video/")) {
+                                                        setVideoError("Arquivo inválido. Selecione um vídeo MP4, WebM ou MOV.");
+                                                        setVideoFile(null);
+                                                        setVideoPreview("");
+                                                        return;
+                                                    }
+                                                    setVideoError(null);
+                                                    setVideoFile(file);
+                                                    setVideoPreview(URL.createObjectURL(file));
+                                                }}
+                                            />
+                                        </label>
+                                        {videoUploading && (
+                                            <span className="text-[11px] text-gray-500">Enviando vídeo...</span>
+                                        )}
+                                    </div>
+                                    {videoError && (
+                                        <p className="text-xs text-red-600">{videoError}</p>
+                                    )}
+                                    {videoPreview && !videoError && (
+                                        <div className="mt-2">
+                                            <ProductVideo
+                                                videoUrl={videoPreview}
+                                                productName={currentProduct.name || "Prévia do produto"}
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
