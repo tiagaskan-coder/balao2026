@@ -26,9 +26,8 @@ body {
 }
 
 /* Force all text to be black unless explicitly overridden by white (e.g. buttons) */
-.text-gray-50, .text-gray-100, .text-gray-200, .text-gray-300, .text-gray-400, 
-.text-gray-500, .text-gray-600, .text-gray-700, .text-gray-800, .text-gray-900,
-.text-slate-500, .text-slate-600, .text-zinc-500, .text-neutral-500 {
+/* Modified to be less aggressive for dark mode sections */
+.light-mode .text-gray-50, .light-mode .text-gray-100 {
   color: #000000 !important;
 }
 
@@ -48,4 +47,18 @@ body {
   background-repeat: repeat;
   background-size: 200px 200px;
   animation: starMovement 2s linear infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float 6s ease-in-out 3s infinite;
 }
