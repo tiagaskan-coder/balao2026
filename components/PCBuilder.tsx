@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Product } from "@/lib/utils";
 import Image from "next/image";
 import { 
@@ -21,7 +21,10 @@ import {
   AlertCircle,
   Share2,
   X,
-  Plus
+  Plus,
+  Bot,
+  Sparkles,
+  Info
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
@@ -149,7 +152,21 @@ const getProductSpecs = (p: Product) => {
   else if (text.includes("DDR4")) memory = "DDR4";
   else if (text.includes("DDR3")) memory = "DDR3";
 
-  return { socket, memory };
+  // Wattage Detection (heuristic)
+  let wattage = 0;
+  // Match "850W", "750 W", etc.
+  const wattageMatch = text.match(/(\d{3,4})\s*W/);
+  if (wattageMatch) {
+    wattage = parseInt(wattageMatch[1]);
+  }
+
+  // GPU Tier (for power estimation)
+  let gpuTier = 0; // 0 = low, 1 = mid, 2 = high, 3 = extreme
+  if (text.includes("RTX 4090") || text.includes("RX 7900 XTX") || text.includes("RTX 4080")) gpuTier = 3;
+  else if (text.includes("RTX 4070") || text.includes("RX 7800") || text.includes("RTX 3080")) gpuTier = 2;
+  else if (text.includes("RTX 4060") || text.includes("RX 7600") || text.includes("RTX 3060")) gpuTier = 1;
+
+  return { socket, memory, wattage, gpuTier };
 };
 
 type Selections = {
@@ -175,6 +192,53 @@ export default function PCBuilder({ products }: PCBuilderProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const { addToCart } = useCart();
   const { showToast } = useToast();
+  const [aiMessage, setAiMessage] = useState<string>("");
+
+  // Derived specs from current selections
+  const selectedCpuSpecs = selections.processor ? getProductSpecs(selections.processor as Product) : null;
+  const selectedMoboSpecs = selections.motherboard ? getProductSpecs(selections.motherboard as Product) : null;
+  const selectedRamSpecs = selections.memory ? getProductSpecs(selections.memory as Product) : null;
+  const selectedGpuSpecs = selections.gpu ? getProductSpecs(selections.gpu as Product) : null;
+
+  // AI Assistant Logic
+  useEffect(() => {
+    const step = STEPS.find(s => s.id === currentStep);
+    if (!step) return;
+
+    let msg = `Olá! Estou aqui para ajudar você a escolher o melhor ${step.label}.`;
+
+    if (currentStep === "processor") {
+      msg = "O processador é o cérebro do PC. Escolha entre Intel ou AMD. Isso definirá qual Placa-Mãe você poderá usar.";
+    } 
+    else if (currentStep === "motherboard") {
+      if (selectedCpuSpecs?.socket) {
+        msg = `Ótima escolha de processador! Para ele, filtrei apenas as Placas-Mãe com socket ${selectedCpuSpecs.socket}.`;
+      } else {
+        msg = "A Placa-Mãe conecta tudo. Escolha uma compatível com seu processador.";
+      }
+    }
+    else if (currentStep === "memory") {
+      if (selectedMoboSpecs?.memory) {
+        msg = `Sua Placa-Mãe suporta memória ${selectedMoboSpecs.memory}. Mostrando apenas módulos compatíveis.`;
+      } else {
+        msg = "Memória RAM é essencial para multitarefas e jogos. 16GB é o recomendado atualmente.";
+      }
+    }
+    else if (currentStep === "gpu") {
+      msg = "A Placa de Vídeo define o desempenho em jogos. Escolha com sabedoria!";
+    }
+    else if (currentStep === "power_supply") {
+      if (selectedGpuSpecs && selectedGpuSpecs.gpuTier >= 2) {
+        msg = "Com essa Placa de Vídeo potente, recomendo uma fonte de pelo menos 750W ou 850W para garantir estabilidade.";
+      } else if (selectedGpuSpecs && selectedGpuSpecs.gpuTier >= 1) {
+        msg = "Para essa configuração, uma fonte de 600W a 650W deve ser suficiente.";
+      } else {
+        msg = "Uma boa fonte garante a longevidade do seu PC. Não economize na qualidade aqui!";
+      }
+    }
+    
+    setAiMessage(msg);
+  }, [currentStep, selectedCpuSpecs, selectedMoboSpecs, selectedGpuSpecs]);
 
   const handleSelect = (product: Product) => {
     const step = STEPS.find(s => s.id === currentStep);
@@ -217,11 +281,8 @@ export default function PCBuilder({ products }: PCBuilderProps) {
 
   const currentStepInfo = STEPS.find(s => s.id === currentStep);
 
-  // Derived specs from current selections
-  const selectedCpuSpecs = selections.processor ? getProductSpecs(selections.processor as Product) : null;
-  const selectedMoboSpecs = selections.motherboard ? getProductSpecs(selections.motherboard as Product) : null;
-  const selectedRamSpecs = selections.memory ? getProductSpecs(selections.memory as Product) : null;
-
+  // Derived specs from current selections (REMOVED - already declared above)
+  
   const filteredProducts = useMemo(() => {
     if (!currentStepInfo) return [];
     
@@ -272,6 +333,13 @@ export default function PCBuilder({ products }: PCBuilderProps) {
         if (selectedMoboSpecs?.memory && specs.memory && specs.memory !== selectedMoboSpecs.memory) return false;
         // If CPU selected, check compatibility (less common constraint, usually mobo dictates)
         if (selectedCpuSpecs?.memory && specs.memory && specs.memory !== selectedCpuSpecs.memory) return false;
+      }
+      
+      // Power Supply Logic (Soft Check - maybe just warn, but user asked to ensure compatibility)
+      if (currentStepInfo.id === "power_supply") {
+         // If high-end GPU, maybe filter out very low wattage? 
+         // Let's be safe and filter out < 600W for high-end cards
+         if (selectedGpuSpecs && selectedGpuSpecs.gpuTier >= 2 && specs.wattage > 0 && specs.wattage < 600) return false;
       }
 
       // 4. KEYWORD/SEARCH MATCH
@@ -349,7 +417,27 @@ export default function PCBuilder({ products }: PCBuilderProps) {
     <div className="flex flex-col xl:flex-row gap-6 min-h-[80vh]">
       {/* Left Sidebar - Summary/Preview */}
       <div className="w-full xl:w-1/4 flex flex-col gap-4">
-        <div className="bg-white rounded-xl shadow-lg border border-red-100 overflow-hidden flex flex-col h-full max-h-[calc(100vh-100px)] sticky top-24">
+        
+        {/* AI Assistant Box */}
+        <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-xl shadow-lg border border-indigo-400 p-4 text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-2 font-bold text-indigo-100 uppercase tracking-wider text-xs">
+              <Sparkles size={12} />
+              Assistente Virtual
+            </div>
+            <div className="flex gap-3">
+              <div className="shrink-0 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center border border-white/30">
+                <Bot size={24} className="text-white" />
+              </div>
+              <div className="text-sm font-medium leading-relaxed">
+                {aiMessage}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-lg border border-red-100 overflow-hidden flex flex-col h-full max-h-[calc(100vh-250px)] sticky top-24">
           <div className="p-4 bg-gradient-to-r from-red-600 to-red-700 text-white shadow-sm">
             <h2 className="font-bold text-lg flex items-center gap-2">
               <ShoppingCart size={20} />
