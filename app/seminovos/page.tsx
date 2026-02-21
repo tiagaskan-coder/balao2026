@@ -23,15 +23,15 @@ export const dynamic = "force-dynamic";
 function BrandStrip() {
   const brands = ["Dell", "HP", "Lenovo", "Acer", "Asus", "Apple"];
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between gap-4 overflow-x-auto">
-      <div className="text-xs font-semibold text-gray-500 uppercase whitespace-nowrap">
+    <div className="bg-white border border-gray-200 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-3">
+      <div className="text-xs font-semibold text-gray-500 uppercase">
         Trabalhamos com:
       </div>
-      <div className="flex items-center gap-4 text-sm font-semibold text-gray-700">
+      <div className="flex flex-wrap items-center justify-center md:justify-end gap-2 md:gap-3 text-sm font-semibold text-gray-700">
         {brands.map((b) => (
           <span
             key={b}
-            className="px-3 py-1 rounded-full bg-gray-50 border border-gray-200 whitespace-nowrap"
+            className="px-3 py-1 rounded-full bg-gray-50 border border-gray-200"
           >
             {b}
           </span>
@@ -44,43 +44,43 @@ function BrandStrip() {
 function SecondaryBanners() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div className="rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-5 flex flex-col justify-between">
+      <div className="rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-emerald-600 text-white p-5 flex flex-col justify-between shadow-lg">
         <div>
-          <p className="text-xs uppercase tracking-wide text-emerald-300 font-semibold">
-            Acessórios essenciais
+          <p className="text-xs uppercase tracking-wide text-emerald-100 font-semibold">
+            Nosso diferencial
           </p>
-          <h3 className="text-lg font-bold mt-1 mb-2">
-            Mochilas, mouses e teclados para completar seu setup
+          <h3 className="text-xl font-extrabold mt-1 mb-2 tracking-tight">
+            PAGUE AO RECEBER NA SUA CASA
           </h3>
         </div>
-        <p className="text-xs text-slate-300">
-          Combine seu notebook seminovo com periféricos selecionados para produtividade.
+        <p className="text-xs text-emerald-50">
+          Você recebe o notebook em casa, confere o equipamento e só então realiza o pagamento.
         </p>
       </div>
-      <div className="rounded-2xl bg-gradient-to-r from-indigo-700 via-indigo-600 to-sky-500 text-white p-5 flex flex-col justify-between">
+      <div className="rounded-2xl bg-gradient-to-r from-indigo-700 via-indigo-600 to-sky-500 text-white p-5 flex flex-col justify-between shadow-lg">
         <div>
           <p className="text-xs uppercase tracking-wide text-indigo-200 font-semibold">
-            Upgrades sob medida
+            Entrega grátis
           </p>
           <h3 className="text-lg font-bold mt-1 mb-2">
-            Mais RAM e SSD para deixar seu seminovo ainda mais rápido
+            Frete grátis para Campinas e região selecionada
           </h3>
         </div>
         <p className="text-xs text-indigo-100">
-          Serviço feito na loja com garantia Balão da Informática.
+          Estoque físico em Campinas, com envio rápido e seguro direto da loja.
         </p>
       </div>
-      <div className="rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-orange-400 text-white p-5 flex flex-col justify-between">
+      <div className="rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-orange-400 text-white p-5 flex flex-col justify-between shadow-lg">
         <div>
           <p className="text-xs uppercase tracking-wide text-amber-900/80 font-semibold">
-            Oportunidades limitadas
+            Estoque ao vivo 24h
           </p>
           <h3 className="text-lg font-bold mt-1 mb-2">
-            Cada anúncio é único: acabou o estoque, acabou a oferta
+            Se o anúncio está ativo, o notebook está disponível
           </h3>
         </div>
         <p className="text-xs text-amber-900/90">
-          Garanta agora seu notebook seminovo com garantia em Campinas.
+          Estoque em tempo real: acabou o estoque, o anúncio sai do ar automaticamente.
         </p>
       </div>
     </div>
@@ -119,6 +119,112 @@ function Testimonials() {
           </p>
           <p className="mt-2 text-xs text-gray-500">– Renata, Barão Geraldo</p>
         </blockquote>
+      </div>
+    </section>
+  );
+}
+
+function WhyBalaoSection() {
+  return (
+    <section className="bg-white rounded-3xl border border-gray-200 p-6 md:p-8 space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wide">
+            Por que o seminovo do Balão vale a pena?
+          </p>
+          <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">
+            Seminovo com cara de novo, garantia real e pagamento seguro
+          </h2>
+          <p className="text-sm text-gray-600 mt-2 max-w-xl">
+            Se o anúncio está ativo, o notebook está disponível. Nosso estoque é ao vivo 24h por dia
+            e cada equipamento é preparado como se fosse novo.
+          </p>
+        </div>
+        <div className="inline-flex items-center px-4 py-2 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
+          Estoque ao vivo • Atualizado em tempo real
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+        <div className="flex gap-3">
+          <div className="mt-1">
+            <ShieldCheck className="w-5 h-5 text-emerald-600" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900">Garantia de 6 meses</h3>
+            <p className="text-gray-600">
+              Assistência direto com a Balão da Informática, sem burocracia nem surpresa.
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-3">
+          <div className="mt-1">
+            <Laptop2 className="w-5 h-5 text-indigo-600" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900">Equipamentos revisados</h3>
+            <p className="text-gray-600">
+              Limpeza interna, testes de desempenho, bateria avaliada e Windows 11 instalado.
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-3">
+          <div className="mt-1">
+            <Truck className="w-5 h-5 text-sky-600" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900">Entrega grátis</h3>
+            <p className="text-gray-600">
+              Entrega grátis para Campinas e região selecionada, com envio rápido e seguro.
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-3">
+          <div className="mt-1">
+            <BadgeCheck className="w-5 h-5 text-emerald-600" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900">Pague ao receber</h3>
+            <p className="text-gray-600">
+              Você confere o notebook na sua casa e só então faz o pagamento.
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-3">
+          <div className="mt-1">
+            <Award className="w-5 h-5 text-amber-500" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900">Carregador e embalagem</h3>
+            <p className="text-gray-600">
+              Acompanha carregador original ou compatível revisado e embalagem protegida para transporte.
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-3">
+          <div className="mt-1">
+            <Star className="w-5 h-5 text-amber-400" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900">Atendimento humano</h3>
+            <p className="text-gray-600">
+              Equipe especializada para ajudar você a escolher o melhor seminovo para o seu uso.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-emerald-500 text-white px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 shadow-lg">
+        <div className="text-[11px] uppercase tracking-[0.25em] text-emerald-100">
+          Diferencial exclusivo Balão
+        </div>
+        <div className="text-xl md:text-3xl font-black tracking-tight text-center md:text-left">
+          PAGUE AO RECEBER NA SUA CASA
+        </div>
+        <p className="text-xs md:text-sm text-emerald-100 max-w-md">
+          Mais segurança para você: o notebook chega pronto para uso, você confere tudo com calma e só
+          então realiza o pagamento.
+        </p>
       </div>
     </section>
   );
@@ -173,13 +279,14 @@ export default async function SeminovosPage() {
                 <p className="text-sm md:text-base text-gray-200 mb-6 leading-relaxed">
                   Cada equipamento passa por uma revisão rigorosa: limpeza interna, testes de
                   desempenho, bateria avaliada e Windows 11 instalado. Se o anúncio está ativo,
-                  o notebook está disponível para você.
+                  o notebook está disponível para você, com estoque ao vivo 24h por dia.
                 </p>
                 <ul className="space-y-2 text-sm text-gray-100">
                   <li>• Garantia de 6 meses direto com a Balão da Informática</li>
                   <li>• Windows 11 + Office 2021 Trial instalados e atualizados</li>
                   <li>• Acompanha carregador original ou compatível revisado</li>
                   <li>• Estoque físico em Campinas, com retirada na loja ou envio</li>
+                  <li>• Entrega grátis e opção de pagar ao receber na sua casa</li>
                 </ul>
               </div>
               <div className="space-y-4">
@@ -208,6 +315,7 @@ export default async function SeminovosPage() {
 
         <section className="pb-12">
           <div className="container mx-auto px-4 max-w-6xl space-y-6">
+            <WhyBalaoSection />
             <Testimonials />
             <div className="text-[11px] text-gray-500 leading-relaxed">
               Melhor preço de notebooks usados em Campinas, Cambuí, Centro e toda região
