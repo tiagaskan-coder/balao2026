@@ -43,6 +43,7 @@ interface Step {
   label: string;
   icon: React.ElementType;
   categoryKeywords: string[];
+  exactCategories: string[];
   required: boolean;
 }
 
@@ -52,6 +53,7 @@ const STEPS: Step[] = [
     label: "Processador", 
     icon: Cpu, 
     categoryKeywords: ["processador", "cpu", "intel", "amd"], 
+    exactCategories: ["Processadores (CPU)", "Processadores"],
     required: true 
   },
   { 
@@ -59,6 +61,7 @@ const STEPS: Step[] = [
     label: "Placa Mãe", 
     icon: CircuitBoard, 
     categoryKeywords: ["placa mãe", "motherboard", "placa-mãe"], 
+    exactCategories: ["Placas‑Mãe", "Placas-Mãe", "Placas Mãe"], // Includes potential variations
     required: true 
   },
   { 
@@ -66,6 +69,7 @@ const STEPS: Step[] = [
     label: "Memória RAM", 
     icon: MemoryStick, 
     categoryKeywords: ["memória", "ram", "ddr4", "ddr5"], 
+    exactCategories: ["Memória RAM"],
     required: true 
   },
   { 
@@ -73,6 +77,7 @@ const STEPS: Step[] = [
     label: "Placa de Vídeo", 
     icon: Monitor, 
     categoryKeywords: ["placa de vídeo", "gpu", "rtx", "gtx", "radeon", "rx"], 
+    exactCategories: ["Placas de Vídeo (GPU)", "Placas de Vídeo"],
     required: false 
   },
   { 
@@ -80,6 +85,7 @@ const STEPS: Step[] = [
     label: "Armazenamento", 
     icon: HardDrive, 
     categoryKeywords: ["ssd", "hd", "disco rigido", "nvme"], 
+    exactCategories: ["SSD / HD / NVMe", "Armazenamento"],
     required: true 
   },
   { 
@@ -87,6 +93,7 @@ const STEPS: Step[] = [
     label: "Fonte", 
     icon: Zap, 
     categoryKeywords: ["fonte", "atx", "power supply"], 
+    exactCategories: ["Fontes de Alimentação", "Fontes"],
     required: true 
   },
   { 
@@ -94,6 +101,7 @@ const STEPS: Step[] = [
     label: "Gabinete", 
     icon: Box, 
     categoryKeywords: ["gabinete", "case", "tower"], 
+    exactCategories: ["Gabinetes"],
     required: true 
   },
   { 
@@ -101,6 +109,7 @@ const STEPS: Step[] = [
     label: "Monitor", 
     icon: Monitor, 
     categoryKeywords: ["monitor", "tela", "display", "gamer"], 
+    exactCategories: ["Monitores", "Monitor Gamer", "Monitor Curvo", "Monitor Profissional", "Monitor Ultrawide", "Monitor 4K"],
     required: false 
   },
   { 
@@ -108,6 +117,7 @@ const STEPS: Step[] = [
     label: "Periféricos", 
     icon: Keyboard, 
     categoryKeywords: ["teclado", "mouse", "headset", "fone"], 
+    exactCategories: ["Periféricos", "Teclados Gamer e Mecânicos", "Mouses Gamer", "Headsets e Fones", "Mousepads", "Controles / Joysticks", "Volantes e Simuladores", "Webcams", "Microfones"],
     required: false 
   }
 ];
@@ -150,8 +160,13 @@ export default function PCBuilder({ products }: PCBuilderProps) {
     if (!currentStepInfo) return [];
     
     return products.filter(p => {
-      // Check category match
-      const categoryMatch = currentStepInfo.categoryKeywords.some(keyword => 
+      // Check exact category match first
+      const exactMatch = currentStepInfo.exactCategories.some(cat => 
+        (p.category?.toLowerCase() || "") === cat.toLowerCase()
+      );
+
+      // Check keyword match in category or name
+      const keywordMatch = currentStepInfo.categoryKeywords.some(keyword => 
         (p.category?.toLowerCase() || "").includes(keyword) || 
         p.name.toLowerCase().includes(keyword)
       );
@@ -159,7 +174,14 @@ export default function PCBuilder({ products }: PCBuilderProps) {
       // Check search term
       const searchMatch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
       
-      return categoryMatch && searchMatch;
+      // Allow if exact match OR keyword match (prioritizing category field over name for keywords if possible, but keeping it broad for now)
+      // The user wants strict relation to hardware categories.
+      // If we have exact matches, we should probably prefer them, but data might be messy.
+      // Let's require at least one match on category field if possible, or name if category is missing/generic.
+      
+      const isRelevant = exactMatch || keywordMatch;
+
+      return isRelevant && searchMatch;
     });
   }, [products, currentStepInfo, searchTerm]);
 
