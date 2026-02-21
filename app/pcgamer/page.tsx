@@ -167,9 +167,14 @@ function BlockCustom() {
                     <p className="text-slate-600 text-lg mb-6 max-w-md mx-auto">
                        Não sabe qual peça escolher? Nossos especialistas te ajudam a montar o melhor setup para o seu orçamento.
                     </p>
-                    <button className="w-full md:w-auto px-8 py-3 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200">
+                    <a 
+                       href="https://wa.me/5519987510267?text=Ol%C3%A1%2C%20gostaria%20de%20uma%20consultoria%20gr%C3%A1tis%20para%20meu%20PC%20Gamer!" 
+                       target="_blank" 
+                       rel="noopener noreferrer"
+                       className="w-full md:w-auto px-8 py-3 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200 inline-block"
+                    >
                        Chamar Especialista
-                    </button>
+                    </a>
                  </div>
               </div>
            </div>
@@ -261,10 +266,15 @@ function BlockUrgency() {
                Não perca mais partidas por causa de FPS baixo. Garanta sua máquina hoje.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4 md:pt-8">
-               <button className="bg-white text-emerald-900 px-6 py-4 md:px-8 md:py-5 rounded-full font-black text-lg md:text-xl hover:scale-105 transition-transform shadow-xl flex items-center justify-center gap-3 w-full sm:w-auto">
+               <a 
+                  href="https://wa.me/5519987510267?text=Ol%C3%A1%2C%20estou%20pronto%20para%20o%20pr%C3%B3ximo%20n%C3%ADvel%20e%20quero%20um%20PC%20Gamer!"
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="bg-white text-emerald-900 px-6 py-4 md:px-8 md:py-5 rounded-full font-black text-lg md:text-xl hover:scale-105 transition-transform shadow-xl flex items-center justify-center gap-3 w-full sm:w-auto inline-flex"
+               >
                   <MessageCircle className="w-5 h-5 md:w-6 md:h-6" />
                   CHAMAR NO WHATSAPP AGORA
-               </button>
+               </a>
             </div>
             <p className="text-xs md:text-sm opacity-75 mt-4">
                Atendimento rápido • Orçamento sem compromisso
@@ -334,13 +344,7 @@ export default async function PcGamerPage() {
         {/* BLOCO 1: HERO */}
         <BlockHero />
 
-        {/* BLOCO 2: PERFORMANCE */}
-        <BlockPerformance />
-
-        {/* BLOCO 3: CUSTOMIZAÇÃO */}
-        <BlockCustom />
-
-        {/* PRODUTOS - GRID */}
+        {/* PRODUTOS - GRID 1 (MOVIDO PARA CIMA) */}
         <section id="ofertas" className="py-12 md:py-20 bg-zinc-50 min-h-[50vh]">
           <div className="container mx-auto px-4">
              <div className="text-center mb-12 md:mb-16">
@@ -359,11 +363,36 @@ export default async function PcGamerPage() {
           </div>
         </section>
 
+        {/* BLOCO 2: PERFORMANCE */}
+        <BlockPerformance />
+
+        {/* BLOCO 3: CUSTOMIZAÇÃO */}
+        <BlockCustom />
+
         {/* BLOCO 4: MONTAGEM DE PEÇAS (SERVIÇO) */}
         <BlockAssembly />
 
         {/* BLOCO 5: STRESS TEST */}
         <BlockTesting />
+
+        {/* PRODUTOS - GRID 2 (NOVO BLOCO DE OFERTAS) */}
+        <section id="mais-ofertas" className="py-12 md:py-20 bg-white min-h-[50vh]">
+          <div className="container mx-auto px-4">
+             <div className="text-center mb-12 md:mb-16">
+                <h2 className="text-3xl md:text-6xl font-black text-slate-900 mb-4">MAIS OFERTAS GAMER</h2>
+                <div className="w-16 md:w-24 h-2 bg-fuchsia-600 mx-auto rounded-full"></div>
+                <p className="mt-4 text-lg md:text-xl text-slate-600">Encontre o setup perfeito para você.</p>
+             </div>
+             
+             {gamerProducts.length === 0 ? (
+               <div className="bg-white border-2 border-dashed border-gray-300 rounded-3xl p-8 md:p-12 text-center text-gray-500 text-lg md:text-xl">
+                 Carregando estoque gamer atualizado...
+               </div>
+             ) : (
+               <PcGamerSearchGrid initialProducts={gamerProducts} />
+             )}
+          </div>
+        </section>
 
         {/* BLOCO 6: ENTREGA (Reusing delivery block logic but simpler/darker if needed, or just standard) */}
         <section className="min-h-[50vh] flex items-center bg-slate-900 text-white py-12 md:py-20">

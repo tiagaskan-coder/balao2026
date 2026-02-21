@@ -203,9 +203,9 @@ function BlockDelivery() {
               <p className="text-xl md:text-2xl text-indigo-100 font-light">
                  Não cobramos frete para a região metropolitana. O preço que você vê é o preço final.
               </p>
-              <button className="w-full md:w-auto bg-white text-indigo-900 px-8 py-4 rounded-full font-bold text-lg md:text-xl hover:bg-indigo-50 transition-colors">
+              <a href="https://wa.me/5519987510267?text=Ol%C3%A1%2C%20gostaria%20de%20consultar%20a%20entrega%20para%20meu%20CEP%20(Seminovos)." target="_blank" rel="noopener noreferrer" className="w-full md:w-auto bg-white text-indigo-900 px-8 py-4 rounded-full font-bold text-lg md:text-xl hover:bg-indigo-50 transition-colors inline-block">
                  Consultar meu CEP no WhatsApp
-              </button>
+              </a>
            </div>
         </div>
       </section>
@@ -295,7 +295,7 @@ export default async function SeminovosPage() {
                <p className="text-slate-600 mb-8">
                   Nossa equipe técnica está pronta para te ajudar a escolher o modelo ideal para seu trabalho ou estudo.
                </p>
-               <a href="#" className="inline-flex items-center justify-center px-8 py-4 bg-emerald-600 text-white rounded-full font-bold text-lg hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-200">
+               <a href="https://wa.me/5519987510267?text=Ol%C3%A1%2C%20gostaria%20de%20falar%20com%20um%20especialista%20sobre%20notebooks%20seminovos." target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center px-8 py-4 bg-emerald-600 text-white rounded-full font-bold text-lg hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-200">
                   Falar com Especialista no WhatsApp
                </a>
             </div>
