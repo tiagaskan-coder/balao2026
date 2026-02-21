@@ -156,32 +156,72 @@ export default function PCBuilder({ products }: PCBuilderProps) {
 
   const currentStepInfo = STEPS.find(s => s.id === currentStep);
 
+  // List of categories that should NEVER appear as components (unless specifically requested in that step)
+  const EXCLUDED_CATEGORIES = [
+    "computadores", "pc gamer", "workstation", "notebooks", "notebook gamer", 
+    "smartphones", "smartphones android", "iphone", 
+    "monitores", // Excluded from internal components, allowed in Monitor step
+    "periféricos", // Excluded from internal components, allowed in Peripherals step
+    "acessórios"
+  ];
+
   const filteredProducts = useMemo(() => {
     if (!currentStepInfo) return [];
     
     return products.filter(p => {
-      // Check exact category match first
-      const exactMatch = currentStepInfo.exactCategories.some(cat => 
-        (p.category?.toLowerCase() || "") === cat.toLowerCase()
+      const productCategory = (p.category || "").toLowerCase();
+      const productName = p.name.toLowerCase();
+
+      // 1. GLOBAL EXCLUSION: Check if product belongs to a completely different main category
+      // For internal components (everything except monitor and peripherals), exclude external devices
+      const isInternalComponent = !["monitor", "peripherals"].includes(currentStepInfo.id);
+      
+      if (isInternalComponent) {
+        if (productCategory.includes("computadores") || 
+            productCategory.includes("notebooks") || 
+            productCategory.includes("smartphones") ||
+            productCategory.includes("monitores") ||
+            productCategory.includes("periféricos")) {
+          return false;
+        }
+      }
+
+      // 2. EXACT MATCH: If we have a category on the product, it MUST match one of the expected categories
+      // OR be generic "hardware" to proceed to keyword check.
+      // If the product has a specific category like "Placas-Mãe" but we are looking for "Processador", reject it.
+      
+      const hasSpecificCategory = productCategory && productCategory !== "hardware";
+      const isExactCategoryMatch = currentStepInfo.exactCategories.some(cat => 
+        productCategory === cat.toLowerCase()
       );
 
-      // Check keyword match in category or name
+      if (hasSpecificCategory && !isExactCategoryMatch) {
+        // If the product has a specific category that doesn't match the step's allowed categories,
+        // we should probably reject it, UNLESS the category is very similar or a sub-match.
+        // But since the user complained about "other categories", let's be strict.
+        // However, we must ensure we don't filter out valid items if category names vary slightly.
+        // We trust 'exactCategories' contains the correct list.
+        return false;
+      }
+
+      // 3. KEYWORD MATCH (Backup): If category is generic "hardware" or missing, check name keywords
+      // OR if it was an exact category match, we already passed the previous check.
+      
+      // If we already matched by category, we are good (unless we want to filter by name too, but usually category is enough).
+      if (isExactCategoryMatch) {
+        // Apply search term filter
+        return productName.includes(searchTerm.toLowerCase());
+      }
+
+      // If we didn't match by exact category (maybe category is missing or "hardware"), check keywords
       const keywordMatch = currentStepInfo.categoryKeywords.some(keyword => 
-        (p.category?.toLowerCase() || "").includes(keyword) || 
-        p.name.toLowerCase().includes(keyword)
+        productCategory.includes(keyword) || productName.includes(keyword)
       );
       
       // Check search term
-      const searchMatch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const searchMatch = productName.includes(searchTerm.toLowerCase());
       
-      // Allow if exact match OR keyword match (prioritizing category field over name for keywords if possible, but keeping it broad for now)
-      // The user wants strict relation to hardware categories.
-      // If we have exact matches, we should probably prefer them, but data might be messy.
-      // Let's require at least one match on category field if possible, or name if category is missing/generic.
-      
-      const isRelevant = exactMatch || keywordMatch;
-
-      return isRelevant && searchMatch;
+      return keywordMatch && searchMatch;
     });
   }, [products, currentStepInfo, searchTerm]);
 
