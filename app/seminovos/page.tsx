@@ -95,7 +95,7 @@ function BlockPayOnDelivery() {
              </ul>
           </div>
           <div className="relative h-full min-h-[300px] md:min-h-[400px] flex items-center justify-center">
-             <div className="relative w-full aspect-square max-w-md bg-white/10 backdrop-blur-md rounded-[3rem] border border-white/20 shadow-2xl flex items-center justify-center p-8 transform rotate-3 hover:rotate-0 transition-all duration-500">
+             <div className="relative w-full aspect-square max-w-md bg-white/10 backdrop-blur-md rounded-[3rem] border border-white/20 shadow-2xl flex items-center justify-center p-8">
                 <div className="text-center space-y-4">
                    <ShieldCheck className="w-24 h-24 md:w-32 md:h-32 mx-auto text-emerald-200" />
                    <div className="text-3xl md:text-4xl font-black">RISCO ZERO</div>
