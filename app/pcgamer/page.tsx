@@ -43,18 +43,18 @@ function BlockHero() {
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-600/20 rounded-full blur-[120px] animate-pulse"></div>
 
-      <div className="container relative z-10 px-4 text-center space-y-8">
-        <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-violet-500/10 border border-violet-500/30 text-violet-300 text-sm font-bold uppercase tracking-widest animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="container relative z-10 px-4 text-center space-y-6 md:space-y-8">
+        <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-violet-500/10 border border-violet-500/30 text-violet-300 text-xs md:text-sm font-bold uppercase tracking-widest animate-in fade-in slide-in-from-bottom-4 duration-700">
           <Gamepad2 className="w-4 h-4 animate-bounce" />
           Campinas e Região
         </div>
         
-        <h1 className="text-6xl md:text-8xl lg:text-[10rem] font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-violet-200 to-violet-900 drop-shadow-[0_0_30px_rgba(139,92,246,0.5)] animate-in fade-in zoom-in-50 duration-1000 leading-none">
+        <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[10rem] font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-violet-200 to-violet-900 drop-shadow-[0_0_30px_rgba(139,92,246,0.5)] animate-in fade-in zoom-in-50 duration-1000 leading-none">
           PC GAMER<br />
           <span className="text-stroke-white text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-fuchsia-500">INSANO</span>
         </h1>
         
-        <p className="text-xl md:text-3xl text-slate-300 max-w-4xl mx-auto font-light leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
+        <p className="text-lg md:text-3xl text-slate-300 max-w-4xl mx-auto font-light leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
           Chega de lag. Domine o jogo com máquinas projetadas para <strong className="text-violet-400 font-bold">performance extrema</strong> e visual impecável.
         </p>
 
@@ -64,8 +64,8 @@ function BlockHero() {
       </div>
       
       {/* Marquee Games */}
-      <div className="absolute bottom-0 w-full bg-white/5 border-t border-white/10 py-6 backdrop-blur-sm overflow-hidden">
-        <div className="container mx-auto px-4 flex flex-wrap justify-center gap-8 md:gap-16 opacity-60 text-violet-200 font-bold tracking-widest text-sm md:text-xl">
+      <div className="absolute bottom-0 w-full bg-white/5 border-t border-white/10 py-4 md:py-6 backdrop-blur-sm overflow-hidden">
+        <div className="container mx-auto px-4 flex flex-wrap justify-center gap-6 md:gap-16 opacity-60 text-violet-200 font-bold tracking-widest text-xs md:text-xl">
            <span>CS2</span>
            <span>VALORANT</span>
            <span>WARZONE</span>
@@ -81,46 +81,46 @@ function BlockHero() {
 
 function BlockPerformance() {
   return (
-    <section className="min-h-[80vh] flex items-center bg-zinc-950 text-white py-20 relative overflow-hidden">
+    <section className="min-h-[80vh] flex items-center bg-zinc-950 text-white py-12 md:py-20 relative overflow-hidden">
        <div className="absolute top-0 left-0 w-full h-full bg-[linear-gradient(45deg,transparent_25%,rgba(68,68,68,.2)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px]"></div>
        
-       <div className="container mx-auto px-4 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+       <div className="container mx-auto px-4 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <div className="order-2 lg:order-1">
-             <div className="grid grid-cols-2 gap-4">
-                <div className="bg-zinc-900/80 backdrop-blur border border-zinc-800 p-8 rounded-3xl hover:border-violet-500 transition-colors group">
-                   <Cpu className="w-12 h-12 text-violet-500 mb-4 group-hover:scale-110 transition-transform" />
-                   <h3 className="text-2xl font-bold mb-2">Processadores</h3>
-                   <p className="text-zinc-400">Intel Core i9 / i7 / i5 e AMD Ryzen 9 / 7 / 5 de última geração.</p>
+             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="bg-zinc-900/80 backdrop-blur border border-zinc-800 p-6 md:p-8 rounded-3xl hover:border-violet-500 transition-colors group">
+                   <Cpu className="w-10 h-10 md:w-12 md:h-12 text-violet-500 mb-4 group-hover:scale-110 transition-transform" />
+                   <h3 className="text-xl md:text-2xl font-bold mb-2">Processadores</h3>
+                   <p className="text-sm md:text-base text-zinc-400">Intel Core i9 / i7 / i5 e AMD Ryzen 9 / 7 / 5 de última geração.</p>
                 </div>
-                <div className="bg-zinc-900/80 backdrop-blur border border-zinc-800 p-8 rounded-3xl hover:border-fuchsia-500 transition-colors group">
-                   <MonitorPlay className="w-12 h-12 text-fuchsia-500 mb-4 group-hover:scale-110 transition-transform" />
-                   <h3 className="text-2xl font-bold mb-2">Placas de Vídeo</h3>
-                   <p className="text-zinc-400">RTX 4090, 4080, 4070, 4060. Ray Tracing e DLSS no máximo.</p>
+                <div className="bg-zinc-900/80 backdrop-blur border border-zinc-800 p-6 md:p-8 rounded-3xl hover:border-fuchsia-500 transition-colors group">
+                   <MonitorPlay className="w-10 h-10 md:w-12 md:h-12 text-fuchsia-500 mb-4 group-hover:scale-110 transition-transform" />
+                   <h3 className="text-xl md:text-2xl font-bold mb-2">Placas de Vídeo</h3>
+                   <p className="text-sm md:text-base text-zinc-400">RTX 4090, 4080, 4070, 4060. Ray Tracing e DLSS no máximo.</p>
                 </div>
-                <div className="bg-zinc-900/80 backdrop-blur border border-zinc-800 p-8 rounded-3xl hover:border-cyan-500 transition-colors group col-span-2">
-                   <Zap className="w-12 h-12 text-cyan-500 mb-4 group-hover:scale-110 transition-transform" />
-                   <h3 className="text-2xl font-bold mb-2">Alta Performance</h3>
-                   <p className="text-zinc-400">Memórias DDR5 de alta frequência e SSDs NVMe Gen4 com velocidades absurdas de leitura e escrita.</p>
+                <div className="bg-zinc-900/80 backdrop-blur border border-zinc-800 p-6 md:p-8 rounded-3xl hover:border-cyan-500 transition-colors group col-span-1 sm:col-span-2">
+                   <Zap className="w-10 h-10 md:w-12 md:h-12 text-cyan-500 mb-4 group-hover:scale-110 transition-transform" />
+                   <h3 className="text-xl md:text-2xl font-bold mb-2">Alta Performance</h3>
+                   <p className="text-sm md:text-base text-zinc-400">Memórias DDR5 de alta frequência e SSDs NVMe Gen4 com velocidades absurdas de leitura e escrita.</p>
                 </div>
              </div>
           </div>
           
-          <div className="order-1 lg:order-2 space-y-8 text-right lg:text-left">
-             <h2 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.9]">
+          <div className="order-1 lg:order-2 space-y-6 md:space-y-8 text-center lg:text-left">
+             <h2 className="text-5xl md:text-8xl font-black tracking-tighter leading-[0.9]">
                 FPS NO <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-fuchsia-500">TALO</span>
              </h2>
-             <p className="text-2xl md:text-3xl font-medium text-zinc-300 leading-snug">
+             <p className="text-xl md:text-3xl font-medium text-zinc-300 leading-snug">
                 Não jogue para participar. Jogue para ganhar. Cada frame conta na hora do clutch.
              </p>
-             <div className="flex flex-col lg:flex-row gap-6 justify-end lg:justify-start">
+             <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center lg:justify-start">
                 <div className="flex items-center gap-4 bg-zinc-900 p-4 rounded-xl border border-zinc-800">
-                   <div className="text-4xl font-black text-green-400">300+</div>
-                   <div className="text-sm font-bold uppercase tracking-wider text-zinc-500">FPS<br/>Competitivo</div>
+                   <div className="text-3xl md:text-4xl font-black text-green-400">300+</div>
+                   <div className="text-xs md:text-sm font-bold uppercase tracking-wider text-zinc-500 text-left">FPS<br/>Competitivo</div>
                 </div>
                 <div className="flex items-center gap-4 bg-zinc-900 p-4 rounded-xl border border-zinc-800">
-                   <div className="text-4xl font-black text-purple-400">4K</div>
-                   <div className="text-sm font-bold uppercase tracking-wider text-zinc-500">Resolução<br/>Ultra</div>
+                   <div className="text-3xl md:text-4xl font-black text-purple-400">4K</div>
+                   <div className="text-xs md:text-sm font-bold uppercase tracking-wider text-zinc-500 text-left">Resolução<br/>Ultra</div>
                 </div>
              </div>
           </div>
@@ -181,32 +181,32 @@ function BlockCustom() {
 
 function BlockAssembly() {
     return (
-      <section className="min-h-[60vh] flex items-center bg-zinc-900 text-white py-20 border-y border-zinc-800">
+      <section className="min-h-[60vh] flex items-center bg-zinc-900 text-white py-12 md:py-20 border-y border-zinc-800">
          <div className="container mx-auto px-4 text-center">
-            <h2 className="text-4xl md:text-6xl font-black mb-12">
+            <h2 className="text-3xl md:text-6xl font-black mb-8 md:mb-12">
                COMPROU NA INTERNET? <br/>
                <span className="text-emerald-400">A GENTE MONTA!</span>
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
                <div className="bg-zinc-800 p-8 rounded-3xl border border-zinc-700 hover:border-emerald-500 transition-all hover:-translate-y-2">
-                  <PackageCheck className="w-16 h-16 text-emerald-400 mx-auto mb-6" />
-                  <h3 className="text-2xl font-bold mb-4">Recebemos suas Peças</h3>
-                  <p className="text-zinc-400">
+                  <PackageCheck className="w-12 h-12 md:w-16 md:h-16 text-emerald-400 mx-auto mb-6" />
+                  <h3 className="text-xl md:text-2xl font-bold mb-4">Recebemos suas Peças</h3>
+                  <p className="text-zinc-400 text-sm md:text-base">
                      Pode comprar na Kabum, Terabyte, Pichau... Traga as caixas lacradas que nós cuidamos do resto.
                   </p>
                </div>
                <div className="bg-zinc-800 p-8 rounded-3xl border border-zinc-700 hover:border-emerald-500 transition-all hover:-translate-y-2">
-                  <Zap className="w-16 h-16 text-emerald-400 mx-auto mb-6" />
-                  <h3 className="text-2xl font-bold mb-4">Montagem Premium</h3>
-                  <p className="text-zinc-400">
+                  <Zap className="w-12 h-12 md:w-16 md:h-16 text-emerald-400 mx-auto mb-6" />
+                  <h3 className="text-xl md:text-2xl font-bold mb-4">Montagem Premium</h3>
+                  <p className="text-zinc-400 text-sm md:text-base">
                      Cable management impecável (fios escondidos), aplicação de pasta térmica de prata e fixação segura.
                   </p>
                </div>
                <div className="bg-zinc-800 p-8 rounded-3xl border border-zinc-700 hover:border-emerald-500 transition-all hover:-translate-y-2">
-                  <MonitorPlay className="w-16 h-16 text-emerald-400 mx-auto mb-6" />
-                  <h3 className="text-2xl font-bold mb-4">Drivers e BIOS</h3>
-                  <p className="text-zinc-400">
+                  <MonitorPlay className="w-12 h-12 md:w-16 md:h-16 text-emerald-400 mx-auto mb-6" />
+                  <h3 className="text-xl md:text-2xl font-bold mb-4">Drivers e BIOS</h3>
+                  <p className="text-zinc-400 text-sm md:text-base">
                      Atualizamos a BIOS, instalamos Windows e todos os drivers. Você pega o PC pronto para jogar.
                   </p>
                </div>
@@ -218,31 +218,31 @@ function BlockAssembly() {
 
 function BlockTesting() {
    return (
-      <section className="min-h-[60vh] flex items-center bg-red-950 text-white py-20 relative overflow-hidden">
+      <section className="min-h-[60vh] flex items-center bg-red-950 text-white py-12 md:py-20 relative overflow-hidden">
          <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10"></div>
          <div className="container mx-auto px-4 relative z-10 flex flex-col md:flex-row items-center gap-12">
-            <div className="flex-1">
-               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/20 border border-red-500/50 text-red-300 font-bold mb-6">
-                  <Flame className="w-5 h-5 animate-pulse" />
+            <div className="flex-1 text-center md:text-left">
+               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/20 border border-red-500/50 text-red-300 font-bold mb-6 text-sm">
+                  <Flame className="w-4 h-4 md:w-5 md:h-5 animate-pulse" />
                   Stress Test Aprovado
                </div>
-               <h2 className="text-5xl md:text-8xl font-black leading-none mb-6">
+               <h2 className="text-4xl md:text-8xl font-black leading-none mb-6">
                   TESTADO<br/>NO LIMITE
                </h2>
-               <p className="text-xl md:text-2xl text-red-100 opacity-80 leading-relaxed">
+               <p className="text-lg md:text-2xl text-red-100 opacity-80 leading-relaxed">
                   Não entregamos o PC apenas "ligando". Todas as máquinas passam por baterias de testes de stress de CPU e GPU para garantir que não haverá superaquecimento ou telas azuis durante sua gameplay.
                </p>
             </div>
-            <div className="flex-1 grid grid-cols-2 gap-4">
-               <div className="bg-black/40 backdrop-blur p-6 rounded-2xl border border-red-500/30">
-                  <ThermometerSun className="w-10 h-10 text-red-500 mb-3" />
-                  <div className="text-3xl font-bold">Temperatura</div>
-                  <div className="text-sm opacity-70">Monitoramento térmico</div>
+            <div className="flex-1 grid grid-cols-2 gap-4 w-full">
+               <div className="bg-black/40 backdrop-blur p-6 rounded-2xl border border-red-500/30 text-center md:text-left">
+                  <ThermometerSun className="w-8 h-8 md:w-10 md:h-10 text-red-500 mb-3 mx-auto md:mx-0" />
+                  <div className="text-xl md:text-3xl font-bold">Temperatura</div>
+                  <div className="text-xs md:text-sm opacity-70">Monitoramento térmico</div>
                </div>
-               <div className="bg-black/40 backdrop-blur p-6 rounded-2xl border border-red-500/30">
-                  <Zap className="w-10 h-10 text-yellow-500 mb-3" />
-                  <div className="text-3xl font-bold">Voltagem</div>
-                  <div className="text-sm opacity-70">Estabilidade de energia</div>
+               <div className="bg-black/40 backdrop-blur p-6 rounded-2xl border border-red-500/30 text-center md:text-left">
+                  <Zap className="w-8 h-8 md:w-10 md:h-10 text-yellow-500 mb-3 mx-auto md:mx-0" />
+                  <div className="text-xl md:text-3xl font-bold">Voltagem</div>
+                  <div className="text-xs md:text-sm opacity-70">Estabilidade de energia</div>
                </div>
             </div>
          </div>
@@ -252,21 +252,21 @@ function BlockTesting() {
 
 function BlockUrgency() {
    return (
-      <section className="py-20 bg-emerald-600 text-white text-center">
+      <section className="py-12 md:py-20 bg-emerald-600 text-white text-center">
          <div className="container mx-auto px-4 max-w-4xl space-y-8">
-            <h2 className="text-4xl md:text-6xl font-black">
+            <h2 className="text-3xl md:text-6xl font-black">
                PRONTO PARA O PRÓXIMO NÍVEL?
             </h2>
-            <p className="text-xl md:text-2xl font-medium opacity-90">
+            <p className="text-lg md:text-2xl font-medium opacity-90">
                Não perca mais partidas por causa de FPS baixo. Garanta sua máquina hoje.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-               <button className="bg-white text-emerald-900 px-8 py-5 rounded-full font-black text-xl hover:scale-105 transition-transform shadow-xl flex items-center justify-center gap-3">
-                  <MessageCircle className="w-6 h-6" />
+            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4 md:pt-8">
+               <button className="bg-white text-emerald-900 px-6 py-4 md:px-8 md:py-5 rounded-full font-black text-lg md:text-xl hover:scale-105 transition-transform shadow-xl flex items-center justify-center gap-3 w-full sm:w-auto">
+                  <MessageCircle className="w-5 h-5 md:w-6 md:h-6" />
                   CHAMAR NO WHATSAPP AGORA
                </button>
             </div>
-            <p className="text-sm opacity-75 mt-4">
+            <p className="text-xs md:text-sm opacity-75 mt-4">
                Atendimento rápido • Orçamento sem compromisso
             </p>
          </div>
@@ -341,16 +341,16 @@ export default async function PcGamerPage() {
         <BlockCustom />
 
         {/* PRODUTOS - GRID */}
-        <section id="ofertas" className="py-20 bg-zinc-50 min-h-[50vh]">
+        <section id="ofertas" className="py-12 md:py-20 bg-zinc-50 min-h-[50vh]">
           <div className="container mx-auto px-4">
-             <div className="text-center mb-16">
-                <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-4">SETUP GAMER PRONTO</h2>
-                <div className="w-24 h-2 bg-violet-600 mx-auto rounded-full"></div>
-                <p className="mt-4 text-xl text-slate-600">Máquinas montadas e configuradas. É só ligar e jogar.</p>
+             <div className="text-center mb-12 md:mb-16">
+                <h2 className="text-3xl md:text-6xl font-black text-slate-900 mb-4">SETUP GAMER PRONTO</h2>
+                <div className="w-16 md:w-24 h-2 bg-violet-600 mx-auto rounded-full"></div>
+                <p className="mt-4 text-lg md:text-xl text-slate-600">Máquinas montadas e configuradas. É só ligar e jogar.</p>
              </div>
              
              {gamerProducts.length === 0 ? (
-               <div className="bg-white border-2 border-dashed border-gray-300 rounded-3xl p-12 text-center text-gray-500 text-xl">
+               <div className="bg-white border-2 border-dashed border-gray-300 rounded-3xl p-8 md:p-12 text-center text-gray-500 text-lg md:text-xl">
                  Carregando estoque gamer atualizado...
                </div>
              ) : (
@@ -366,33 +366,33 @@ export default async function PcGamerPage() {
         <BlockTesting />
 
         {/* BLOCO 6: ENTREGA (Reusing delivery block logic but simpler/darker if needed, or just standard) */}
-        <section className="min-h-[50vh] flex items-center bg-slate-900 text-white py-20">
+        <section className="min-h-[50vh] flex items-center bg-slate-900 text-white py-12 md:py-20">
             <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-               <div>
-                  <Truck className="w-20 h-20 text-blue-400 mb-6" />
-                  <h2 className="text-5xl font-black mb-6">ENTREGA RÁPIDA</h2>
-                  <p className="text-xl text-slate-300 mb-6">
+               <div className="text-center md:text-left">
+                  <Truck className="w-16 h-16 md:w-20 md:h-20 text-blue-400 mb-6 mx-auto md:mx-0" />
+                  <h2 className="text-4xl md:text-5xl font-black mb-6">ENTREGA RÁPIDA</h2>
+                  <p className="text-lg md:text-xl text-slate-300 mb-6">
                      Campinas e região recebem via motoboy. Outras cidades via transportadora com seguro total.
                   </p>
                </div>
                <div className="bg-slate-800 p-8 rounded-2xl border border-slate-700">
-                  <h3 className="text-2xl font-bold mb-4 text-blue-300">Região Metropolitana de Campinas</h3>
+                  <h3 className="text-xl md:text-2xl font-bold mb-4 text-blue-300">Região Metropolitana de Campinas</h3>
                   <ul className="space-y-3">
-                     <li className="flex items-center gap-3"><CheckCircle2 className="text-green-400"/> Campinas</li>
-                     <li className="flex items-center gap-3"><CheckCircle2 className="text-green-400"/> Sumaré</li>
-                     <li className="flex items-center gap-3"><CheckCircle2 className="text-green-400"/> Hortolândia</li>
-                     <li className="flex items-center gap-3"><CheckCircle2 className="text-green-400"/> Paulínia</li>
+                     <li className="flex items-center gap-3"><CheckCircle2 className="text-green-400 shrink-0"/> Campinas</li>
+                     <li className="flex items-center gap-3"><CheckCircle2 className="text-green-400 shrink-0"/> Sumaré</li>
+                     <li className="flex items-center gap-3"><CheckCircle2 className="text-green-400 shrink-0"/> Hortolândia</li>
+                     <li className="flex items-center gap-3"><CheckCircle2 className="text-green-400 shrink-0"/> Paulínia</li>
                   </ul>
                </div>
             </div>
         </section>
 
         {/* BLOCO 7: GARANTIA */}
-        <section className="py-20 bg-white">
+        <section className="py-12 md:py-20 bg-white">
            <div className="container mx-auto px-4 text-center">
-              <ShieldCheck className="w-24 h-24 text-violet-600 mx-auto mb-6" />
-              <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-6">GARANTIA REAL</h2>
-              <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+              <ShieldCheck className="w-16 h-16 md:w-24 md:h-24 text-violet-600 mx-auto mb-6" />
+              <h2 className="text-3xl md:text-6xl font-black text-slate-900 mb-6">GARANTIA REAL</h2>
+              <p className="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto">
                  Nada de enviar peça para a China ou esperar 30 dias. A garantia é conosco, na loja física em Campinas.
               </p>
            </div>
