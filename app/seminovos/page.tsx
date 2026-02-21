@@ -4,7 +4,8 @@ import Header from "@/components/Header";
 import { getProducts, getCategories } from "@/lib/db";
 import { Product, Category } from "@/lib/utils";
 import ProductCard from "@/components/ProductCard";
-import { Laptop2, ShieldCheck, BadgeCheck, Truck, Award, Star } from "lucide-react";
+import HeroCTA from "@/components/HeroCTA";
+import { Laptop2, ShieldCheck, BadgeCheck, Truck, Award, Star, CheckCircle2 } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Notebooks Seminovos em Campinas | Balão da Informática",
@@ -82,6 +83,48 @@ function SecondaryBanners() {
         <p className="text-xs text-amber-900/90">
           Estoque em tempo real: acabou o estoque, o anúncio sai do ar automaticamente.
         </p>
+      </div>
+    </div>
+  );
+}
+
+function PayOnDeliveryBanner() {
+  return (
+    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 shadow-2xl p-8 md:p-12 text-white transform hover:scale-[1.01] transition-all duration-300">
+      <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+      <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-yellow-400/20 rounded-full blur-3xl animate-pulse"></div>
+      
+      <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+        <div className="space-y-2">
+          <div className="inline-block bg-white/20 backdrop-blur-sm px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-2 border border-white/30">
+            Diferencial Exclusivo
+          </div>
+          <h2 className="text-3xl md:text-5xl font-black tracking-tighter drop-shadow-sm">
+            PAGUE AO RECEBER <br className="hidden md:block" />
+            <span className="text-yellow-300">NA SUA CASA</span>
+          </h2>
+          <p className="text-lg md:text-xl text-emerald-50 max-w-2xl font-medium leading-relaxed">
+            Sem risco nenhum! Você recebe o notebook, testa tudo no conforto do seu lar 
+            e só faz o pagamento quando estiver 100% satisfeito.
+          </p>
+        </div>
+        
+        <div className="flex-shrink-0 bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 shadow-inner">
+          <ul className="space-y-3 text-left">
+            <li className="flex items-center gap-3 text-sm font-bold">
+              <CheckCircle2 className="w-5 h-5 text-yellow-300" />
+              <span>Entrega Grátis em Campinas</span>
+            </li>
+            <li className="flex items-center gap-3 text-sm font-bold">
+              <CheckCircle2 className="w-5 h-5 text-yellow-300" />
+              <span>Teste antes de pagar</span>
+            </li>
+            <li className="flex items-center gap-3 text-sm font-bold">
+              <CheckCircle2 className="w-5 h-5 text-yellow-300" />
+              <span>Pix, Cartão ou Dinheiro</span>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   );
@@ -288,6 +331,9 @@ export default async function SeminovosPage() {
                   <li>• Estoque físico em Campinas, com retirada na loja ou envio</li>
                   <li>• Entrega grátis e opção de pagar ao receber na sua casa</li>
                 </ul>
+                <div className="mt-8">
+                   <HeroCTA />
+                </div>
               </div>
               <div className="space-y-4">
                 <BrandStrip />
@@ -297,7 +343,13 @@ export default async function SeminovosPage() {
           </div>
         </section>
 
-        <section className="py-10 md:py-14">
+        <section className="py-8 bg-white">
+             <div className="container mx-auto px-4 max-w-6xl">
+                 <PayOnDeliveryBanner />
+             </div>
+        </section>
+
+        <section id="ofertas" className="py-10 md:py-14 bg-gray-50">
           <div className="container mx-auto px-4 max-w-6xl space-y-6">
             {seminovos.length === 0 ? (
               <div className="bg-white border border-dashed border-gray-300 rounded-3xl p-8 text-center text-sm text-gray-500">
