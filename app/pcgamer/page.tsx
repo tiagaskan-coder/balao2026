@@ -6,6 +6,7 @@ import { Product, Category } from "@/lib/utils";
 import ProductCard from "@/components/ProductCard";
 import Image from "next/image";
 import HeroCTA from "@/components/HeroCTA";
+import PcGamerSearchGrid from "@/components/PcGamerSearchGrid";
 import { 
   Gamepad2, 
   Cpu, 
@@ -45,12 +46,12 @@ function BlockHero() {
       <div className="container relative z-10 px-4 text-center space-y-8">
         
         {/* Floating Element - Left */}
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 w-64 h-64 hidden 2xl:block opacity-60 pointer-events-none">
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 w-48 h-48 md:w-64 md:h-64 hidden lg:block opacity-60 pointer-events-none">
            <Image src="/images/prizes/headset.png" alt="Headset Gamer" fill className="object-contain drop-shadow-[0_0_30px_rgba(139,92,246,0.5)] animate-float" />
         </div>
 
         {/* Floating Element - Right */}
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 w-96 h-96 hidden 2xl:block opacity-80 pointer-events-none">
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 w-64 h-64 md:w-96 md:h-96 hidden lg:block opacity-80 pointer-events-none">
            <Image src="/images/prizes/pc.png" alt="PC Gamer High End" fill className="object-contain drop-shadow-[0_0_50px_rgba(139,92,246,0.5)] animate-float-delayed" />
         </div>
 
@@ -362,11 +363,7 @@ export default async function PcGamerPage() {
                  Carregando estoque gamer atualizado...
                </div>
              ) : (
-                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                   {gamerProducts.map((item) => (
-                     <ProductCard key={item.id} product={item} />
-                   ))}
-                 </div>
+               <PcGamerSearchGrid initialProducts={gamerProducts} />
              )}
           </div>
         </section>
