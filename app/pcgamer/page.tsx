@@ -133,42 +133,44 @@ function BlockCustom() {
   return (
     <section className="py-12 bg-slate-100 text-slate-900">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
-           <div className="flex-1 space-y-6">
-              <h2 className="text-4xl md:text-6xl font-black tracking-tight text-slate-900 leading-tight">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+           <div className="bg-white p-8 rounded-3xl shadow-lg border border-slate-200 flex flex-col justify-center h-full">
+              <h2 className="text-4xl md:text-5xl font-black tracking-tight text-slate-900 leading-tight mb-4">
                 MONTE DO<br/>
                 <span className="text-blue-600">SEU JEITO</span>
               </h2>
-              <p className="text-xl text-slate-600 leading-relaxed max-w-xl">
+              <p className="text-lg text-slate-600 leading-relaxed mb-6">
                  Tem uma configuração dos sonhos em mente? Nós tornamos realidade. Escolha gabinete, cooler, fans RGB e muito mais.
               </p>
               <ul className="space-y-3 text-lg font-semibold text-slate-700">
                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-6 h-6 text-blue-600" />
+                    <CheckCircle2 className="w-6 h-6 text-blue-600 shrink-0" />
                     <span>Orçamento personalizado via WhatsApp</span>
                  </li>
                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-6 h-6 text-blue-600" />
+                    <CheckCircle2 className="w-6 h-6 text-blue-600 shrink-0" />
                     <span>Compatibilidade de peças verificada</span>
                  </li>
                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-6 h-6 text-blue-600" />
+                    <CheckCircle2 className="w-6 h-6 text-blue-600 shrink-0" />
                     <span>Sugestões de upgrade futuro</span>
                  </li>
               </ul>
            </div>
-           <div className="flex-1 relative">
-              {/* Placeholder for visual representation */}
-              <div className="relative aspect-square bg-gradient-to-br from-blue-600 to-indigo-700 rounded-full blur-3xl opacity-20 absolute inset-0"></div>
-              <div className="relative bg-white p-8 rounded-3xl shadow-2xl border border-slate-200">
-                 <Wrench className="w-24 h-24 text-blue-600 mb-6 mx-auto" />
-                 <h3 className="text-3xl font-bold text-center mb-4">Consultoria Grátis</h3>
-                 <p className="text-center text-slate-600 text-lg mb-8">
-                    Não sabe qual peça escolher? Nossos especialistas te ajudam a montar o melhor setup para o seu orçamento.
-                 </p>
-                 <button className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200">
-                    Chamar Especialista
-                 </button>
+           
+           <div className="relative">
+              <div className="relative bg-white p-8 rounded-3xl shadow-lg border border-slate-200 h-full flex flex-col justify-center items-center text-center">
+                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl opacity-50 pointer-events-none"></div>
+                 <div className="relative z-10">
+                    <Wrench className="w-20 h-20 text-blue-600 mb-4 mx-auto" />
+                    <h3 className="text-3xl font-bold mb-3">Consultoria Grátis</h3>
+                    <p className="text-slate-600 text-lg mb-6 max-w-md mx-auto">
+                       Não sabe qual peça escolher? Nossos especialistas te ajudam a montar o melhor setup para o seu orçamento.
+                    </p>
+                    <button className="w-full md:w-auto px-8 py-3 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200">
+                       Chamar Especialista
+                    </button>
+                 </div>
               </div>
            </div>
         </div>
