@@ -517,31 +517,43 @@ export default function RoletaPage() {
                     const sliceAngle = 360 / PRIZES.length;
                     const rotation = sliceAngle * index + (sliceAngle / 2);
                     return (
-                      <div 
-                        key={prize.id}
-                        className="absolute w-full h-[50%] top-0 left-0 flex flex-col justify-start items-center pt-2 md:pt-4 origin-bottom z-30 pointer-events-none"
-                        style={{ 
-                          transform: `rotate(${rotation}deg)`,
-                          transformOrigin: 'bottom center' // Rotaciona a partir do centro da roleta
-                        }}
-                      >
-                         {/* Conteúdo da Fatia - Container restrito */}
-                         {/* A largura máxima deve diminuir conforme nos aproximamos do centro para não vazar */}
-                         <div className="flex flex-col items-center justify-start h-full w-full max-w-[40%]">
-                           
-                           {/* Texto - No topo (borda externa) */}
-                           <span className="text-xs sm:text-sm md:text-xl font-black text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] uppercase tracking-wider mb-1 md:mb-2 text-center leading-none z-30 break-words w-full">
+                      <div key={prize.id} className="absolute inset-0">
+                        {/* 1. BACKGROUND DA FATIA (Imagem Triangular) */}
+                        <div 
+                          className="absolute top-0 left-1/2 h-[50%] z-10 origin-bottom overflow-hidden"
+                          style={{ 
+                            width: '42%', // ~ tan(22.5) * 2 * 50% = 41.4%
+                            marginLeft: '-21%', // Centralizar
+                            transform: `rotate(${rotation}deg)`,
+                            transformOrigin: 'bottom center',
+                            clipPath: 'polygon(0 0, 100% 0, 50% 100%)', // Formato Triangular
+                          }}
+                        >
+                           <div className="relative w-full h-full">
+                              {/* Fundo colorido base caso a imagem não carregue ou seja transparente */}
+                              <div className="absolute inset-0" style={{ backgroundColor: prize.color }}></div>
+                              
+                              <img 
+                                 src={prize.image} 
+                                 alt={prize.text}
+                                 className="w-full h-full object-cover transform scale-110" 
+                              />
+                              {/* Overlay gradiente para garantir leitura do texto */}
+                              <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/30"></div>
+                           </div>
+                        </div>
+
+                        {/* 2. CONTEÚDO DA FATIA (Texto) */}
+                        <div 
+                          className="absolute w-full h-[50%] top-0 left-0 flex flex-col justify-start items-center pt-6 md:pt-10 origin-bottom z-30 pointer-events-none"
+                          style={{ 
+                            transform: `rotate(${rotation}deg)`,
+                            transformOrigin: 'bottom center' 
+                          }}
+                        >
+                           <span className="text-sm md:text-xl font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] uppercase tracking-wider text-center leading-none max-w-[30%] break-words shadow-black">
                              {prize.text}
                            </span>
-
-                           {/* Imagem - Logo abaixo, ocupando o espaço restante mas respeitando as laterais */}
-                           <div className="relative w-full aspect-square max-w-[80px] md:max-w-[140px] flex items-center justify-center p-1">
-                             <img 
-                               src={prize.image} 
-                               alt={prize.text}
-                               className="w-full h-full object-contain drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)] transform scale-110"
-                             />
-                           </div>
                         </div>
                       </div>
                     );
