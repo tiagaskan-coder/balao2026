@@ -11,6 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useSidebar } from "@/context/SidebarContext";
 import { Product } from "@/lib/utils";
 import SearchPreview from "@/components/SearchPreview";
+import CartPreview from "@/components/CartPreview";
 
 export default function Header() {
   const router = useRouter();
@@ -20,6 +21,8 @@ export default function Header() {
   const { toggleSidebar } = useSidebar();
   const [logoClicks, setLogoClicks] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showCartPreview, setShowCartPreview] = useState(false);
+  const cartPreviewTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Sync search query with URL params
   useEffect(() => {
@@ -113,6 +116,19 @@ export default function Header() {
     setSearchQuery("");
     setProducts([]);
     setShowPreview(false);
+  };
+
+  const handleCartMouseEnter = () => {
+    if (cartPreviewTimeoutRef.current) {
+      clearTimeout(cartPreviewTimeoutRef.current);
+    }
+    setShowCartPreview(true);
+  };
+
+  const handleCartMouseLeave = () => {
+    cartPreviewTimeoutRef.current = setTimeout(() => {
+      setShowCartPreview(false);
+    }, 300);
   };
 
   // Products are now fetched directly from API, so no need for client-side filtering here
@@ -211,20 +227,27 @@ export default function Header() {
             </div>
           </Link>
           
-          <Link href="/cart" id="cart-icon-container" className="relative group flex items-center gap-3 active:scale-95 transition-transform">
-             <div className="p-2 bg-gray-100 rounded-full text-gray-600 group-hover:bg-[#E60012] group-hover:text-white transition-colors shadow-sm">
-                <ShoppingCart size={20} className="md:w-5 md:h-5" strokeWidth={2.5} />
-             </div>
-             <div className="hidden lg:flex flex-col text-sm leading-tight">
-                <span className="text-gray-500">Meu</span>
-                <span className="font-bold text-gray-800 group-hover:text-[#E60012] transition-colors">Carrinho</span>
-            </div>
-            {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 md:top-0 md:right-0 lg:left-7 lg:top-0 bg-[#E60012] text-white text-[10px] md:text-[11px] font-bold h-5 w-5 md:h-5 md:w-5 flex items-center justify-center rounded-full border-2 border-white shadow-sm">
-                    {cartCount}
-                </span>
+          <div className="relative" onMouseEnter={handleCartMouseEnter} onMouseLeave={handleCartMouseLeave}>
+            <Link href="/cart" id="cart-icon-container" className="relative group flex items-center gap-3 active:scale-95 transition-transform">
+               <div className="p-2 bg-gray-100 rounded-full text-gray-600 group-hover:bg-[#E60012] group-hover:text-white transition-colors shadow-sm">
+                  <ShoppingCart size={20} className="md:w-5 md:h-5" strokeWidth={2.5} />
+               </div>
+               <div className="hidden lg:flex flex-col text-sm leading-tight">
+                  <span className="text-gray-500">Meu</span>
+                  <span className="font-bold text-gray-800 group-hover:text-[#E60012] transition-colors">Carrinho</span>
+              </div>
+              {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 md:top-0 md:right-0 lg:left-7 lg:top-0 bg-[#E60012] text-white text-[10px] md:text-[11px] font-bold h-5 w-5 md:h-5 md:w-5 flex items-center justify-center rounded-full border-2 border-white shadow-sm">
+                      {cartCount}
+                  </span>
+              )}
+            </Link>
+            {showCartPreview && (
+                <div className="absolute top-full right-0 z-[1000]">
+                    <CartPreview onClose={() => setShowCartPreview(false)} />
+                </div>
             )}
-          </Link>
+          </div>
         </div>
       </div>
 
