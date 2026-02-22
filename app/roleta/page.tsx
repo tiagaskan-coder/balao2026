@@ -8,46 +8,97 @@ import confetti from 'canvas-confetti';
 // --- CONFIGURAÇÃO DOS PRÊMIOS ---
 // Imagens reais baixadas localmente
 const PRIZES = [
-  { id: 1, text: 'Fone com Fio', color: '#FF0055', type: 'win', probability: 0.15, image: '/images/prizes/headset.jpg' },
+  { 
+    id: 1, 
+    text: 'R$ 10,00 Pix', 
+    color: '#00CC66', 
+    type: 'win', 
+    probability: 0.05, 
+    image: '/images/prizes/10reais.jpg' 
+  },
   { 
     id: 2, 
+    text: 'Tente de Novo', 
+    color: '#FF3333', 
+    type: 'loss', 
+    probability: 0.24, 
+    image: null, 
+    emoji: '😢'
+  },
+  { 
+    id: 3, 
+    text: 'Fone com Fio', 
+    color: '#FF0055', 
+    type: 'win', 
+    probability: 0.05, 
+    image: '/images/prizes/headset.jpg' 
+  },
+  { 
+    id: 4, 
+    text: 'Mão de Obra', 
+    subtext: 'Troca R$2,00',
+    color: '#FF00CC', 
+    type: 'win', 
+    probability: 0.20, 
+    image: '/images/prizes/2reais.png' 
+  },
+  { 
+    id: 5, 
+    text: 'PS5', 
+    color: '#9D00FF', 
+    type: 'win', // Comemorar se ganhar (apenas via cheat)
+    probability: 0, 
+    image: '/images/prizes/ps5.jpg' 
+  },
+  { 
+    id: 6, 
+    text: '5% OFF', 
+    color: '#FF9900', 
+    type: 'win', 
+    probability: 0.05, 
+    image: '/images/prizes/bitcoin.png' 
+  },
+  { 
+    id: 7, 
+    text: 'Não foi dessa vez', 
+    color: '#888888', 
+    type: 'loss', 
+    probability: 0.24, 
+    image: null,
+    emoji: '😢'
+  },
+  { 
+    id: 8, 
+    text: 'Cabo USB', 
+    color: '#CCFF00', 
+    type: 'win', 
+    probability: 0.05, 
+    image: '/images/prizes/usb.jpg' 
+  },
+  { 
+    id: 9, 
     text: 'PC Gamer', 
     color: '#00FFFF', 
-    type: 'loss', 
+    type: 'win', // Comemorar se ganhar (apenas via cheat)
     probability: 0, 
     image: '/images/prizes/pc.jpg' 
   },
   { 
-    id: 3, 
-    text: 'Cabo USB', 
-    color: '#CCFF00', 
+    id: 10, 
+    text: 'R$ 5,00 Pix', 
+    color: '#00FF99', 
     type: 'win', 
-    probability: 0.15, 
-    image: '/images/prizes/usb.jpg' 
+    probability: 0.10, 
+    image: '/images/prizes/5reais.jpg' 
   },
   { 
-    id: 4, 
-    text: 'PS5', 
-    color: '#9D00FF', 
-    type: 'loss', 
-    probability: 0, 
-    image: '/images/prizes/ps5.jpg' 
+    id: 11, 
+    text: '10% OFF', 
+    color: '#0099FF', 
+    type: 'win', 
+    probability: 0.02, 
+    image: '/images/prizes/discount10.jpg' 
   },
-  { id: 5, text: '5% OFF', color: '#FF9900', type: 'win', probability: 0.2, image: '/images/prizes/discount5.jpg' },
-  { id: 6, text: '10% OFF', color: '#0099FF', type: 'loss', probability: 0, image: '/images/prizes/discount10.jpg' },
-  { 
-    id: 7, 
-    text: 'Mão de Obra', 
-    color: '#FF00CC', 
-    type: 'loss', 
-    probability: 0, 
-    image: '/images/prizes/repair.png' 
-  },
-  // NOVOS PRÊMIOS
-  { id: 8, text: 'Tente de Novo', color: '#FF3333', type: 'loss_message', probability: 0.2, image: '/images/prizes/repair.png' }, // Reutilizando repair como "tentar consertar"
-  { id: 9, text: 'Não foi dessa vez', color: '#888888', type: 'loss_message', probability: 0.2, image: '/images/prizes/repair.png' },
-  { id: 10, text: 'R$ 10,00 Pix', color: '#00CC66', type: 'win', probability: 0.05, image: '/images/prizes/discount10.jpg' }, // Reutilizando img de 10%
-  { id: 11, text: 'R$ 5,00 Pix', color: '#00FF99', type: 'win', probability: 0.05, image: '/images/prizes/discount5.jpg' }, // Reutilizando img de 5%
 ];
 
 const WINNING_PRIZES = PRIZES.filter(p => p.probability > 0);
@@ -291,7 +342,7 @@ export default function RoletaPage() {
 
     // CHEAT MODE: Shift + Click libera prêmios "impossíveis" (PC Gamer ou PS5)
     if (e.shiftKey) {
-      const cheatPrizes = PRIZES.filter(p => p.id === 2 || p.id === 4);
+      const cheatPrizes = PRIZES.filter(p => p.id === 5 || p.id === 9); // IDs do PS5 e PC Gamer
       selectedPrize = cheatPrizes[Math.floor(Math.random() * cheatPrizes.length)];
     } else {
       const lastPrizeId = localStorage.getItem('last_prize_id');
@@ -539,14 +590,21 @@ export default function RoletaPage() {
                           }}
                         >
                            <div className="relative w-full h-full">
-                              {/* Fundo colorido base caso a imagem não carregue ou seja transparente */}
+                              {/* Fundo colorido base */}
                               <div className="absolute inset-0" style={{ backgroundColor: prize.color }}></div>
                               
-                              <img 
-                                 src={prize.image} 
-                                 alt={prize.text}
-                                 className="w-full h-full object-cover transform scale-110" 
-                              />
+                              {prize.image ? (
+                                <img 
+                                   src={prize.image} 
+                                   alt={prize.text}
+                                   className="w-full h-full object-cover transform scale-110" 
+                                />
+                              ) : (
+                                <div className="absolute inset-0 flex items-center justify-center pt-12">
+                                  <span className="text-4xl md:text-6xl animate-bounce filter drop-shadow-lg">{prize.emoji}</span>
+                                </div>
+                              )}
+                              
                               {/* Overlay gradiente para garantir leitura do texto */}
                               <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/30"></div>
                            </div>
@@ -560,9 +618,16 @@ export default function RoletaPage() {
                             transformOrigin: 'bottom center' 
                           }}
                         >
-                           <span className="text-[10px] sm:text-xs md:text-base font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] uppercase tracking-wider text-center leading-none max-w-[20%] break-words shadow-black">
-                             {prize.text}
-                           </span>
+                           <div className="flex flex-col items-center max-w-[25%] text-center">
+                             <span className="text-[10px] sm:text-xs md:text-base font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] uppercase tracking-wider leading-none break-words shadow-black">
+                               {prize.text}
+                             </span>
+                             {prize.subtext && (
+                               <span className="text-[8px] md:text-[10px] font-bold text-yellow-300 mt-1 drop-shadow-md leading-tight">
+                                 {prize.subtext}
+                               </span>
+                             )}
+                           </div>
                         </div>
                       </div>
                     );
@@ -595,11 +660,15 @@ export default function RoletaPage() {
               <div className={`bg-gradient-to-br p-10 rounded-3xl border-4 shadow-[0_0_60px_rgba(255,215,0,0.4)] mb-8 relative overflow-hidden group max-w-lg mx-auto ${result.type === 'win' ? 'from-slate-800 to-black border-yellow-500' : 'from-slate-800 to-slate-900 border-slate-600 grayscale'}`}>
                 <div className={`absolute inset-0 animate-pulse ${result.type === 'win' ? 'bg-yellow-500/10' : 'bg-red-500/5'}`}></div>
                 
-                <img 
-                  src={result.image} 
-                  alt={result.text}
-                  className="w-48 h-48 md:w-64 md:h-64 object-contain mx-auto mb-6 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] transform group-hover:scale-110 transition-transform duration-500"
-                />
+                {result.image ? (
+                  <img 
+                    src={result.image} 
+                    alt={result.text}
+                    className="w-48 h-48 md:w-64 md:h-64 object-contain mx-auto mb-6 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] transform group-hover:scale-110 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="text-9xl mb-6 text-center animate-bounce">{result.emoji}</div>
+                )}
                 
                 <h3 className={`text-4xl md:text-5xl font-black text-transparent bg-clip-text uppercase tracking-widest relative z-10 ${result.type === 'win' ? 'bg-gradient-to-r from-yellow-300 to-orange-500' : 'bg-gradient-to-r from-slate-400 to-slate-200'}`}>
                   {result.text}
