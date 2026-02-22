@@ -14,7 +14,7 @@ const PRIZES = [
     color: '#00CC66', 
     type: 'win', 
     probability: 0.05, 
-    image: '/images/prizes/10reais.jpg' 
+    image: '/images/prizes/10reais.svg' 
   },
   { 
     id: 2, 
@@ -40,7 +40,7 @@ const PRIZES = [
     color: '#FF00CC', 
     type: 'win', 
     probability: 0.20, 
-    image: '/images/prizes/2reais.png' 
+    image: '/images/prizes/2reais.svg' 
   },
   { 
     id: 5, 
@@ -56,7 +56,7 @@ const PRIZES = [
     color: '#FF9900', 
     type: 'win', 
     probability: 0.05, 
-    image: '/images/prizes/bitcoin.png' 
+    image: '/images/prizes/bitcoin.svg' 
   },
   { 
     id: 7, 
@@ -89,7 +89,7 @@ const PRIZES = [
     color: '#00FF99', 
     type: 'win', 
     probability: 0.10, 
-    image: '/images/prizes/5reais.jpg' 
+    image: '/images/prizes/5reais.svg' 
   },
   { 
     id: 11, 
@@ -601,8 +601,8 @@ export default function RoletaPage() {
                                 />
                               ) : (
                                 <div className="absolute inset-0 flex items-center justify-center pt-12">
-                                  <span className="text-4xl md:text-6xl animate-bounce filter drop-shadow-lg">{prize.emoji}</span>
-                                </div>
+                                   <span className="text-4xl md:text-6xl filter drop-shadow-lg">{prize.emoji}</span>
+                                 </div>
                               )}
                               
                               {/* Overlay gradiente para garantir leitura do texto */}
@@ -667,7 +667,7 @@ export default function RoletaPage() {
                     className="w-48 h-48 md:w-64 md:h-64 object-contain mx-auto mb-6 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] transform group-hover:scale-110 transition-transform duration-500"
                   />
                 ) : (
-                  <div className="text-9xl mb-6 text-center animate-bounce">{result.emoji}</div>
+                  <div className="text-9xl mb-6 text-center">{result.emoji}</div>
                 )}
                 
                 <h3 className={`text-4xl md:text-5xl font-black text-transparent bg-clip-text uppercase tracking-widest relative z-10 ${result.type === 'win' ? 'bg-gradient-to-r from-yellow-300 to-orange-500' : 'bg-gradient-to-r from-slate-400 to-slate-200'}`}>
