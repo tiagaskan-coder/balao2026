@@ -92,7 +92,7 @@ export default function CartPreview({ onClose }: { onClose?: () => void }) {
                 Ver Carrinho
              </Link>
              <Link 
-                href="/checkout" 
+                href="/cart" 
                 className="flex items-center justify-center px-4 py-2 bg-[#E60012] rounded text-white font-bold text-sm hover:bg-[#cc0010] shadow-md transition-all active:scale-95"
                 onClick={onClose}
              >
