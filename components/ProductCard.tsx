@@ -1,28 +1,31 @@
 "use client";
 
-import React from "react";
+import { useRef } from "react";
 import { Product } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import { ShoppingCart } from "lucide-react";
+import { animateAddToCart } from "@/lib/animations";
 
 export default function ProductCard({ product, variant = "grid" }: { product: Product, variant?: "grid" | "list" }) {
   const { addToCart } = useCart();
   const { showToast } = useToast();
+  const imageRef = useRef<HTMLDivElement>(null);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation if wrapped in Link
     addToCart(product);
     showToast("Adicionado ao carrinho!");
+    animateAddToCart(imageRef.current, product.image);
   };
 
   if (variant === "list") {
     return (
       <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-100 flex flex-col md:flex-row h-full group">
         <Link href={`/product/${product.id}`} className="flex-1 flex flex-col md:flex-row">
-          <div className="relative w-full md:w-32 pt-[100%] md:pt-0 md:h-auto md:min-h-[8rem] bg-gray-50 overflow-hidden shrink-0">
+          <div ref={imageRef} className="relative w-full md:w-32 pt-[100%] md:pt-0 md:h-auto md:min-h-[8rem] bg-gray-50 overflow-hidden shrink-0">
              <Image
                 src={product.image}
                 alt={product.name}
@@ -72,7 +75,7 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
   return (
     <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-100 flex flex-col h-full group">
       <Link href={`/product/${product.id}`} className="flex-1">
-        <div className="relative pt-[100%] bg-gray-50 overflow-hidden">
+        <div ref={imageRef} className="relative pt-[100%] bg-gray-50 overflow-hidden">
              <Image
                 src={product.image}
                 alt={product.name}

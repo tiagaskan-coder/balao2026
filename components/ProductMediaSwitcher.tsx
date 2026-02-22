@@ -26,7 +26,7 @@ export default function ProductMediaSwitcher({
           src={imageUrl}
           alt={productName}
           fill
-          className="object-contain"
+          className="object-contain product-main-image"
           priority
           unoptimized
         />
@@ -44,7 +44,7 @@ export default function ProductMediaSwitcher({
             src={imageUrl}
             alt={productName}
             fill
-            className="object-contain"
+            className="object-contain product-main-image"
             priority
             unoptimized
           />

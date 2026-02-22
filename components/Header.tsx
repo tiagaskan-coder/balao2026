@@ -211,7 +211,7 @@ export default function Header() {
             </div>
           </Link>
           
-          <Link href="/cart" className="relative group flex items-center gap-3 active:scale-95 transition-transform">
+          <Link href="/cart" id="cart-icon-container" className="relative group flex items-center gap-3 active:scale-95 transition-transform">
              <div className="p-2 bg-gray-100 rounded-full text-gray-600 group-hover:bg-[#E60012] group-hover:text-white transition-colors shadow-sm">
                 <ShoppingCart size={20} className="md:w-5 md:h-5" strokeWidth={2.5} />
              </div>

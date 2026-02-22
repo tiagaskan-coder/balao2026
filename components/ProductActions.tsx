@@ -5,17 +5,22 @@ import { useToast } from "@/context/ToastContext";
 import { Product } from "@/lib/utils";
 import { ShoppingCart } from "lucide-react";
 import { useState } from "react";
+import { animateAddToCart } from "@/lib/animations";
 
 export default function ProductActions({ product }: { product: Product }) {
   const { addToCart } = useCart();
   const { showToast } = useToast();
   const [added, setAdded] = useState(false);
 
-  const handleBuy = () => {
+  const handleBuy = (e: React.MouseEvent) => {
     addToCart(product);
     showToast("Adicionado ao carrinho!");
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
+
+    // Animation
+    const mainImage = document.querySelector('.product-main-image') as HTMLElement;
+    animateAddToCart(mainImage || (e.currentTarget as HTMLElement), product.image);
   };
 
   return (
