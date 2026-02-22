@@ -311,11 +311,25 @@ export default function RoletaPage() {
 
     localStorage.setItem('last_prize_id', selectedPrize.id.toString());
 
+    // CALCULO DE ROTAÇÃO PRECISO (para parar no MEIO da fatia)
     const sliceAngle = 360 / PRIZES.length;
     const prizeIndex = PRIZES.findIndex(p => p.id === selectedPrize.id);
-    const offsetInsideSlice = sliceAngle * 0.15;
-    const baseRotation = (360 * 8) - (prizeIndex * sliceAngle); 
-    const targetRotation = baseRotation - offsetInsideSlice + (Math.random() * (sliceAngle * 0.2)); 
+    
+    // O ponteiro está no topo (0 graus).
+    // A fatia N começa em (N * sliceAngle) e termina em ((N+1) * sliceAngle).
+    // O centro da fatia N é (N * sliceAngle) + (sliceAngle / 2).
+    // Para alinhar o centro da fatia N no topo, precisamos rotacionar -centro.
+    // Adicionamos voltas completas (360 * 8) para o efeito de giro.
+    
+    const centerOffset = (sliceAngle / 2); // Metade da fatia
+    const targetRotationBase = (360 * 8) - (prizeIndex * sliceAngle) - centerOffset;
+    
+    // Adicionar pequena variação aleatória segura (max +/- 20% da fatia) para não parecer robótico, 
+    // mas longe das bordas (que seriam +/- 50%).
+    const safeRandomRange = sliceAngle * 0.2; 
+    const randomOffset = (Math.random() * safeRandomRange * 2) - safeRandomRange;
+    
+    const targetRotation = targetRotationBase + randomOffset;
 
     gsap.to(wheelRef.current, {
       rotation: targetRotation,
@@ -424,22 +438,40 @@ export default function RoletaPage() {
 
           {step === 'roulette' && (
             <div className="text-center animate-fadeIn relative flex flex-col items-center">
-              {/* Marcador */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-6 z-30 w-0 h-0 border-l-[25px] border-l-transparent border-r-[25px] border-r-transparent border-t-[50px] border-t-white drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)] filter hue-rotate-15"></div>
-              
               {/* Roleta Gigante */}
               <div className="relative mb-12 transform transition-transform hover:scale-[1.02] duration-500">
+                {/* Indicador/Seta FIXO no topo */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-8 z-40 w-16 h-16 filter drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)]">
+                   <svg viewBox="0 0 100 100" className="w-full h-full fill-red-600 stroke-white stroke-2">
+                     <path d="M 50 100 L 20 20 L 80 20 Z" />
+                   </svg>
+                </div>
+
                 <div 
                   ref={wheelRef}
-                  // AUMENTO DE 100%: w-72 (288px) -> w-[576px] ~ w-[600px] responsivo
-                  className="w-[90vw] h-[90vw] max-w-[600px] max-h-[600px] rounded-full border-8 border-yellow-500 shadow-[0_0_20px_rgba(255,215,0,0.3)] overflow-hidden relative will-change-transform"
+                  className="w-[90vw] h-[90vw] max-w-[600px] max-h-[600px] rounded-full border-[12px] border-yellow-600 shadow-[0_0_30px_rgba(0,0,0,0.8)] overflow-hidden relative will-change-transform bg-slate-900"
                   style={{ 
+                    // Fundo base, mas as fatias serão desenhadas individualmente ou via conic
                     background: `conic-gradient(
                       ${PRIZES.map((p, i) => `${p.color} ${(i * 100) / PRIZES.length}% ${((i + 1) * 100) / PRIZES.length}%`).join(', ')}
                     )`,
-                    transform: 'rotate(0deg)'
                   }} 
                 >
+                  {/* Linhas Divisórias (Bordas entre prêmios) */}
+                  {PRIZES.map((_, i) => {
+                     const sliceAngle = 360 / PRIZES.length;
+                     const rotation = i * sliceAngle;
+                     return (
+                       <div
+                         key={`border-${i}`}
+                         className="absolute top-0 left-1/2 w-[4px] h-1/2 bg-white origin-bottom z-20" // Borda grossa branca
+                         style={{ 
+                           transform: `translateX(-50%) rotate(${rotation}deg)` 
+                         }}
+                       />
+                     );
+                  })}
+
                   {/* Itens da Roleta */}
                   {PRIZES.map((prize, index) => {
                     const sliceAngle = 360 / PRIZES.length;
@@ -447,25 +479,26 @@ export default function RoletaPage() {
                     return (
                       <div 
                         key={prize.id}
-                        className="absolute w-full h-full top-0 left-0 flex justify-center"
-                        style={{ transform: `rotate(${rotation}deg)` }}
+                        className="absolute w-full h-1/2 top-0 left-0 flex flex-col justify-start items-center pt-4 origin-bottom"
+                        style={{ 
+                          transform: `rotate(${rotation}deg)`,
+                          transformOrigin: 'bottom center' // Rotaciona a partir do centro da roleta
+                        }}
                       >
-                        <div className="flex flex-col items-center h-full pt-2 md:pt-4">
-                           {/* Texto na Borda (Topo) */}
-                           <span 
-                             className="text-[10px] sm:text-xs md:text-xl font-black text-white bg-black/60 px-2 py-0.5 md:px-3 md:py-1 rounded-full uppercase tracking-wider max-w-[120px] md:max-w-[140px] text-center leading-tight border border-white/10 mb-1 md:mb-2"
-                           >
+                         {/* Conteúdo da Fatia */}
+                         <div className="flex flex-col items-center justify-start h-full w-full max-w-[150px] md:max-w-[200px]">
+                           
+                           {/* Texto */}
+                           <span className="text-sm md:text-2xl font-black text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] uppercase tracking-wider mb-2 text-center leading-tight z-30">
                              {prize.text}
                            </span>
 
-                           {/* Imagem do Produto (Maior e abaixo do texto) */}
-                           <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-36 md:h-36 bg-white/10 rounded-xl md:rounded-2xl p-1 md:p-2 border border-white/20">
+                           {/* Imagem Gigante - ocupando espaço */}
+                           <div className="relative w-24 h-24 md:w-40 md:h-40 z-10 flex items-center justify-center">
                              <img 
                                src={prize.image} 
                                alt={prize.text}
-                               className="w-full h-full object-cover rounded-lg md:rounded-xl"
-                               loading="eager"
-                               decoding="sync"
+                               className="w-full h-full object-contain drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)] transform scale-125"
                              />
                            </div>
                         </div>
@@ -473,9 +506,11 @@ export default function RoletaPage() {
                     );
                   })}
 
-                  {/* Centro */}
-                  <div className="absolute top-1/2 left-1/2 w-20 h-20 md:w-32 md:h-32 bg-gradient-to-br from-yellow-400 to-yellow-700 rounded-full -translate-x-1/2 -translate-y-1/2 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] flex items-center justify-center z-20 border-8 border-black">
-                    <span className="text-4xl md:text-6xl filter drop-shadow-lg">🎰</span>
+                  {/* Centro da Roleta (Hub) */}
+                  <div className="absolute top-1/2 left-1/2 w-16 h-16 md:w-24 md:h-24 bg-gradient-to-b from-yellow-300 to-yellow-600 rounded-full -translate-x-1/2 -translate-y-1/2 shadow-[0_0_15px_rgba(0,0,0,0.5)] flex items-center justify-center z-50 border-4 border-white">
+                    <div className="w-3/4 h-3/4 bg-red-600 rounded-full flex items-center justify-center shadow-inner">
+                        <span className="text-white font-bold text-xs md:text-sm">BALÃO</span>
+                    </div>
                   </div>
                 </div>
               </div>
