@@ -554,13 +554,13 @@ export default function RoletaPage() {
 
                         {/* 2. CONTEÚDO DA FATIA (Texto) */}
                         <div 
-                          className="absolute w-full h-[50%] top-0 left-0 flex flex-col justify-start items-center pt-6 md:pt-10 origin-bottom z-30 pointer-events-none"
+                          className="absolute w-full h-[50%] top-0 left-0 flex flex-col justify-start items-center pt-4 md:pt-8 origin-bottom z-30 pointer-events-none"
                           style={{ 
                             transform: `rotate(${rotation}deg)`,
                             transformOrigin: 'bottom center' 
                           }}
                         >
-                           <span className="text-sm md:text-xl font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] uppercase tracking-wider text-center leading-none max-w-[30%] break-words shadow-black">
+                           <span className="text-[10px] sm:text-xs md:text-base font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] uppercase tracking-wider text-center leading-none max-w-[20%] break-words shadow-black">
                              {prize.text}
                            </span>
                         </div>
