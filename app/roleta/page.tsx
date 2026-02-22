@@ -454,6 +454,39 @@ export default function RoletaPage() {
                    </svg>
                 </div>
 
+                {/* MOLDURA DE LUZES (Anel Estático) */}
+                <div className="absolute inset-0 z-20 pointer-events-none rounded-full">
+                  {Array.from({ length: 36 }).map((_, i) => {
+                    const angle = (i / 36) * 2 * Math.PI;
+                    const radius = 49; // % do container (levemente para dentro da borda)
+                    const x = 50 + radius * Math.cos(angle);
+                    const y = 50 + radius * Math.sin(angle);
+                    const color = i % 2 === 0 ? '#ff0' : '#f0f'; // Amarelo e Rosa alternados
+                    const delay = i % 2 === 0 ? '0s' : '0.5s';
+                    
+                    return (
+                      <div
+                        key={`light-${i}`}
+                        className="absolute w-3 h-3 md:w-4 md:h-4 rounded-full shadow-[0_0_10px_currentColor] transition-opacity duration-300"
+                        style={{
+                          left: `${x}%`,
+                          top: `${y}%`,
+                          transform: 'translate(-50%, -50%)',
+                          backgroundColor: i % 3 === 0 ? '#ff0000' : (i % 3 === 1 ? '#00ff00' : '#ffff00'), // RGB Lights
+                          boxShadow: `0 0 8px ${i % 3 === 0 ? '#ff0000' : (i % 3 === 1 ? '#00ff00' : '#ffff00')}`,
+                          animation: `blinkLights 1s infinite alternate ${delay}`
+                        }}
+                      />
+                    );
+                  })}
+                  <style>{`
+                    @keyframes blinkLights {
+                      0% { opacity: 0.3; transform: translate(-50%, -50%) scale(0.8); }
+                      100% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+                    }
+                  `}</style>
+                </div>
+
                 <div 
                   ref={wheelRef}
                   className="w-[90vw] h-[90vw] max-w-[600px] max-h-[600px] rounded-full border-[12px] border-yellow-600 shadow-[0_0_30px_rgba(0,0,0,0.8)] overflow-hidden relative will-change-transform bg-slate-900"
