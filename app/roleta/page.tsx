@@ -514,16 +514,25 @@ export default function RoletaPage() {
 
                   {/* Itens da Roleta */}
                   {PRIZES.map((prize, index) => {
-                    const sliceAngle = 360 / PRIZES.length;
+                    const numPrizes = PRIZES.length;
+                    const sliceAngle = 360 / numPrizes;
                     const rotation = sliceAngle * index + (sliceAngle / 2);
+                    
+                    // Cálculo preciso da largura da fatia baseado no número de prêmios
+                    const halfAngle = 180 / numPrizes;
+                    const tanVal = Math.tan(halfAngle * Math.PI / 180);
+                    // Largura % do diâmetro = tan(halfAngle) * 100
+                    // Adicionamos 0.5% extra para evitar linhas brancas entre fatias
+                    const widthPercent = (tanVal * 100) + 0.5;
+                    
                     return (
                       <div key={prize.id} className="absolute inset-0">
                         {/* 1. BACKGROUND DA FATIA (Imagem Triangular) */}
                         <div 
                           className="absolute top-0 left-1/2 h-[50%] z-10 origin-bottom overflow-hidden"
                           style={{ 
-                            width: '42%', // ~ tan(22.5) * 2 * 50% = 41.4%
-                            marginLeft: '-21%', // Centralizar
+                            width: `${widthPercent}%`, 
+                            marginLeft: `-${widthPercent / 2}%`, 
                             transform: `rotate(${rotation}deg)`,
                             transformOrigin: 'bottom center',
                             clipPath: 'polygon(0 0, 100% 0, 50% 100%)', // Formato Triangular
