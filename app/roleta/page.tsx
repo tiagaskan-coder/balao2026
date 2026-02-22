@@ -479,26 +479,27 @@ export default function RoletaPage() {
                     return (
                       <div 
                         key={prize.id}
-                        className="absolute w-full h-1/2 top-0 left-0 flex flex-col justify-start items-center pt-4 origin-bottom"
+                        className="absolute w-full h-[50%] top-0 left-0 flex flex-col justify-start items-center pt-2 md:pt-4 origin-bottom z-30 pointer-events-none"
                         style={{ 
                           transform: `rotate(${rotation}deg)`,
                           transformOrigin: 'bottom center' // Rotaciona a partir do centro da roleta
                         }}
                       >
-                         {/* Conteúdo da Fatia */}
-                         <div className="flex flex-col items-center justify-start h-full w-full max-w-[150px] md:max-w-[200px]">
+                         {/* Conteúdo da Fatia - Container restrito */}
+                         {/* A largura máxima deve diminuir conforme nos aproximamos do centro para não vazar */}
+                         <div className="flex flex-col items-center justify-start h-full w-full max-w-[40%]">
                            
-                           {/* Texto */}
-                           <span className="text-sm md:text-2xl font-black text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] uppercase tracking-wider mb-2 text-center leading-tight z-30">
+                           {/* Texto - No topo (borda externa) */}
+                           <span className="text-xs sm:text-sm md:text-xl font-black text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] uppercase tracking-wider mb-1 md:mb-2 text-center leading-none z-30 break-words w-full">
                              {prize.text}
                            </span>
 
-                           {/* Imagem Gigante - ocupando espaço */}
-                           <div className="relative w-24 h-24 md:w-40 md:h-40 z-10 flex items-center justify-center">
+                           {/* Imagem - Logo abaixo, ocupando o espaço restante mas respeitando as laterais */}
+                           <div className="relative w-full aspect-square max-w-[80px] md:max-w-[140px] flex items-center justify-center p-1">
                              <img 
                                src={prize.image} 
                                alt={prize.text}
-                               className="w-full h-full object-contain drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)] transform scale-125"
+                               className="w-full h-full object-contain drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)] transform scale-110"
                              />
                            </div>
                         </div>
