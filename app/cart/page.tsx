@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import { useCart } from "@/context/CartContext";
 import { Trash2, Minus, Plus, ArrowRight, ShoppingBag, Truck, CreditCard, User, Check, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import ApplyCoupon from "@/components/ApplyCoupon";
@@ -458,6 +459,41 @@ export default function CartPage() {
                     </h3>
                     
                     <div className="mb-6">
+                        <h4 className="text-sm font-medium text-gray-500 mb-3">Itens no carrinho</h4>
+                        <div className="max-h-60 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+                            {items.map((item) => (
+                                <div key={item.id} className="flex gap-3 items-center group">
+                                    <div className="relative w-12 h-12 bg-white rounded border border-gray-200 shrink-0 overflow-hidden">
+                                        <Image 
+                                            src={item.image} 
+                                            alt={item.name} 
+                                            fill 
+                                            className="object-contain p-1 group-hover:scale-110 transition-transform" 
+                                            sizes="48px"
+                                        />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-xs font-medium text-gray-800 line-clamp-2 leading-tight mb-1" title={item.name}>
+                                            {item.name}
+                                        </p>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-xs text-gray-500">Qtd: {item.quantity}</span>
+                                            <span className="text-xs font-bold text-[#E60012]">{item.price}</span>
+                                        </div>
+                                    </div>
+                                    <button 
+                                        onClick={() => removeFromCart(item.id)}
+                                        className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                                        title="Remover item"
+                                    >
+                                        <Trash2 size={14} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="mb-6 border-t pt-4">
                         <ApplyCoupon cartTotal={cartTotal} items={items} onApply={handleApplyCoupon} />
                     </div>
 
