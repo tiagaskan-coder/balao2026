@@ -8,7 +8,7 @@ import confetti from 'canvas-confetti';
 // --- CONFIGURAÇÃO DOS PRÊMIOS ---
 // Imagens reais baixadas localmente
 const PRIZES = [
-    { id: 1, text: 'Fone com Fio', color: '#FF0055', type: 'win', probability: 0.3, image: '/images/prizes/headset.jpg' },
+  { id: 1, text: 'Fone com Fio', color: '#FF0055', type: 'win', probability: 0.15, image: '/images/prizes/headset.jpg' },
   { 
     id: 2, 
     text: 'PC Gamer', 
@@ -22,7 +22,7 @@ const PRIZES = [
     text: 'Cabo USB', 
     color: '#CCFF00', 
     type: 'win', 
-    probability: 0.3, 
+    probability: 0.15, 
     image: '/images/prizes/usb.jpg' 
   },
   { 
@@ -33,8 +33,8 @@ const PRIZES = [
     probability: 0, 
     image: '/images/prizes/ps5.jpg' 
   },
-  { id: 5, text: '5% OFF', color: '#FF9900', type: 'win', probability: 0.4, image: '/images/prizes/discount5.jpg' },
-    { id: 6, text: '10% OFF', color: '#0099FF', type: 'loss', probability: 0, image: '/images/prizes/discount10.jpg' },
+  { id: 5, text: '5% OFF', color: '#FF9900', type: 'win', probability: 0.2, image: '/images/prizes/discount5.jpg' },
+  { id: 6, text: '10% OFF', color: '#0099FF', type: 'loss', probability: 0, image: '/images/prizes/discount10.jpg' },
   { 
     id: 7, 
     text: 'Mão de Obra', 
@@ -43,6 +43,11 @@ const PRIZES = [
     probability: 0, 
     image: '/images/prizes/repair.png' 
   },
+  // NOVOS PRÊMIOS
+  { id: 8, text: 'Tente de Novo', color: '#FF3333', type: 'loss_message', probability: 0.2, image: '/images/prizes/repair.png' }, // Reutilizando repair como "tentar consertar"
+  { id: 9, text: 'Não foi dessa vez', color: '#888888', type: 'loss_message', probability: 0.2, image: '/images/prizes/repair.png' },
+  { id: 10, text: 'R$ 10,00 Pix', color: '#00CC66', type: 'win', probability: 0.05, image: '/images/prizes/discount10.jpg' }, // Reutilizando img de 10%
+  { id: 11, text: 'R$ 5,00 Pix', color: '#00FF99', type: 'win', probability: 0.05, image: '/images/prizes/discount5.jpg' }, // Reutilizando img de 5%
 ];
 
 const WINNING_PRIZES = PRIZES.filter(p => p.probability > 0);
@@ -350,14 +355,16 @@ export default function RoletaPage() {
       },
       onComplete: () => {
         SoundManager.stopSpinSound();
-        SoundManager.playWin();
         
-        const colors = [selectedPrize.color, '#ffffff', '#ffd700'];
-        confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 }, colors: colors, disableForReducedMotion: true });
-        setTimeout(() => {
-            confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0 }, colors: colors });
-            confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1 }, colors: colors });
-        }, 300);
+        if (selectedPrize.type === 'win') {
+           SoundManager.playWin();
+           const colors = [selectedPrize.color, '#ffffff', '#ffd700'];
+           confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 }, colors: colors, disableForReducedMotion: true });
+           setTimeout(() => {
+               confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0 }, colors: colors });
+               confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1 }, colors: colors });
+           }, 300);
+        }
         
         setResult(selectedPrize);
         setTimeout(() => setStep('result'), 1500);
@@ -527,10 +534,12 @@ export default function RoletaPage() {
 
           {step === 'result' && result && (
             <div className="text-center animate-scaleIn">
-              <h2 className="text-4xl md:text-5xl font-black text-yellow-400 mb-4 drop-shadow-lg">PARABÉNS! 🎉</h2>
+              <h2 className={`text-4xl md:text-5xl font-black mb-4 drop-shadow-lg ${result.type === 'win' ? 'text-yellow-400' : 'text-slate-400'}`}>
+                {result.type === 'win' ? 'PARABÉNS! 🎉' : 'QUE PENA! 😢'}
+              </h2>
               
-              <div className="bg-gradient-to-br from-slate-800 to-black p-10 rounded-3xl border-4 border-yellow-500 shadow-[0_0_60px_rgba(255,215,0,0.4)] mb-8 relative overflow-hidden group max-w-lg mx-auto">
-                <div className="absolute inset-0 bg-yellow-500/10 animate-pulse"></div>
+              <div className={`bg-gradient-to-br p-10 rounded-3xl border-4 shadow-[0_0_60px_rgba(255,215,0,0.4)] mb-8 relative overflow-hidden group max-w-lg mx-auto ${result.type === 'win' ? 'from-slate-800 to-black border-yellow-500' : 'from-slate-800 to-slate-900 border-slate-600 grayscale'}`}>
+                <div className={`absolute inset-0 animate-pulse ${result.type === 'win' ? 'bg-yellow-500/10' : 'bg-red-500/5'}`}></div>
                 
                 <img 
                   src={result.image} 
@@ -538,13 +547,13 @@ export default function RoletaPage() {
                   className="w-48 h-48 md:w-64 md:h-64 object-contain mx-auto mb-6 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] transform group-hover:scale-110 transition-transform duration-500"
                 />
                 
-                <h3 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-500 uppercase tracking-widest relative z-10">
+                <h3 className={`text-4xl md:text-5xl font-black text-transparent bg-clip-text uppercase tracking-widest relative z-10 ${result.type === 'win' ? 'bg-gradient-to-r from-yellow-300 to-orange-500' : 'bg-gradient-to-r from-slate-400 to-slate-200'}`}>
                   {result.text}
                 </h3>
               </div>
 
               <p className="text-slate-400 mb-8 text-lg">
-                Tire um print desta tela e mostre ao vendedor!
+                {result.type === 'win' ? 'Tire um print desta tela e mostre ao vendedor!' : 'Não desanime! Tente novamente em breve.'}
               </p>
 
               <button 
