@@ -3,7 +3,14 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Segurança e Privacidade | Balão da Informática",
-  description: "Política de privacidade, LGPD e certificados de segurança do Balão da Informática.",
+  description:
+    "Política de privacidade, LGPD e certificados de segurança do Balão da Informática para compras online em todo o Brasil com foco em clientes de Campinas e região.",
+  keywords: [
+    "segurança loja de informática",
+    "privacidade balão da informática",
+    "compras seguras online",
+    "lgpd ecommerce",
+  ],
 };
 
 import { ShieldCheck, Lock, CreditCard } from "lucide-react";

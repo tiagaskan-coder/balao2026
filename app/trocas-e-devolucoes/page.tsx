@@ -3,7 +3,14 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Trocas e Devoluções | Balão da Informática",
-  description: "Política de trocas, devoluções e garantias do Balão da Informática.",
+  description:
+    "Política de trocas, devoluções e garantias do Balão da Informática para clientes de Campinas, região metropolitana e todo o Brasil.",
+  keywords: [
+    "trocas e devoluções",
+    "garantia loja de informática",
+    "balão da informática trocas",
+    "compras online campinas",
+  ],
 };
 
 import { RefreshCcw, AlertTriangle, CheckCircle } from "lucide-react";

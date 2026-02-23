@@ -3,7 +3,14 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Como Comprar | Balão da Informática",
-  description: "Guia passo a passo para comprar com segurança no Balão da Informática.",
+  description:
+    "Guia passo a passo para comprar com segurança no Balão da Informática, loja de informática online com entrega rápida para Campinas e região e envio para todo o Brasil.",
+  keywords: [
+    "como comprar online",
+    "como comprar balão da informática",
+    "loja de informática online",
+    "comprar computador campinas",
+  ],
 };
 
 import Link from "next/link";

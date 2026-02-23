@@ -8,13 +8,20 @@ import HeroCTA from "@/components/HeroCTA";
 import { Laptop2, ShieldCheck, BadgeCheck, Truck, Award, CheckCircle2 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Notebooks Seminovos em Campinas | Balão da Informática",
+  title: "Notebooks Seminovos em Campinas com Entrega Rápida | Balão da Informática",
   description:
-    "Notebooks usados e seminovos com garantia de 6 meses em Campinas. Estoque real, Windows 11 + Office 2021 Trial instalados e equipamentos testados.",
+    "Notebooks usados e seminovos com garantia de 6 meses em Campinas, estoque real e entrega rápida para Campinas, Sumaré, Hortolândia, Paulínia, Valinhos e Vinhedo, com envio para todo o Brasil.",
+  keywords: [
+    "notebook seminovo campinas",
+    "notebook usado campinas",
+    "notebook barato campinas",
+    "notebook seminovo brasil",
+    "entrega rápida notebook campinas",
+  ],
   openGraph: {
-    title: "Notebooks Seminovos em Campinas | Balão da Informática",
+    title: "Notebooks Seminovos em Campinas com Entrega Rápida | Balão da Informática",
     description:
-      "Compre notebooks usados com garantia em Campinas. Estoque real, equipamentos testados e prontos para uso.",
+      "Compre notebooks usados e seminovos com garantia em Campinas, estoque atualizado e entrega rápida para Campinas e região metropolitana.",
     type: "website",
   },
 };

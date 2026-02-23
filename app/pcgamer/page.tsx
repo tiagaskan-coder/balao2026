@@ -22,13 +22,20 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "PC Gamer em Campinas | Balão da Informática",
+  title: "PC Gamer em Campinas com Entrega Rápida | Balão da Informática",
   description:
-    "PC Gamer de alta performance em Campinas. Montagem profissional, setups personalizados e garantia local. Processadores Intel/AMD e Placas RTX.",
+    "PC Gamer de alta performance em Campinas com montagem profissional, setups personalizados, garantia local e entrega rápida para Campinas, região metropolitana e envio para todo o Brasil.",
+  keywords: [
+    "pc gamer campinas",
+    "pc gamer brasil",
+    "computador gamer campinas",
+    "pc gamer montagem profissional",
+    "pc gamer entrega rápida campinas",
+  ],
   openGraph: {
-    title: "PC Gamer em Campinas | Balão da Informática",
+    title: "PC Gamer em Campinas com Entrega Rápida | Balão da Informática",
     description:
-      "PC Gamer de alta performance. Montagem profissional, setups personalizados e garantia local.",
+      "PC Gamer de alta performance com montagem profissional, garantia local e entrega rápida em Campinas e região.",
     type: "website",
   },
 };

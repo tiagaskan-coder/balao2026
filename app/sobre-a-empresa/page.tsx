@@ -3,7 +3,14 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Sobre a Empresa | Balão da Informática",
-  description: "Dados corporativos, estrutura logística e lojas do Balão da Informática.",
+  description:
+    "Dados corporativos, estrutura logística e lojas do Balão da Informática, referência nacional em informática com entrega rápida para Campinas e região.",
+  keywords: [
+    "empresa balão da informática",
+    "loja de informática brasil",
+    "estrutura logística campinas",
+    "entrega rápida informática",
+  ],
 };
 
 export default function SobreAEmpresaPage() {

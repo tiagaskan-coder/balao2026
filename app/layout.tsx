@@ -24,11 +24,28 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Balão da Informática Campinas",
-    default: "Balão da Informática | Loja de Informática em Campinas e Região",
+    template: "%s | Balão da Informática",
+    default:
+      "Balão da Informática | Loja de Informática com Entrega Rápida em Campinas e Região",
   },
-  description: "A melhor loja de informática em Campinas e região. Encontre PCs Gamer, Notebooks, Placas de Vídeo, Hardware e Periféricos com o melhor preço. Entregas em Sumaré, Hortolândia, Paulínia, Valinhos e Vinhedo.",
-  keywords: ["informatica campinas", "loja de informatica campinas", "pc gamer campinas", "peças de pc campinas", "notebook campinas", "hardware campinas", "sumare", "hortolandia", "paulinia", "valinhos", "vinhedo"],
+  description:
+    "Loja de informática completa com entrega rápida para Campinas, Sumaré, Hortolândia, Paulínia, Valinhos, Vinhedo e todo o Brasil. PCs Gamer, notebooks, hardware, periféricos e assistência técnica especializada.",
+  keywords: [
+    "loja de informática",
+    "loja de informática online",
+    "informática campinas",
+    "pc gamer campinas",
+    "pc gamer brasil",
+    "computador completo",
+    "notebook campinas",
+    "hardware campinas",
+    "loja de computadores",
+    "entrega rápida campinas",
+    "entrega rápida região metropolitana de campinas",
+    "entrega para todo brasil",
+    "assistência técnica informática campinas",
+    "balão da informática",
+  ],
   authors: [{ name: "Balão da Informática" }],
   creator: "Balão da Informática",
   publisher: "Balão da Informática",
@@ -36,28 +53,33 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  alternates: {
+    canonical: "https://www.balao.info",
+  },
   openGraph: {
     type: "website",
     locale: "pt_BR",
-    url: "https://www.balaodainformatica.com.br",
-    title: "Balão da Informática | Loja de Informática em Campinas e Região",
-    description: "Hardware de alta performance, PCs Gamer e assistência técnica em Campinas. As melhores marcas e preços da RMC.",
+    url: "https://www.balao.info",
+    title:
+      "Balão da Informática | Loja de Informática com Entrega Rápida em Campinas e Região",
+    description:
+      "Loja de informática em Campinas com foco em PCs Gamer, notebooks e hardware, entrega rápida na região de Campinas e envio para todo o Brasil.",
     siteName: "Balão da Informática",
   },
 };
 
 const jsonLd = {
   "@context": "https://schema.org",
-  "@type": "ComputerStore",
+  "@type": "Store",
   "name": "Balão da Informática",
-  "image": "https://www.balaodainformatica.com.br/logo.png",
-  "description": "Loja de informática em Campinas especializada em hardware, PC Gamer e periféricos.",
+  "image": "https://www.balao.info/logo.png",
+  "description": "Loja de informática em Campinas especializada em computadores, PC Gamer, notebooks, hardware e periféricos, com entrega rápida para Campinas e região.",
   "address": {
     "@type": "PostalAddress",
-    "streetAddress": "Av. Brasil, 1234",
+    "streetAddress": "Avenida Anchieta, 789, Cambuí",
     "addressLocality": "Campinas",
     "addressRegion": "SP",
-    "postalCode": "13000-000",
+    "postalCode": "13025-000",
     "addressCountry": "BR"
   },
   "geo": {
@@ -65,8 +87,9 @@ const jsonLd = {
     "latitude": -22.9099,
     "longitude": -47.0626
   },
-  "url": "https://www.balaodainformatica.com.br",
-  "telephone": "+551930000000",
+  "url": "https://www.balao.info",
+  "telephone": "+55 19 3255-1661",
+  "email": "balaocastelo@balaodainformatica.com.br",
   "openingHoursSpecification": [
     {
       "@type": "OpeningHoursSpecification",
@@ -87,7 +110,37 @@ const jsonLd = {
       "closes": "13:00"
     }
   ],
-  "priceRange": "$$"
+  "priceRange": "$$",
+  "areaServed": [
+    "Campinas",
+    "Sumaré",
+    "Hortolândia",
+    "Paulínia",
+    "Valinhos",
+    "Vinhedo",
+    "Brasil"
+  ],
+  "makesOffer": {
+    "@type": "OfferCatalog",
+    "name": "Informática e Tecnologia",
+    "itemListElement": [
+      {
+        "@type": "Offer",
+        "name": "PC Gamer",
+        "category": "Computadores"
+      },
+      {
+        "@type": "Offer",
+        "name": "Notebooks",
+        "category": "Informática"
+      },
+      {
+        "@type": "Offer",
+        "name": "Periféricos e Acessórios",
+        "category": "Informática"
+      }
+    ]
+  }
 };
 
 export default async function RootLayout({

@@ -3,7 +3,15 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Envio e Entrega | Balão da Informática",
-  description: "Informações sobre frete, prazos e formas de entrega do Balão da Informática.",
+  description:
+    "Informações sobre frete, prazos e formas de entrega do Balão da Informática, com foco em entrega rápida para Campinas e região e envio para todo o Brasil.",
+  keywords: [
+    "envio e entrega",
+    "frete loja de informática",
+    "entrega rápida campinas",
+    "entrega para todo o brasil",
+    "retirada em loja campinas",
+  ],
 };
 
 import { Truck, Clock, MapPin } from "lucide-react";
