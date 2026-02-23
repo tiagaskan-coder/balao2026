@@ -295,6 +295,7 @@ export default function RoletaPage() {
   const [result, setResult] = useState<typeof PRIZES[0] | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(100);
+  const [leverPulled, setLeverPulled] = useState(false);
   
   const wheelRef = useRef<HTMLDivElement>(null);
 
@@ -423,6 +424,15 @@ export default function RoletaPage() {
     });
   };
 
+  const handleLeverClick = (e: React.MouseEvent) => {
+    if (leverPulled) return;
+    setLeverPulled(true);
+    spinWheel(e);
+    setTimeout(() => {
+      setLeverPulled(false);
+    }, 400);
+  };
+
   return (
     <div className="min-h-screen bg-black text-white font-sans overflow-x-hidden flex flex-col items-center justify-center p-4 relative"
          style={{ background: 'radial-gradient(circle at center, #1a1a2e 0%, #000000 100%)' }}>
@@ -535,6 +545,11 @@ export default function RoletaPage() {
                       0% { opacity: 0.3; transform: translate(-50%, -50%) scale(0.8); }
                       100% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
                     }
+                    @keyframes leverPull {
+                      0% { transform: translateY(0); }
+                      40% { transform: translateY(12px); }
+                      100% { transform: translateY(0); }
+                    }
                   `}</style>
                 </div>
 
@@ -638,6 +653,21 @@ export default function RoletaPage() {
                     <div className="w-3/4 h-3/4 bg-red-600 rounded-full flex items-center justify-center shadow-inner">
                         <span className="text-white font-bold text-xs md:text-sm">BALÃO</span>
                     </div>
+                  </div>
+                </div>
+                
+                <div className="absolute -right-16 top-1/2 -translate-y-1/2 flex flex-col items-center z-30">
+                  <div
+                    className="flex flex-col items-center"
+                    style={leverPulled ? { animation: 'leverPull 0.4s ease-out' } : {}}
+                  >
+                    <div className="w-3 h-24 md:w-4 md:h-28 bg-gradient-to-b from-slate-200 to-slate-700 rounded-full border border-slate-500 shadow-lg" />
+                    <button
+                      onClick={handleLeverClick}
+                      className="mt-2 w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-b from-red-500 to-red-700 border-2 border-yellow-300 shadow-[0_0_20px_rgba(255,0,0,0.6)] flex items-center justify-center text-[10px] md:text-xs font-black text-white active:scale-95"
+                    >
+                      PUXAR
+                    </button>
                   </div>
                 </div>
               </div>
