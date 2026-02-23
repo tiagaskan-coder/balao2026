@@ -20,6 +20,7 @@ export default function AdminLayout({
     { name: "Blocos da Home", href: "/admin/home-blocks", icon: Layout },
     { name: "Marketing & E-mail", href: "/admin/marketing", icon: Mail },
     { name: "Cupons", href: "/admin/cupons", icon: Settings },
+    { name: "Barra (TopBar)", href: "/admin/barra", icon: Layout },
   ];
 
   return (
