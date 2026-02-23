@@ -296,6 +296,7 @@ export default function RoletaPage() {
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(100);
   const [leverPulled, setLeverPulled] = useState(false);
+  const [isSpinning, setIsSpinning] = useState(false);
   
   const wheelRef = useRef<HTMLDivElement>(null);
 
@@ -335,6 +336,8 @@ export default function RoletaPage() {
 
   const spinWheel = (e: React.MouseEvent) => {
     if (!wheelRef.current) return;
+    if (isSpinning) return;
+    setIsSpinning(true);
     
     // Iniciar som contínuo
     SoundManager.startSpinSound();
@@ -407,6 +410,7 @@ export default function RoletaPage() {
       },
       onComplete: () => {
         SoundManager.stopSpinSound();
+        setIsSpinning(false);
         
         if (selectedPrize.type === 'win') {
            SoundManager.playWin();
@@ -425,7 +429,7 @@ export default function RoletaPage() {
   };
 
   const handleLeverClick = (e: React.MouseEvent) => {
-    if (leverPulled) return;
+    if (leverPulled || isSpinning) return;
     setLeverPulled(true);
     spinWheel(e);
     setTimeout(() => {
@@ -506,7 +510,15 @@ export default function RoletaPage() {
 
           {step === 'roulette' && (
             <div className="text-center animate-fadeIn relative flex flex-col items-center">
-              {/* Roleta Gigante */}
+              {!isMuted && !isSpinning && (
+                <div className="absolute opacity-0 pointer-events-none w-0 h-0">
+                  <iframe
+                    src="https://www.youtube.com/embed/pct1uEhAqBQ?start=12&autoplay=1&loop=1&playlist=pct1uEhAqBQ&controls=0&modestbranding=1"
+                    title="Circus music"
+                    allow="autoplay; encrypted-media"
+                  />
+                </div>
+              )}
               <div className="relative mb-12 transform transition-transform hover:scale-[1.02] duration-500">
                 {/* Indicador/Seta FIXO no topo */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-8 z-40 w-16 h-16 filter drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)]">
@@ -555,7 +567,7 @@ export default function RoletaPage() {
 
                 <div 
                   ref={wheelRef}
-                  className="w-[90vw] h-[90vw] max-w-[600px] max-h-[600px] rounded-full border-[12px] border-yellow-600 shadow-[0_0_30px_rgba(0,0,0,0.8)] overflow-hidden relative will-change-transform bg-slate-900"
+                  className="w-[90vw] h-[90vw] max-w-[780px] max-h-[780px] rounded-full border-[12px] border-yellow-600 shadow-[0_0_30px_rgba(0,0,0,0.8)] overflow-hidden relative will-change-transform bg-slate-900"
                   style={{ 
                     // Fundo base, mas as fatias serão desenhadas individualmente ou via conic
                     background: `conic-gradient(
