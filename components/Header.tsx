@@ -12,6 +12,7 @@ import { useSidebar } from "@/context/SidebarContext";
 import { Product } from "@/lib/utils";
 import SearchPreview from "@/components/SearchPreview";
 import CartPreview from "@/components/CartPreview";
+import TopBar from "@/components/TopBar";
 
 export default function Header() {
   const router = useRouter();
@@ -135,7 +136,8 @@ export default function Header() {
   const previewProducts = products;
 
   return (
-    <header className="bg-white border-b-4 border-[#E60012] sticky top-0 z-[900] shadow-md">
+    <header className="bg-white border-b-4 border-[#E60012] sticky top-0 z-[900] shadow-md flex flex-col">
+      <TopBar />
       <div className="container mx-auto px-4 py-4 flex items-center justify-between gap-4">
         
         {/* Mobile Menu Button - Optimized for Touch */}
