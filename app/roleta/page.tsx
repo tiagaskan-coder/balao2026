@@ -532,10 +532,10 @@ export default function RoletaPage() {
                 </div>
 
                 {/* MOLDURA DE LUZES (Anel Estático) */}
-                <div className="absolute inset-0 z-20 pointer-events-none rounded-full">
+                <div className="absolute inset-[18px] md:inset-[20px] z-20 pointer-events-none rounded-full">
                   {Array.from({ length: 36 }).map((_, i) => {
                     const angle = (i / 36) * 2 * Math.PI;
-                    const radius = 49; // % do container (levemente para dentro da borda)
+                    const radius = 46; // % do container (ajustado p/ caber no mobile)
                     const x = 50 + radius * Math.cos(angle);
                     const y = 50 + radius * Math.sin(angle);
                     const color = i % 2 === 0 ? '#ff0' : '#f0f'; // Amarelo e Rosa alternados
