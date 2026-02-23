@@ -18,7 +18,11 @@ import {
   Wifi,
   Database,
   Search,
-  ArrowRight
+  ArrowRight,
+  Droplets,
+  Tablet,
+  Recycle,
+  Clock
 } from 'lucide-react'
 
 export const metadata: Metadata = {
@@ -83,6 +87,38 @@ const FEATURED_SERVICES = [
     description: "Aumente a vida útil do seu equipamento. Limpeza interna completa, troca de pasta térmica de alta condutividade e higienização externa.",
     icon: Wrench,
     details: ["Pasta térmica Silver/Gold", "Limpeza de contatos", "Desoxidação", "Lubrificação de fans"]
+  },
+  // Novos Blocos
+  {
+    title: "Reparo de Placa de iPhone",
+    description: "Laboratório especializado em microeletrônica Apple. Recuperamos aparelhos condenados por outras assistências.",
+    icon: Smartphone,
+    details: ["Erro de Baseband", "Curto na placa", "Falha de áudio (Codec)", "Problemas de carga (Tristar)"],
+    image: "/images/prizes/repair.png" // Using existing repair image as placeholder/actual
+  },
+  {
+    title: "Desoxidação (Banho Químico)",
+    description: "Seu aparelho caiu na água? Traga imediatamente! Realizamos desoxidação completa com ultrassom e produtos específicos.",
+    icon: Droplets,
+    details: ["Banho Ultrassônico", "Tratamento anticorrosivo", "Secagem em estufa", "Análise microscópica"]
+  },
+  {
+    title: "Manutenção de Tablet e iPad",
+    description: "Troca de vidros, telas, baterias e conectores de carga para toda a linha iPad e Tablets Samsung/Lenovo.",
+    icon: Tablet,
+    details: ["Troca de Vidro Touch", "Troca de Display LCD", "Baterias Originais", "Conectores de Carga"]
+  },
+  {
+    title: "Peças Seminovas (Economia)",
+    description: "Opção inteligente para baratear seu orçamento. Peças originais retiradas de outros equipamentos, testadas e com garantia.",
+    icon: Recycle,
+    details: ["Placas-mãe originais", "Processadores OEM", "Memórias RAM", "Telas originais"]
+  },
+  {
+    title: "Serviço Express (60 min)",
+    description: "Não pode ficar sem o equipamento? Agende nosso serviço express e tenha seu reparo pronto em até 1 hora (consulte disponibilidade).",
+    icon: Clock,
+    details: ["Troca de Tela iPhone", "Troca de Bateria", "Formatação Express", "Limpeza Simples"]
   }
 ]
 
@@ -235,7 +271,7 @@ export default async function Page() {
                   <div className="relative h-[400px] lg:h-[600px] bg-zinc-50 flex items-center justify-center p-12 overflow-hidden group-hover:bg-red-50/30 transition-colors duration-500">
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-zinc-50 to-zinc-100 opacity-80" />
                     {product?.image ? (
-                      <div className="relative w-full h-full transition-transform duration-700 group-hover:scale-110 group-hover:-rotate-2">
+                      <div className="relative w-full h-full">
                         <Image
                           src={product.image}
                           alt={product.name}
@@ -343,10 +379,24 @@ export default async function Page() {
           {/* Featured Services Blocks - Large & Detailed */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
             {FEATURED_SERVICES.map((service, idx) => (
-               <div key={idx} className="bg-zinc-800/50 backdrop-blur-sm p-8 rounded-3xl border border-zinc-700/50 hover:border-red-600/50 hover:bg-zinc-800 transition-all group">
-                 <div className="w-16 h-16 bg-zinc-900 rounded-2xl flex items-center justify-center mb-6 text-red-600 group-hover:scale-110 group-hover:bg-red-600 group-hover:text-white transition-all shadow-lg border border-zinc-700">
-                   <service.icon className="w-8 h-8" />
-                 </div>
+               <div key={idx} className="bg-zinc-800/50 backdrop-blur-sm p-8 rounded-3xl border border-zinc-700/50 hover:border-red-600/50 hover:bg-zinc-800 transition-all group overflow-hidden relative">
+                 {service.image ? (
+                   <div className="relative w-full h-48 mb-6 rounded-2xl overflow-hidden border border-zinc-700 group-hover:shadow-red-900/20 shadow-lg transition-all">
+                      <Image
+                        src={service.image}
+                        alt={service.title}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
+                      <div className="absolute top-3 right-3 bg-zinc-900/90 backdrop-blur p-2 rounded-lg border border-zinc-700 shadow-xl z-10">
+                         <service.icon className="w-6 h-6 text-red-600" />
+                      </div>
+                   </div>
+                 ) : (
+                   <div className="w-16 h-16 bg-zinc-900 rounded-2xl flex items-center justify-center mb-6 text-red-600 group-hover:scale-110 group-hover:bg-red-600 group-hover:text-white transition-all shadow-lg border border-zinc-700">
+                     <service.icon className="w-8 h-8" />
+                   </div>
+                 )}
                  <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-red-500 transition-colors">{service.title}</h3>
                  <p className="text-zinc-400 mb-6 leading-relaxed">
                    {service.description}
