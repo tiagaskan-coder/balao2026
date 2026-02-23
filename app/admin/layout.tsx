@@ -21,6 +21,7 @@ export default function AdminLayout({
     { name: "Marketing & E-mail", href: "/admin/marketing", icon: Mail },
     { name: "Cupons", href: "/admin/cupons", icon: Settings },
     { name: "Barra (TopBar)", href: "/admin/barra", icon: Layout },
+    { name: "Fechamento", href: "https://www.balao.info/fechamento", icon: CheckCircle },
   ];
 
   return (
