@@ -132,21 +132,22 @@ const maisDe50Servicos = [
 
 export default function Page() {
   return (
-    <main className="min-h-screen bg-white text-black">
-      <section className="w-full bg-red-600 text-white">
-        <div className="mx-auto max-w-7xl px-4 py-16 md:py-24">
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">
+    <main className="min-h-screen bg-black text-white">
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_#0b1220_0%,_#000_70%)]" />
+        <div className="relative mx-auto max-w-6xl px-4 py-16 md:py-24">
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-cyan-300 drop-shadow-[0_0_20px_rgba(0,255,255,0.35)]">
             Serviços e Ofertas
           </h1>
-          <p className="mt-4 text-xl md:text-2xl max-w-3xl">
-            Performance, transparência e garantia em Campinas e região. Seu computador novo de novo, com preço justo.
+          <p className="mt-4 text-lg md:text-2xl text-slate-300 max-w-3xl">
+            Tudo para o seu computador com preço justo, transparência e garantia. Especialistas em manutenção, upgrades e implantação para uso pessoal e corporativo em Campinas e região.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             {heroCtas.map((c) => (
               <Link
                 key={c.label}
                 href={c.href}
-                className="px-6 py-3 rounded-xl bg-white text-red-700 hover:bg-red-50 font-bold"
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold shadow-[0_0_20px_rgba(0,255,255,0.25)]"
               >
                 {c.label}
               </Link>
@@ -155,184 +156,110 @@ export default function Page() {
         </div>
       </section>
 
-      <section className="w-full">
-        {principaisServicos.map((s, idx) => (
-          <div
-            key={s.titulo}
-            className={`${idx % 2 === 0 ? 'bg-white text-black' : 'bg-red-50 text-red-900'} w-full`}
-          >
-            <div className="mx-auto max-w-7xl px-4 py-14 md:py-16">
-              <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight">
+      <section className="mx-auto max-w-6xl px-4 py-12 md:py-16">
+        <div className="grid gap-6 md:gap-8">
+          {principaisServicos.map((s) => (
+            <div
+              key={s.titulo}
+              className="rounded-3xl border border-cyan-500/30 bg-white/5 backdrop-blur-sm p-6 md:p-10 shadow-[0_0_40px_rgba(0,255,255,0.08)]"
+            >
+              <h2 className="text-3xl md:text-5xl font-extrabold text-cyan-300 tracking-tight">
                 {s.titulo}
               </h2>
-              <p className="mt-2 text-lg md:text-2xl font-bold">{s.destaque}</p>
-              <p className="mt-3 text-base md:text-lg max-w-4xl">{s.texto}</p>
-              <div className="mt-6">
+              <p className="mt-3 text-lg md:text-xl font-bold text-white">{s.destaque}</p>
+              <p className="mt-2 text-slate-300 text-base md:text-lg">{s.texto}</p>
+              <div className="mt-5">
                 <Link
                   href="/contato"
-                  className={`inline-block rounded-xl px-6 py-3 font-semibold ${idx % 2 === 0 ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-red-700 text-white hover:bg-red-800'}`}
+                  className="inline-block rounded-xl px-5 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold"
                 >
                   Pedir Orçamento
                 </Link>
               </div>
             </div>
-          </div>
-        ))}
-      </section>
-
-      <section className="w-full bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-14 md:py-16">
-          <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight text-red-700">
-            Gráficos de Resultado
-          </h2>
-          <p className="mt-2 text-lg md:text-xl text-slate-700">
-            Ganho real de velocidade e confiabilidade após nossos serviços.
-          </p>
-          <div className="mt-8 grid md:grid-cols-3 gap-6">
-            <div className="border rounded-2xl p-6">
-              <div className="text-lg font-bold text-red-700">Tempo de Inicialização</div>
-              <div className="mt-3 h-2 w-full bg-slate-200 rounded-full">
-                <div className="h-2 bg-red-600 rounded-full" style={{ width: '25%' }} />
-              </div>
-              <div className="mt-2 text-sm text-slate-600">Antes: 100% • Depois: 25%</div>
-            </div>
-            <div className="border rounded-2xl p-6">
-              <div className="text-lg font-bold text-red-700">Abertura de Aplicativos</div>
-              <div className="mt-3 h-2 w-full bg-slate-200 rounded-full">
-                <div className="h-2 bg-red-600 rounded-full" style={{ width: '35%' }} />
-              </div>
-              <div className="mt-2 text-sm text-slate-600">Antes: 100% • Depois: 35%</div>
-            </div>
-            <div className="border rounded-2xl p-6">
-              <div className="text-lg font-bold text-red-700">Transferência de Arquivos</div>
-              <div className="mt-3 h-2 w-full bg-slate-200 rounded-full">
-                <div className="h-2 bg-red-600 rounded-full" style={{ width: '30%' }} />
-              </div>
-              <div className="mt-2 text-sm text-slate-600">Antes: 100% • Depois: 30%</div>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
 
-      <section className="w-full bg-red-600 text-white">
-        <div className="mx-auto max-w-7xl px-4 py-14 md:py-16">
-          <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight">
-            Por que escolher o Balão?
+      <section className="mx-auto max-w-6xl px-4 py-12 md:py-16">
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-3xl md:text-5xl font-extrabold text-yellow-300 tracking-tight drop-shadow-[0_0_20px_rgba(255,215,0,0.25)]">
+            Promoções
           </h2>
-          <div className="mt-8 grid md:grid-cols-3 gap-6">
-            <div className="bg-white/10 rounded-2xl p-6">
-              <div className="text-2xl font-black">Garantia Real</div>
-              <p className="mt-2 text-white/90">Serviço com nota, garantia local e acompanhamento.</p>
-            </div>
-            <div className="bg-white/10 rounded-2xl p-6">
-              <div className="text-2xl font-black">Atendimento Rápido</div>
-              <p className="mt-2 text-white/90">Diagnóstico ágil e comunicação clara em cada etapa.</p>
-            </div>
-            <div className="bg-white/10 rounded-2xl p-6">
-              <div className="text-2xl font-black">Transparência</div>
-              <p className="mt-2 text-white/90">Orçamento antes de intervir e peças de procedência.</p>
-            </div>
-            <div className="bg-white/10 rounded-2xl p-6">
-              <div className="text-2xl font-black">Consultoria</div>
-              <p className="mt-2 text-white/90">Recomendamos upgrades com melhor custo‑benefício.</p>
-            </div>
-            <div className="bg-white/10 rounded-2xl p-6">
-              <div className="text-2xl font-black">Testes Rigorosos</div>
-              <p className="mt-2 text-white/90">Validação térmica e de estabilidade após cada serviço.</p>
-            </div>
-            <div className="bg-white/10 rounded-2xl p-6">
-              <div className="text-2xl font-black">Campinas e Região</div>
-              <p className="mt-2 text-white/90">Entrega/retirada ágil e suporte local.</p>
-            </div>
-          </div>
+          <span className="text-slate-400 text-sm md:text-base">Uma fileira com 10 produtos de preço baixo</span>
         </div>
-      </section>
-
-      <section className="w-full bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-14 md:py-16">
-          <div className="flex items-baseline justify-between">
-            <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight text-red-700">
-              Promoções
-            </h2>
-            <span className="text-slate-600 text-sm md:text-base">Uma fileira com 10 produtos de preço baixo</span>
-          </div>
-          <div className="mt-6 overflow-x-auto">
-            <div className="flex gap-4 md:gap-6 min-w-max">
-              {promocoesBaratas.map((p) => (
-                <div
-                  key={p.nome}
-                  className="w-64 shrink-0 rounded-2xl border border-red-200 bg-white p-4 shadow-sm"
-                >
-                  <div className="h-28 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center text-red-400 text-sm">
-                    Imagem
-                  </div>
-                  <div className="mt-3">
-                    <div className="font-semibold line-clamp-2">{p.nome}</div>
-                    <div className="text-3xl font-black text-red-600 mt-1">{p.preco}</div>
-                  </div>
-                  <Link
-                    href="/contato"
-                    className="mt-3 inline-flex w-full items-center justify-center rounded-lg bg-red-600 text-white font-bold py-2 hover:bg-red-700"
-                  >
-                    Quero Aproveitar
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="w-full bg-red-50">
-        <div className="mx-auto max-w-7xl px-4 py-14 md:py-16">
-          <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight text-red-700">
-            Mais de 50 serviços em TI e Informática
-          </h2>
-          <p className="mt-3 text-slate-700 text-base md:text-lg">
-            Residencial, corporativo e home office, com processos ágeis e garantia.
-          </p>
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-            {maisDe50Servicos.map((item) => (
+        <div className="mt-6 overflow-x-auto">
+          <div className="flex gap-4 md:gap-6 min-w-max">
+            {promocoesBaratas.map((p) => (
               <div
-                key={item}
-                className="rounded-xl border border-red-200 bg-white px-4 py-3 text-slate-800 text-sm md:text-base"
+                key={p.nome}
+                className="w-56 shrink-0 rounded-2xl border border-yellow-500/30 bg-gradient-to-b from-slate-800 to-black p-4 shadow-[0_0_30px_rgba(255,215,0,0.15)]"
               >
-                {item}
+                <div className="h-28 rounded-xl bg-black/30 border border-white/10 flex items-center justify-center text-slate-400 text-sm">
+                  Imagem
+                </div>
+                <div className="mt-3">
+                  <div className="text-white font-semibold line-clamp-2">{p.nome}</div>
+                  <div className="text-2xl md:text-3xl font-black text-yellow-300 mt-1">{p.preco}</div>
+                </div>
+                <Link
+                  href="/contato"
+                  className="mt-3 inline-flex w-full items-center justify-center rounded-lg bg-yellow-500 text-black font-bold py-2 hover:bg-yellow-400"
+                >
+                  Quero Aproveitar
+                </Link>
               </div>
             ))}
           </div>
-          <div className="mt-8">
-            <Link
-              href="/contato"
-              className="inline-block rounded-2xl px-6 py-4 bg-red-600 hover:bg-red-700 text-white font-extrabold text-lg"
-            >
-              Falar com um Especialista
-            </Link>
-          </div>
         </div>
       </section>
 
-      <section className="w-full bg-white">
-        <div className="mx-auto max-w-7xl px-4 pb-16">
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 md:p-10">
-            <h3 className="text-3xl md:text-4xl font-extrabold tracking-tight text-red-700">Onde estamos</h3>
-            <p className="mt-2 text-slate-700">
-              Av. Anchieta, 789 — Campinas, SP. Atendimento rápido para Campinas e região.
-            </p>
-            <div className="mt-4 flex flex-wrap gap-3">
-              <Link
-                href="/contato"
-                className="px-5 py-3 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 font-semibold"
-              >
-                Como Chegar
-              </Link>
-              <Link
-                href="/contato"
-                className="px-5 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold"
-              >
-                Solicitar Orçamento
-              </Link>
+      <section className="mx-auto max-w-6xl px-4 py-12 md:py-16">
+        <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight text-pink-400 drop-shadow-[0_0_20px_rgba(255,0,128,0.25)]">
+          Mais de 50 serviços em TI e Informática
+        </h2>
+        <p className="mt-3 text-slate-300 text-base md:text-lg">
+          Atendemos residências, empresas e home office, com processos ágeis, documentação e garantia.
+        </p>
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+          {maisDe50Servicos.map((item) => (
+            <div
+              key={item}
+              className="rounded-xl border border-pink-500/20 bg-white/5 px-4 py-3 text-slate-200 text-sm md:text-base"
+            >
+              {item}
             </div>
+          ))}
+        </div>
+        <div className="mt-8">
+          <Link
+            href="/contato"
+            className="inline-block rounded-2xl px-6 py-4 bg-pink-600 hover:bg-pink-500 text-white font-extrabold text-lg"
+          >
+            Falar com um Especialista
+          </Link>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 pb-16">
+        <div className="rounded-3xl border border-slate-700 bg-white/5 p-6 md:p-10">
+          <h3 className="text-2xl md:text-4xl font-extrabold text-white tracking-tight">Onde estamos</h3>
+          <p className="mt-2 text-slate-300">
+            Av. Anchieta, 789 — Campinas, SP. Atendimento rápido para Campinas e região.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link
+              href="/contato"
+              className="px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold"
+            >
+              Como Chegar
+            </Link>
+            <Link
+              href="/contato"
+              className="px-5 py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold"
+            >
+              Solicitar Orçamento
+            </Link>
           </div>
         </div>
       </section>
@@ -360,3 +287,4 @@ export default function Page() {
     </main>
   )
 }
+
