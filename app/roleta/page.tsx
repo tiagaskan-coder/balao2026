@@ -547,7 +547,7 @@ export default function RoletaPage() {
                     }
                     @keyframes leverPull {
                       0% { transform: translateY(0); }
-                      40% { transform: translateY(12px); }
+                      40% { transform: translateY(32px); }
                       100% { transform: translateY(0); }
                     }
                   `}</style>
@@ -659,7 +659,7 @@ export default function RoletaPage() {
                 <div className="absolute -right-16 top-1/2 -translate-y-1/2 flex flex-col items-center z-30">
                   <div
                     className="flex flex-col items-center"
-                    style={leverPulled ? { animation: 'leverPull 0.4s ease-out' } : {}}
+                    style={leverPulled ? { animation: 'leverPull 0.5s ease-out' } : {}}
                   >
                     <div className="w-3 h-24 md:w-4 md:h-28 bg-gradient-to-b from-slate-200 to-slate-700 rounded-full border border-slate-500 shadow-lg" />
                     <button
@@ -671,13 +671,6 @@ export default function RoletaPage() {
                   </div>
                 </div>
               </div>
-
-              <button 
-                onClick={spinWheel}
-                className="w-full max-w-md bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-400 hover:to-orange-500 text-white font-bold py-6 rounded-2xl text-3xl shadow-[0_0_40px_rgba(255,165,0,0.6)] animate-pulse tracking-widest uppercase border-b-4 border-orange-800 active:border-b-0 active:translate-y-1"
-              >
-                GIRAR!
-              </button>
             </div>
           )}
 
