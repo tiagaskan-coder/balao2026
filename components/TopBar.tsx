@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 export default function TopBar() {
   const [dolar, setDolar] = useState<string | null>(null);
+  const [messages, setMessages] = useState<string[] | null>(null);
 
   useEffect(() => {
     async function fetchDolar() {
@@ -23,21 +24,39 @@ export default function TopBar() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const res = await fetch("/api/topbar", { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data?.messages) && data.messages.length > 0) {
+            setMessages(data.messages);
+            return;
+          }
+        }
+      } catch {}
+      setMessages([
+        "Telefone: (19) 3255-1661",
+        "WhatsApp: (19) 98751-0267",
+        "E-mail: balaocastelo@balaodainformatica.com.br",
+        "Horário de Atendimento: Seg a Sex das 07:00 às 18:00",
+        "Endereço: Av. Andrade Neves, 1682 - Jardim Chapadão, Campinas - SP"
+      ]);
+    };
+    fetchMessages();
+  }, []);
+
   return (
     <div className="w-full bg-[#E60012] text-white text-xs md:text-sm py-1 overflow-hidden relative z-50 border-b border-red-700">
       <div className="container mx-auto flex items-center justify-between px-2">
          {/* Marquee Container */}
          <div className="flex-1 overflow-hidden whitespace-nowrap relative">
             <div className="animate-marquee inline-block">
-              <span className="mx-4 font-semibold">Telefone: (19) 3255-1661</span>
+              {messages?.map((m, idx) => (
+                <span key={idx} className="mx-4 font-semibold">{m}</span>
+              ))}
               <span className="mx-2 text-red-200">|</span>
-              <span className="mx-4 font-semibold">WhatsApp: (19) 98751-0267</span>
-              <span className="mx-2 text-red-200">|</span>
-              <span className="mx-4">E-mail: balaocastelo@balaodainformatica.com.br</span>
-              <span className="mx-2 text-red-200">|</span>
-              <span className="mx-4">Horário de Atendimento: Seg a Sex das 07:00 às 18:00</span>
-              <span className="mx-2 text-red-200">|</span>
-              <span className="mx-4">Endereço: Av. Andrade Neves, 1682 - Jardim Chapadão, Campinas - SP</span>
                {dolar && (
                 <>
                   <span className="mx-2 text-red-200">|</span>
