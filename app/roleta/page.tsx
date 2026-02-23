@@ -7,7 +7,18 @@ import confetti from 'canvas-confetti';
 
 // --- CONFIGURAÇÃO DOS PRÊMIOS ---
 // Imagens reais baixadas localmente
-const PRIZES = [
+type Prize = {
+  id: number;
+  text: string;
+  subtext?: string;
+  color: string;
+  type: 'win' | 'loss';
+  probability: number;
+  image: string | null;
+  emoji?: string;
+};
+
+const PRIZES: Prize[] = [
   { 
     id: 1, 
     text: 'R$ 10,00 Pix', 
@@ -311,11 +322,13 @@ export default function RoletaPage() {
       if (!wheelRef.current) return;
       const rect = wheelRef.current.getBoundingClientRect();
       const size = Math.min(rect.width, rect.height);
-      const borderWidth = 12;
+      const computed = getComputedStyle(wheelRef.current);
+      const borderWidth = parseFloat(computed.borderTopWidth || '12') || 12;
       const ledDiameter = window.innerWidth >= 768 ? 16 : 12;
+      const ledScaleMax = window.innerWidth >= 768 ? 1.10 : 1.05;
       const outerR = size / 2;
       const innerR = outerR - borderWidth;
-      const targetR = Math.max(0, innerR - ledDiameter / 2 - 1);
+      const targetR = Math.max(0, innerR - (ledDiameter * ledScaleMax) / 2 - 1);
       const pct = (targetR / outerR) * 50;
       setLedRadiusPercent(pct);
     };
@@ -582,8 +595,8 @@ export default function RoletaPage() {
                   })}
                   <style>{`
                     @keyframes blinkLights {
-                      0% { opacity: 0.3; transform: translate(-50%, -50%) scale(0.8); }
-                      100% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+                      0% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.9); }
+                      100% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
                     }
                     @keyframes leverPull {
                       0% { transform: translateY(0); }
