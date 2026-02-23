@@ -35,8 +35,7 @@ const PRIZES = [
   },
   { 
     id: 4, 
-    text: 'Mão de Obra', 
-    subtext: 'Troca R$2,00',
+    text: 'R$ 2,00 no PIX', 
     color: '#FF00CC', 
     type: 'win', 
     probability: 0.20, 
