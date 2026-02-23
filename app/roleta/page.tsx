@@ -103,25 +103,6 @@ const PRIZES = [
 
 const WINNING_PRIZES = PRIZES.filter(p => p.probability > 0);
 
-// --- LOGO COMPONENT (Placeholder SVG se a imagem não carregar) ---
-const Logo = () => (
-  <div className="flex justify-center mb-6">
-    <picture>
-      <source srcSet="/logo.png" type="image/png" />
-      <img 
-        src="/logo.png" 
-        alt="Balão da Informática Logo" 
-        className="h-24 md:h-32 object-contain drop-shadow-[0_0_15px_rgba(255,0,0,0.6)]"
-        onError={(e) => {
-          // Fallback para texto estilizado se a imagem falhar
-          e.currentTarget.style.display = 'none';
-          e.currentTarget.parentElement!.innerHTML = `<h1 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-400 drop-shadow-[0_0_10px_rgba(255,0,0,0.8)] tracking-tighter">Balão da<br/>Informática</h1>`;
-        }}
-      />
-    </picture>
-  </div>
-);
-
 // --- SOUND MANAGER AVANÇADO ---
 const SoundManager = {
   ctx: null as AudioContext | null,
@@ -460,11 +441,6 @@ export default function RoletaPage() {
       </div>
 
       <div className="z-10 w-full max-w-4xl flex flex-col items-center">
-        
-        {/* LOGO AREA */}
-        <Logo />
-
-        {/* CONTAINER PRINCIPAL */}
         <div className="w-full bg-black/80 backdrop-blur-md border border-slate-800 rounded-3xl p-6 shadow-[0_0_50px_rgba(0,255,255,0.1)] transition-all duration-500">
           
           {step === 'welcome' && (
@@ -567,9 +543,12 @@ export default function RoletaPage() {
 
                 <div 
                   ref={wheelRef}
-                  className="w-[90vw] h-[90vw] max-w-[780px] max-h-[780px] rounded-full border-[12px] border-yellow-600 shadow-[0_0_30px_rgba(0,0,0,0.8)] overflow-hidden relative will-change-transform bg-slate-900"
+                  className="rounded-full border-[12px] border-yellow-600 shadow-[0_0_30px_rgba(0,0,0,0.8)] overflow-hidden relative will-change-transform bg-slate-900"
                   style={{ 
-                    // Fundo base, mas as fatias serão desenhadas individualmente ou via conic
+                    width: 'min(90vw, 70vh)',
+                    height: 'min(90vw, 70vh)',
+                    maxWidth: '780px',
+                    maxHeight: '780px',
                     background: `conic-gradient(
                       ${PRIZES.map((p, i) => `${p.color} ${(i * 100) / PRIZES.length}% ${((i + 1) * 100) / PRIZES.length}%`).join(', ')}
                     )`,
