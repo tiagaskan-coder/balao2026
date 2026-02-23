@@ -324,8 +324,8 @@ export default function RoletaPage() {
       const size = Math.min(rect.width, rect.height);
       const computed = getComputedStyle(wheelRef.current);
       const borderWidth = parseFloat(computed.borderTopWidth || '12') || 12;
-      const ledDiameter = window.innerWidth >= 768 ? 16 : 12;
-      const ledScaleMax = window.innerWidth >= 768 ? 1.10 : 1.05;
+      const ledDiameter = 16;
+      const ledScaleMax = 1.05;
       const outerR = size / 2;
       const innerR = outerR - borderWidth;
       const targetR = Math.max(0, innerR - (ledDiameter * ledScaleMax) / 2 - 1);
@@ -581,7 +581,7 @@ export default function RoletaPage() {
                     return (
                       <div
                         key={`light-${i}`}
-                        className="absolute w-3 h-3 md:w-4 md:h-4 rounded-full shadow-[0_0_10px_currentColor] transition-opacity duration-300"
+                        className="absolute w-4 h-4 rounded-full shadow-[0_0_10px_currentColor] transition-opacity duration-300"
                         style={{
                           left: `${x}%`,
                           top: `${y}%`,
@@ -683,21 +683,21 @@ export default function RoletaPage() {
 
                         {/* 2. CONTEÚDO DA FATIA (Texto) */}
                         <div 
-                          className="absolute w-full h-[50%] top-0 left-0 flex flex-col justify-start items-center pt-4 md:pt-8 origin-bottom z-30 pointer-events-none"
+                          className="absolute w-full h-[50%] top-0 left-0 flex flex-col justify-start items-center pt-8 origin-bottom z-30 pointer-events-none"
                           style={{ 
                             transform: `rotate(${rotation}deg)`,
                             transformOrigin: 'bottom center' 
                           }}
                         >
                            <div className="flex flex-col items-center max-w-[25%] text-center">
-                             <span className="text-[10px] sm:text-xs md:text-base font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] uppercase tracking-wider leading-none break-words shadow-black">
+                             <span className="text-base font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] uppercase tracking-wider leading-none break-words shadow-black">
                                {prize.text}
                              </span>
-                             {prize.subtext && (
-                               <span className="text-[8px] md:text-[10px] font-bold text-yellow-300 mt-1 drop-shadow-md leading-tight">
+                             {prize.subtext ? (
+                               <span className="text-[10px] font-bold text-yellow-300 mt-1 drop-shadow-md leading-tight">
                                  {prize.subtext}
                                </span>
-                             )}
+                             ) : null}
                            </div>
                         </div>
                       </div>
