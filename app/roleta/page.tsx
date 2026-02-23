@@ -570,7 +570,7 @@ export default function RoletaPage() {
                    </svg>
                 </div>
 
-                <div className="absolute inset-0 z-20 pointer-events-none rounded-full">
+                <div className="absolute inset-0 z-20 pointer-events-none rounded-full hidden md:block">
                   {Array.from({ length: 36 }).map((_, i) => {
                     const angle = (i / 36) * 2 * Math.PI;
                     const radius = ledRadiusPercent;
