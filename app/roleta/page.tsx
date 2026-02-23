@@ -14,7 +14,7 @@ const PRIZES = [
     color: '#00CC66', 
     type: 'win', 
     probability: 0.05, 
-    image: '/images/prizes/10reais.svg' 
+    image: '/images/prizes/10reais.jpg' 
   },
   { 
     id: 2, 
@@ -40,7 +40,7 @@ const PRIZES = [
     color: '#FF00CC', 
     type: 'win', 
     probability: 0.20, 
-    image: '/images/prizes/2reais.svg' 
+    image: '/images/prizes/2reais.jpg' 
   },
   { 
     id: 5, 
@@ -89,7 +89,7 @@ const PRIZES = [
     color: '#00FF99', 
     type: 'win', 
     probability: 0.10, 
-    image: '/images/prizes/5reais.svg' 
+    image: '/images/prizes/5reais.jpg' 
   },
   { 
     id: 11, 
