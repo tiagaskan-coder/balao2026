@@ -103,6 +103,24 @@ const PRIZES = [
 
 const WINNING_PRIZES = PRIZES.filter(p => p.probability > 0);
 
+// --- LOGO COMPONENT (Placeholder SVG se a imagem não carregar) ---
+const Logo = () => (
+  <div className="flex justify-center mb-6">
+    <picture>
+      <source srcSet="/logo.png" type="image/png" />
+      <img 
+        src="/logo.png" 
+        alt="Balão da Informática Logo" 
+        className="h-24 md:h-32 object-contain drop-shadow-[0_0_15px_rgba(255,0,0,0.6)]"
+        onError={(e) => {
+          e.currentTarget.style.display = 'none';
+          e.currentTarget.parentElement!.innerHTML = `<h1 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-400 drop-shadow-[0_0_10px_rgba(255,0,0,0.8)] tracking-tighter">Balão da<br/>Informática</h1>`;
+        }}
+      />
+    </picture>
+  </div>
+);
+
 // --- SOUND MANAGER AVANÇADO ---
 const SoundManager = {
   ctx: null as AudioContext | null,
@@ -315,7 +333,7 @@ export default function RoletaPage() {
     setTimeout(() => { setLoading(false); setStep('roulette'); }, 2000);
   };
 
-  const spinWheel = (e: React.MouseEvent) => {
+  const spinWheel = (e?: React.MouseEvent) => {
     if (!wheelRef.current) return;
     if (isSpinning) return;
     setIsSpinning(true);
@@ -326,7 +344,7 @@ export default function RoletaPage() {
     let selectedPrize;
 
     // CHEAT MODE: Shift + Click libera prêmios "impossíveis" (PC Gamer ou PS5)
-    if (e.shiftKey) {
+    if (e?.shiftKey) {
       const cheatPrizes = PRIZES.filter(p => p.id === 5 || p.id === 9); // IDs do PS5 e PC Gamer
       selectedPrize = cheatPrizes[Math.floor(Math.random() * cheatPrizes.length)];
     } else {
@@ -418,6 +436,11 @@ export default function RoletaPage() {
     }, 400);
   };
 
+  const handleSpinButtonClick = () => {
+    if (isSpinning) return;
+    spinWheel();
+  };
+
   return (
     <div className="min-h-screen bg-black text-white font-sans overflow-x-hidden flex flex-col items-center justify-center p-4 relative"
          style={{ background: 'radial-gradient(circle at center, #1a1a2e 0%, #000000 100%)' }}>
@@ -441,11 +464,16 @@ export default function RoletaPage() {
       </div>
 
       <div className="z-10 w-full max-w-4xl flex flex-col items-center">
+        
+        {/* LOGO AREA */}
+        <Logo />
         <div className="w-full bg-black/80 backdrop-blur-md border border-slate-800 rounded-3xl p-6 shadow-[0_0_50px_rgba(0,255,255,0.1)] transition-all duration-500">
-          
+        {/* CONTAINER PRINCIPAL */}
           {step === 'welcome' && (
             <div className="text-center animate-fadeIn max-w-md mx-auto">
               <div className="bg-gray-800/50 p-6 rounded-xl border border-cyan-500/30 mb-8">
+                <h2 className="text-2xl font-bold mb-4 text-cyan-400">Bem-vindo ao Clube de Vantagens!</h2>
+                <p className="text-slate-300 text-lg">Gire a roleta e ganhe prêmios exclusivos na hora.</p>
                 <h2 className="text-2xl font-bold mb-4 text-cyan-400">Bem-vindo ao Clube de Vantagens!</h2>
                 <p className="text-slate-300 text-lg">Gire a roleta e ganhe prêmios exclusivos na hora.</p>
               </div>
@@ -495,7 +523,7 @@ export default function RoletaPage() {
                   />
                 </div>
               )}
-              <div className="relative mb-12 transform transition-transform hover:scale-[1.02] duration-500">
+              <div className="relative mb-6 md:mb-12 transform transition-transform hover:scale-[1.02] duration-500">
                 {/* Indicador/Seta FIXO no topo */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-8 z-40 w-16 h-16 filter drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)]">
                    <svg viewBox="0 0 100 100" className="w-full h-full fill-red-600 stroke-white stroke-2">
@@ -647,7 +675,8 @@ export default function RoletaPage() {
                   </div>
                 </div>
                 
-                <div className="absolute -right-16 top-1/2 -translate-y-1/2 flex flex-col items-center z-30">
+                {/* Alavanca (somente em telas grandes) */}
+                <div className="absolute -right-16 top-1/2 -translate-y-1/2 hidden md:flex flex-col items-center z-30">
                   <div
                     className="flex flex-col items-center"
                     style={leverPulled ? { animation: 'leverPull 0.5s ease-out' } : {}}
@@ -660,6 +689,17 @@ export default function RoletaPage() {
                       PUXAR
                     </button>
                   </div>
+                </div>
+
+                {/* Botão para telas pequenas */}
+                <div className="mt-6 w-full flex md:hidden justify-center">
+                  <button
+                    onClick={handleSpinButtonClick}
+                    disabled={isSpinning}
+                    className="px-6 py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-lg shadow-[0_0_20px_rgba(0,255,255,0.3)] active:scale-95 disabled:opacity-60"
+                  >
+                    GIRAR 🎡
+                  </button>
                 </div>
               </div>
             </div>
