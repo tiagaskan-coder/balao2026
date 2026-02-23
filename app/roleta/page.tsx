@@ -296,6 +296,7 @@ export default function RoletaPage() {
   const [volume, setVolume] = useState(100);
   const [leverPulled, setLeverPulled] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
+  const [ledRadiusPercent, setLedRadiusPercent] = useState(48);
   
   const wheelRef = useRef<HTMLDivElement>(null);
 
@@ -306,6 +307,32 @@ export default function RoletaPage() {
     setVolume(SoundManager.volume * 100);
   }, []);
 
+  useEffect(() => {
+    const calc = () => {
+      if (!wheelRef.current) return;
+      const rect = wheelRef.current.getBoundingClientRect();
+      const size = Math.min(rect.width, rect.height);
+      const borderWidth = 12;
+      const ledDiameter = window.innerWidth >= 768 ? 16 : 12;
+      const outerR = size / 2;
+      const innerR = outerR - borderWidth;
+      const targetR = Math.max(0, innerR - ledDiameter / 2 - 1);
+      const pct = (targetR / outerR) * 50;
+      setLedRadiusPercent(pct);
+    };
+    calc();
+    const onResize = () => calc();
+    window.addEventListener('resize', onResize);
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && wheelRef.current) {
+      ro = new ResizeObserver(() => calc());
+      ro.observe(wheelRef.current);
+    }
+    return () => {
+      window.removeEventListener('resize', onResize);
+      if (ro) ro.disconnect();
+    };
+  }, []);
   const toggleMute = () => {
     const newVal = !isMuted;
     setIsMuted(newVal);
@@ -531,14 +558,12 @@ export default function RoletaPage() {
                    </svg>
                 </div>
 
-                {/* MOLDURA DE LUZES (Anel Estático) */}
-                <div className="absolute inset-[18px] md:inset-[20px] z-20 pointer-events-none rounded-full">
+                <div className="absolute inset-0 z-20 pointer-events-none rounded-full">
                   {Array.from({ length: 36 }).map((_, i) => {
                     const angle = (i / 36) * 2 * Math.PI;
-                    const radius = 46; // % do container (ajustado p/ caber no mobile)
+                    const radius = ledRadiusPercent;
                     const x = 50 + radius * Math.cos(angle);
                     const y = 50 + radius * Math.sin(angle);
-                    const color = i % 2 === 0 ? '#ff0' : '#f0f'; // Amarelo e Rosa alternados
                     const delay = i % 2 === 0 ? '0s' : '0.5s';
                     
                     return (
