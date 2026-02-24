@@ -154,9 +154,10 @@ const maisDe50Servicos = [
 ]
 
 const FEATURED_PRODUCT_IDS = [
-  'd2da0079-5b31-42b2-80bd-f2035ebefd04', // iPhone 17 Pro Max
-  '32cb7fe9-d6fe-4a09-9e18-580d267d36ad', // Apple Watch SE 3
-  '0ebb9fd9-f161-41a7-bb14-c545b1164ca2'  // Monitor Dell 27
+  '6724ba18-4794-4a4d-885f-93470a18233a', // PC Gamer
+  '2e72e933-1bae-4441-8281-5c550938515e', // Monitor Brazil PC
+  '72b06dac-7097-4b86-914e-65e03f7a0a74', // Jogo Bloodborne
+  '35b8c8c9-43cb-4132-822f-9f997695889c'  // Base Notebook
 ]
 
 export const dynamic = 'force-dynamic'
@@ -243,178 +244,152 @@ export default async function Page() {
         </div>
       </section>
 
-      {/* Featured Products Section - White Background for Contrast */}
-      <section id="ofertas" className="py-20 bg-white text-zinc-900">
-        <div className="container mx-auto px-4 mb-16">
+      {/* Featured Products Section - Compact Grid */}
+      <section id="ofertas" className="py-12 bg-white text-zinc-900 border-b border-zinc-200">
+        <div className="container mx-auto px-4 mb-8">
           <div className="flex items-center gap-4 mb-4 justify-center">
-            <div className="h-1 w-12 bg-red-600 rounded-full" />
-            <h2 className="text-3xl md:text-5xl font-black text-zinc-900 uppercase tracking-tight text-center">
+            <h2 className="text-2xl md:text-3xl font-black text-zinc-900 uppercase tracking-tight text-center">
               Ofertas <span className="text-red-600">Relâmpago</span>
             </h2>
-            <div className="h-1 w-12 bg-red-600 rounded-full" />
           </div>
-          <p className="text-center text-zinc-500 font-medium text-lg">Produtos selecionados com preços exclusivos para o site.</p>
         </div>
 
-        <div className="space-y-20 container mx-auto px-4 max-w-6xl">
-          {validProducts.map((product, index) => {
-            const currentPrice = parsePrice(product?.price || '0');
-            const originalPrice = currentPrice * 1.4; // 40% markup for "De" price
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {validProducts.map((product, index) => {
+              const currentPrice = parsePrice(product?.price || '0');
+              const originalPrice = currentPrice * 1.4;
 
-            return (
-              <div 
-                key={product?.id || index} 
-                className="group relative bg-white rounded-[2.5rem] border border-zinc-100 shadow-2xl overflow-hidden hover:shadow-red-900/10 transition-all duration-500"
-              >
-                <div className="grid grid-cols-1 lg:grid-cols-2">
+              return (
+                <div 
+                  key={product?.id || index} 
+                  className="group relative bg-white rounded-xl border border-zinc-200 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col overflow-hidden"
+                >
                   {/* Image Section */}
-                  <div className="relative h-[400px] lg:h-[600px] bg-zinc-50 flex items-center justify-center p-12 overflow-hidden group-hover:bg-red-50/30 transition-colors duration-500">
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-zinc-50 to-zinc-100 opacity-80" />
+                  <div className="relative h-48 bg-zinc-50 flex items-center justify-center p-4">
                     {product?.image ? (
                       <div className="relative w-full h-full">
                         <Image
                           src={product.image}
                           alt={product.name}
                           fill
-                          className="object-contain drop-shadow-2xl"
-                          sizes="(max-width: 1024px) 100vw, 50vw"
-                          priority={index === 0}
+                          className="object-contain"
+                          sizes="(max-width: 640px) 100vw, 25vw"
                         />
                       </div>
                     ) : (
-                      <div className="flex items-center justify-center w-full h-full bg-zinc-100 text-zinc-300 rounded-3xl">
-                        <span className="text-xl font-bold">Imagem Indisponível</span>
+                      <div className="flex items-center justify-center w-full h-full bg-zinc-100 text-zinc-300 rounded-lg">
+                        <span className="text-xs font-bold">Sem Imagem</span>
                       </div>
                     )}
                     
-                    {/* Badge */}
-                    <div className="absolute top-8 left-8 bg-red-600 text-white text-sm font-bold px-6 py-3 rounded-full shadow-xl z-10 flex items-center gap-2">
-                      <Zap className="w-4 h-4 fill-current" />
-                      OFERTA EXCLUSIVA
+                    <div className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-sm z-10">
+                      -{Math.round(((originalPrice - currentPrice) / originalPrice) * 100)}%
                     </div>
                   </div>
 
                   {/* Content Section */}
-                  <div className="p-10 lg:p-16 flex flex-col justify-center bg-white relative">
-                    <div className="mb-8">
-                      <OfferCountdown />
+                  <div className="p-4 flex flex-col flex-grow">
+                    <div className="mb-2">
+                       <OfferCountdown />
                     </div>
 
-                    <h3 className="text-3xl lg:text-5xl font-black text-zinc-900 mb-6 leading-none tracking-tight">
+                    <h3 className="text-sm font-bold text-zinc-900 mb-2 line-clamp-2 min-h-[2.5em]">
                       {product?.name}
                     </h3>
 
-                    <div className="flex flex-col gap-2 mb-10 p-6 bg-zinc-50 rounded-2xl border border-zinc-100">
-                      <div className="flex items-baseline gap-4 flex-wrap">
-                        <span className="text-lg text-zinc-400 line-through font-medium">
+                    <div className="mt-auto">
+                      <div className="flex flex-col">
+                        <span className="text-xs text-zinc-400 line-through">
                           de {formatPrice(originalPrice)}
                         </span>
-                        <span className="text-red-600 font-bold text-sm bg-red-50 px-3 py-1 rounded-full uppercase tracking-wider">
-                          Economize {formatPrice(originalPrice - currentPrice)}
-                        </span>
-                      </div>
-                      <div className="flex items-baseline gap-2">
-                         <span className="text-6xl lg:text-7xl font-black text-zinc-900 tracking-tighter">
+                        <span className="text-lg font-black text-red-600">
                           {product?.price ? (
-                             // If product.price already has currency symbol, use it, else format
                              product.price.includes('R$') ? product.price : formatPrice(currentPrice)
                           ) : 'R$ ---'}
                         </span>
                       </div>
-                      <span className="text-zinc-500 font-medium flex items-center gap-2 mt-2">
-                        <CheckCircle className="w-5 h-5 text-green-500" /> 
-                        À vista no PIX com 10% de desconto extra
-                      </span>
+                      
+                      <Link 
+                        href={`/product/${product?.id}`}
+                        className="mt-3 w-full bg-zinc-900 hover:bg-red-600 text-white text-xs font-bold py-2 px-4 rounded-lg transition-colors text-center block"
+                      >
+                        COMPRAR
+                      </Link>
                     </div>
-
-                    <div className="grid grid-cols-2 gap-6 mb-10">
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 bg-red-50 rounded-xl text-red-600">
-                           <Truck className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <p className="font-bold text-zinc-900">Entrega Rápida</p>
-                          <p className="text-sm text-zinc-500">Campinas e região</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 bg-red-50 rounded-xl text-red-600">
-                           <ShieldCheck className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <p className="font-bold text-zinc-900">Garantia Total</p>
-                          <p className="text-sm text-zinc-500">Direto com a loja</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <Link 
-                      href={`/product/${product?.id}`}
-                      className="w-full group/btn bg-zinc-900 hover:bg-red-600 text-white text-xl font-bold py-6 px-8 rounded-2xl shadow-xl hover:shadow-red-600/30 transition-all text-center flex items-center justify-center gap-4"
-                    >
-                      COMPRAR AGORA
-                      <ArrowRight className="w-6 h-6 group-hover/btn:translate-x-1 transition-transform" />
-                    </Link>
                   </div>
                 </div>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
       </section>
 
-      {/* Services List Section - Dark again for contrast */}
-      <section className="py-24 bg-zinc-900 text-white border-t border-zinc-800">
+      {/* Services List Section - Full Width Blocks */}
+      <section className="py-20 bg-zinc-900 text-white">
         <div className="container mx-auto px-4">
-          <div className="text-center max-w-4xl mx-auto mb-20">
-            <h2 className="text-4xl md:text-6xl font-black text-white mb-8 tracking-tight">
+          <div className="text-center max-w-4xl mx-auto mb-16">
+            <h2 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">
               SOLUÇÕES EM <span className="text-red-600">TECNOLOGIA</span>
             </h2>
-            <p className="text-xl text-zinc-400 font-light">
-              Nossa equipe técnica é certificada e preparada para resolver qualquer problema. 
-              Confira os serviços mais procurados por nossos clientes.
+            <p className="text-lg text-zinc-400 font-light">
+              Nossa equipe técnica é certificada e preparada para resolver qualquer problema.
             </p>
           </div>
 
-          {/* Featured Services Blocks - Large & Detailed */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+          <div className="space-y-12 mb-20">
             {FEATURED_SERVICES.map((service, idx) => (
-               <div key={idx} className="bg-zinc-800/50 backdrop-blur-sm p-8 rounded-3xl border border-zinc-700/50 hover:border-red-600/50 hover:bg-zinc-800 transition-all group overflow-hidden relative">
-                 {service.image ? (
-                   <div className="relative w-full h-48 mb-6 rounded-2xl overflow-hidden border border-zinc-700 group-hover:shadow-red-900/20 shadow-lg transition-all">
-                      <Image
-                        src={service.image}
-                        alt={service.title}
-                        fill
-                        className="object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                      <div className="absolute top-3 right-3 bg-zinc-900/90 backdrop-blur p-2 rounded-lg border border-zinc-700 shadow-xl z-10">
-                         <service.icon className="w-6 h-6 text-red-600" />
-                      </div>
+               <div key={idx} className="bg-zinc-800/30 backdrop-blur-sm border border-zinc-700/50 rounded-3xl overflow-hidden hover:border-red-600/30 transition-all group">
+                 <div className="flex flex-col lg:flex-row">
+                   {/* Image/Icon Side */}
+                   <div className="lg:w-1/3 relative min-h-[250px] lg:min-h-full bg-zinc-800 flex items-center justify-center p-8">
+                     {service.image ? (
+                       <>
+                        <Image
+                          src={service.image}
+                          alt={service.title}
+                          fill
+                          className="object-cover opacity-60 group-hover:opacity-80 transition-opacity"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-transparent to-transparent lg:bg-gradient-to-r" />
+                       </>
+                     ) : null}
+                     
+                     <div className="relative z-10 w-20 h-20 bg-zinc-900/80 backdrop-blur rounded-2xl flex items-center justify-center text-red-600 shadow-xl border border-zinc-700 group-hover:scale-110 transition-transform duration-500">
+                       <service.icon className="w-10 h-10" />
+                     </div>
                    </div>
-                 ) : (
-                   <div className="w-16 h-16 bg-zinc-900 rounded-2xl flex items-center justify-center mb-6 text-red-600 group-hover:scale-110 group-hover:bg-red-600 group-hover:text-white transition-all shadow-lg border border-zinc-700">
-                     <service.icon className="w-8 h-8" />
+
+                   {/* Content Side */}
+                   <div className="lg:w-2/3 p-8 lg:p-12 flex flex-col justify-center">
+                     <h3 className="text-3xl font-bold text-white mb-4 group-hover:text-red-500 transition-colors">
+                       {service.title}
+                     </h3>
+                     <p className="text-xl text-zinc-400 mb-8 leading-relaxed max-w-3xl">
+                       {service.description}
+                     </p>
+                     
+                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                       {service.details.map((detail, i) => (
+                         <div key={i} className="flex items-center gap-3 text-zinc-400 group-hover:text-zinc-300 transition-colors bg-zinc-900/50 p-3 rounded-lg border border-zinc-800">
+                           <div className="w-2 h-2 rounded-full bg-red-600 shadow-[0_0_10px_rgba(220,38,38,0.5)]" />
+                           <span className="font-medium">{detail}</span>
+                         </div>
+                       ))}
+                     </div>
+
+                     <div>
+                       <Link 
+                         href="https://wa.me/5519987510267"
+                         className="inline-flex items-center bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-red-900/20 hover:shadow-red-900/40 gap-2 group-hover:translate-x-2 duration-300"
+                       >
+                         <MessageCircle className="w-5 h-5" />
+                         Solicitar Orçamento Agora
+                         <ArrowRight className="w-4 h-4" />
+                       </Link>
+                     </div>
                    </div>
-                 )}
-                 <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-red-500 transition-colors">{service.title}</h3>
-                 <p className="text-zinc-400 mb-6 leading-relaxed">
-                   {service.description}
-                 </p>
-                 <ul className="space-y-2 mb-8">
-                   {service.details.map((detail, i) => (
-                     <li key={i} className="flex items-center gap-2 text-zinc-500 text-sm group-hover:text-zinc-300 transition-colors">
-                       <div className="w-1.5 h-1.5 rounded-full bg-red-600" />
-                       {detail}
-                     </li>
-                   ))}
-                 </ul>
-                 <Link 
-                   href="https://wa.me/5519987510267"
-                   className="inline-flex items-center text-red-500 font-bold hover:text-red-400 transition-colors gap-2 group-hover:translate-x-2 duration-300"
-                 >
-                   Solicitar Orçamento <ArrowRight className="w-4 h-4" />
-                 </Link>
+                 </div>
                </div>
             ))}
           </div>
