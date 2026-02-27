@@ -90,7 +90,7 @@ export default function SellerSelector({ onSellerSelect, selectedSeller }: Selle
       </button>
 
       {isOpen && (
-        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
+        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-xl max-h-[60vh] overflow-y-auto">
           <div className="p-2">
             <button
               onClick={() => {

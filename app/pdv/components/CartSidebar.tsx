@@ -20,7 +20,7 @@ export default function CartSidebar() {
 
   return (
     <div className="flex flex-col h-full bg-white border-l border-gray-200 shadow-xl w-full max-w-md ml-auto">
-      <div className="p-4 border-b border-gray-200 bg-red-600 text-white flex justify-between items-center shadow-md">
+      <div className="p-4 border-b border-gray-200 bg-red-600 text-white flex justify-between items-center shadow-md z-20 relative">
         <h2 className="text-xl font-bold flex items-center gap-2">
           <ShoppingCart />
           Carrinho de Compras
@@ -28,6 +28,13 @@ export default function CartSidebar() {
         <span className="bg-white/20 px-3 py-1 rounded-full text-sm font-medium">
           {cart.length} itens
         </span>
+      </div>
+
+      <div className="p-4 bg-white border-b border-gray-200 z-10 relative">
+        <SellerSelector 
+          selectedSeller={sellerId} 
+          onSellerSelect={(id) => dispatch({ type: "SET_SELLER", payload: id })} 
+        />
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
@@ -83,14 +90,7 @@ export default function CartSidebar() {
         )}
       </div>
 
-      <div className="p-4 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-        <div className="mb-4">
-          <SellerSelector 
-            selectedSeller={sellerId} 
-            onSellerSelect={(id) => dispatch({ type: "SET_SELLER", payload: id })} 
-          />
-        </div>
-
+      <div className="p-4 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20 relative">
         <div className="flex justify-between items-center mb-4">
           <span className="text-gray-600 font-medium">Subtotal</span>
           <span className="text-2xl font-bold text-gray-900">
