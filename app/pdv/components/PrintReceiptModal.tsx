@@ -40,9 +40,11 @@ export default function PrintReceiptModal({ order, onClose }: PrintReceiptModalP
 
     try {
       const canvas = await html2canvas(element, {
-        scale: 2, // Better resolution
+        scale: 2, // Mantendo a resolução alta
         backgroundColor: '#ffffff',
-        logging: false,
+        logging: true, // Habilitar logs para debug
+        useCORS: true, // Permitir carregar imagens externas se houver
+        allowTaint: true, // Permitir taint se necessário
       });
 
       const image = canvas.toDataURL('image/png');
@@ -52,9 +54,9 @@ export default function PrintReceiptModal({ order, onClose }: PrintReceiptModalP
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating receipt image:', error);
-      alert('Erro ao gerar imagem do recibo.');
+      alert(`Erro ao gerar imagem do recibo: ${error.message || 'Erro desconhecido'}`);
     }
   };
 
