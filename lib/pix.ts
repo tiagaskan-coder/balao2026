@@ -7,7 +7,7 @@ class Pix {
   private txid: string;
 
   constructor(key: string, name: string, city: string, amount: number, txid: string = '***') {
-    this.key = key.replace(/[^a-zA-Z0-9@.+_-]/g, ""); // Allow valid Pix key chars
+    this.key = key; // Allow valid Pix key chars
     this.name = this.normalize(name).substring(0, 25).toUpperCase();
     this.city = this.normalize(city).substring(0, 15).toUpperCase();
     this.amount = amount.toFixed(2);
@@ -54,10 +54,8 @@ class Pix {
     const txid = this.formatField('05', this.txid);
     const additionalData = this.formatField('62', txid);
 
-    // Build payload
+    // 63 - CRC16
     const payload = pfi + merchantAccount + mcc + currency + amount + country + name + city + additionalData + '6304';
-
-    // Calculate CRC16
     const crc = this.crc16(payload);
 
     return payload + crc;

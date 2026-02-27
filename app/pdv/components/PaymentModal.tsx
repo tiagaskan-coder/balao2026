@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, CreditCard, Banknote, QrCode, Printer, CheckCircle, AlertTriangle } from "lucide-react";
+import { X, CreditCard, Banknote, QrCode, Printer, CheckCircle, AlertTriangle, Copy, Check } from "lucide-react";
 import { usePdv } from "../store";
 import { createOrder } from "../actions";
+import { QRCodeSVG } from "qrcode.react";
+import { generatePixPayload } from "@/lib/pix";
 
 export default function PaymentModal() {
   const { state, dispatch, total } = usePdv();
@@ -11,6 +13,29 @@ export default function PaymentModal() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
   const [orderId, setOrderId] = useState<string | null>(null);
+  
+  // Estados para PIX
+  const [showPix, setShowPix] = useState(false);
+  const [pixPayload, setPixPayload] = useState("");
+  const [pixCopied, setPixCopied] = useState(false);
+
+  const handlePixSelection = () => {
+    const payload = generatePixPayload({
+      key: "34397947000108", // CNPJ Chave PIX
+      name: "BALAO DA INFORMATICA CASTELO",
+      city: "CAMPINAS", // Assumindo Campinas/SP dado o contexto "Castelo"
+      amount: total,
+      txid: `PDV${Date.now().toString().slice(-10)}`
+    });
+    setPixPayload(payload);
+    setShowPix(true);
+  };
+
+  const copyPix = () => {
+    navigator.clipboard.writeText(pixPayload);
+    setPixCopied(true);
+    setTimeout(() => setPixCopied(false), 2000);
+  };
 
   const handlePayment = async (method: string) => {
     setLoading(true);
@@ -36,18 +61,13 @@ export default function PaymentModal() {
       setOrderId(res.orderId);
       setSuccess(true);
       
-      // Se for Pix, poderia gerar o QR Code aqui
-      // Se for Térmica, disparar impressão
-      if (method === "pix") {
-         // Lógica de Pix
-      }
-
     } catch (err: any) {
       setError(err.message || "Erro ao processar pagamento");
     } finally {
       setLoading(false);
     }
   };
+
 
   const handlePrint = () => {
     window.print();
@@ -156,37 +176,90 @@ export default function PaymentModal() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <button
-          onClick={() => handlePayment("pix")}
-          disabled={loading}
-          className="flex flex-col items-center justify-center p-6 rounded-xl border-2 border-gray-100 hover:border-red-500 hover:bg-red-50 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <QrCode className="w-10 h-10 text-gray-400 group-hover:text-red-600 mb-3 transition-colors" />
-          <span className="font-bold text-gray-700 group-hover:text-red-700">PIX</span>
-          <span className="text-xs text-gray-500 mt-1">Aprovação Imediata</span>
-        </button>
+      {showPix ? (
+        <div className="flex flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in duration-300">
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Pagamento via PIX</h3>
+          <p className="text-gray-600 mb-6">Escaneie o QR Code abaixo para pagar</p>
+          
+          <div className="bg-white p-4 rounded-xl shadow-lg border-2 border-gray-100 mb-6">
+            <QRCodeSVG value={pixPayload} size={200} />
+          </div>
+          
+          <div className="w-full max-w-sm">
+            <p className="text-sm font-medium text-gray-700 mb-2">Chave PIX (Copia e Cola)</p>
+            <div className="flex items-center gap-2">
+              <input 
+                readOnly 
+                value={pixPayload} 
+                className="flex-1 bg-gray-50 border border-gray-200 rounded-lg p-2 text-xs font-mono text-gray-600 truncate focus:outline-none focus:ring-2 focus:ring-red-500"
+              />
+              <button 
+                onClick={copyPix}
+                className={`p-2 rounded-lg border transition-colors ${pixCopied ? 'bg-green-50 border-green-200 text-green-600' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                title="Copiar código PIX"
+              >
+                {pixCopied ? <Check size={20} /> : <Copy size={20} />}
+              </button>
+            </div>
+            {pixCopied && <p className="text-xs text-green-600 mt-1 font-medium">Copiado com sucesso!</p>}
+          </div>
 
-        <button
-          onClick={() => handlePayment("credit_card")}
-          disabled={loading}
-          className="flex flex-col items-center justify-center p-6 rounded-xl border-2 border-gray-100 hover:border-red-500 hover:bg-red-50 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <CreditCard className="w-10 h-10 text-gray-400 group-hover:text-red-600 mb-3 transition-colors" />
-          <span className="font-bold text-gray-700 group-hover:text-red-700">Cartão</span>
-          <span className="text-xs text-gray-500 mt-1">Crédito ou Débito</span>
-        </button>
+          <div className="mt-8 flex gap-3 w-full max-w-sm">
+            <button
+              onClick={() => setShowPix(false)}
+              className="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              Voltar
+            </button>
+            <button
+              onClick={() => handlePayment("pix")}
+              disabled={loading}
+              className="flex-1 py-3 px-4 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-70"
+            >
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <>
+                  <CheckCircle size={20} />
+                  Confirmar Pagamento
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <button
+            onClick={handlePixSelection}
+            disabled={loading}
+            className="flex flex-col items-center justify-center p-6 rounded-xl border-2 border-gray-100 hover:border-red-500 hover:bg-red-50 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <QrCode className="w-10 h-10 text-gray-400 group-hover:text-red-600 mb-3 transition-colors" />
+            <span className="font-bold text-gray-700 group-hover:text-red-700">PIX</span>
+            <span className="text-xs text-gray-500 mt-1">Aprovação Imediata</span>
+          </button>
 
-        <button
-          onClick={() => handlePayment("cash")}
-          disabled={loading}
-          className="flex flex-col items-center justify-center p-6 rounded-xl border-2 border-gray-100 hover:border-red-500 hover:bg-red-50 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Banknote className="w-10 h-10 text-gray-400 group-hover:text-red-600 mb-3 transition-colors" />
-          <span className="font-bold text-gray-700 group-hover:text-red-700">Dinheiro</span>
-          <span className="text-xs text-gray-500 mt-1">Pagamento no Caixa</span>
-        </button>
-      </div>
+          <button
+            onClick={() => handlePayment("credit_card")}
+            disabled={loading}
+            className="flex flex-col items-center justify-center p-6 rounded-xl border-2 border-gray-100 hover:border-red-500 hover:bg-red-50 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <CreditCard className="w-10 h-10 text-gray-400 group-hover:text-red-600 mb-3 transition-colors" />
+            <span className="font-bold text-gray-700 group-hover:text-red-700">Cartão</span>
+            <span className="text-xs text-gray-500 mt-1">Crédito ou Débito</span>
+          </button>
+
+          <button
+            onClick={() => handlePayment("cash")}
+            disabled={loading}
+            className="flex flex-col items-center justify-center p-6 rounded-xl border-2 border-gray-100 hover:border-red-500 hover:bg-red-50 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Banknote className="w-10 h-10 text-gray-400 group-hover:text-red-600 mb-3 transition-colors" />
+            <span className="font-bold text-gray-700 group-hover:text-red-700">Dinheiro</span>
+            <span className="text-xs text-gray-500 mt-1">Pagamento no Caixa</span>
+          </button>
+        </div>
+      )}
 
       {loading && (
         <div className="flex-1 flex flex-col items-center justify-center text-gray-500">

@@ -45,12 +45,41 @@ export default function CustomerForm() {
     }
   };
 
+  const handleQuickClient = () => {
+    dispatch({
+      type: "SET_CUSTOMER",
+      payload: {
+        ...state.customer,
+        name: "Cliente Final",
+        cpf_cnpj: "000.000.000-00",
+        phone: "19999999999",
+        email: "",
+        cep: "",
+        address: "",
+        number: "",
+        complement: "",
+        city: "",
+        state: ""
+      }
+    });
+    // Avança para a próxima etapa (pagamento)
+    dispatch({ type: "SET_STEP", payload: "payment" });
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 h-full flex flex-col">
-      <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2 border-b border-gray-100 pb-2">
-        <User className="text-red-600" />
-        Dados do Cliente
-      </h2>
+      <div className="flex justify-between items-center mb-4 border-b border-gray-100 pb-2">
+        <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+          <User className="text-red-600" />
+          Dados do Cliente
+        </h2>
+        <button
+          onClick={handleQuickClient}
+          className="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-full border border-blue-200 hover:bg-blue-100 font-medium transition-colors"
+        >
+          Cliente Rápido (Balcão)
+        </button>
+      </div>
       
       <div className="space-y-4 overflow-y-auto flex-1 pr-2">
         {/* Nome / Razão Social */}
