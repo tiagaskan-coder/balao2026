@@ -5,8 +5,8 @@ import { Trash2, Minus, Plus, CreditCard, ShoppingCart } from "lucide-react";
 import { usePdv, PdvCartItem } from "../store";
 
 export default function CartSidebar() {
-  const { state, dispatch } = usePdv();
-  const { cart, total } = state;
+  const { state, dispatch, total } = usePdv();
+  const { cart } = state;
 
   const updateQty = (id: string, qty: number) => {
     if (qty < 1) return;
@@ -37,7 +37,7 @@ export default function CartSidebar() {
             <p className="text-sm">Adicione produtos para começar a venda</p>
           </div>
         ) : (
-          cart.map((item) => (
+          cart.map((item: PdvCartItem) => (
             <div key={item.id} className="bg-white p-3 rounded-lg shadow-sm border border-gray-200 flex gap-3 group hover:border-red-200 transition-colors">
               <div className="w-16 h-16 bg-gray-100 rounded-md flex-shrink-0 flex items-center justify-center overflow-hidden">
                  {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -6,14 +6,12 @@ import { usePdv } from "../store";
 import { createOrder } from "../actions";
 
 export default function PaymentModal() {
-  const { state, dispatch } = usePdv();
+  const { state, dispatch, total } = usePdv();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
   const [orderId, setOrderId] = useState<string | null>(null);
 
-  const total = state.total;
-  
   const handlePayment = async (method: string) => {
     setLoading(true);
     setError("");
@@ -25,7 +23,7 @@ export default function PaymentModal() {
       const res = await createOrder({
         customer: state.customer,
         items: state.cart,
-        total: state.total,
+        total: total,
         paymentMethod: method,
         origin: "pdv",
         sellerId: null // TODO: Pegar do contexto de auth

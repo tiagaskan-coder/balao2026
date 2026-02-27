@@ -127,13 +127,18 @@ function pdvReducer(state: PdvState, action: Action): PdvState {
 const PdvContext = createContext<{
   state: PdvState;
   dispatch: React.Dispatch<Action>;
+  total: number;
 } | null>(null);
 
 export function PdvProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(pdvReducer, initialState);
 
+  const total = React.useMemo(() => {
+    return state.cart.reduce((acc: number, item: PdvCartItem) => acc + item.price * item.quantity, 0);
+  }, [state.cart]);
+
   return (
-    <PdvContext.Provider value={{ state, dispatch }}>
+    <PdvContext.Provider value={{ state, dispatch, total }}>
       {children}
     </PdvContext.Provider>
   );

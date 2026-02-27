@@ -91,7 +91,7 @@ export default function ProductSearch() {
             placeholder="Buscar produto (nome, código...)"
             className="w-full pl-10 pr-4 py-3 rounded-md border-0 focus:ring-2 focus:ring-white/50 outline-none text-lg shadow-sm"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
             autoFocus
           />
         </div>
