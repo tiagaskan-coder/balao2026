@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { User, MapPin, Phone, Mail, Search, Check, AlertCircle } from "lucide-react";
+import { User, MapPin, Phone, Mail, Search, Check, AlertCircle, ArrowLeft } from "lucide-react";
 import { usePdv } from "../store";
 
 export default function CustomerForm() {
@@ -140,6 +140,23 @@ export default function CustomerForm() {
       <div className="mt-4 pt-4 border-t border-gray-100 text-xs text-gray-500 flex items-start gap-2">
         <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
         <p>Preencha os dados corretamente para emissão de Nota Fiscal. O CPF/CNPJ é obrigatório.</p>
+      </div>
+
+      {/* Botões de navegação */}
+      <div className="mt-6 flex gap-3">
+        <button
+          onClick={() => dispatch({ type: "SET_STEP", payload: "cart" })}
+          className="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded transition-colors"
+        >
+          Voltar ao Carrinho
+        </button>
+        <button
+          onClick={() => dispatch({ type: "SET_STEP", payload: "payment" })}
+          disabled={!state.customer.name || !state.customer.cpf_cnpj}
+          className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Ir para Pagamento
+        </button>
       </div>
     </div>
   );

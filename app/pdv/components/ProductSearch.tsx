@@ -27,16 +27,35 @@ export default function ProductSearch() {
         const list = Array.isArray(data) ? data : data.products || [];
 
         const mapped = list.map((p: any) => {
-          // Tratamento de imagem
+          // Tratamento de imagem - correção para diferentes formatos de imagem
           let imageUrl = "/placeholder.png";
           if (p.images && p.images.length > 0) {
             const img = p.images[0];
             if (img.startsWith("http")) {
               imageUrl = img;
+            } else if (img.startsWith("[")) {
+              // Se for array JSON, parse e pega primeira imagem
+              try {
+                const imagesArray = JSON.parse(img);
+                if (imagesArray.length > 0) {
+                  const firstImg = imagesArray[0];
+                  if (firstImg.startsWith("http")) {
+                    imageUrl = firstImg;
+                  } else {
+                    imageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/products/${firstImg}`;
+                  }
+                }
+              } catch {
+                imageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/products/${img}`;
+              }
             } else {
-              // Ajuste para o bucket correto se necessário. Assumindo bucket 'products'
+              // URL direta do bucket products
               imageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/products/${img}`;
             }
+          } else if (p.image_url) {
+            // Fallback para image_url direto
+            imageUrl = p.image_url.startsWith("http") ? p.image_url : 
+                      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/products/${p.image_url}`;
           }
 
           return {
