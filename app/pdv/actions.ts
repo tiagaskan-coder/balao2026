@@ -49,7 +49,6 @@ export async function createOrder({
     // 2. Criar Itens
     const orderItems = items.map((item) => ({
       order_id: order.id,
-      product_id: item.id.startsWith("custom-") ? null : item.id, // Se for custom, product_id é null ou precisa tratar
       product_name: item.name,
       product_image: item.image_url,
       quantity: item.quantity,
