@@ -122,7 +122,7 @@ export default function PaymentModal() {
                 <div className="border-t border-black pt-2 mb-4">
                    <div className="flex justify-between font-bold text-sm">
                       <span>TOTAL</span>
-                      <span>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(state.total)}</span>
+                      <span>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(total)}</span>
                    </div>
                 </div>
                 <div className="text-center text-[10px] mb-8">
