@@ -100,12 +100,19 @@ export default function PrintReceiptModal({ order, onClose }: PrintReceiptModalP
         </div>
 
         {/* Receipt Content */}
-        <div id="receipt-content" className="p-6 space-y-4 text-sm font-mono print:p-0 bg-white">
-          <div className="text-center border-b pb-4 border-dashed border-gray-300">
+        <div 
+          id="receipt-content" 
+          className="p-6 space-y-4 text-sm font-mono print:p-0"
+          style={{ backgroundColor: '#ffffff', color: '#000000' }}
+        >
+          <div 
+            className="text-center border-b pb-4 border-dashed"
+            style={{ borderColor: '#d1d5db' }}
+          >
             <h1 className="text-xl font-bold uppercase mb-1">Balão da Informática</h1>
-            <p className="text-gray-600">CNPJ: 00.000.000/0000-00</p>
-            <p className="text-gray-600">Rua Exemplo, 123 - Campinas/SP</p>
-            <p className="text-gray-600">(19) 3255-1661</p>
+            <p style={{ color: '#4b5563' }}>CNPJ: 00.000.000/0000-00</p>
+            <p style={{ color: '#4b5563' }}>Rua Exemplo, 123 - Campinas/SP</p>
+            <p style={{ color: '#4b5563' }}>(19) 3255-1661</p>
           </div>
 
           <div className="space-y-1">
@@ -129,7 +136,10 @@ export default function PrintReceiptModal({ order, onClose }: PrintReceiptModalP
             )}
           </div>
 
-          <div className="border-t border-b border-dashed border-gray-300 py-2">
+          <div 
+            className="border-t border-b border-dashed py-2"
+            style={{ borderColor: '#d1d5db' }}
+          >
             <div className="grid grid-cols-12 font-bold mb-1 text-xs uppercase">
               <div className="col-span-6">Item</div>
               <div className="col-span-2 text-center">Qtd</div>
@@ -151,13 +161,13 @@ export default function PrintReceiptModal({ order, onClose }: PrintReceiptModalP
               <span>TOTAL</span>
               <span>{formatCurrency(order.total)}</span>
             </div>
-            <div className="flex justify-between text-xs text-gray-500">
+            <div className="flex justify-between text-xs" style={{ color: '#6b7280' }}>
               <span>Forma de Pagamento:</span>
               <span className="uppercase">{order.payment_method?.replace('_', ' ')}</span>
             </div>
           </div>
 
-          <div className="text-center pt-4 text-xs text-gray-500">
+          <div className="text-center pt-4 text-xs" style={{ color: '#6b7280' }}>
             <p>Obrigado pela preferência!</p>
             <p>www.balao.info</p>
           </div>
