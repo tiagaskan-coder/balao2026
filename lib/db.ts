@@ -656,8 +656,79 @@ export async function getOrders(): Promise<Order[]> {
     }
 }
 
+// Helper para estornar vendas na Arena
+async function processArenaReversal(orderId: string) {
+    try {
+        // 1. Buscar registros em arena_vendas vinculados a este pedido
+        const { data: arenaSales, error: searchError } = await supabaseAdmin
+            .from('arena_vendas')
+            .select('*')
+            .eq('order_id', orderId);
+        
+        if (searchError) {
+            console.error("[processArenaReversal] Erro ao buscar vendas na arena:", searchError);
+            return;
+        }
+
+        if (!arenaSales || arenaSales.length === 0) return;
+
+        console.log(`[processArenaReversal] Revertendo ${arenaSales.length} registros de venda para o pedido ${orderId}`);
+
+        for (const sale of arenaSales) {
+            if (!sale.vendedor_id) continue;
+
+            // Buscar vendedor para atualizar total
+            const { data: seller, error: sellerError } = await supabaseAdmin
+                .from('arena_vendedores')
+                .select('vendas_atual')
+                .eq('id', sale.vendedor_id)
+                .single();
+            
+            if (sellerError) {
+                 console.error(`[processArenaReversal] Erro ao buscar vendedor ${sale.vendedor_id}:`, sellerError);
+                 continue;
+            }
+
+            if (seller) {
+                const currentTotal = seller.vendas_atual || 0;
+                const saleValue = sale.valor || 0;
+                const newTotal = currentTotal - saleValue;
+                
+                console.log(`[processArenaReversal] Vendedor ${sale.vendedor_id}: ${currentTotal} - ${saleValue} = ${newTotal}`);
+
+                const { error: updateError } = await supabaseAdmin
+                    .from('arena_vendedores')
+                    .update({ vendas_atual: newTotal })
+                    .eq('id', sale.vendedor_id);
+                
+                if (updateError) {
+                    console.error(`[processArenaReversal] Erro ao atualizar total do vendedor ${sale.vendedor_id}:`, updateError);
+                }
+            }
+        }
+
+        // Remover registros de arena_vendas
+        const { error: deleteError } = await supabaseAdmin
+            .from('arena_vendas')
+            .delete()
+            .eq('order_id', orderId);
+            
+        if (deleteError) {
+            console.error("[processArenaReversal] Erro ao deletar registros em arena_vendas:", deleteError);
+        }
+
+    } catch (error) {
+        console.error("[processArenaReversal] Erro crítico:", error);
+    }
+}
+
 export async function updateOrderStatus(id: string, status: string) {
     try {
+        // Se estiver cancelando, estornar da Arena
+        if (status === 'cancelled') {
+            await processArenaReversal(id);
+        }
+
         const { error } = await supabaseAdmin
             .from('orders')
             .update({ status })
@@ -672,6 +743,9 @@ export async function updateOrderStatus(id: string, status: string) {
 
 export async function deleteOrder(id: string) {
     try {
+        // Antes de excluir, estornar da Arena (se houver registros)
+        await processArenaReversal(id);
+
         const { error } = await supabaseAdmin
             .from('orders')
             .delete()

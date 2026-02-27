@@ -20,7 +20,7 @@ export default function PaymentModal() {
   const [pixCopied, setPixCopied] = useState(false);
 
   // Auto-refresh após sucesso
-  React.useEffect(() => {
+  useEffect(() => {
     let timeout: NodeJS.Timeout;
     if (success) {
       timeout = setTimeout(() => {
@@ -97,8 +97,7 @@ export default function PaymentModal() {
               <CheckCircle className="w-10 h-10 text-green-600" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Venda Finalizada!</h2>
-            <p className="text-gray-600 mb-2">O pedido #{orderId} foi registrado com sucesso.</p>
-            <p className="text-sm text-gray-500 mb-8 animate-pulse">Atualizando sistema em 5 segundos...</p>
+            <p className="text-gray-600 mb-8">O pedido #{orderId} foi registrado com sucesso.</p>
             
             <div className="grid grid-cols-2 gap-4">
               <button 
@@ -280,27 +279,5 @@ export default function PaymentModal() {
         </div>
       )}
     </div>
-  );
-}
-
-// Icone ShoppingCart não foi importado no topo, vou adicionar
-function ShoppingCart({ className }: { className?: string }) {
-  return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      width="24" 
-      height="24" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      className={className}
-    >
-      <circle cx="8" cy="21" r="1" />
-      <circle cx="19" cy="21" r="1" />
-      <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
-    </svg>
   );
 }
