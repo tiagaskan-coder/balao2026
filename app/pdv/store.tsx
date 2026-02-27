@@ -20,15 +20,8 @@ export interface PdvCustomer {
   cpf_cnpj: string;
   email: string;
   phone: string;
-  address: {
-    street: string;
-    number: string;
-    neighborhood: string;
-    city: string;
-    state: string;
-    zip: string;
-    complement?: string;
-  };
+  address: string;
+  cep: string;
 }
 
 export interface PdvState {
@@ -57,14 +50,8 @@ const initialState: PdvState = {
     cpf_cnpj: "",
     email: "",
     phone: "",
-    address: {
-      street: "",
-      number: "",
-      neighborhood: "",
-      city: "",
-      state: "",
-      zip: "",
-    },
+    address: "",
+    cep: "",
   },
   sellerId: null,
   step: "cart",
