@@ -26,7 +26,7 @@ export default function PaymentModal() {
         total: total,
         paymentMethod: method,
         origin: "pdv",
-        sellerId: null // TODO: Pegar do contexto de auth
+        sellerId: state.sellerId
       });
 
       if (!res.success) {

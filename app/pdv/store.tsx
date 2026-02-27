@@ -22,6 +22,10 @@ export interface PdvCustomer {
   phone: string;
   address: string;
   cep: string;
+  city: string;
+  state: string;
+  number: string;
+  complement: string;
 }
 
 export interface PdvState {
@@ -37,7 +41,7 @@ type Action =
   | { type: "REMOVE_FROM_CART"; payload: string }
   | { type: "UPDATE_QUANTITY"; payload: { id: string; quantity: number } }
   | { type: "SET_CUSTOMER"; payload: Partial<PdvCustomer> }
-  | { type: "SET_SELLER"; payload: string }
+  | { type: "SET_SELLER"; payload: string | null }
   | { type: "SET_STEP"; payload: PdvState["step"] }
   | { type: "SET_PAYMENT_METHOD"; payload: PdvState["paymentMethod"] }
   | { type: "RESET" };
@@ -52,6 +56,10 @@ const initialState: PdvState = {
     phone: "",
     address: "",
     cep: "",
+    city: "",
+    state: "",
+    number: "",
+    complement: ""
   },
   sellerId: null,
   step: "cart",

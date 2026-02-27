@@ -12,6 +12,7 @@ import { CartProvider } from "@/context/CartContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { AuthProvider } from "@/context/AuthContext";
 import LayoutWrapper from "@/components/LayoutWrapper";
+import VisitorTracker from "@/components/VisitorTracker";
 
 import { getCategories } from "@/lib/db";
 import type { Category } from "@/lib/utils";
@@ -160,6 +161,7 @@ export default async function RootLayout({
       <body
         className={`${bangers.variable} antialiased flex flex-col min-h-screen overflow-x-hidden`}
       >
+        <VisitorTracker />
         <AuthProvider>
           <CartProvider>
             <ToastProvider>

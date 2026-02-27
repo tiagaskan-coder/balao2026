@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { User, MapPin, Phone, Mail, Search, Check, AlertCircle, ArrowLeft } from "lucide-react";
 import { usePdv } from "../store";
+import SellerSelector from "./SellerSelector";
 
 export default function CustomerForm() {
   const { state, dispatch } = usePdv();
@@ -28,8 +29,12 @@ export default function CustomerForm() {
           type: "SET_CUSTOMER",
           payload: {
             ...state.customer,
-            address: `${data.logradouro}, ${data.bairro}, ${data.localidade} - ${data.uf}`,
-            cep: data.cep
+            address: data.logradouro,
+            cep: data.cep,
+            city: data.localidade,
+            state: data.uf,
+            number: "",
+            complement: ""
           }
         });
       }
@@ -123,18 +128,72 @@ export default function CustomerForm() {
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Endereço Completo</label>
-          <div className="relative">
-            <MapPin className="absolute left-3 top-3 text-gray-400 w-4 h-4" />
-            <textarea
-              value={state.customer.address}
-              onChange={(e) => handleChange("address", e.target.value)}
-              className="w-full pl-9 p-2 border border-gray-300 rounded focus:ring-2 focus:ring-red-500 outline-none min-h-[80px] resize-none"
-              placeholder="Rua, Número, Bairro, Cidade - UF"
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Logradouro</label>
+            <div className="relative">
+              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                value={state.customer.address}
+                onChange={(e) => handleChange("address", e.target.value)}
+                className="w-full pl-9 p-2 border border-gray-300 rounded focus:ring-2 focus:ring-red-500 outline-none"
+                placeholder="Rua, Avenida, etc."
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Número</label>
+            <input
+              type="text"
+              value={state.customer.number}
+              onChange={(e) => handleChange("number", e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-red-500 outline-none"
+              placeholder="Nº"
             />
           </div>
         </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Complemento</label>
+            <input
+              type="text"
+              value={state.customer.complement}
+              onChange={(e) => handleChange("complement", e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-red-500 outline-none"
+              placeholder="Apto, Bloco, etc."
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Cidade/UF</label>
+            <div className="grid grid-cols-2 gap-2">
+              <input
+                type="text"
+                value={state.customer.city}
+                onChange={(e) => handleChange("city", e.target.value)}
+                className="p-2 border border-gray-300 rounded focus:ring-2 focus:ring-red-500 outline-none"
+                placeholder="Cidade"
+              />
+              <input
+                type="text"
+                value={state.customer.state}
+                onChange={(e) => handleChange("state", e.target.value)}
+                className="p-2 border border-gray-300 rounded focus:ring-2 focus:ring-red-500 outline-none"
+                placeholder="UF"
+                maxLength={2}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Seleção de Vendedor */}
+      <div className="mt-6">
+        <SellerSelector
+          onSellerSelect={(sellerId) => dispatch({ type: "SET_SELLER", payload: sellerId })}
+          selectedSeller={state.sellerId}
+        />
       </div>
       
       <div className="mt-4 pt-4 border-t border-gray-100 text-xs text-gray-500 flex items-start gap-2">

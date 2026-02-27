@@ -504,7 +504,7 @@ export async function deleteCategory(id: string) {
 export interface OrderItem {
     id: string;
     order_id: string;
-    product_id: string;
+    product_id?: string;
     product_name: string;
     product_image: string;
     quantity: number;
@@ -524,6 +524,10 @@ export interface Order {
     items?: OrderItem[];
     coupon_code?: string;
     discount_value?: number;
+    seller_id?: string;
+    origin?: 'site' | 'pdv';
+    payment_method?: string;
+    cpf_cnpj?: string;
 }
 
 export async function createOrder(orderData: Omit<Order, 'id' | 'created_at' | 'updated_at'>, items: Omit<OrderItem, 'id' | 'order_id'>[]) {
@@ -548,6 +552,39 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'created_at' | '
             .insert(itemsWithOrderId);
 
         if (itemsError) throw itemsError;
+
+        // 3. If it's a PDV sale with a seller, register in Arena
+        if (orderData.origin === 'pdv' && orderData.seller_id) {
+            try {
+                // Update seller total
+                const { data: seller, error: sellerError } = await supabaseAdmin
+                    .from('arena_vendedores')
+                    .select('vendas_atual')
+                    .eq('id', orderData.seller_id)
+                    .single();
+
+                if (!sellerError && seller) {
+                    const newTotal = (seller.vendas_atual || 0) + orderData.total;
+                    
+                    await supabaseAdmin
+                        .from('arena_vendedores')
+                        .update({ vendas_atual: newTotal })
+                        .eq('id', orderData.seller_id);
+
+                    // Register sale in history
+                    await supabaseAdmin
+                        .from('arena_vendas')
+                        .insert({
+                            vendedor_id: orderData.seller_id,
+                            valor: orderData.total,
+                            order_id: order.id
+                        });
+                }
+            } catch (arenaError) {
+                console.error("Error registering Arena sale:", arenaError);
+                // Don't fail the order creation if Arena update fails
+            }
+        }
 
         return order;
     } catch (error) {
