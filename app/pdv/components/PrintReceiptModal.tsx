@@ -1,6 +1,7 @@
 'use client';
 
-import { X, Printer } from 'lucide-react';
+import { X, Printer, Download } from 'lucide-react';
+import html2canvas from 'html2canvas';
 
 interface OrderItem {
   id: string;
@@ -31,6 +32,30 @@ export default function PrintReceiptModal({ order, onClose }: PrintReceiptModalP
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDownloadImage = async () => {
+    const element = document.getElementById('receipt-content');
+    if (!element) return;
+
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2, // Better resolution
+        backgroundColor: '#ffffff',
+        logging: false,
+      });
+
+      const image = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = image;
+      link.download = `recibo-${order.id.slice(0, 8)}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error generating receipt image:', error);
+      alert('Erro ao gerar imagem do recibo.');
+    }
   };
 
   const formatCurrency = (value: number) => {
@@ -73,7 +98,7 @@ export default function PrintReceiptModal({ order, onClose }: PrintReceiptModalP
         </div>
 
         {/* Receipt Content */}
-        <div className="p-6 space-y-4 text-sm font-mono print:p-0">
+        <div id="receipt-content" className="p-6 space-y-4 text-sm font-mono print:p-0 bg-white">
           <div className="text-center border-b pb-4 border-dashed border-gray-300">
             <h1 className="text-xl font-bold uppercase mb-1">Balão da Informática</h1>
             <p className="text-gray-600">CNPJ: 00.000.000/0000-00</p>
@@ -143,6 +168,13 @@ export default function PrintReceiptModal({ order, onClose }: PrintReceiptModalP
             className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
           >
             Fechar
+          </button>
+          <button
+            onClick={handleDownloadImage}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+          >
+            <Download size={18} />
+            Salvar Imagem
           </button>
           <button
             onClick={handlePrint}
