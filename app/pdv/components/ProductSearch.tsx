@@ -1,8 +1,56 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, Plus, PackagePlus, X } from "lucide-react";
+import { Search, Plus, PackagePlus, X, Package } from "lucide-react";
 import { usePdv, PdvProduct } from "../store";
+import { supabase } from "@/lib/supabase";
+
+// Dados mock para desenvolvimento local
+const getMockProducts = (query: string) => {
+  const mockProducts = [
+    {
+      id: '1',
+      name: 'Mouse Gamer RGB',
+      price: 89.90,
+      images: ['mouse-gamer.jpg'],
+      stock_quantity: 15
+    },
+    {
+      id: '2', 
+      name: 'Teclado Mecânico',
+      price: 199.90,
+      images: ['teclado-mecanico.jpg'],
+      stock_quantity: 8
+    },
+    {
+      id: '3',
+      name: 'Headphone Bluetooth',
+      price: 159.90,
+      images: ['headphone-bt.jpg'],
+      stock_quantity: 12
+    },
+    {
+      id: '4',
+      name: 'Monitor 24" LED',
+      price: 699.90,
+      images: ['monitor-24.jpg'],
+      stock_quantity: 5
+    },
+    {
+      id: '5',
+      name: 'Webcam Full HD',
+      price: 129.90,
+      images: ['webcam-hd.jpg'],
+      stock_quantity: 20
+    }
+  ];
+
+  // Filtrar por query se houver
+  return query 
+    ? mockProducts.filter(p => 
+        p.name.toLowerCase().includes(query.toLowerCase()))
+    : mockProducts;
+};
 
 export default function ProductSearch() {
   const { dispatch } = usePdv();
@@ -20,42 +68,77 @@ export default function ProductSearch() {
       }
       setLoading(true);
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-        if (!res.ok) throw new Error("Falha na busca");
-        const data = await res.json();
+        // Verificar se temos configuração do Supabase
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
         
-        const list = Array.isArray(data) ? data : data.products || [];
+        let list: any[] = [];
+        
+        if (supabaseUrl && supabaseKey && !supabaseUrl.includes('seu-projeto') && !supabaseKey.includes('sua-chave')) {
+          // Conexão real com Supabase
+          const { data: supabaseData, error } = await supabase
+            .from('products')
+            .select('*')
+            .ilike('name', `%${query}%`)
+            .limit(20);
+
+          if (error) throw error;
+          list = supabaseData || [];
+        } else {
+          // Fallback para API route (desenvolvimento local)
+          const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+          if (!res.ok) throw new Error("Falha na busca");
+          const data = await res.json();
+          list = Array.isArray(data) ? data : data.products || [];
+        }
 
         const mapped = list.map((p: any) => {
           // Tratamento de imagem - correção para diferentes formatos de imagem
           let imageUrl = "/placeholder.png";
-          if (p.images && p.images.length > 0) {
-            const img = p.images[0];
-            if (img.startsWith("http")) {
-              imageUrl = img;
-            } else if (img.startsWith("[")) {
-              // Se for array JSON, parse e pega primeira imagem
-              try {
-                const imagesArray = JSON.parse(img);
-                if (imagesArray.length > 0) {
-                  const firstImg = imagesArray[0];
-                  if (firstImg.startsWith("http")) {
-                    imageUrl = firstImg;
-                  } else {
-                    imageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/products/${firstImg}`;
+          
+          // Função para construir URL do Supabase
+          const buildSupabaseUrl = (filename: string) => {
+            if (!filename) return "/placeholder.png";
+            if (filename.startsWith("http")) return filename;
+            
+            // Remove qualquer prefixo de bucket se existir
+            const cleanFilename = filename.replace(/^products\//, '');
+            
+            // Para desenvolvimento local, usar URL padrão do Supabase
+            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://seu-projeto.supabase.co';
+            return `${supabaseUrl}/storage/v1/object/public/products/${cleanFilename}`;
+          };
+
+          // Prioridade 1: Campo images (pode ser array ou string)
+          if (p.images) {
+            if (Array.isArray(p.images) && p.images.length > 0) {
+              const firstImg = p.images[0];
+              imageUrl = buildSupabaseUrl(firstImg);
+            } else if (typeof p.images === 'string') {
+              if (p.images.startsWith('[')) {
+                // Tentar parsear como JSON array
+                try {
+                  const imagesArray = JSON.parse(p.images);
+                  if (imagesArray.length > 0) {
+                    imageUrl = buildSupabaseUrl(imagesArray[0]);
                   }
+                } catch {
+                  // Se falhar o parse, tratar como string simples
+                  imageUrl = buildSupabaseUrl(p.images);
                 }
-              } catch {
-                imageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/products/${img}`;
+              } else {
+                // String simples
+                imageUrl = buildSupabaseUrl(p.images);
               }
-            } else {
-              // URL direta do bucket products
-              imageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/products/${img}`;
             }
-          } else if (p.image_url) {
-            // Fallback para image_url direto
-            imageUrl = p.image_url.startsWith("http") ? p.image_url : 
-                      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/products/${p.image_url}`;
+          }
+          // Prioridade 2: Campo image_url
+          else if (p.image_url) {
+            imageUrl = buildSupabaseUrl(p.image_url);
+          }
+          // Prioridade 3: Campo image (caso exista)
+          else if (p.image) {
+            imageUrl = buildSupabaseUrl(p.image);
           }
 
           return {
@@ -136,10 +219,23 @@ export default function ProductSearch() {
                 className="flex flex-col bg-white border border-gray-200 rounded-lg p-3 hover:shadow-lg transition-shadow cursor-pointer group hover:border-red-200"
                 onClick={() => handleAdd(product)}
               >
-                <div className="aspect-square bg-gray-100 rounded-md mb-3 flex items-center justify-center overflow-hidden relative">
+                <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-md mb-3 flex items-center justify-center overflow-hidden relative">
                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                   <img src={product.image_url} alt={product.name} className="object-contain h-full w-full mix-blend-multiply" />
-                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+                   <img 
+                     src={product.image_url} 
+                     alt={product.name} 
+                     className="object-contain h-full w-full mix-blend-multiply transition-all duration-300 group-hover:scale-105" 
+                     onError={(e) => {
+                       const target = e.target as HTMLImageElement;
+                       target.src = '/placeholder.png';
+                       target.classList.remove('mix-blend-multiply');
+                       target.classList.add('opacity-50');
+                     }}
+                   />
+                   <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                   {product.image_url === '/placeholder.png' && (
+                     <Package className="absolute w-8 h-8 text-gray-400" />
+                   )}
                 </div>
                 <h3 className="font-medium text-sm text-gray-800 line-clamp-2 mb-2 flex-1 group-hover:text-red-600 transition-colors" title={product.name}>{product.name}</h3>
                 <div className="flex items-center justify-between mt-auto">
