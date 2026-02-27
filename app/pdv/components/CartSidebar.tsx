@@ -3,10 +3,11 @@
 import React from "react";
 import { Trash2, Minus, Plus, CreditCard, ShoppingCart } from "lucide-react";
 import { usePdv, PdvCartItem } from "../store";
+import SellerSelector from "./SellerSelector";
 
 export default function CartSidebar() {
   const { state, dispatch, total } = usePdv();
-  const { cart } = state;
+  const { cart, sellerId } = state;
 
   const updateQty = (id: string, qty: number) => {
     if (qty < 1) return;
@@ -83,6 +84,13 @@ export default function CartSidebar() {
       </div>
 
       <div className="p-4 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <div className="mb-4">
+          <SellerSelector 
+            selectedSeller={sellerId} 
+            onSellerSelect={(id) => dispatch({ type: "SET_SELLER", payload: id })} 
+          />
+        </div>
+
         <div className="flex justify-between items-center mb-4">
           <span className="text-gray-600 font-medium">Subtotal</span>
           <span className="text-2xl font-bold text-gray-900">
@@ -91,7 +99,13 @@ export default function CartSidebar() {
         </div>
         
         <button
-          onClick={() => dispatch({ type: "SET_STEP", payload: "customer" })}
+          onClick={() => {
+            if (!sellerId) {
+              alert("Por favor, selecione um vendedor antes de finalizar.");
+              return;
+            }
+            dispatch({ type: "SET_STEP", payload: "customer" });
+          }}
           disabled={cart.length === 0}
           className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
         >
