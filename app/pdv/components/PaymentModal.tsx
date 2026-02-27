@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
-import { X, CreditCard, Banknote, QrCode, Printer, CheckCircle, AlertTriangle, Copy, Check } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { X, CreditCard, Banknote, QrCode, Printer, CheckCircle, AlertTriangle, Copy, Check, ShoppingCart } from "lucide-react";
 import { usePdv } from "../store";
-import { createOrder } from "../actions";
+import { createOrder } from "@/app/pdv/actions";
 import { QRCodeSVG } from "qrcode.react";
 import { generatePixPayload } from "@/lib/pix";
 
@@ -18,6 +18,17 @@ export default function PaymentModal() {
   const [showPix, setShowPix] = useState(false);
   const [pixPayload, setPixPayload] = useState("");
   const [pixCopied, setPixCopied] = useState(false);
+
+  // Auto-refresh após sucesso
+  React.useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    if (success) {
+      timeout = setTimeout(() => {
+        window.location.reload();
+      }, 5000); // 5 segundos para ler e atualizar sozinho
+    }
+    return () => clearTimeout(timeout);
+  }, [success]);
 
   const handlePixSelection = () => {
     const payload = generatePixPayload({
@@ -74,7 +85,7 @@ export default function PaymentModal() {
   };
 
   const handleNewSale = () => {
-    dispatch({ type: "RESET" });
+    window.location.reload();
   };
 
   if (success) {
@@ -86,7 +97,8 @@ export default function PaymentModal() {
               <CheckCircle className="w-10 h-10 text-green-600" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Venda Finalizada!</h2>
-            <p className="text-gray-600 mb-8">O pedido #{orderId} foi registrado com sucesso.</p>
+            <p className="text-gray-600 mb-2">O pedido #{orderId} foi registrado com sucesso.</p>
+            <p className="text-sm text-gray-500 mb-8 animate-pulse">Atualizando sistema em 5 segundos...</p>
             
             <div className="grid grid-cols-2 gap-4">
               <button 
