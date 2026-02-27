@@ -555,6 +555,7 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'created_at' | '
 
         // 3. If it's a PDV sale with a seller, register in Arena
         if (orderData.origin === 'pdv' && orderData.seller_id) {
+            console.log(`[createOrder] Registering Arena sale for seller ${orderData.seller_id}, total ${orderData.total}`);
             try {
                 // Update seller total
                 const { data: seller, error: sellerError } = await supabaseAdmin
@@ -563,26 +564,43 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'created_at' | '
                     .eq('id', orderData.seller_id)
                     .single();
 
-                if (!sellerError && seller) {
+                if (sellerError) {
+                    console.error("[createOrder] Error fetching seller:", sellerError);
+                    throw sellerError;
+                }
+
+                if (seller) {
                     const newTotal = (seller.vendas_atual || 0) + orderData.total;
                     
-                    await supabaseAdmin
+                    const { error: updateError } = await supabaseAdmin
                         .from('arena_vendedores')
                         .update({ vendas_atual: newTotal })
                         .eq('id', orderData.seller_id);
+                    
+                    if (updateError) {
+                         console.error("[createOrder] Error updating seller total:", updateError);
+                         throw updateError;
+                    }
 
                     // Register sale in history
-                    await supabaseAdmin
+                    const { error: insertError } = await supabaseAdmin
                         .from('arena_vendas')
                         .insert({
                             vendedor_id: orderData.seller_id,
                             valor: orderData.total,
                             order_id: order.id
                         });
+                        
+                    if (insertError) {
+                        console.error("[createOrder] Error inserting arena_vendas:", insertError);
+                        throw insertError;
+                    }
+                    
+                    console.log("[createOrder] Arena sale registered successfully");
                 }
             } catch (arenaError) {
-                console.error("Error registering Arena sale:", arenaError);
-                // Don't fail the order creation if Arena update fails
+                console.error("[createOrder] Critical error registering Arena sale:", arenaError);
+                // Don't fail the order creation if Arena update fails, but log it clearly
             }
         }
 

@@ -394,11 +394,18 @@ export default function AdminClient({
                                     <td className="px-6 py-4 text-slate-600">
                                         {new Date(venda.created_at).toLocaleString('pt-BR')}
                                     </td>
-                                    <td className="px-6 py-4 font-medium text-slate-900 flex items-center gap-2">
-                                        {venda.vendedor?.avatar_url && (
-                                            <img src={venda.vendedor.avatar_url} alt="" className="w-6 h-6 rounded-full object-cover" />
+                                    <td className="px-6 py-4 font-medium text-slate-900">
+                                        <div className="flex items-center gap-2">
+                                            {venda.vendedor?.avatar_url && (
+                                                <img src={venda.vendedor.avatar_url} alt="" className="w-6 h-6 rounded-full object-cover" />
+                                            )}
+                                            {venda.vendedor?.nome || 'Desconhecido'}
+                                        </div>
+                                        {venda.order_id && (
+                                            <div className="text-xs text-slate-400 mt-1 pl-8">
+                                                Pedido: {venda.order_id.slice(0, 8)}...
+                                            </div>
                                         )}
-                                        {venda.vendedor?.nome || 'Desconhecido'}
                                     </td>
                                     <td className="px-6 py-4 text-emerald-600 font-bold">
                                         R$ {venda.valor.toLocaleString('pt-BR')}

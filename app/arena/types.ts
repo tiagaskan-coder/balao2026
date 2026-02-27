@@ -13,6 +13,7 @@ export type Venda = {
   vendedor_id: string;
   valor: number;
   created_at: string;
+  order_id?: string;
   vendedor?: Vendedor; // Join opcional
 };
 

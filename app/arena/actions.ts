@@ -68,6 +68,20 @@ export async function removerVenda(vendaId: string) {
 
   if (deleteError) throw new Error('Erro ao remover registro de venda');
 
+  // 6. Se tiver pedido associado, cancela o pedido
+  if (venda.order_id) {
+    const { error: cancelOrderError } = await supabaseAdmin
+      .from('orders')
+      .update({ status: 'cancelled' })
+      .eq('id', venda.order_id);
+      
+    if (cancelOrderError) {
+      console.error('Erro ao cancelar pedido associado:', cancelOrderError);
+      // Não lança erro aqui para não impedir a remoção da venda no Arena,
+      // mas loga para investigação
+    }
+  }
+
   revalidatePath('/arena/admin');
   revalidatePath('/arena');
 }
