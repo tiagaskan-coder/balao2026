@@ -6,6 +6,7 @@ import { usePdv } from "../store";
 import { createOrder } from "@/app/pdv/actions";
 import { QRCodeSVG } from "qrcode.react";
 import { generatePixPayload } from "@/lib/pix";
+import PrintReceiptModal from "./PrintReceiptModal";
 
 export default function PaymentModal() {
   const { state, dispatch, total } = usePdv();
@@ -13,6 +14,8 @@ export default function PaymentModal() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [lastPaymentMethod, setLastPaymentMethod] = useState<string>("");
+  const [showPrintModal, setShowPrintModal] = useState(false);
   
   // Estados para PIX
   const [showPix, setShowPix] = useState(false);
@@ -51,6 +54,7 @@ export default function PaymentModal() {
   const handlePayment = async (method: string) => {
     setLoading(true);
     setError("");
+    setLastPaymentMethod(method);
 
     try {
       // Simulação de processamento
@@ -81,7 +85,7 @@ export default function PaymentModal() {
 
 
   const handlePrint = () => {
-    window.print();
+    setShowPrintModal(true);
   };
 
   const handleNewSale = () => {
@@ -90,80 +94,60 @@ export default function PaymentModal() {
 
   if (success) {
     return (
-      <div className="absolute inset-0 z-50 bg-gray-900/50 flex items-center justify-center p-4 backdrop-blur-sm">
-        <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in duration-200">
-          <div className="p-8 text-center">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-10 h-10 text-green-600" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Venda Finalizada!</h2>
-            <p className="text-gray-600 mb-8">O pedido #{orderId} foi registrado com sucesso.</p>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <button 
-                onClick={handlePrint}
-                className="flex flex-col items-center justify-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border-2 border-gray-100 transition-all hover:border-gray-200 group"
-              >
-                <Printer className="w-8 h-8 text-gray-600 mb-2 group-hover:text-gray-900" />
-                <span className="font-medium text-gray-900">Imprimir Cupom</span>
-              </button>
+      <>
+        <div className="absolute inset-0 z-50 bg-gray-900/50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in duration-200">
+            <div className="p-8 text-center">
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle className="w-10 h-10 text-green-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Venda Finalizada!</h2>
+              <p className="text-gray-600 mb-2">O pedido #{orderId} foi registrado com sucesso.</p>
+              <p className="text-sm text-gray-500 mb-8">Atualizando sistema em 5 segundos...</p>
               
-              <button 
-                onClick={handleNewSale}
-                className="flex flex-col items-center justify-center p-4 bg-red-50 hover:bg-red-100 rounded-xl border-2 border-red-100 transition-all hover:border-red-200 group"
-              >
-                <ShoppingCart className="w-8 h-8 text-red-600 mb-2 group-hover:text-red-700" />
-                <span className="font-medium text-red-900">Nova Venda</span>
-              </button>
+              <div className="grid grid-cols-2 gap-4">
+                <button 
+                  onClick={handlePrint}
+                  className="flex flex-col items-center justify-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border-2 border-gray-100 transition-all hover:border-gray-200 group"
+                >
+                  <Printer className="w-8 h-8 text-gray-600 mb-2 group-hover:text-gray-900" />
+                  <span className="font-medium text-gray-900">Imprimir Cupom</span>
+                </button>
+                
+                <button 
+                  onClick={handleNewSale}
+                  className="flex flex-col items-center justify-center p-4 bg-red-50 hover:bg-red-100 rounded-xl border-2 border-red-100 transition-all hover:border-red-200 group"
+                >
+                  <ShoppingCart className="w-8 h-8 text-red-600 mb-2 group-hover:text-red-700" />
+                  <span className="font-medium text-red-900">Nova Venda</span>
+                </button>
+              </div>
             </div>
-          </div>
-          
-          {/* Área de impressão oculta (apenas para window.print) */}
-          <div className="hidden print:block fixed inset-0 bg-white p-0">
-             <div className="w-[80mm] mx-auto p-2 font-mono text-xs">
-                <div className="text-center mb-4">
-                  <h1 className="font-bold text-lg">BALÃO DA INFORMÁTICA</h1>
-                  <p>Rua Exemplo, 123 - Centro</p>
-                  <p>CNPJ: 34.397.947/0001-08</p>
-                  <p>{new Date().toLocaleString()}</p>
-                </div>
-                <div className="border-b border-black mb-2">
-                  <p>Cliente: {state.customer.name || "Consumidor Final"}</p>
-                  {state.customer.cpf_cnpj && <p>CPF/CNPJ: {state.customer.cpf_cnpj}</p>}
-                </div>
-                <div className="border-b border-black mb-2"></div>
-                <table className="w-full mb-4">
-                  <thead>
-                    <tr className="text-left">
-                      <th>Item</th>
-                      <th className="text-right">Qtd</th>
-                      <th className="text-right">Vl. Tot</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {state.cart.map((item) => (
-                      <tr key={item.id}>
-                        <td className="truncate max-w-[40mm]">{item.name}</td>
-                        <td className="text-right">{item.quantity}</td>
-                        <td className="text-right">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.price * item.quantity)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <div className="border-t border-black pt-2 mb-4">
-                   <div className="flex justify-between font-bold text-sm">
-                      <span>TOTAL</span>
-                      <span>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(total)}</span>
-                   </div>
-                </div>
-                <div className="text-center text-[10px] mb-8">
-                   <p>Obrigado pela preferência!</p>
-                   <p>www.balao.info</p>
-                </div>
-             </div>
           </div>
         </div>
-      </div>
+
+        {showPrintModal && (
+          <PrintReceiptModal
+            order={{
+              id: orderId || "PENDENTE",
+              created_at: new Date().toISOString(),
+              customer_name: state.customer.name || "Consumidor Final",
+              customer_email: state.customer.email,
+              customer_whatsapp: state.customer.phone,
+              total: total,
+              payment_method: lastPaymentMethod,
+              origin: "pdv",
+              items: state.cart.map(item => ({
+                id: item.id,
+                product_name: item.name,
+                quantity: item.quantity,
+                price: item.price
+              }))
+            }}
+            onClose={() => setShowPrintModal(false)}
+          />
+        )}
+      </>
     );
   }
 

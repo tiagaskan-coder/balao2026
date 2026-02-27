@@ -41,18 +41,29 @@ export default function PrintReceiptModal({ order, onClose }: PrintReceiptModalP
   };
 
   const formatDate = (dateString: string) => {
-    return new Intl.DateTimeFormat('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(new Date(dateString));
+    try {
+      return new Intl.DateTimeFormat('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).format(new Date(dateString));
+    } catch (e) {
+      return dateString;
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 print:bg-white print:static print:h-auto print:w-auto print:block">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto print:shadow-none print:w-full print:max-w-none print:h-auto print:overflow-visible">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 print:p-0 print:bg-white print:absolute print:inset-0 print:z-[9999]">
+      <style jsx global>{`
+        @media print {
+          body > * { display: none !important; }
+          #print-modal-root { display: block !important; position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+          @page { margin: 0; size: auto; }
+        }
+      `}</style>
+      <div id="print-modal-root" className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto print:shadow-none print:w-full print:max-w-none print:max-h-none print:h-auto print:overflow-visible print:rounded-none">
         {/* Header - Hidden on Print */}
         <div className="flex items-center justify-between p-4 border-b print:hidden">
           <h2 className="text-lg font-bold text-gray-800">Comprovante de Venda</h2>
