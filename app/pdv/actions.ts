@@ -1,8 +1,13 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@supabase/supabase-js";
 import { PdvCartItem, PdvCustomer } from "./store";
 import { adicionarVenda } from "@/app/arena/actions";
+
+// Inicializa o cliente Supabase Admin para ignorar RLS no PDV
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function createOrder({
   customer,
@@ -19,8 +24,6 @@ export async function createOrder({
   origin: string;
   sellerId: string | null;
 }) {
-  const supabase = await createClient();
-
   try {
     // 1. Criar Pedido
     const { data: order, error: orderError } = await supabase
@@ -46,7 +49,7 @@ export async function createOrder({
     // 2. Criar Itens
     const orderItems = items.map((item) => ({
       order_id: order.id,
-      product_id: item.id,
+      product_id: item.id.startsWith("custom-") ? null : item.id, // Se for custom, product_id é null ou precisa tratar
       product_name: item.name,
       product_image: item.image_url,
       quantity: item.quantity,

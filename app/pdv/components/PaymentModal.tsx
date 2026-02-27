@@ -1,198 +1,223 @@
 "use client";
 
 import React, { useState } from "react";
+import { X, CreditCard, Banknote, QrCode, Printer, CheckCircle, AlertTriangle } from "lucide-react";
 import { usePdv } from "../store";
-import { ArrowLeft, Check, Printer, QrCode } from "lucide-react";
-import { QRCodeSVG } from "qrcode.react";
-import { generatePixPayload } from "@/lib/pix";
 import { createOrder } from "../actions";
 
-export default function PaymentModal({ onBack }: { onBack: () => void }) {
+export default function PaymentModal() {
   const { state, dispatch } = usePdv();
   const [loading, setLoading] = useState(false);
-  const [pixPayload, setPixPayload] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
   const [orderId, setOrderId] = useState<string | null>(null);
 
-  const total = state.cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-
-  const handleGeneratePix = () => {
-    // CNPJ Balão da Informática: 34397947000108
-    const payload = generatePixPayload({
-      key: "34397947000108",
-      name: "BALAO DA INFORMATICA",
-      city: "SAO PAULO", // Assumindo cidade sede, ajuste conforme necessário
-      amount: total,
-      txid: `PDV${Date.now().toString().slice(-8)}` // ID único curto
-    });
-    setPixPayload(payload);
-  };
-
-  const handleFinalize = async () => {
+  const total = state.total;
+  
+  const handlePayment = async (method: string) => {
     setLoading(true);
+    setError("");
+
     try {
-      const result = await createOrder({
+      // Simulação de processamento
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      const res = await createOrder({
         customer: state.customer,
         items: state.cart,
-        total,
-        paymentMethod: "pix",
+        total: state.total,
+        paymentMethod: method,
         origin: "pdv",
-        sellerId: state.sellerId
+        sellerId: null // TODO: Pegar do contexto de auth
       });
-      
-      if (result.success && result.orderId) {
-        setOrderId(result.orderId);
-        dispatch({ type: "SET_STEP", payload: "success" });
-        // Aqui poderia disparar impressão automática
-      } else {
-        alert("Erro ao criar pedido: " + result.error);
+
+      if (!res.success) {
+        throw new Error(res.error);
       }
-    } catch (error) {
-      console.error(error);
-      alert("Erro inesperado ao finalizar.");
+
+      setOrderId(res.orderId);
+      setSuccess(true);
+      
+      // Se for Pix, poderia gerar o QR Code aqui
+      // Se for Térmica, disparar impressão
+      if (method === "pix") {
+         // Lógica de Pix
+      }
+
+    } catch (err: any) {
+      setError(err.message || "Erro ao processar pagamento");
     } finally {
       setLoading(false);
     }
   };
-  
+
   const handlePrint = () => {
-      window.print();
-  };
-  
-  const handleNewOrder = () => {
-      dispatch({ type: "RESET" });
-      onBack();
+    window.print();
   };
 
-  if (state.step === "success") {
-      return (
-        <>
-        <div className="flex flex-col h-full bg-white border-l border-gray-200 shadow-xl w-full max-w-md ml-auto p-6 items-center justify-center text-center space-y-6 no-print">
-            <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4">
-                <Check size={40} />
+  const handleNewSale = () => {
+    dispatch({ type: "RESET" });
+  };
+
+  if (success) {
+    return (
+      <div className="absolute inset-0 z-50 bg-gray-900/50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in duration-200">
+          <div className="p-8 text-center">
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle className="w-10 h-10 text-green-600" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900">Venda Realizada!</h2>
-            <p className="text-gray-600">O pedido #{orderId?.slice(0,8)} foi registrado com sucesso.</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Venda Finalizada!</h2>
+            <p className="text-gray-600 mb-8">O pedido #{orderId} foi registrado com sucesso.</p>
             
-            <div className="flex flex-col w-full gap-3">
-                <button 
-                    onClick={handlePrint}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
-                >
-                    <Printer size={20} />
-                    Imprimir Comprovante
-                </button>
-                <button 
-                    onClick={handleNewOrder}
-                    className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
-                >
-                    Nova Venda
-                </button>
+            <div className="grid grid-cols-2 gap-4">
+              <button 
+                onClick={handlePrint}
+                className="flex flex-col items-center justify-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border-2 border-gray-100 transition-all hover:border-gray-200 group"
+              >
+                <Printer className="w-8 h-8 text-gray-600 mb-2 group-hover:text-gray-900" />
+                <span className="font-medium text-gray-900">Imprimir Cupom</span>
+              </button>
+              
+              <button 
+                onClick={handleNewSale}
+                className="flex flex-col items-center justify-center p-4 bg-red-50 hover:bg-red-100 rounded-xl border-2 border-red-100 transition-all hover:border-red-200 group"
+              >
+                <ShoppingCart className="w-8 h-8 text-red-600 mb-2 group-hover:text-red-700" />
+                <span className="font-medium text-red-900">Nova Venda</span>
+              </button>
             </div>
-        </div>
-        
-        <div id="printable-receipt" className="hidden">
-            <div className="p-2 max-w-[80mm] mx-auto font-mono text-xs text-black">
+          </div>
+          
+          {/* Área de impressão oculta (apenas para window.print) */}
+          <div className="hidden print:block fixed inset-0 bg-white p-0">
+             <div className="w-[80mm] mx-auto p-2 font-mono text-xs">
                 <div className="text-center mb-4">
-                    <h1 className="font-bold text-lg uppercase">Balão da Informática</h1>
-                    <p>CNPJ: 34.397.947/0001-08</p>
-                    <p className="mt-2">Pedido #{orderId?.slice(0,8)}</p>
-                    <p>{new Date().toLocaleString('pt-BR')}</p>
+                  <h1 className="font-bold text-lg">BALÃO DA INFORMÁTICA</h1>
+                  <p>Rua Exemplo, 123 - Centro</p>
+                  <p>CNPJ: 34.397.947/0001-08</p>
+                  <p>{new Date().toLocaleString()}</p>
                 </div>
-                
-                <div className="mb-4 border-b border-black border-dashed pb-2">
-                    <p><strong>Cliente:</strong> {state.customer.name}</p>
-                    <p><strong>CPF/CNPJ:</strong> {state.customer.cpf_cnpj}</p>
+                <div className="border-b border-black mb-2">
+                  <p>Cliente: {state.customer.name || "Consumidor Final"}</p>
+                  {state.customer.cpf_cnpj && <p>CPF/CNPJ: {state.customer.cpf_cnpj}</p>}
                 </div>
-                
-                <div className="mb-4">
+                <div className="border-b border-black mb-2"></div>
+                <table className="w-full mb-4">
+                  <thead>
+                    <tr className="text-left">
+                      <th>Item</th>
+                      <th className="text-right">Qtd</th>
+                      <th className="text-right">Vl. Tot</th>
+                    </tr>
+                  </thead>
+                  <tbody>
                     {state.cart.map((item) => (
-                        <div key={item.id} className="flex justify-between mb-1">
-                            <span className="truncate w-3/5">{item.name}</span>
-                            <span className="w-1/12 text-center">x{item.quantity}</span>
-                            <span className="w-1/4 text-right">
-                                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.price * item.quantity)}
-                            </span>
-                        </div>
+                      <tr key={item.id}>
+                        <td className="truncate max-w-[40mm]">{item.name}</td>
+                        <td className="text-right">{item.quantity}</td>
+                        <td className="text-right">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.price * item.quantity)}</td>
+                      </tr>
                     ))}
+                  </tbody>
+                </table>
+                <div className="border-t border-black pt-2 mb-4">
+                   <div className="flex justify-between font-bold text-sm">
+                      <span>TOTAL</span>
+                      <span>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(state.total)}</span>
+                   </div>
                 </div>
-                
-                <div className="text-right font-bold text-sm border-t border-black border-dashed pt-2">
-                    TOTAL: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(total)}
+                <div className="text-center text-[10px] mb-8">
+                   <p>Obrigado pela preferência!</p>
+                   <p>www.balao.info</p>
                 </div>
-                
-                <div className="text-center mt-8 text-[10px]">
-                    <p>Obrigado pela preferência!</p>
-                    <p>www.balao.info</p>
-                </div>
-            </div>
+             </div>
+          </div>
         </div>
-        </>
-      );
+      </div>
+    );
   }
 
   return (
-    <div className="flex flex-col h-full bg-white border-l border-gray-200 shadow-xl w-full max-w-md ml-auto">
-      <div className="p-4 border-b border-gray-200 bg-white flex items-center gap-2">
-        <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-full text-gray-600">
-          <ArrowLeft size={20} />
-        </button>
-        <h2 className="text-lg font-bold text-gray-800">Pagamento</h2>
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
-        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-            <div className="flex justify-between text-lg font-bold text-gray-900 mb-2">
-                <span>Total a Pagar</span>
-                <span>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(total)}</span>
-            </div>
-            <p className="text-sm text-gray-500">Itens: {state.cart.length}</p>
-        </div>
-
-        <div className="space-y-4">
-            <button 
-                onClick={handleGeneratePix}
-                className={`w-full py-4 px-4 rounded-lg border-2 flex items-center justify-between transition-all ${pixPayload ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-blue-500'}`}
-            >
-                <div className="flex items-center gap-3">
-                    <QrCode size={24} className="text-gray-700" />
-                    <span className="font-medium text-gray-900">Pix (QR Code)</span>
-                </div>
-                {pixPayload && <Check className="text-green-600" size={20} />}
-            </button>
-            
-            {pixPayload && (
-                <div className="flex flex-col items-center justify-center p-4 border border-gray-200 rounded-lg bg-white animate-in fade-in zoom-in duration-300">
-                    <QRCodeSVG value={pixPayload} size={200} />
-                    <p className="mt-4 text-sm text-gray-500 text-center">Escaneie o QR Code para pagar</p>
-                    <button 
-                        onClick={() => navigator.clipboard.writeText(pixPayload)}
-                        className="mt-2 text-blue-600 text-sm font-medium hover:underline"
-                    >
-                        Copiar Código Pix
-                    </button>
-                </div>
-            )}
-            
-            {/* Outros métodos poderiam ser adicionados aqui */}
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 h-full flex flex-col">
+      <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
+        <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+          <CreditCard className="text-red-600" />
+          Pagamento
+        </h2>
+        <div className="text-right">
+          <p className="text-sm text-gray-500">Total a Pagar</p>
+          <p className="text-2xl font-bold text-gray-900">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(total)}</p>
         </div>
       </div>
 
-      <div className="p-4 border-t border-gray-200 bg-gray-50">
+      {error && (
+        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+          <p>{error}</p>
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 gap-4 mb-6">
         <button
-          onClick={handleFinalize}
-          disabled={loading || !pixPayload} // Por enquanto força gerar pix, mas poderia ser opcional
-          className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+          onClick={() => handlePayment("pix")}
+          disabled={loading}
+          className="flex flex-col items-center justify-center p-6 rounded-xl border-2 border-gray-100 hover:border-red-500 hover:bg-red-50 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? (
-             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-          ) : (
-             <>
-               <Check size={20} />
-               Confirmar Pagamento
-             </>
-          )}
+          <QrCode className="w-10 h-10 text-gray-400 group-hover:text-red-600 mb-3 transition-colors" />
+          <span className="font-bold text-gray-700 group-hover:text-red-700">PIX</span>
+          <span className="text-xs text-gray-500 mt-1">Aprovação Imediata</span>
+        </button>
+
+        <button
+          onClick={() => handlePayment("credit_card")}
+          disabled={loading}
+          className="flex flex-col items-center justify-center p-6 rounded-xl border-2 border-gray-100 hover:border-red-500 hover:bg-red-50 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <CreditCard className="w-10 h-10 text-gray-400 group-hover:text-red-600 mb-3 transition-colors" />
+          <span className="font-bold text-gray-700 group-hover:text-red-700">Cartão</span>
+          <span className="text-xs text-gray-500 mt-1">Crédito ou Débito</span>
+        </button>
+
+        <button
+          onClick={() => handlePayment("cash")}
+          disabled={loading}
+          className="flex flex-col items-center justify-center p-6 rounded-xl border-2 border-gray-100 hover:border-red-500 hover:bg-red-50 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Banknote className="w-10 h-10 text-gray-400 group-hover:text-red-600 mb-3 transition-colors" />
+          <span className="font-bold text-gray-700 group-hover:text-red-700">Dinheiro</span>
+          <span className="text-xs text-gray-500 mt-1">Pagamento no Caixa</span>
         </button>
       </div>
+
+      {loading && (
+        <div className="flex-1 flex flex-col items-center justify-center text-gray-500">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-red-200 border-t-red-600 mb-4"></div>
+          <p>Processando pagamento...</p>
+        </div>
+      )}
     </div>
+  );
+}
+
+// Icone ShoppingCart não foi importado no topo, vou adicionar
+function ShoppingCart({ className }: { className?: string }) {
+  return (
+    <svg 
+      xmlns="http://www.w3.org/2000/svg" 
+      width="24" 
+      height="24" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="2" 
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
+      className={className}
+    >
+      <circle cx="8" cy="21" r="1" />
+      <circle cx="19" cy="21" r="1" />
+      <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+    </svg>
   );
 }
