@@ -275,6 +275,51 @@ export default async function ServicesPage() {
                 </div>
               )}
 
+              {/* Banners Promocionais Intercalados */}
+              {category.id === 'software' && (
+                <div className="mt-20 py-16 bg-zinc-900 rounded-3xl relative overflow-hidden text-center shadow-2xl">
+                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(68,68,68,.2)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%,100%_100%] bg-[position:-100%_0,0_0] bg-no-repeat animate-[shine_2s_infinite]" />
+                    <h3 className="text-4xl md:text-6xl font-black text-white mb-6 relative z-10 uppercase tracking-tighter leading-tight">
+                      Seu Computador <br/><span className="text-red-500">Mais Rápido</span> Agora
+                    </h3>
+                    <p className="text-xl md:text-2xl text-zinc-300 mb-10 max-w-3xl mx-auto relative z-10 font-light">
+                      Troque seu HD antigo por um <span className="text-white font-bold">SSD Ultra Rápido</span> e tenha até 10x mais velocidade. Instalação, clonagem e backup inclusos.
+                    </p>
+                    <Link href="https://wa.me/5519993916723?text=Quero deixar meu PC mais rápido com SSD" target="_blank" className="inline-block px-12 py-6 bg-red-600 text-white font-bold text-xl rounded-full hover:bg-red-700 transition-all hover:scale-110 hover:shadow-lg hover:shadow-red-600/40 relative z-10">
+                      QUERO UM UPGRADE AGORA
+                    </Link>
+                </div>
+              )}
+
+              {category.id === 'performance' && (
+                <div className="mt-20 py-16 bg-red-600 rounded-3xl relative overflow-hidden text-center shadow-2xl">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-red-500 via-red-600 to-red-700" />
+                    <h3 className="text-4xl md:text-6xl font-black text-white mb-6 relative z-10 uppercase tracking-tighter leading-tight">
+                      PC Gamer <span className="text-zinc-900">Dos Sonhos</span>
+                    </h3>
+                    <p className="text-xl md:text-2xl text-white/90 mb-10 max-w-3xl mx-auto relative z-10 font-light">
+                      Rodando tudo no Ultra? Montamos sua máquina com as melhores peças, cable management impecável e <span className="font-bold text-white">Garantia Balão</span>.
+                    </p>
+                    <Link href="https://wa.me/5519993916723?text=Quero montar um PC Gamer" target="_blank" className="inline-block px-12 py-6 bg-white text-red-600 font-bold text-xl rounded-full hover:bg-zinc-100 transition-all hover:scale-110 hover:shadow-lg relative z-10">
+                      MONTAR MEU PC
+                    </Link>
+                </div>
+              )}
+
+              {category.id === 'corporate' && (
+                <div className="mt-20 py-16 bg-zinc-100 border border-zinc-200 rounded-3xl relative overflow-hidden text-center">
+                    <h3 className="text-3xl md:text-5xl font-black text-zinc-800 mb-6 relative z-10 uppercase tracking-tighter leading-tight">
+                      Sua Empresa <span className="text-red-600">Não Pode Parar</span>
+                    </h3>
+                    <p className="text-lg md:text-xl text-zinc-600 mb-8 max-w-3xl mx-auto relative z-10">
+                      Contratos de manutenção preventiva e corretiva com SLA definido. Prioridade no atendimento e equipamentos de backup.
+                    </p>
+                    <Link href="/fale-conosco" className="inline-block px-10 py-5 bg-zinc-900 text-white font-bold text-lg rounded-full hover:bg-black transition-all hover:scale-105 relative z-10">
+                      Falar com Consultor Corporativo
+                    </Link>
+                </div>
+              )}
+
             </div>
           )
         })}

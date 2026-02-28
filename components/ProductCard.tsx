@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { Product } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import { ShoppingCart } from "lucide-react";
@@ -13,12 +14,11 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
   const { addToCart } = useCart();
   const { showToast } = useToast();
   const imageRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent navigation if wrapped in Link
-    addToCart(product);
-    showToast("Adicionado ao carrinho!");
-    animateAddToCart(imageRef.current, product.image);
+    e.preventDefault();
+    router.push(`/product/${product.id}`);
   };
 
   if (variant === "list") {
