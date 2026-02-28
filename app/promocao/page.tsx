@@ -171,6 +171,7 @@ export default async function PromocaoPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-black font-sans">
+      <Header />
       <main className="flex-1">
         
         <BlockHero />

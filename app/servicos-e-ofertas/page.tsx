@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import Header from '@/components/Header'
 import { getProducts } from '@/lib/db'
 import ProductCarousel from '@/components/ProductCarousel'
 import { ALL_SERVICES, SERVICE_CATEGORIES } from './data'
@@ -366,6 +367,7 @@ export default async function ServicesPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-black font-sans">
+      <Header />
       <main className="flex-1">
         
         {/* HERO */}
