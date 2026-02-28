@@ -72,35 +72,35 @@ function BlockHero() {
     <section className="relative min-h-[85vh] flex items-center justify-center bg-black text-white overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-red-900/40 via-black to-black"></div>
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-red-600/20 rounded-full blur-[120px] animate-pulse"></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] md:w-[800px] md:h-[800px] bg-red-600/20 rounded-full blur-[60px] md:blur-[120px] animate-pulse"></div>
 
       <div className="container relative z-10 px-4 text-center space-y-6 md:space-y-8">
-        <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-red-500/10 border border-red-500/30 text-red-300 text-xs md:text-sm font-bold uppercase tracking-widest animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <Wrench className="w-4 h-4 animate-bounce" />
+        <div className="inline-flex items-center gap-2 px-4 md:px-6 py-2 rounded-full bg-red-500/10 border border-red-500/30 text-red-300 text-[10px] sm:text-xs md:text-sm font-bold uppercase tracking-widest animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <Wrench className="w-3 h-3 md:w-4 md:h-4 animate-bounce" />
           Assistência Técnica Premium
         </div>
         
-        <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[9rem] font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-red-200 to-red-900 drop-shadow-[0_0_30px_rgba(220,38,38,0.5)] animate-in fade-in zoom-in-50 duration-1000 leading-none">
+        <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-[9rem] font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-red-200 to-red-900 drop-shadow-[0_0_30px_rgba(220,38,38,0.5)] animate-in fade-in zoom-in-50 duration-1000 leading-[0.9] py-2">
           REPARO<br />
           <span className="text-stroke-white text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500">EXTREMO</span>
         </h1>
         
-        <p className="text-lg md:text-3xl text-slate-300 max-w-4xl mx-auto font-light leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
+        <p className="text-base sm:text-lg md:text-3xl text-slate-300 max-w-4xl mx-auto font-light leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200 px-2">
           Do software ao hardware. Recuperamos seu equipamento com <strong className="text-red-500 font-bold">peças originais</strong> e garantia total.
         </p>
 
-        <div className="pt-8 flex flex-col sm:flex-row justify-center gap-4 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300">
+        <div className="pt-4 md:pt-8 flex flex-col sm:flex-row justify-center gap-4 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300 px-4">
           <Link 
              href="https://wa.me/5519993916723?text=Ol%C3%A1%2C%20preciso%20de%20assist%C3%AAncia%20t%C3%A9cnica!"
              target="_blank"
-             className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-full font-bold text-lg transition-all shadow-lg shadow-red-600/30 hover:scale-105 flex items-center justify-center gap-2"
+             className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 md:px-8 md:py-4 rounded-full font-bold text-base md:text-lg transition-all shadow-lg shadow-red-600/30 hover:scale-105 flex items-center justify-center gap-2 w-full sm:w-auto"
           >
              <MessageCircle className="w-5 h-5" />
              Orçamento Rápido
           </Link>
           <Link 
              href="#servicos"
-             className="bg-white/10 hover:bg-white/20 border border-white/20 text-white px-8 py-4 rounded-full font-bold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2 backdrop-blur-sm"
+             className="bg-white/10 hover:bg-white/20 border border-white/20 text-white px-6 py-3 md:px-8 md:py-4 rounded-full font-bold text-base md:text-lg transition-all hover:scale-105 flex items-center justify-center gap-2 backdrop-blur-sm w-full sm:w-auto"
           >
              Ver Serviços
           </Link>
@@ -125,16 +125,16 @@ function BlockHero() {
 
 function BlockDivider({ text, subtext }: { text: string, subtext?: string }) {
   return (
-    <section className="relative py-24 md:py-32 flex flex-col items-center justify-center text-center overflow-hidden bg-black border-y border-zinc-800">
+    <section className="relative py-16 md:py-32 flex flex-col items-center justify-center text-center overflow-hidden bg-black border-y border-zinc-800">
        <div className="absolute inset-0 bg-red-900/10"></div>
        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-30"></div>
        
        <div className="relative z-10 container px-4">
-          <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-zinc-600 uppercase leading-none mb-4 drop-shadow-xl">
+          <h2 className="text-4xl sm:text-5xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-zinc-600 uppercase leading-none mb-4 drop-shadow-xl break-words">
              {text}
           </h2>
           {subtext && (
-             <p className="text-xl md:text-2xl text-red-500 font-bold tracking-widest uppercase animate-pulse">
+             <p className="text-sm sm:text-xl md:text-2xl text-red-500 font-bold tracking-widest uppercase animate-pulse">
                 {subtext}
              </p>
           )}
@@ -146,15 +146,15 @@ function BlockDivider({ text, subtext }: { text: string, subtext?: string }) {
 function ServiceCard({ service }: { service: any }) {
   const Icon = service.icon
   return (
-    <div className="group bg-zinc-900/50 backdrop-blur border border-zinc-800 p-6 rounded-3xl hover:border-red-500 transition-all hover:bg-zinc-900/80">
+    <div className="group bg-zinc-900/50 backdrop-blur border border-zinc-800 p-4 md:p-6 rounded-3xl hover:border-red-500 transition-all hover:bg-zinc-900/80">
       <details className="w-full group/details">
         <summary className="flex items-start cursor-pointer list-none relative select-none">
-          <div className="flex gap-4 flex-1 items-start">
+          <div className="flex flex-col sm:flex-row gap-4 flex-1 items-start">
              <div className="w-12 h-12 bg-zinc-800 rounded-xl flex items-center justify-center text-zinc-400 group-hover:text-red-500 group-hover:bg-red-500/10 transition-all shrink-0 border border-zinc-700 group-hover:border-red-500/30">
                 <Icon className="w-6 h-6" />
              </div>
              <div>
-                <h3 className="text-xl font-bold text-white group-hover:text-red-400 transition-colors flex items-center gap-2">
+                <h3 className="text-lg md:text-xl font-bold text-white group-hover:text-red-400 transition-colors flex items-center gap-2 pr-6 sm:pr-0">
                     {service.title}
                 </h3>
                 <p className="text-zinc-400 mt-2 text-sm leading-relaxed pr-8">
@@ -235,45 +235,45 @@ function BlockCategory({ category, isDark = true, reverse = false }: { category:
   const categoryServices = ALL_SERVICES.filter(s => s.categoryId === category.id)
   
   return (
-    <section id={category.id} className={`py-20 relative overflow-hidden ${isDark ? 'bg-zinc-950 text-white' : 'bg-slate-50 text-slate-900'}`}>
+    <section id={category.id} className={`py-12 md:py-20 relative overflow-hidden ${isDark ? 'bg-zinc-950 text-white' : 'bg-slate-50 text-slate-900'}`}>
       {isDark && (
         <div className="absolute top-0 left-0 w-full h-full bg-[linear-gradient(45deg,transparent_25%,rgba(68,68,68,.2)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px] pointer-events-none"></div>
       )}
       
       <div className="container mx-auto px-4 relative z-10">
-        <div className={`flex flex-col lg:flex-row gap-12 lg:gap-20 ${reverse ? 'lg:flex-row-reverse' : ''}`}>
+        <div className={`flex flex-col lg:flex-row gap-8 lg:gap-20 ${reverse ? 'lg:flex-row-reverse' : ''}`}>
            
            {/* Header da Categoria */}
-           <div className="lg:w-1/3 space-y-8 sticky top-24 h-fit">
-              <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-bold uppercase tracking-widest ${isDark ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-red-100 border-red-200 text-red-700'}`}>
-                 <category.icon className="w-4 h-4" />
+           <div className="lg:w-1/3 space-y-4 md:space-y-8 relative lg:sticky lg:top-24 h-fit z-10">
+              <div className={`inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full border text-xs md:text-sm font-bold uppercase tracking-widest ${isDark ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-red-100 border-red-200 text-red-700'}`}>
+                 <category.icon className="w-3 h-3 md:w-4 md:h-4" />
                  {category.title}
               </div>
               
-              <h2 className={`text-4xl md:text-6xl font-black tracking-tighter leading-[0.9] ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              <h2 className={`text-3xl sm:text-4xl md:text-6xl font-black tracking-tighter leading-[0.9] ${isDark ? 'text-white' : 'text-slate-900'}`}>
                  {category.title.split(' ').slice(0, 2).join(' ')} <br/>
                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500">
                     {category.title.split(' ').slice(2).join(' ')}
                  </span>
               </h2>
               
-              <p className={`text-lg md:text-xl font-medium leading-relaxed ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
+              <p className={`text-sm sm:text-base md:text-xl font-medium leading-relaxed ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
                  {category.description}
               </p>
 
-              <div className="hidden lg:block">
+              <div className="block pt-2">
                  <Link 
                     href="https://wa.me/5519993916723"
                     target="_blank"
-                    className={`inline-flex items-center gap-3 font-bold text-lg hover:underline ${isDark ? 'text-red-400' : 'text-red-600'}`}
+                    className={`inline-flex items-center gap-2 md:gap-3 font-bold text-base md:text-lg hover:underline ${isDark ? 'text-red-400' : 'text-red-600'}`}
                  >
-                    Falar com Técnico <MessageCircle className="w-5 h-5" />
+                    Falar com Técnico <MessageCircle className="w-4 h-4 md:w-5 md:h-5" />
                  </Link>
               </div>
            </div>
 
            {/* Lista de Serviços */}
-           <div className="lg:w-2/3 grid grid-cols-1 gap-6">
+           <div className="lg:w-2/3 grid grid-cols-1 gap-4 md:gap-6">
               {categoryServices.map((service, idx) => (
                  <div key={idx} className={isDark ? '' : 'shadow-lg shadow-slate-200'}>
                     <ServiceCard service={service} />
