@@ -176,6 +176,7 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
     const isActive = currentCategory === node.name || (!!pathname && pathname.startsWith("/categoria/") && !!node.slug && pathname.endsWith(`/${node.slug}`));
     
     const Icon = level === 0 ? getIcon(node.icon || node.name) : null;
+    const isLongLabel = node.name.toLowerCase().includes('30 minutos') || node.name.toLowerCase().includes('entregas');
 
     return (
       <div className="w-full">
@@ -190,11 +191,11 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
         >
           <Link 
               href={`/categoria/${encodeURIComponent(node.slug)}`} 
-              className="flex-1 flex items-center gap-3 truncate"
+              className={`flex-1 flex items-center gap-3 ${isLongLabel ? '' : 'truncate'}`}
               onClick={closeSidebar}
           >
               {Icon && <span className={`${isActive ? 'text-[#E60012]' : 'text-gray-400 group-hover:text-gray-600'}`}>{Icon}</span>}
-              <span>{node.name}</span>
+              <span className={isLongLabel ? 'text-[11px] leading-tight font-bold' : ''}>{node.name}</span>
            </Link>
            
            {hasChildren && (
@@ -221,11 +222,13 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
 
   const CustomLink = ({ href, icon: Icon, label }: { href: string, icon: any, label: string }) => {
     const isActive = pathname === href;
+    const isLongLabel = label.toLowerCase().includes('30 minutos') || label.toLowerCase().includes('entregas');
+
     return (
       <Link 
         href={href} 
         className={`
-          flex items-center gap-3 px-4 py-2.5 text-sm transition-all duration-200 rounded-r-full mr-2
+          flex items-center gap-3 px-4 py-2.5 text-base transition-all duration-200 rounded-r-full mr-2
           ${isActive 
             ? 'bg-red-50 text-[#E60012] font-semibold border-l-4 border-[#E60012]' 
             : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 border-l-4 border-transparent'}
@@ -233,7 +236,7 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
         onClick={closeSidebar}
       >
         <span className={`${isActive ? 'text-[#E60012]' : 'text-gray-400'}`}><Icon size={18} /></span>
-        <span>{label}</span>
+        <span className={isLongLabel ? 'text-[11px] leading-tight font-bold' : ''}>{label}</span>
       </Link>
     );
   };
