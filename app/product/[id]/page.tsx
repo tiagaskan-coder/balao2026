@@ -9,6 +9,7 @@ import WhatsAppButton from '@/components/WhatsAppButton';
 import ProductActions from '@/components/ProductActions';
 import ShippingCalculator from '@/components/ShippingCalculator';
 import ProductMediaSwitcher from '@/components/ProductMediaSwitcher';
+import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema, generateProductSchema } from '@/components/JsonLd';
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -63,8 +64,22 @@ export default async function ProductPage({ params }: Props) {
   const listPriceNum = cashPriceNum / 0.85;
   const installmentValue = listPriceNum / 10;
 
+  const category = categories.find(c => c.name === product.category);
+  const categorySlug = category ? category.slug : 'todos-os-produtos';
+
+  const breadcrumbItems = [
+    { name: 'Home', item: 'https://www.balao.info' },
+    { name: product.category || 'Produtos', item: `https://www.balao.info/categoria/${categorySlug}` },
+    { name: product.name, item: `https://www.balao.info/product/${product.id}` }
+  ];
+
   return (
      <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+      <JsonLd data={[
+        generateOrganizationSchema(),
+        generateBreadcrumbSchema(breadcrumbItems),
+        generateProductSchema(product)
+      ]} />
       <Header />
       <div className="flex container mx-auto flex-1 py-6 gap-6">
         <div className="hidden lg:block">

@@ -6,6 +6,7 @@ import { Product, Category } from "@/lib/utils";
 import ProductCard from "@/components/ProductCard";
 import HeroCTA from "@/components/HeroCTA";
 import { Laptop2, ShieldCheck, BadgeCheck, Truck, Award, CheckCircle2 } from "lucide-react";
+import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema, generateItemListSchema } from "@/components/JsonLd";
 
 export const metadata: Metadata = {
   title: "Notebooks Seminovos em Campinas com Entrega Rápida | Balão da Informática",
@@ -253,8 +254,18 @@ export default async function SeminovosPage() {
   // Dividir produtos se necessário, ou mostrar todos em uma super grid
   // Vou mostrar todos em uma grid central poderosa
 
+  const breadcrumbItems = [
+    { name: 'Home', item: 'https://www.balao.info' },
+    { name: 'Seminovos', item: 'https://www.balao.info/seminovos' }
+  ];
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 font-sans">
+      <JsonLd data={[
+        generateOrganizationSchema(),
+        generateBreadcrumbSchema(breadcrumbItems),
+        generateItemListSchema(seminovos, 'https://www.balao.info/seminovos')
+      ]} />
       <Header />
       <main className="flex-1">
         

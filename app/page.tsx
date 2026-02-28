@@ -4,6 +4,7 @@ import ProductList from "@/components/ProductList";
 import Carousel from "@/components/Carousel";
 import ProductCarousel from "@/components/ProductCarousel";
 import SeoContent from "@/components/SeoContent";
+import JsonLd, { generateOrganizationSchema } from "@/components/JsonLd";
 // InstagramFeed will be moved to Sidebar area
 // import InstagramFeed from "@/components/InstagramFeed";
 import { getProducts, getCarouselImages, getCategories, getHomeBlocks } from "@/lib/db";
@@ -109,6 +110,7 @@ export default async function Home(props: {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+      <JsonLd data={generateOrganizationSchema()} />
       <Header />
       
       {/* Carousel Banner */}

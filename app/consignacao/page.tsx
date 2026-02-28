@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import { getProducts } from '@/lib/db'
 import ProductCarousel from '@/components/ProductCarousel'
+import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from '@/components/JsonLd'
 import { 
   CheckCircle, 
   MessageCircle, 
@@ -60,8 +61,17 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic'
 
 function BlockHero() {
+  const breadcrumbItems = [
+    { name: 'Home', item: 'https://www.balao.info' },
+    { name: 'Consignação', item: 'https://www.balao.info/consignacao' }
+  ];
+
   return (
     <section className="relative min-h-[85vh] flex items-center justify-center bg-black text-white overflow-hidden">
+      <JsonLd data={[
+        generateOrganizationSchema(),
+        generateBreadcrumbSchema(breadcrumbItems)
+      ]} />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-green-900/40 via-black to-black"></div>
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] md:w-[800px] md:h-[800px] bg-green-600/20 rounded-full blur-[60px] md:blur-[120px] animate-pulse"></div>

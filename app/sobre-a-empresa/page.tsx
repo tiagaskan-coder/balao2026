@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import type { Metadata } from "next";
+import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/components/JsonLd";
 
 export const metadata: Metadata = {
   title: "Sobre a Empresa | Balão da Informática",
@@ -14,8 +15,17 @@ export const metadata: Metadata = {
 };
 
 export default function SobreAEmpresaPage() {
+  const breadcrumbItems = [
+    { name: 'Home', item: 'https://www.balao.info' },
+    { name: 'Sobre a Empresa', item: 'https://www.balao.info/sobre-a-empresa' }
+  ];
+
   return (
     <div className="min-h-screen flex flex-col font-sans">
+      <JsonLd data={[
+        generateOrganizationSchema(),
+        generateBreadcrumbSchema(breadcrumbItems)
+      ]} />
       <Header />
       <main className="flex-1 container mx-auto px-4 py-8 md:py-12">
         <h1 className="text-3xl md:text-4xl font-bold mb-8 text-[#E60012] border-b pb-4">Sobre a Empresa</h1>

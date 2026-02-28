@@ -6,16 +6,53 @@ import { getProducts, getCategories } from "@/lib/db";
 import { searchProducts } from "@/lib/searchUtils";
 import { extractTags, filterProductsByTags } from "@/lib/product-filters";
 import type { Category } from "@/lib/utils";
+import { Metadata } from "next";
+import JsonLd, { generateBreadcrumbSchema, generateOrganizationSchema, generateItemListSchema } from "@/components/JsonLd";
  
 export const dynamic = "force-dynamic";
+
+type Props = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ search?: string; tags?: string }>;
+};
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const categories = await getCategories();
+  
+  let title = "Categoria";
+  let description = "Encontre os melhores produtos de informática no Balão da Informática.";
+
+  if (slug === 'todos-os-produtos') {
+    title = "Todos os Produtos | Balão da Informática";
+    description = "Confira nosso catálogo completo de produtos de informática, hardware e periféricos.";
+  } else {
+    const category = categories.find(c => c.slug === slug);
+    if (category) {
+      title = `${category.name} em Campinas | Balão da Informática`;
+      description = `Compre ${category.name} com o melhor preço de Campinas. Hardware, Periféricos e Computadores com entrega rápida.`;
+    }
+  }
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      url: `https://www.balao.info/categoria/${slug}`,
+    },
+    alternates: {
+      canonical: `https://www.balao.info/categoria/${slug}`,
+    }
+  };
+}
  
 export default async function CategoriaPage({
   params,
   searchParams,
-}: {
-  params: Promise<{ slug: string }>;
-  searchParams: Promise<{ search?: string; tags?: string }>;
-}) {
+}: Props) {
   const { slug } = await params;
   const { search, tags: tagsParam } = await searchParams;
   const selectedTags = tagsParam ? tagsParam.split(',') : [];
@@ -70,25 +107,61 @@ export default async function CategoriaPage({
 
   // Apply tag filter
   filteredProducts = filterProductsByTags(filteredProducts, selectedTags);
+
+  // Schema Markup
+  const breadcrumbItems = [
+    { name: 'Home', item: 'https://www.balao.info' },
+    { name: 'Departamentos', item: 'https://www.balao.info/departamentos' },
+    { name: categoryName || 'Categoria', item: `https://www.balao.info/categoria/${slug}` }
+  ];
  
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+      <JsonLd data={[
+        generateOrganizationSchema(),
+        generateBreadcrumbSchema(breadcrumbItems),
+        generateItemListSchema(filteredProducts, `https://www.balao.info/categoria/${slug}`)
+      ]} />
       <FilterSyncer tags={availableTags} />
       <Header />
+      
+      {/* Mobile Title & Filters Toggle (Placeholder for future filter drawer) */}
+      <div className="lg:hidden container mx-auto px-4 py-4 flex items-center justify-between">
+         <h1 className="text-xl font-bold text-gray-800">
+            {categoryName || "Categoria"}
+         </h1>
+         <span className="text-xs font-medium bg-gray-200 px-2 py-1 rounded-full text-gray-600">
+            {filteredProducts.length}
+         </span>
+      </div>
+
       <div className="flex container mx-auto flex-1 py-6 gap-6 px-4 lg:px-0">
-        <div className="hidden lg:block">
+        {/* Sidebar Hidden on Mobile */}
+        <div className="hidden lg:block w-64 shrink-0">
           <Sidebar categories={categories} availableTags={availableTags} selectedTags={selectedTags} />
         </div>
+
         <main className="flex-1 w-full min-w-0">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-bold text-gray-800">
+          <div className="hidden lg:flex items-center justify-between mb-4">
+            <h1 className="text-2xl font-bold text-gray-800">
               {categoryName || "Categoria"}
             </h1>
             <span className="text-sm text-gray-500">{filteredProducts.length} produtos</span>
           </div>
+
+          {/* Tags List for Mobile (Horizontal Scroll) */}
+          <div className="lg:hidden flex gap-2 overflow-x-auto pb-4 mb-4 scrollbar-hide">
+             {availableTags.map(tag => (
+                <div key={tag.name} className="whitespace-nowrap bg-white border border-gray-200 px-3 py-1 rounded-full text-sm text-gray-600">
+                   {tag.name}
+                </div>
+             ))}
+          </div>
+
           {filteredProducts.length === 0 ? (
             <div className="text-center py-20 text-gray-500 bg-white rounded-lg shadow-sm">
               <p className="text-xl font-medium">Nenhum produto encontrado.</p>
+              <p className="mt-2 text-sm">Tente ajustar seus filtros ou busca.</p>
             </div>
           ) : (
             <ProductList products={filteredProducts} />

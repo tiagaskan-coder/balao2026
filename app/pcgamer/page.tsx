@@ -20,6 +20,7 @@ import {
   PackageCheck,
   ThermometerSun
 } from "lucide-react";
+import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/components/JsonLd";
 
 export const metadata: Metadata = {
   title: "PC Gamer em Campinas com Entrega Rápida | Balão da Informática",
@@ -343,8 +344,17 @@ export default async function PcGamerPage() {
     return validCategories.has(p.category);
   });
 
+  const breadcrumbItems = [
+    { name: 'Home', item: 'https://www.balao.info' },
+    { name: 'PC Gamer', item: 'https://www.balao.info/pcgamer' }
+  ];
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 font-sans">
+      <JsonLd data={[
+        generateOrganizationSchema(),
+        generateBreadcrumbSchema(breadcrumbItems)
+      ]} />
       <Header />
       <main className="flex-1">
         

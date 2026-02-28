@@ -1,6 +1,8 @@
 import { getProducts } from "@/lib/db";
 import PCBuilder from "@/components/PCBuilder";
 import { Monitor, Cpu, Settings } from "lucide-react";
+import Header from "@/components/Header";
+import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/components/JsonLd";
 
 // Force dynamic rendering to ensure we get fresh products
 export const dynamic = 'force-dynamic';
@@ -8,8 +10,18 @@ export const dynamic = 'force-dynamic';
 export default async function MonteSeuPCPage() {
   const products = await getProducts();
 
+  const breadcrumbItems = [
+    { name: 'Home', item: 'https://www.balao.info' },
+    { name: 'Monte Seu PC', item: 'https://www.balao.info/monteseupc' }
+  ];
+
   return (
-    <div className="min-h-screen bg-zinc-100">
+    <div className="min-h-screen bg-zinc-100 font-sans">
+      <JsonLd data={[
+        generateOrganizationSchema(),
+        generateBreadcrumbSchema(breadcrumbItems)
+      ]} />
+      <Header />
       {/* Header Banner */}
       <div className="bg-gradient-to-r from-red-900 to-red-800 text-white py-12 md:py-16 relative overflow-hidden">
         {/* Decorative elements */}

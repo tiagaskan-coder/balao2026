@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import type { Metadata } from "next";
+import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/components/JsonLd";
 
 export const metadata: Metadata = {
   title: "Segurança e Privacidade | Balão da Informática",
@@ -16,8 +17,17 @@ export const metadata: Metadata = {
 import { ShieldCheck, Lock, CreditCard } from "lucide-react";
 
 export default function SegurancaPrivacidadePage() {
+  const breadcrumbItems = [
+    { name: 'Home', item: 'https://www.balao.info' },
+    { name: 'Segurança e Privacidade', item: 'https://www.balao.info/seguranca-e-privacidade' }
+  ];
+
   return (
     <div className="min-h-screen flex flex-col font-sans">
+      <JsonLd data={[
+        generateOrganizationSchema(),
+        generateBreadcrumbSchema(breadcrumbItems)
+      ]} />
       <Header />
       <main className="flex-1 container mx-auto px-4 py-8 md:py-12">
         <h1 className="text-3xl md:text-4xl font-bold mb-8 text-[#E60012] border-b pb-4">Segurança e Privacidade</h1>

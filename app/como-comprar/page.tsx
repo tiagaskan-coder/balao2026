@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import type { Metadata } from "next";
+import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/components/JsonLd";
 
 export const metadata: Metadata = {
   title: "Como Comprar | Balão da Informática",
@@ -17,8 +18,17 @@ import Link from "next/link";
 import { Search, ShoppingCart, User, CreditCard, Truck } from "lucide-react";
 
 export default function ComoComprarPage() {
+  const breadcrumbItems = [
+    { name: 'Home', item: 'https://www.balao.info' },
+    { name: 'Como Comprar', item: 'https://www.balao.info/como-comprar' }
+  ];
+
   return (
     <div className="min-h-screen flex flex-col font-sans">
+      <JsonLd data={[
+        generateOrganizationSchema(),
+        generateBreadcrumbSchema(breadcrumbItems)
+      ]} />
       <Header />
       <main className="flex-1 container mx-auto px-4 py-8 md:py-12">
         <h1 className="text-3xl md:text-4xl font-bold mb-8 text-[#E60012] border-b pb-4">Como Comprar</h1>

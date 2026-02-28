@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import ContactContent from "./ContactContent";
+import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/components/JsonLd";
 
 export const metadata: Metadata = {
   title: "Fale Conosco | Balão da Informática",
@@ -14,5 +15,18 @@ export const metadata: Metadata = {
 };
 
 export default function FaleConoscoPage() {
-  return <ContactContent />;
+  const breadcrumbItems = [
+    { name: 'Home', item: 'https://www.balao.info' },
+    { name: 'Fale Conosco', item: 'https://www.balao.info/fale-conosco' }
+  ];
+
+  return (
+    <>
+      <JsonLd data={[
+        generateOrganizationSchema(),
+        generateBreadcrumbSchema(breadcrumbItems)
+      ]} />
+      <ContactContent />
+    </>
+  );
 }

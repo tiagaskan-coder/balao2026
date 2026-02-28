@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import type { Metadata } from "next";
+import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/components/JsonLd";
 
 export const metadata: Metadata = {
   title: "Trocas e Devoluções | Balão da Informática",
@@ -16,8 +17,17 @@ export const metadata: Metadata = {
 import { RefreshCcw, AlertTriangle, CheckCircle } from "lucide-react";
 
 export default function TrocasDevolucoesPage() {
+  const breadcrumbItems = [
+    { name: 'Home', item: 'https://www.balao.info' },
+    { name: 'Trocas e Devoluções', item: 'https://www.balao.info/trocas-e-devolucoes' }
+  ];
+
   return (
     <div className="min-h-screen flex flex-col font-sans">
+      <JsonLd data={[
+        generateOrganizationSchema(),
+        generateBreadcrumbSchema(breadcrumbItems)
+      ]} />
       <Header />
       <main className="flex-1 container mx-auto px-4 py-8 md:py-12">
         <h1 className="text-3xl md:text-4xl font-bold mb-8 text-[#E60012] border-b pb-4">Trocas e Devoluções</h1>

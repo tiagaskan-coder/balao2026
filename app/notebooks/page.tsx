@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import { getProducts, getCategories } from "@/lib/db";
 import { Product, Category } from "@/lib/utils";
 import ProductCard from "@/components/ProductCard";
+import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/components/JsonLd";
 import Image from "next/image";
 import HeroCTA from "@/components/HeroCTA";
 import NotebooksSearchGrid from "@/components/NotebooksSearchGrid";
@@ -309,8 +310,17 @@ export default async function NotebooksPage() {
     // Exclude PC Gamer explicitly if overlap exists, though unlikely with good categorization
   });
 
+  const breadcrumbItems = [
+    { name: 'Home', item: 'https://www.balao.info' },
+    { name: 'Notebooks', item: 'https://www.balao.info/notebooks' }
+  ];
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 font-sans">
+      <JsonLd data={[
+        generateOrganizationSchema(),
+        generateBreadcrumbSchema(breadcrumbItems)
+      ]} />
       <Header />
       <main className="flex-1">
         
