@@ -251,7 +251,7 @@ function BlockContact() {
 
 export default async function CarregadoresPage() {
   const allProducts = await getProducts();
-  const chargers = searchProducts(allProducts, "carregador notebook");
+  const chargers = searchProducts(allProducts, "fonte notebook");
   const filteredChargers = chargers.slice(0, 12); // Show top 12 initially
 
   return (

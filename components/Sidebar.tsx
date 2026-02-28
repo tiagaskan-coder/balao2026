@@ -263,6 +263,8 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
           <CustomLink href="/promocao" icon={Tag} label="Promoção" />
           <CustomLink href="/manutencao" icon={Wrench} label="Manutenção" />
           <CustomLink href="/consignacao" icon={Handshake} label="Consignação" />
+          <CustomLink href="/carregadores" icon={Battery} label="Carregadores" />
+          <CustomLink href="/microsoft" icon={Key} label="Licenças Microsoft" />
 
           {availableTags && availableTags.length > 0 && (
             <div className="mt-4 pt-4 border-t border-gray-100 mx-4">
