@@ -1,5 +1,3 @@
-'use client';
-
 import { Product } from '@/lib/utils';
 
 type JsonLdProps = {
