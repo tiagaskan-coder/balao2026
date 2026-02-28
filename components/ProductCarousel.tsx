@@ -10,9 +10,10 @@ interface ProductCarouselProps {
   title: string;
   products: Product[];
   categoryId?: string;
+  isDark?: boolean;
 }
 
-export default function ProductCarousel({ title, products, categoryId }: ProductCarouselProps) {
+export default function ProductCarousel({ title, products, categoryId, isDark = false }: ProductCarouselProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: "left" | "right") => {
@@ -27,7 +28,7 @@ export default function ProductCarousel({ title, products, categoryId }: Product
   return (
     <div className="mb-8">
       <div className="flex items-center justify-between mb-4 px-4 lg:px-0">
-        <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
+        <h2 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>{title}</h2>
         <div className="flex gap-2">
             {categoryId && (
                 <Link 
@@ -39,14 +40,22 @@ export default function ProductCarousel({ title, products, categoryId }: Product
             )}
           <button
             onClick={() => scroll("left")}
-            className="p-2 bg-white border border-gray-200 rounded-full shadow-sm hover:bg-gray-50 text-gray-600"
+            className={`p-2 border rounded-full shadow-sm ${
+              isDark 
+                ? 'bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700' 
+                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+            }`}
             aria-label="Previous"
           >
             <ChevronLeft size={20} />
           </button>
           <button
             onClick={() => scroll("right")}
-            className="p-2 bg-white border border-gray-200 rounded-full shadow-sm hover:bg-gray-50 text-gray-600"
+            className={`p-2 border rounded-full shadow-sm ${
+              isDark 
+                ? 'bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700' 
+                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+            }`}
             aria-label="Next"
           >
             <ChevronRight size={20} />
