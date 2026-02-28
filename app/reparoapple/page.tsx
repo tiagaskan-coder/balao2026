@@ -1,7 +1,5 @@
 import { Metadata } from 'next'
 import Header from '@/components/Header'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { 
   Smartphone, 
   Battery, 
@@ -16,8 +14,8 @@ import {
   ArrowRight
 } from 'lucide-react'
 import Link from 'next/link'
-import { ProductCarousel } from '@/components/ProductCarousel'
-import { getProducts } from '@/lib/api'
+import ProductCarousel from '@/components/ProductCarousel'
+import { getProducts } from '@/lib/db'
 
 export const metadata: Metadata = {
   title: 'Conserto de iPhone e iPad em Campinas | Assistência Apple Especializada | Balão da Informática',
@@ -39,7 +37,7 @@ export const metadata: Metadata = {
 export default async function ReparoApplePage() {
   const allProducts = await getProducts()
   
-  // Filtrar produtos relacionados a iphone pro (conforme pedido do usuário)
+  // Filtrar produtos relacionados a iphone pro
   const appleProducts = allProducts.filter(p => {
     const text = (p.name + " " + (p.description || "") + " " + p.category).toLowerCase()
     return text.includes('iphone') && text.includes('pro')
@@ -68,13 +66,17 @@ export default async function ReparoApplePage() {
                 Técnicos certificados e laboratório de ponta em Campinas.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="bg-white text-black hover:bg-zinc-200 px-8 h-12 text-lg">
-                  <Phone className="w-5 h-5 mr-2" />
-                  Orçamento Grátis
-                </Button>
-                <Button variant="outline" size="lg" className="border-zinc-700 text-zinc-100 hover:bg-zinc-800 h-12 text-lg">
-                  Ver Serviços
-                </Button>
+                <Link href="https://wa.me/5519993916723" target="_blank">
+                  <button className="inline-flex items-center justify-center bg-white text-black hover:bg-zinc-200 px-8 h-12 text-lg rounded-md font-medium transition-colors w-full sm:w-auto">
+                    <Phone className="w-5 h-5 mr-2" />
+                    Orçamento Grátis
+                  </button>
+                </Link>
+                <Link href="#servicos">
+                  <button className="inline-flex items-center justify-center border border-zinc-700 text-zinc-100 hover:bg-zinc-800 h-12 text-lg px-8 rounded-md font-medium transition-colors w-full sm:w-auto">
+                    Ver Serviços
+                  </button>
+                </Link>
               </div>
             </div>
           </div>
@@ -95,69 +97,69 @@ export default async function ReparoApplePage() {
         </section>
 
         {/* Bloco 3: Principais Serviços */}
-        <section className="py-20 bg-black">
+        <section id="servicos" className="py-20 bg-black">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold mb-12 text-center">Serviços Realizados</h2>
             <div className="grid md:grid-cols-3 gap-6">
-              <Card className="bg-zinc-900 border-zinc-800 hover:bg-zinc-800/80 transition-all group">
-                <CardContent className="p-6">
+              <div className="bg-zinc-900 border border-zinc-800 hover:bg-zinc-800/80 transition-all group rounded-xl overflow-hidden shadow-sm">
+                <div className="p-6">
                   <Smartphone className="w-10 h-10 text-purple-500 mb-4 group-hover:scale-110 transition-transform" />
                   <h3 className="text-xl font-bold mb-2">Troca de Tela e Vidro</h3>
                   <p className="text-zinc-400">
                     Substituição de displays quebrados, com manchas ou touch falhando. Opções de telas Originais Recondicionadas ou Premium.
                   </p>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              <Card className="bg-zinc-900 border-zinc-800 hover:bg-zinc-800/80 transition-all group">
-                <CardContent className="p-6">
+              <div className="bg-zinc-900 border border-zinc-800 hover:bg-zinc-800/80 transition-all group rounded-xl overflow-hidden shadow-sm">
+                <div className="p-6">
                   <Battery className="w-10 h-10 text-green-500 mb-4 group-hover:scale-110 transition-transform" />
                   <h3 className="text-xl font-bold mb-2">Troca de Bateria</h3>
                   <p className="text-zinc-400">
                     Seu iPhone descarrega rápido? Trocamos sua bateria por uma nova com saúde 100% e garantia de performance.
                   </p>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              <Card className="bg-zinc-900 border-zinc-800 hover:bg-zinc-800/80 transition-all group">
-                <CardContent className="p-6">
+              <div className="bg-zinc-900 border border-zinc-800 hover:bg-zinc-800/80 transition-all group rounded-xl overflow-hidden shadow-sm">
+                <div className="p-6">
                   <Cpu className="w-10 h-10 text-blue-500 mb-4 group-hover:scale-110 transition-transform" />
                   <h3 className="text-xl font-bold mb-2">Reparo de Placa</h3>
                   <p className="text-zinc-400">
                     Recuperação de aparelhos que não ligam, molhados, erro de carga (Tristar), falha de áudio e curto-circuito.
                   </p>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              <Card className="bg-zinc-900 border-zinc-800 hover:bg-zinc-800/80 transition-all group">
-                <CardContent className="p-6">
+              <div className="bg-zinc-900 border border-zinc-800 hover:bg-zinc-800/80 transition-all group rounded-xl overflow-hidden shadow-sm">
+                <div className="p-6">
                   <div className="w-10 h-10 text-yellow-500 mb-4 flex items-center justify-center font-bold text-xl border-2 border-yellow-500 rounded-lg">ID</div>
                   <h3 className="text-xl font-bold mb-2">Face ID e Câmeras</h3>
                   <p className="text-zinc-400">
                     Reparo do sistema TrueDepth (Face ID) que parou de funcionar e troca de lentes e módulos de câmera.
                   </p>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              <Card className="bg-zinc-900 border-zinc-800 hover:bg-zinc-800/80 transition-all group">
-                <CardContent className="p-6">
+              <div className="bg-zinc-900 border border-zinc-800 hover:bg-zinc-800/80 transition-all group rounded-xl overflow-hidden shadow-sm">
+                <div className="p-6">
                   <Wifi className="w-10 h-10 text-cyan-500 mb-4 group-hover:scale-110 transition-transform" />
                   <h3 className="text-xl font-bold mb-2">Sinal e Conectividade</h3>
                   <p className="text-zinc-400">
                     Correção de problemas de Wi-Fi cinza, Bluetooth, GPS e falhas de sinal de operadora (Sem Serviço).
                   </p>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              <Card className="bg-zinc-900 border-zinc-800 hover:bg-zinc-800/80 transition-all group">
-                <CardContent className="p-6">
+              <div className="bg-zinc-900 border border-zinc-800 hover:bg-zinc-800/80 transition-all group rounded-xl overflow-hidden shadow-sm">
+                <div className="p-6">
                   <ShieldCheck className="w-10 h-10 text-zinc-300 mb-4 group-hover:scale-110 transition-transform" />
                   <h3 className="text-xl font-bold mb-2">Tampa Traseira</h3>
                   <p className="text-zinc-400">
                     Troca do vidro traseiro quebrado com acabamento perfeito, mantendo a estética original do seu iPhone.
                   </p>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -168,12 +170,13 @@ export default async function ReparoApplePage() {
              <ProductCarousel 
                 title="iPhones Pro e Acessórios" 
                 products={appleProducts} 
+                isDark={true}
              />
              <div className="mt-8 text-center">
                 <Link href="/busca?q=iphone">
-                  <Button variant="outline" className="border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800">
+                  <button className="inline-flex items-center justify-center border border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800 h-10 px-4 py-2 rounded-md font-medium transition-colors">
                     Ver todos os produtos Apple
-                  </Button>
+                  </button>
                 </Link>
              </div>
           </div>
@@ -250,9 +253,9 @@ export default async function ReparoApplePage() {
                  Atendemos clientes de todo o Brasil. Você envia seu iPhone ou iPad, nós consertamos e enviamos de volta com seguro.
                  Todo o processo é registrado e você acompanha o status online.
                </p>
-               <Button variant="outline" className="border-purple-500 text-purple-400 hover:bg-purple-500/10">
+               <button className="inline-flex items-center justify-center border border-purple-500 text-purple-400 hover:bg-purple-500/10 h-10 px-4 py-2 rounded-md font-medium transition-colors">
                  Ver Instruções de Envio
-               </Button>
+               </button>
              </div>
           </div>
         </section>
@@ -296,10 +299,10 @@ export default async function ReparoApplePage() {
               Qualidade, transparência e preço justo. Fale com nossos técnicos agora.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-               <Button size="lg" className="bg-green-600 text-white hover:bg-green-700 text-lg px-8 rounded-full">
+               <button className="inline-flex items-center justify-center bg-green-600 text-white hover:bg-green-700 text-lg px-8 h-12 rounded-full font-medium transition-colors">
                  <Phone className="w-5 h-5 mr-2" />
                  Chamar no WhatsApp
-               </Button>
+               </button>
             </div>
           </div>
         </section>
