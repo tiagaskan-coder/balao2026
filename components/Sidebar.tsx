@@ -344,6 +344,9 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
             <CustomLink href="/promocao" icon={Tag} label="Promoção" />
             <CustomLink href="/manutencao" icon={Wrench} label="Manutenção" />
             <CustomLink href="/consignacao" icon={Handshake} label="Consignação" />
+            <CustomLink href="/assistenciagames" icon={Gamepad2} label="Assistência Games" />
+            <CustomLink href="/tonner" icon={Printer} label="Toners" />
+            <CustomLink href="/reparoapple" icon={Smartphone} label="Reparo Apple" />
 
             {/* Mobile Filters */}
             {availableTags && availableTags.length > 0 && (

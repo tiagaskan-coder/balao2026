@@ -1,0 +1,303 @@
+import { Metadata } from 'next'
+import Header from '@/components/Header'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { 
+  Printer, 
+  Truck, 
+  CheckCircle2, 
+  Clock, 
+  MapPin, 
+  ShieldCheck, 
+  Building2, 
+  Package,
+  BadgePercent,
+  Phone,
+  ArrowRight
+} from 'lucide-react'
+import Link from 'next/link'
+import { ProductCarousel } from '@/components/ProductCarousel'
+import { getProducts } from '@/lib/api'
+
+export const metadata: Metadata = {
+  title: 'Venda e Entrega de Toner em Campinas | Original e Compatível | Balão da Informática',
+  description: 'Compre Toner HP, Brother, Samsung e Canon com entrega rápida em Campinas e envio para todo Brasil. Preços de atacado e varejo. Consulte nosso estoque!',
+  keywords: [
+    'toner campinas',
+    'entrega toner rápido',
+    'toner hp campinas',
+    'toner brother',
+    'toner samsung',
+    'loja de toner',
+    'suprimentos de impressão',
+    'cartucho e toner',
+    'toner compatível premium',
+    'distribuidora de toner'
+  ]
+}
+
+export default async function TonnerPage() {
+  const allProducts = await getProducts()
+  
+  // Filtrar produtos relacionados a toner
+  const tonerProducts = allProducts.filter(p => {
+    const text = (p.name + " " + (p.description || "") + " " + p.category).toLowerCase()
+    return text.includes('toner')
+  })
+
+  return (
+    <div className="min-h-screen flex flex-col bg-black font-sans text-zinc-100">
+      <Header />
+      
+      <main className="flex-1">
+        {/* Bloco 1: Hero Section */}
+        <section className="relative py-20 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-black to-black z-0" />
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="max-w-3xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-sm font-medium mb-6 border border-blue-500/20">
+                <Truck className="w-4 h-4" />
+                <span>Entrega Expressa em Campinas e Região</span>
+              </div>
+              <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+                Toners Originais e Compatíveis com <span className="text-blue-500">Melhor Preço</span>
+              </h1>
+              <p className="text-xl text-zinc-400 mb-8 leading-relaxed">
+                Abasteça sua empresa ou home office com toners de alta qualidade. 
+                Trabalhamos com HP, Brother, Samsung, Canon e muito mais. 
+                Entrega rápida e garantia total.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 h-12 text-lg">
+                  <Phone className="w-5 h-5 mr-2" />
+                  Pedir via WhatsApp
+                </Button>
+                <Button variant="outline" size="lg" className="border-zinc-700 text-zinc-100 hover:bg-zinc-800 h-12 text-lg">
+                  Ver Catálogo Online
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Bloco 2: Principais Marcas */}
+        <section className="py-12 border-y border-zinc-800 bg-zinc-900/50">
+          <div className="container mx-auto px-4">
+            <p className="text-center text-zinc-500 mb-8 text-sm uppercase tracking-wider font-semibold">Trabalhamos com as principais marcas</p>
+            <div className="flex flex-wrap justify-center gap-8 md:gap-16 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
+              {['HP', 'Brother', 'Samsung', 'Canon', 'Lexmark', 'Epson'].map((brand) => (
+                <div key={brand} className="text-2xl font-bold text-zinc-400 flex items-center">
+                  {brand}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Bloco 3: Serviços e Diferenciais */}
+        <section className="py-20 bg-black">
+          <div className="container mx-auto px-4">
+            <div className="text-center max-w-2xl mx-auto mb-16">
+              <h2 className="text-3xl font-bold mb-4">Por que comprar Toner na Balão?</h2>
+              <p className="text-zinc-400">
+                Oferecemos a combinação perfeita entre preço, qualidade e agilidade na entrega para manter sua impressora sempre funcionando.
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-3 gap-8">
+              <Card className="bg-zinc-900 border-zinc-800 hover:border-blue-500/50 transition-colors">
+                <CardContent className="p-6">
+                  <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center mb-4 text-blue-500">
+                    <Clock className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2 text-zinc-100">Entrega Rápida</h3>
+                  <p className="text-zinc-400">
+                    Para Campinas e região, oferecemos entrega expressa. Não pare sua produção por falta de tinta.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-zinc-900 border-zinc-800 hover:border-blue-500/50 transition-colors">
+                <CardContent className="p-6">
+                  <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center mb-4 text-blue-500">
+                    <ShieldCheck className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2 text-zinc-100">Garantia Total</h3>
+                  <p className="text-zinc-400">
+                    Todos os nossos toners, sejam originais ou compatíveis, possuem garantia contra defeitos de fabricação.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-zinc-900 border-zinc-800 hover:border-blue-500/50 transition-colors">
+                <CardContent className="p-6">
+                  <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center mb-4 text-blue-500">
+                    <BadgePercent className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2 text-zinc-100">Custo-Benefício</h3>
+                  <p className="text-zinc-400">
+                    Economize até 70% com nossa linha de compatíveis premium, sem abrir mão da qualidade de impressão.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* Bloco 4: Carrossel de Produtos (Filtrado por Toner) */}
+        <section className="bg-zinc-900 py-16 border-y border-zinc-800">
+          <div className="container mx-auto px-4">
+             <ProductCarousel 
+                title="Toners em Destaque" 
+                products={tonerProducts} 
+             />
+             <div className="mt-8 text-center">
+                <Link href="/busca?q=toner">
+                  <Button variant="outline" className="border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800">
+                    Ver todos os toners
+                  </Button>
+                </Link>
+             </div>
+          </div>
+        </section>
+
+        {/* Bloco 5: Para Empresas (B2B) */}
+        <section className="py-20 bg-black">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col md:flex-row items-center gap-12">
+              <div className="flex-1">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 text-green-400 text-sm font-medium mb-6">
+                  <Building2 className="w-4 h-4" />
+                  <span>Atendimento Corporativo</span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold mb-6">Soluções para sua Empresa</h2>
+                <p className="text-zinc-400 mb-6 text-lg">
+                  Fornecemos suprimentos de impressão para escritórios, escolas e empresas de todos os portes.
+                  Cadastre sua empresa e tenha acesso a condições especiais.
+                </p>
+                <ul className="space-y-4 mb-8">
+                  {[
+                    'Faturamento facilitado para CNPJ',
+                    'Entrega programada',
+                    'Cotações rápidas por e-mail ou WhatsApp',
+                    'Atendimento prioritário'
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-center gap-3 text-zinc-300">
+                      <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Button className="bg-green-600 hover:bg-green-700 text-white">
+                  Falar com Consultor Corporativo
+                </Button>
+              </div>
+              <div className="flex-1 relative">
+                <div className="aspect-square rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center p-8">
+                   <Printer className="w-32 h-32 text-zinc-700" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Bloco 6: SEO Nacional */}
+        <section className="py-20 bg-zinc-900/30 border-y border-zinc-800">
+          <div className="container mx-auto px-4">
+            <h2 className="text-2xl font-bold mb-8 text-center">Entregamos Toners para Todo o Brasil</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {['São Paulo', 'Rio de Janeiro', 'Minas Gerais', 'Paraná', 'Santa Catarina', 'Rio Grande do Sul', 'Bahia', 'Distrito Federal'].map((state) => (
+                <div key={state} className="flex items-center gap-2 text-zinc-400 p-3 rounded bg-zinc-900/50 border border-zinc-800/50">
+                  <MapPin className="w-4 h-4 text-blue-500" />
+                  <span>{state}</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-center text-zinc-500 mt-8 text-sm">
+              Utilizamos transportadoras parceiras e Correios para garantir que seu toner chegue rápido e seguro, onde você estiver.
+            </p>
+          </div>
+        </section>
+
+        {/* Bloco 7: Original vs Compatível */}
+        <section className="py-20 bg-black">
+          <div className="container mx-auto px-4 max-w-4xl">
+             <h2 className="text-3xl font-bold mb-8 text-center">Toner Original ou Compatível?</h2>
+             <div className="grid md:grid-cols-2 gap-8">
+                <div className="p-6 rounded-xl bg-zinc-900 border border-zinc-800">
+                   <h3 className="text-xl font-bold text-blue-400 mb-4">Toner Original</h3>
+                   <p className="text-zinc-400 mb-4">
+                     Fabricado pela própria marca da impressora (HP, Brother, etc). 
+                     Garante a exata qualidade de cor e durabilidade especificada pelo fabricante.
+                     Ideal para impressões fotográficas ou documentos críticos.
+                   </p>
+                </div>
+                <div className="p-6 rounded-xl bg-zinc-900 border border-zinc-800">
+                   <h3 className="text-xl font-bold text-green-400 mb-4">Toner Compatível</h3>
+                   <p className="text-zinc-400 mb-4">
+                     Produto novo, 100% compatível, fabricado por terceiros com certificação de qualidade.
+                     Oferece excelente custo-benefício, chegando a custar muito menos.
+                     Ideal para dia a dia, textos e rascunhos.
+                   </p>
+                </div>
+             </div>
+          </div>
+        </section>
+
+        {/* Bloco 8: FAQ */}
+        <section className="py-20 bg-zinc-900">
+          <div className="container mx-auto px-4 max-w-3xl">
+            <h2 className="text-3xl font-bold mb-12 text-center">Dúvidas Frequentes</h2>
+            <div className="space-y-6">
+              {[
+                { q: "O toner compatível estraga a impressora?", a: "Não. Nossos toners compatíveis são de alta qualidade e respeitam as especificações dos fabricantes, não causando danos ao equipamento." },
+                { q: "Vocês entregam no mesmo dia em Campinas?", a: "Sim! Para pedidos confirmados até as 14h, oferecemos opção de entrega expressa via motoboy para Campinas e região." },
+                { q: "O toner tem garantia?", a: "Sim, oferecemos 3 meses de garantia para defeitos de fabricação em todos os cartuchos e toners." },
+                { q: "Vocês recarregam toner?", a: "Focamos na venda de toners novos (originais e compatíveis) para garantir a máxima qualidade e menor índice de problemas." }
+              ].map((item, i) => (
+                <div key={i} className="bg-black border border-zinc-800 p-6 rounded-lg">
+                  <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
+                    <span className="text-blue-500">?</span> {item.q}
+                  </h3>
+                  <p className="text-zinc-400 ml-6">{item.a}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Bloco 9: Sustentabilidade */}
+        <section className="py-16 bg-black border-t border-zinc-800">
+          <div className="container mx-auto px-4 text-center">
+             <div className="inline-block p-4 rounded-full bg-green-900/20 mb-6">
+                <Package className="w-8 h-8 text-green-500" />
+             </div>
+             <h2 className="text-2xl font-bold mb-4">Descarte Consciente</h2>
+             <p className="text-zinc-400 max-w-2xl mx-auto">
+               Preocupados com o meio ambiente? Traga seu toner vazio até nossa loja que nós garantimos a destinação correta para reciclagem.
+             </p>
+          </div>
+        </section>
+
+        {/* Bloco 10: CTA Final */}
+        <section className="py-24 relative overflow-hidden">
+          <div className="absolute inset-0 bg-blue-900/20" />
+          <div className="container mx-auto px-4 relative z-10 text-center">
+            <h2 className="text-4xl font-bold mb-6">Precisa de Toner Agora?</h2>
+            <p className="text-xl text-zinc-300 mb-8 max-w-2xl mx-auto">
+              Não fique sem imprimir. Compre online ou chame no WhatsApp e receba rapidamente.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+               <Button size="lg" className="bg-white text-black hover:bg-zinc-200 text-lg px-8">
+                 Comprar Agora
+               </Button>
+               <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 text-lg px-8">
+                 Falar com Vendedor
+               </Button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  )
+}
