@@ -1,7 +1,5 @@
 import { Metadata } from 'next'
 import Header from '@/components/Header'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { 
   Printer, 
   Truck, 
@@ -16,8 +14,8 @@ import {
   ArrowRight
 } from 'lucide-react'
 import Link from 'next/link'
-import { ProductCarousel } from '@/components/ProductCarousel'
-import { getProducts } from '@/lib/api'
+import ProductCarousel from '@/components/ProductCarousel'
+import { getProducts } from '@/lib/db'
 
 export const metadata: Metadata = {
   title: 'Venda e Entrega de Toner em Campinas | Original e Compatível | Balão da Informática',
@@ -68,13 +66,17 @@ export default async function TonnerPage() {
                 Entrega rápida e garantia total.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 h-12 text-lg">
-                  <Phone className="w-5 h-5 mr-2" />
-                  Pedir via WhatsApp
-                </Button>
-                <Button variant="outline" size="lg" className="border-zinc-700 text-zinc-100 hover:bg-zinc-800 h-12 text-lg">
-                  Ver Catálogo Online
-                </Button>
+                <Link href="https://wa.me/5519993916723" target="_blank">
+                  <button className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-8 h-12 text-lg rounded-md font-medium transition-colors w-full sm:w-auto">
+                    <Phone className="w-5 h-5 mr-2" />
+                    Pedir via WhatsApp
+                  </button>
+                </Link>
+                <Link href="#catalogo">
+                  <button className="inline-flex items-center justify-center border border-zinc-700 text-zinc-100 hover:bg-zinc-800 h-12 text-lg px-8 rounded-md font-medium transition-colors w-full sm:w-auto">
+                    Ver Catálogo Online
+                  </button>
+                </Link>
               </div>
             </div>
           </div>
@@ -105,8 +107,8 @@ export default async function TonnerPage() {
             </div>
             
             <div className="grid md:grid-cols-3 gap-8">
-              <Card className="bg-zinc-900 border-zinc-800 hover:border-blue-500/50 transition-colors">
-                <CardContent className="p-6">
+              <div className="bg-zinc-900 border border-zinc-800 hover:border-blue-500/50 transition-colors rounded-xl overflow-hidden shadow-sm">
+                <div className="p-6">
                   <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center mb-4 text-blue-500">
                     <Clock className="w-6 h-6" />
                   </div>
@@ -114,11 +116,11 @@ export default async function TonnerPage() {
                   <p className="text-zinc-400">
                     Para Campinas e região, oferecemos entrega expressa. Não pare sua produção por falta de tinta.
                   </p>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              <Card className="bg-zinc-900 border-zinc-800 hover:border-blue-500/50 transition-colors">
-                <CardContent className="p-6">
+              <div className="bg-zinc-900 border border-zinc-800 hover:border-blue-500/50 transition-colors rounded-xl overflow-hidden shadow-sm">
+                <div className="p-6">
                   <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center mb-4 text-blue-500">
                     <ShieldCheck className="w-6 h-6" />
                   </div>
@@ -126,11 +128,11 @@ export default async function TonnerPage() {
                   <p className="text-zinc-400">
                     Todos os nossos toners, sejam originais ou compatíveis, possuem garantia contra defeitos de fabricação.
                   </p>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              <Card className="bg-zinc-900 border-zinc-800 hover:border-blue-500/50 transition-colors">
-                <CardContent className="p-6">
+              <div className="bg-zinc-900 border border-zinc-800 hover:border-blue-500/50 transition-colors rounded-xl overflow-hidden shadow-sm">
+                <div className="p-6">
                   <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center mb-4 text-blue-500">
                     <BadgePercent className="w-6 h-6" />
                   </div>
@@ -138,24 +140,25 @@ export default async function TonnerPage() {
                   <p className="text-zinc-400">
                     Economize até 70% com nossa linha de compatíveis premium, sem abrir mão da qualidade de impressão.
                   </p>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
         {/* Bloco 4: Carrossel de Produtos (Filtrado por Toner) */}
-        <section className="bg-zinc-900 py-16 border-y border-zinc-800">
+        <section id="catalogo" className="bg-zinc-900 py-16 border-y border-zinc-800">
           <div className="container mx-auto px-4">
              <ProductCarousel 
                 title="Toners em Destaque" 
                 products={tonerProducts} 
+                isDark={true}
              />
              <div className="mt-8 text-center">
                 <Link href="/busca?q=toner">
-                  <Button variant="outline" className="border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800">
+                  <button className="inline-flex items-center justify-center border border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800 h-10 px-4 py-2 rounded-md font-medium transition-colors">
                     Ver todos os toners
-                  </Button>
+                  </button>
                 </Link>
              </div>
           </div>
@@ -188,9 +191,9 @@ export default async function TonnerPage() {
                     </li>
                   ))}
                 </ul>
-                <Button className="bg-green-600 hover:bg-green-700 text-white">
+                <button className="inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-white h-10 px-6 py-2 rounded-md font-medium transition-colors">
                   Falar com Consultor Corporativo
-                </Button>
+                </button>
               </div>
               <div className="flex-1 relative">
                 <div className="aspect-square rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center p-8">
@@ -288,12 +291,12 @@ export default async function TonnerPage() {
               Não fique sem imprimir. Compre online ou chame no WhatsApp e receba rapidamente.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-               <Button size="lg" className="bg-white text-black hover:bg-zinc-200 text-lg px-8">
+               <button className="inline-flex items-center justify-center bg-white text-black hover:bg-zinc-200 text-lg px-8 h-12 rounded-md font-medium transition-colors w-full sm:w-auto">
                  Comprar Agora
-               </Button>
-               <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 text-lg px-8">
+               </button>
+               <button className="inline-flex items-center justify-center border border-white text-white hover:bg-white/10 text-lg px-8 h-12 rounded-md font-medium transition-colors w-full sm:w-auto">
                  Falar com Vendedor
-               </Button>
+               </button>
             </div>
           </div>
         </section>
