@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import Header from '@/components/Header'
 import { getProducts } from '@/lib/db'
 import ProductCarousel from '@/components/ProductCarousel'
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from '@/components/JsonLd'

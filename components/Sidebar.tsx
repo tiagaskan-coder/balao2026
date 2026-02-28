@@ -181,7 +181,7 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
       <div className="w-full">
         <div 
            className={`
-             group flex items-center justify-between px-4 py-2.5 text-sm transition-all duration-200 cursor-pointer select-none rounded-r-full mr-2
+             group flex items-center justify-between px-4 py-2.5 text-base transition-all duration-200 cursor-pointer select-none rounded-r-full mr-2
              ${isActive 
                ? 'bg-red-50 text-[#E60012] font-semibold border-l-4 border-[#E60012]' 
                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 border-l-4 border-transparent'}
@@ -251,7 +251,7 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
           </div>
         </div>
         
-        <div className="py-2 flex-1 overflow-y-auto max-h-[calc(100vh-150px)] custom-scrollbar">
+        <div className="py-2 flex-1 overflow-y-auto max-h-[calc(100vh-150px)] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
           {tree.map(node => <CategoryNode key={node.id} node={node} level={0} />)}
           
           <div className="my-2 border-t border-gray-100 mx-4" />
