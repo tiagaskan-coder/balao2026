@@ -40,6 +40,7 @@ export async function createOrder({
     };
     
     const itemsData = items.map((item) => ({
+      product_id: item.id,
       product_name: item.name,
       product_image: item.image_url || '',
       quantity: item.quantity,
