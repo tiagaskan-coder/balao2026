@@ -26,7 +26,8 @@ import {
   ThumbsUp,
   Star,
   Shield,
-  AlertTriangle
+  AlertTriangle,
+  Trophy
 } from 'lucide-react'
 
 export const metadata: Metadata = {
