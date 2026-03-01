@@ -546,9 +546,7 @@ export default async function ManutencaoPage() {
                             </details>
                         ))}
                     </div>
-                ction>
-
-            <Blo<kNa/dival />
+                </div>
             </section>
 
             <BlockDivider text="CORPORATIVO" subtext="Contratos de Manutenção" />
