@@ -1,5 +1,6 @@
 
 import React from "react";
+import { SITE_CONFIG } from "@/lib/config";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
 import { getProducts } from "@/lib/db";
@@ -103,7 +104,7 @@ function BlockProcess() {
                </div>
             </div>
             <div className="mt-12">
-               <a href="https://wa.me/5519987510267?text=Tenho%20dúvida%20no%20modelo%20do%20carregador" className="inline-flex items-center gap-2 bg-green-500 text-white px-8 py-4 rounded-full font-bold hover:bg-green-600 transition-colors">
+               <a href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=Tenho%20dúvida%20no%20modelo%20do%20carregador`} className="inline-flex items-center gap-2 bg-green-500 text-white px-8 py-4 rounded-full font-bold hover:bg-green-600 transition-colors">
                   <MessageCircle /> Enviar foto agora
                </a>
             </div>
@@ -429,7 +430,7 @@ function BlockContact() {
         
         <div className="flex flex-col md:flex-row gap-8 justify-center items-center">
           <a 
-            href="https://wa.me/5519987510267?text=Ol%C3%A1%2C%20preciso%20de%20um%20carregador%20para%20meu%20notebook!"
+            href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=Ol%C3%A1%2C%20preciso%20de%20um%20carregador%20para%20meu%20notebook!`}
             className="bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-full font-bold text-xl flex items-center gap-3 transition-transform hover:scale-105"
           >
             <MessageCircle className="w-6 h-6" />
@@ -475,7 +476,7 @@ export default async function CarregadoresPage() {
         
         <div className="text-center mt-12">
           <a 
-            href="https://wa.me/5519987510267?text=N%C3%A3o%20achei%20meu%20modelo%20no%20site%2C%20pode%20me%20ajudar%3F"
+            href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=N%C3%A3o%20achei%20meu%20modelo%20no%20site%2C%20pode%20me%20ajudar%3F`}
             className="inline-flex items-center gap-2 text-blue-600 font-bold hover:underline text-lg"
           >
             Não achou seu modelo? Consulte no estoque da loja <ArrowRight className="w-5 h-5" />

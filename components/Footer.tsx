@@ -5,6 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { Facebook, Instagram, Youtube, Mail, Phone, MapPin, ChevronDown, ChevronUp, CreditCard } from "lucide-react";
 
+import { SITE_CONFIG } from "@/lib/config";
+
 export default function Footer() {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
 
@@ -38,9 +40,8 @@ export default function Footer() {
               Comércio e assistência técnica em informática. Tudo o que sua empresa e sua casa precisa em tecnologia.
             </p>
             <div className="flex gap-4">
-              <a href="https://www.facebook.com/Balaocastelo/" target="_blank" rel="noopener noreferrer" className="hover:text-[#E60012] transition-colors"><Facebook size={20} /></a>
-              <a href="https://www.instagram.com/balaodainformatica_castelo/" target="_blank" rel="noopener noreferrer" className="hover:text-[#E60012] transition-colors"><Instagram size={20} /></a>
-              <a href="https://www.youtube.com/@balaodainformaticacastelo9463" target="_blank" rel="noopener noreferrer" className="hover:text-[#E60012] transition-colors"><Youtube size={20} /></a>
+              <a href={SITE_CONFIG.social.facebook} target="_blank" rel="noopener noreferrer" className="hover:text-[#E60012] transition-colors"><Facebook size={20} /></a>
+              <a href={SITE_CONFIG.social.instagram} target="_blank" rel="noopener noreferrer" className="hover:text-[#E60012] transition-colors"><Instagram size={20} /></a>
             </div>
           </div>
 
@@ -102,19 +103,18 @@ export default function Footer() {
               <li className="flex items-start gap-3">
                 <Phone size={18} className="text-[#E60012] mt-0.5" />
                 <div>
-                    <span className="block font-bold text-gray-900">(19) 3255-1661</span>
+                    <span className="block font-bold text-gray-900">{SITE_CONFIG.phone.display}</span>
                     <span className="text-xs">Seg. a Sex. das 9h às 18h</span>
                 </div>
               </li>
               <li className="flex items-center gap-3">
                 <Mail size={18} className="text-[#E60012]" />
-                <a href="mailto:balaocastelo@balaodainformatica.com.br" className="hover:text-gray-900 transition-colors">balaocastelo@balaodainformatica.com.br</a>
+                <a href={`mailto:${SITE_CONFIG.email}`} className="hover:text-gray-900 transition-colors">{SITE_CONFIG.email}</a>
               </li>
               <li className="flex items-start gap-3">
                 <MapPin size={18} className="text-[#E60012] mt-0.5" />
                 <span>
-                    Avenida Anchieta, 789, Cambuí<br />
-                    Campinas — SP
+                    {SITE_CONFIG.address}
                 </span>
               </li>
             </ul>
@@ -141,7 +141,7 @@ export default function Footer() {
         {/* Copyright */}
         <div className="border-t border-gray-200 pt-8 text-center text-sm text-gray-500">
           <p className="mb-2">&copy; 2026 Balão da Informática. Todos os direitos reservados. <a href="http://www.balao.info" target="_blank" className="hover:text-[#E60012]">www.balao.info</a></p>
-          <p className="text-xs opacity-60">Razão Social: Balão da Informática Morales Ltda | CNPJ: 34.397.947/0001-08 UNIDADE FRANQUEADA ANCHIETA</p>
+          <p className="text-xs opacity-60">Razão Social: {SITE_CONFIG.companyName} | CNPJ: {SITE_CONFIG.cnpj} UNIDADE FRANQUEADA ANCHIETA</p>
         </div>
       </div>
     </footer>

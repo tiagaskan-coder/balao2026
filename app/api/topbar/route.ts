@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin, hasAdmin } from "@/lib/supabase-admin";
+import { SITE_CONFIG } from "@/lib/config";
 
 export async function GET() {
   try {
@@ -17,11 +18,11 @@ export async function GET() {
   } catch {}
   return NextResponse.json({
     messages: [
-      "Telefone: (19) 3255-1661",
-      "WhatsApp: (19) 98751-0267",
-      "E-mail: balaocastelo@balaodainformatica.com.br",
+      `Telefone: ${SITE_CONFIG.phone.display}`,
+      `WhatsApp: ${SITE_CONFIG.whatsapp.display}`,
+      `E-mail: ${SITE_CONFIG.email}`,
       "Horário de Atendimento: Seg a Sex das 07:00 às 18:00",
-      "Endereço: Av. Andrade Neves, 1682 - Jardim Chapadão, Campinas - SP"
+      `Endereço: ${SITE_CONFIG.address}`
     ]
   });
 }

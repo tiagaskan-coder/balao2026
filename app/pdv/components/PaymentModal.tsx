@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { X, CreditCard, Banknote, QrCode, Printer, CheckCircle, AlertTriangle, Copy, Check, ShoppingCart } from "lucide-react";
+import { SITE_CONFIG } from "@/lib/config";
 import { usePdv } from "../store";
 import { createOrder } from "@/app/pdv/actions";
 import { QRCodeSVG } from "qrcode.react";
@@ -35,9 +36,9 @@ export default function PaymentModal() {
 
   const handlePixSelection = () => {
     const payload = generatePixPayload({
-      key: "34397947000108", // CNPJ Chave PIX
-      name: "BALAO DA INFORMATICA CASTELO",
-      city: "CAMPINAS", // Assumindo Campinas/SP dado o contexto "Castelo"
+      key: SITE_CONFIG.pix.key,
+      name: SITE_CONFIG.pix.name,
+      city: SITE_CONFIG.pix.city,
       amount: total,
       txid: `PDV${Date.now().toString().slice(-10)}`
     });

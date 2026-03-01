@@ -14,6 +14,8 @@ export const metadata: Metadata = {
   ],
 };
 
+import { SITE_CONFIG } from "@/lib/config";
+
 export default function SobreAEmpresaPage() {
   const breadcrumbItems = [
     { name: 'Home', item: 'https://www.balao.info' },
@@ -32,7 +34,7 @@ export default function SobreAEmpresaPage() {
         
         <div className="prose max-w-none text-gray-700 leading-relaxed space-y-6">
           <p>
-            O <strong>Balão da Informática</strong> é uma das maiores redes de varejo de informática e eletrônicos do Brasil. 
+            O <strong>{SITE_CONFIG.name}</strong> é uma das maiores redes de varejo de informática e eletrônicos do Brasil. 
             Fundada com o objetivo de democratizar o acesso à tecnologia, nossa empresa cresceu e se consolidou 
             como sinônimo de variedade e preço justo.
           </p>
@@ -52,15 +54,15 @@ export default function SobreAEmpresaPage() {
 
           <h2 className="text-2xl font-bold text-gray-800 mt-8">Dados Corporativos</h2>
           <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-            <p><strong>Razão Social:</strong> Balão da Informática Comércio de Equipamentos Ltda.</p>
-            <p><strong>CNPJ:</strong> 00.000.000/0001-00</p>
-            <p><strong>Endereço Matriz:</strong> Avenida Anchieta, 789, Cambuí - Campinas/SP</p>
+            <p><strong>Razão Social:</strong> {SITE_CONFIG.companyName}</p>
+            <p><strong>CNPJ:</strong> {SITE_CONFIG.cnpj}</p>
+            <p><strong>Endereço Matriz:</strong> {SITE_CONFIG.address}</p>
             <p><strong>CEP:</strong> 13025-000</p>
             <p><strong>Inscrição Estadual:</strong> 000.000.000.000</p>
           </div>
 
           <p className="text-sm text-gray-500 mt-4">
-            * O Balão da Informática preza pela legalidade e transparência. Todos os nossos produtos são vendidos com Nota Fiscal.
+            * O {SITE_CONFIG.name} preza pela legalidade e transparência. Todos os nossos produtos são vendidos com Nota Fiscal.
           </p>
         </div>
       </main>

@@ -1,4 +1,5 @@
 
+import { SITE_CONFIG } from "@/lib/config";
 import React from "react";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
@@ -156,7 +157,7 @@ function BlockBusiness() {
             <h2 className="text-3xl font-black mb-6">PARA EMPRESAS</h2>
             <p className="text-xl text-slate-300 max-w-2xl mx-auto mb-8">Precisa regularizar seu parque de máquinas? Temos condições especiais para volume.</p>
             <div className="flex justify-center gap-4">
-               <a href="https://wa.me/5519987510267" className="bg-white text-slate-900 px-8 py-3 rounded-full font-bold hover:bg-slate-200 transition-colors">
+               <a href={`https://wa.me/${SITE_CONFIG.whatsapp.number}`} className="bg-white text-slate-900 px-8 py-3 rounded-full font-bold hover:bg-slate-200 transition-colors">
                   Solicitar Cotação PJ
                </a>
             </div>
@@ -418,7 +419,7 @@ function BlockContact() {
         
         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
           <a 
-            href="https://wa.me/5519987510267?text=Ol%C3%A1%2C%20quero%20comprar%20uma%20licen%C3%A7a%20Microsoft!"
+            href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=Ol%C3%A1%2C%20quero%20comprar%20uma%20licen%C3%A7a%20Microsoft!`}
             className="bg-green-500 hover:bg-green-600 text-white px-10 py-5 rounded-full font-bold text-xl flex items-center gap-3 transition-all hover:scale-105 shadow-lg shadow-green-900/20"
           >
             <MessageCircle className="w-6 h-6" />

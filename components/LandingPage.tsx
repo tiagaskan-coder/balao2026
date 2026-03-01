@@ -4,6 +4,8 @@ import React from "react";
 import { MessageCircle, MapPin, CheckCircle, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
+import { SITE_CONFIG } from "@/lib/config";
+
 interface LandingPageProps {
   title: string;
   subtitle: string;
@@ -21,10 +23,10 @@ export default function LandingPage({
   ctaText = "Falar com Especialista no WhatsApp",
   icon,
 }: LandingPageProps) {
-  const whatsappLink = `https://wa.me/5519987510267?text=${encodeURIComponent(
+  const whatsappLink = `https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
     `Olá, gostaria de saber mais sobre ${title}`
   )}`;
-  const mapLink = "https://www.google.com/maps/search/?api=1&query=Av+Anchieta+789+Campinas+SP";
+  const mapLink = "https://goo.gl/maps/y1q8J9jX7k72";
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
@@ -68,7 +70,7 @@ export default function LandingPage({
             </Link>
           </div>
           <p className="mt-4 text-sm text-gray-500">
-            Av. Anchieta, 789 - Campinas, SP
+            {SITE_CONFIG.address}
           </p>
         </div>
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import Header from "@/components/Header";
+import { SITE_CONFIG } from "@/lib/config";
 import { useToast } from "@/context/ToastContext";
 import { Mail, Phone, MapPin, Send } from "lucide-react";
 import { useState } from "react";
@@ -63,7 +64,7 @@ export default function FaleConoscoPage() {
                 </div>
                 <div>
                   <h3 className="font-bold text-gray-800 text-lg">Televendas</h3>
-                  <p className="text-gray-600">(19) 3255-1661</p>
+                  <p className="text-gray-600">{SITE_CONFIG.phone.display}</p>
                   <p className="text-sm text-gray-500">Seg. a Sex. das 9h às 18h</p>
                 </div>
               </div>
@@ -74,8 +75,8 @@ export default function FaleConoscoPage() {
                 </div>
                 <div>
                   <h3 className="font-bold text-gray-800 text-lg">E-mail</h3>
-                  <a href="mailto:balaocastelo@balaodainformatica.com.br" className="text-gray-600 hover:text-[#E60012] transition-colors">
-                    balaocastelo@balaodainformatica.com.br
+                  <a href={`mailto:${SITE_CONFIG.email}`} className="text-gray-600 hover:text-[#E60012] transition-colors">
+                    {SITE_CONFIG.email}
                   </a>
                 </div>
               </div>
@@ -87,9 +88,7 @@ export default function FaleConoscoPage() {
                 <div>
                   <h3 className="font-bold text-gray-800 text-lg">Endereço</h3>
                   <p className="text-gray-600">
-                    Avenida Anchieta, 789<br />
-                    Cambuí - Campinas/SP<br />
-                    CEP: 13025-000
+                    {SITE_CONFIG.address}
                   </p>
                 </div>
               </div>

@@ -17,6 +17,8 @@ export const metadata: Metadata = {
 
 import { Truck, Clock, MapPin } from "lucide-react";
 
+import { SITE_CONFIG } from "@/lib/config";
+
 export default function EnvioEntregaPage() {
   const breadcrumbItems = [
     { name: 'Home', item: 'https://www.balao.info' },
@@ -36,7 +38,7 @@ export default function EnvioEntregaPage() {
         <div className="prose max-w-none text-gray-700 leading-relaxed space-y-8">
           
           <p className="text-lg">
-            O <strong>Balão da Informática</strong> entrega em todo o Brasil através de parcerias com os Correios e as melhores transportadoras do país.
+            O <strong>{SITE_CONFIG.name}</strong> entrega em todo o Brasil através de parcerias com os Correios e as melhores transportadoras do país.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-8">
@@ -83,7 +85,7 @@ export default function EnvioEntregaPage() {
           </p>
           <div className="flex items-center gap-2 text-gray-600 bg-gray-50 p-4 rounded-lg inline-block">
              <MapPin size={20} />
-             <span>Av. Anchieta, 789 - Cambuí, Campinas - SP</span>
+             <span>{SITE_CONFIG.address}</span>
           </div>
         </div>
       </main>

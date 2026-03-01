@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import { SITE_CONFIG } from "@/lib/config";
+
 export default function TopBar() {
   const [dolar, setDolar] = useState<string | null>(null);
   const [messages, setMessages] = useState<string[] | null>(null);
@@ -37,11 +39,11 @@ export default function TopBar() {
         }
       } catch {}
       setMessages([
-        "Telefone: (19) 3255-1661",
-        "WhatsApp: (19) 98751-0267",
-        "E-mail: balaocastelo@balaodainformatica.com.br",
-        "Horário de Atendimento: Seg a Sex das 07:00 às 18:00",
-        "Endereço: Av. Andrade Neves, 1682 - Jardim Chapadão, Campinas - SP"
+        `Telefone: ${SITE_CONFIG.phone.display}`,
+        `WhatsApp: ${SITE_CONFIG.whatsapp.display}`,
+        `E-mail: ${SITE_CONFIG.email}`,
+        "Horário de Atendimento: Seg a Sex das 09:00 às 18:00",
+        `Endereço: ${SITE_CONFIG.address}`
       ]);
     };
     fetchMessages();

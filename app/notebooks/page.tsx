@@ -5,6 +5,7 @@ import { getProducts, getCategories } from "@/lib/db";
 import { Product, Category } from "@/lib/utils";
 import ProductCard from "@/components/ProductCard";
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/components/JsonLd";
+import { SITE_CONFIG } from "@/lib/config";
 import Image from "next/image";
 import HeroCTA from "@/components/HeroCTA";
 import NotebooksSearchGrid from "@/components/NotebooksSearchGrid";
@@ -189,8 +190,8 @@ function BlockUpgrade() {
                        Não sabe se o notebook suporta upgrade? Nossos técnicos avaliam as possibilidades na hora.
                     </p>
                     <a 
-                       href="https://wa.me/5519987510267?text=Ol%C3%A1%2C%20gostaria%20de%20saber%20sobre%20upgrade%20para%20meu%20notebook!" 
-                       target="_blank" 
+                href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=Ol%C3%A1%2C%20gostaria%20de%20saber%20sobre%20upgrade%20para%20meu%20notebook!`}
+                target="_blank" 
                        rel="noopener noreferrer"
                        className="w-full md:w-auto px-8 py-3 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200 inline-block"
                     >
@@ -251,7 +252,7 @@ function BlockUrgency() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4 md:pt-8">
                <a 
-                  href="https://wa.me/5519987510267?text=Ol%C3%A1%2C%20preciso%20de%20um%20notebook%20com%20urg%C3%AAncia!"
+                  href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=Ol%C3%A1%2C%20preciso%20de%20um%20notebook%20com%20urg%C3%AAncia!`}
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="bg-white text-cyan-900 px-6 py-4 md:px-8 md:py-5 rounded-full font-black text-lg md:text-xl hover:scale-105 transition-transform shadow-xl flex items-center justify-center gap-3 w-full sm:w-auto inline-flex"
@@ -466,7 +467,7 @@ export default async function NotebooksPage() {
                      <div className="inline-block bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full mb-4">ECONOMIA INTELIGENTE</div>
                      <h2 className="text-3xl md:text-5xl font-black mb-4">ACEITAMOS SEU USADO</h2>
                      <p className="text-lg text-slate-300 mb-6">Seu notebook antigo vale desconto na compra de um novo. Avaliação justa e na hora.</p>
-                     <a href="https://wa.me/5519987510267" target="_blank" className="inline-flex items-center gap-2 bg-white text-blue-900 font-bold px-6 py-3 rounded-full hover:scale-105 transition-transform">
+                     <a href={`https://wa.me/${SITE_CONFIG.whatsapp.number}`} target="_blank" className="inline-flex items-center gap-2 bg-white text-blue-900 font-bold px-6 py-3 rounded-full hover:scale-105 transition-transform">
                         <MessageCircle className="w-5 h-5" />
                         Avaliar Meu Notebook
                      </a>

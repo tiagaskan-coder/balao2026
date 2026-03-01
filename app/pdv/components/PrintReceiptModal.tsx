@@ -3,6 +3,8 @@
 import { X, Printer, Download } from 'lucide-react';
 import html2canvas from 'html2canvas';
 
+import { SITE_CONFIG } from '@/lib/config';
+
 interface OrderItem {
   id: string;
   product_name: string;
@@ -109,10 +111,10 @@ export default function PrintReceiptModal({ order, onClose }: PrintReceiptModalP
             className="text-center border-b pb-4 border-dashed"
             style={{ borderColor: '#d1d5db' }}
           >
-            <h1 className="text-xl font-bold uppercase mb-1">Balão da Informática</h1>
-            <p style={{ color: '#4b5563' }}>CNPJ: 00.000.000/0000-00</p>
-            <p style={{ color: '#4b5563' }}>Rua Exemplo, 123 - Campinas/SP</p>
-            <p style={{ color: '#4b5563' }}>(19) 3255-1661</p>
+            <h1 className="text-xl font-bold uppercase mb-1">{SITE_CONFIG.companyName}</h1>
+            <p style={{ color: '#4b5563' }}>CNPJ: {SITE_CONFIG.cnpj}</p>
+            <p style={{ color: '#4b5563' }}>{SITE_CONFIG.address}</p>
+            <p style={{ color: '#4b5563' }}>{SITE_CONFIG.phone.display}</p>
           </div>
 
           <div className="space-y-1">

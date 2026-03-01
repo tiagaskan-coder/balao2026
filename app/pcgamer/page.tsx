@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import { getProducts, getCategories } from "@/lib/db";
 import { Product, Category } from "@/lib/utils";
 import ProductCard from "@/components/ProductCard";
+import { SITE_CONFIG } from "@/lib/config";
 import Image from "next/image";
 import HeroCTA from "@/components/HeroCTA";
 import PcGamerSearchGrid from "@/components/PcGamerSearchGrid";
@@ -247,8 +248,8 @@ function BlockCustom() {
                        Não sabe qual peça escolher? Nossos especialistas te ajudam a montar o melhor setup para o seu orçamento.
                     </p>
                     <a 
-                       href="https://wa.me/5519987510267?text=Ol%C3%A1%2C%20gostaria%20de%20uma%20consultoria%20gr%C3%A1tis%20para%20meu%20PC%20Gamer!" 
-                       target="_blank" 
+                href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=Ol%C3%A1%2C%20gostaria%20de%20uma%20consultoria%20gr%C3%A1tis%20para%20meu%20PC%20Gamer!`}
+                target="_blank" 
                        rel="noopener noreferrer"
                        className="w-full md:w-auto px-8 py-3 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200 inline-block"
                     >
@@ -346,7 +347,7 @@ function BlockUrgency() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4 md:pt-8">
                <a 
-                  href="https://wa.me/5519987510267?text=Ol%C3%A1%2C%20estou%20pronto%20para%20o%20pr%C3%B3ximo%20n%C3%ADvel%20e%20quero%20um%20PC%20Gamer!"
+                  href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=Ol%C3%A1%2C%20estou%20pronto%20para%20o%20pr%C3%B3ximo%20n%C3%ADvel%20e%20quero%20um%20PC%20Gamer!`}
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="bg-white text-emerald-900 px-6 py-4 md:px-8 md:py-5 rounded-full font-black text-lg md:text-xl hover:scale-105 transition-transform shadow-xl flex items-center justify-center gap-3 w-full sm:w-auto inline-flex"

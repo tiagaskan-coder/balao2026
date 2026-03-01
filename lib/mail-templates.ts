@@ -1,4 +1,6 @@
 
+import { SITE_CONFIG } from "@/lib/config";
+
 export const emailStyles = `
   <style>
     body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f3f4f6; }
@@ -61,9 +63,9 @@ export const getBaseTemplate = (content: string, title: string = "Balão Castelo
     </div>
     <div class="footer">
       <p style="margin-bottom: 10px;">
-        <strong>Balão da Informática Castelo</strong><br>
-        Av. Anchieta, 789 - Campinas, SP<br>
-        (19) 98751-0267
+        <strong>${SITE_CONFIG.companyName}</strong><br>
+        ${SITE_CONFIG.address}<br>
+        ${SITE_CONFIG.whatsapp.display}
       </p>
       <div style="margin-top: 20px; pt-10px; border-top: 1px solid #e5e7eb;">
         <p style="font-size: 11px; color: #9ca3af;">

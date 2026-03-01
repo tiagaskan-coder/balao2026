@@ -69,15 +69,17 @@ export const metadata: Metadata = {
   },
 };
 
+import { SITE_CONFIG } from "@/lib/config";
+
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Store",
-  "name": "Balão da Informática",
+  "name": SITE_CONFIG.name,
   "image": "https://www.balao.info/logo.png",
   "description": "Loja de informática em Campinas especializada em computadores, PC Gamer, notebooks, hardware e periféricos, com entrega rápida para Campinas e região.",
   "address": {
     "@type": "PostalAddress",
-    "streetAddress": "Avenida Anchieta, 789, Cambuí",
+    "streetAddress": SITE_CONFIG.address,
     "addressLocality": "Campinas",
     "addressRegion": "SP",
     "postalCode": "13025-000",
@@ -89,8 +91,8 @@ const jsonLd = {
     "longitude": -47.0626
   },
   "url": "https://www.balao.info",
-  "telephone": "+55 19 3255-1661",
-  "email": "balaocastelo@balaodainformatica.com.br",
+  "telephone": `+55 ${SITE_CONFIG.phone.display}`,
+  "email": SITE_CONFIG.email,
   "openingHoursSpecification": [
     {
       "@type": "OpeningHoursSpecification",
