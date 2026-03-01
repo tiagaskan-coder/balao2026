@@ -11,7 +11,13 @@ import {
   Package,
   BadgePercent,
   Phone,
-  ArrowRight
+  ArrowRight,
+  Search,
+  MessageCircle,
+  Users,
+  Trophy,
+  ThumbsUp,
+  Star
 } from 'lucide-react'
 import Link from 'next/link'
 import ProductCarousel from '@/components/ProductCarousel'
@@ -82,6 +88,23 @@ export default async function TonnerPage() {
           </div>
         </section>
 
+        {/* NEW BLOCK: Stats */}
+        <section className="py-12 bg-zinc-900 border-b border-zinc-800">
+          <div className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            {[
+              { num: "50k+", label: "Toners Vendidos" },
+              { num: "15k+", label: "Clientes Atendidos" },
+              { num: "99%", label: "Satisfação" },
+              { num: "24h", label: "Entrega Média" }
+            ].map((s, i) => (
+              <div key={i}>
+                <div className="text-3xl md:text-4xl font-bold text-white mb-2">{s.num}</div>
+                <div className="text-sm text-zinc-500 uppercase tracking-wider">{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* Bloco 2: Principais Marcas */}
         <section className="py-12 border-y border-zinc-800 bg-zinc-900/50">
           <div className="container mx-auto px-4">
@@ -146,6 +169,29 @@ export default async function TonnerPage() {
           </div>
         </section>
 
+        {/* NEW BLOCK: How to Buy */}
+        <section className="py-20 bg-zinc-950 text-zinc-100 border-t border-zinc-800">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl font-bold mb-16">COMO COMPRAR</h2>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+               {[
+                  { icon: Search, title: "Escolha o Modelo", desc: "Identifique o modelo da sua impressora ou cartucho." },
+                  { icon: MessageCircle, title: "Envie no WhatsApp", desc: "Mande a foto ou modelo para nosso time." },
+                  { icon: CheckCircle2, title: "Receba a Cotação", desc: "Preço na hora com opção Original ou Compatível." },
+                  { icon: Truck, title: "Receba Rápido", desc: "Entrega expressa ou retirada na loja." }
+               ].map((item, i) => (
+                  <div key={i} className="flex flex-col items-center group">
+                     <div className="w-16 h-16 bg-zinc-900 rounded-full flex items-center justify-center text-blue-500 mb-6 border border-zinc-800 group-hover:border-blue-500 transition-colors">
+                        <item.icon className="w-8 h-8" />
+                     </div>
+                     <h3 className="text-lg font-bold mb-2">{item.title}</h3>
+                     <p className="text-zinc-500 text-sm max-w-[200px]">{item.desc}</p>
+                  </div>
+               ))}
+            </div>
+          </div>
+        </section>
+
         {/* Bloco 4: Carrossel de Produtos (Filtrado por Toner) */}
         <section id="catalogo" className="bg-zinc-900 py-16 border-y border-zinc-800">
           <div className="container mx-auto px-4">
@@ -162,6 +208,32 @@ export default async function TonnerPage() {
                 </Link>
              </div>
           </div>
+        </section>
+
+        {/* NEW BLOCK: Bulk Promo */}
+        <section className="py-20 bg-gradient-to-r from-blue-900 to-black text-white relative overflow-hidden">
+           <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10"></div>
+           <div className="container mx-auto px-4 relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
+              <div className="max-w-2xl">
+                 <h2 className="text-3xl md:text-5xl font-black mb-6">COMPRE MAIS, PAGUE MENOS</h2>
+                 <p className="text-xl text-blue-200 mb-8">
+                    Descontos progressivos para pedidos acima de 5 unidades. Ideal para empresas e revendas.
+                 </p>
+                 <ul className="space-y-2 mb-8 text-blue-100">
+                    <li className="flex items-center gap-2"><CheckCircle2 className="w-5 h-5 text-blue-400" /> 5% OFF acima de 5 un.</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 className="w-5 h-5 text-blue-400" /> 10% OFF acima de 10 un.</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 className="w-5 h-5 text-blue-400" /> Frete Grátis acima de R$ 500</li>
+                 </ul>
+                 <Link href="https://wa.me/5519993916723?text=Quero%20cotar%20acima%20de%205%20unidades" target="_blank" className="bg-white text-blue-900 px-8 py-4 rounded-full font-bold hover:scale-105 transition-transform inline-flex items-center gap-2">
+                    Solicitar Cotação em Lote <ArrowRight className="w-5 h-5" />
+                 </Link>
+              </div>
+              <div className="w-full md:w-1/3 bg-white/5 backdrop-blur-sm p-8 rounded-2xl border border-white/10 text-center">
+                 <div className="text-6xl font-black text-blue-400 mb-2">15%</div>
+                 <div className="text-xl font-bold uppercase tracking-wider mb-4">OFF NO PIX</div>
+                 <p className="text-sm opacity-70">Para qualquer quantidade. Aproveite!</p>
+              </div>
+           </div>
         </section>
 
         {/* Bloco 5: Para Empresas (B2B) */}
@@ -280,6 +352,42 @@ export default async function TonnerPage() {
                Preocupados com o meio ambiente? Traga seu toner vazio até nossa loja que nós garantimos a destinação correta para reciclagem.
              </p>
           </div>
+        </section>
+
+        {/* NEW BLOCK: Testimonials */}
+        <section className="py-20 bg-zinc-950 text-white border-y border-zinc-900">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold mb-12 text-center">O Que Dizem Nossos Clientes</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+               {[
+                  { name: "Carlos A.", role: "Gerente de TI", text: "Sempre compro os toners para a empresa aqui. Entrega rápida e nota fiscal certinha." },
+                  { name: "Maria L.", role: "Advogada", text: "O toner compatível que comprei tem a mesma qualidade do original, mas paguei metade do preço." },
+                  { name: "Pedro S.", role: "Gráfica Rápida", text: "Parceria de anos. Nunca me deixaram na mão quando precisei de suprimentos urgentes." }
+               ].map((t, i) => (
+                  <div key={i} className="bg-zinc-900 p-8 rounded-2xl border border-zinc-800">
+                     <div className="flex gap-1 text-yellow-500 mb-4">
+                        {[1,2,3,4,5].map(s => <Star key={s} className="w-4 h-4 fill-current" />)}
+                     </div>
+                     <p className="text-zinc-300 italic mb-6">"{t.text}"</p>
+                     <div>
+                        <div className="font-bold">{t.name}</div>
+                        <div className="text-xs text-blue-500 font-bold uppercase">{t.role}</div>
+                     </div>
+                  </div>
+               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* NEW BLOCK: Newsletter */}
+        <section className="py-20 bg-blue-600 text-white text-center">
+           <div className="container mx-auto px-4 max-w-2xl">
+              <h2 className="text-3xl font-bold mb-4">Ofertas Relâmpago</h2>
+              <p className="mb-8 text-blue-100">Receba promoções exclusivas de toner direto no seu WhatsApp.</p>
+              <Link href="https://wa.me/5519993916723?text=Quero%20entrar%20na%20lista%20VIP" target="_blank" className="bg-white text-blue-600 px-8 py-4 rounded-full font-bold hover:bg-blue-50 transition-colors inline-flex items-center gap-2">
+                 Entrar no Grupo VIP <BadgePercent className="w-5 h-5" />
+              </Link>
+           </div>
         </section>
 
         {/* Bloco 10: CTA Final */}

@@ -328,6 +328,96 @@ function BlockUrgency() {
    );
 }
 
+function BlockFAQ() {
+  return (
+    <section className="py-20 bg-zinc-50 text-slate-900">
+        <div className="container mx-auto px-4 max-w-4xl">
+            <h2 className="text-3xl md:text-5xl font-black text-center mb-12">PERGUNTAS FREQUENTES</h2>
+            <div className="space-y-4">
+                {[
+                    { q: "Qual o prazo para orçamento?", a: "Realizamos o diagnóstico inicial em até 24 horas úteis após a entrada do equipamento." },
+                    { q: "As peças são originais?", a: "Sim, trabalhamos apenas com peças originais ou de primeira linha (OEM), com garantia total." },
+                    { q: "Vocês atendem em domicílio?", a: "Temos serviço de retirada e entrega em Campinas e região, além de suporte remoto para software." },
+                    { q: "Aceitam quais formas de pagamento?", a: "Aceitamos cartões de crédito em até 12x, PIX com desconto e faturamento para empresas cadastradas." }
+                ].map((faq, i) => (
+                    <details key={i} className="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 cursor-pointer">
+                        <summary className="flex justify-between items-center font-bold text-lg list-none">
+                            {faq.q}
+                            <ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180 text-red-500" />
+                        </summary>
+                        <p className="mt-4 text-slate-600 leading-relaxed">{faq.a}</p>
+                    </details>
+                ))}
+            </div>
+        </div>
+    </section>
+  )
+}
+
+function BlockTestimonials() {
+  return (
+    <section className="py-20 bg-zinc-900 text-white relative overflow-hidden border-y border-zinc-800">
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10"></div>
+        <div className="container mx-auto px-4 relative z-10">
+            <h2 className="text-3xl md:text-5xl font-black text-center mb-12">CLIENTES SATISFEITOS</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {[
+                    { name: "Ricardo S.", role: "Empresário", text: "Salvaram os dados do servidor da minha empresa em um domingo. Atendimento impecável." },
+                    { name: "Ana P.", role: "Designer", text: "Meu MacBook ficou como novo. A troca de tela foi super rápida e o preço justo." },
+                    { name: "Carlos M.", role: "Gamer", text: "Montagem do PC ficou perfeita. Cable management de outro nível. Recomendo!" }
+                ].map((t, i) => (
+                    <div key={i} className="bg-zinc-950 p-8 rounded-3xl border border-zinc-800 relative">
+                        <div className="flex items-center gap-1 text-yellow-500 mb-4">
+                            {[1,2,3,4,5].map(s => <Star key={s} className="w-4 h-4 fill-current" />)}
+                        </div>
+                        <p className="text-zinc-300 mb-6 italic">"{t.text}"</p>
+                        <div>
+                            <div className="font-bold text-white">{t.name}</div>
+                            <div className="text-xs text-red-500 font-bold uppercase tracking-wider">{t.role}</div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+  )
+}
+
+function BlockWhyUs() {
+  return (
+    <section className="py-20 bg-white text-slate-900">
+        <div className="container mx-auto px-4">
+             <div className="text-center mb-16">
+                <h2 className="text-3xl md:text-5xl font-black mb-4">DIFERENCIAIS BALÃO</h2>
+                <p className="text-slate-600 max-w-2xl mx-auto">Por que somos referência em assistência técnica há mais de 15 anos.</p>
+             </div>
+             <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+                <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100 hover:border-red-500 transition-colors group">
+                    <ShieldCheck className="w-12 h-12 mx-auto mb-6 text-red-600 group-hover:scale-110 transition-transform" />
+                    <h3 className="text-xl font-bold mb-2">Garantia Real</h3>
+                    <p className="text-slate-600 text-sm">90 dias em serviços e até 1 ano em peças novas.</p>
+                </div>
+                <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100 hover:border-red-500 transition-colors group">
+                    <Wrench className="w-12 h-12 mx-auto mb-6 text-red-600 group-hover:scale-110 transition-transform" />
+                    <h3 className="text-xl font-bold mb-2">Lab Próprio</h3>
+                    <p className="text-slate-600 text-sm">Equipamentos de ponta para reparos complexos em placas.</p>
+                </div>
+                <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100 hover:border-red-500 transition-colors group">
+                    <Truck className="w-12 h-12 mx-auto mb-6 text-red-600 group-hover:scale-110 transition-transform" />
+                    <h3 className="text-xl font-bold mb-2">Leva e Traz</h3>
+                    <p className="text-slate-600 text-sm">Comodidade total para você não sair de casa.</p>
+                </div>
+                <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100 hover:border-red-500 transition-colors group">
+                    <Award className="w-12 h-12 mx-auto mb-6 text-red-600 group-hover:scale-110 transition-transform" />
+                    <h3 className="text-xl font-bold mb-2">Certificação</h3>
+                    <p className="text-slate-600 text-sm">Técnicos treinados pelos principais fabricantes.</p>
+                </div>
+             </div>
+        </div>
+    </section>
+  )
+}
+
 export default async function ServicesPage() {
   const allProducts = await getProducts()
   
@@ -428,6 +518,15 @@ export default async function ServicesPage() {
             <BlockDivider text="CORPORATIVO" subtext="Soluções B2B" />
 
             <BlockCategory category={SERVICE_CATEGORIES[4]} isDark={true} /> {/* Corporativo */}
+
+            <BlockProcess />
+
+            <BlockWhyUs />
+
+            <BlockTestimonials />
+
+            <BlockFAQ />
+
         </div>
 
         {/* CTA FINAL */}

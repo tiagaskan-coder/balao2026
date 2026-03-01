@@ -24,7 +24,8 @@ import {
   MousePointer2,
   Settings,
   Lock,
-  Printer
+  Printer,
+  Clock
 } from 'lucide-react'
 
 export const metadata: Metadata = {
@@ -56,6 +57,135 @@ export const metadata: Metadata = {
 }
 
 export const dynamic = 'force-dynamic'
+
+function BlockStats() {
+  return (
+    <section className="py-12 bg-zinc-900 border-b border-zinc-800">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          {[
+            { value: "+15k", label: "Equipamentos Reparados", icon: Wrench },
+            { value: "98%", label: "Clientes Satisfeitos", icon: Star },
+            { value: "24h", label: "Orçamento Médio", icon: Clock },
+            { value: "12", label: "Anos de Experiência", icon: Award }
+          ].map((stat, i) => (
+            <div key={i} className="p-4">
+              <stat.icon className="w-8 h-8 mx-auto mb-4 text-blue-500" />
+              <div className="text-3xl md:text-4xl font-black text-white mb-2">{stat.value}</div>
+              <div className="text-sm text-zinc-400 uppercase tracking-wider">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function BlockWarranty() {
+  return (
+    <section className="py-20 bg-zinc-950 text-white border-y border-zinc-800">
+      <div className="container mx-auto px-4 flex flex-col md:flex-row items-center gap-12">
+        <div className="flex-1">
+          <ShieldCheck className="w-20 h-20 text-green-500 mb-6" />
+          <h2 className="text-4xl font-black mb-6">GARANTIA DE VERDADE</h2>
+          <p className="text-xl text-zinc-300 mb-8 leading-relaxed">
+            Não brincamos em serviço. Todos os reparos possuem garantia legal de 90 dias, cobrindo peças e mão de obra. 
+            Se o problema voltar, nós resolvemos sem custo adicional.
+          </p>
+          <ul className="space-y-4">
+            <li className="flex items-center gap-3 text-lg">
+              <CheckCircle className="w-6 h-6 text-green-500" /> Peças 100% Originais
+            </li>
+            <li className="flex items-center gap-3 text-lg">
+              <CheckCircle className="w-6 h-6 text-green-500" /> Nota Fiscal de Serviço
+            </li>
+            <li className="flex items-center gap-3 text-lg">
+              <CheckCircle className="w-6 h-6 text-green-500" /> Suporte Pós-Venda
+            </li>
+          </ul>
+        </div>
+        <div className="flex-1 bg-zinc-900 p-8 rounded-3xl border border-zinc-800">
+             <h3 className="text-2xl font-bold mb-4 text-blue-400">O que a garantia cobre?</h3>
+             <ul className="space-y-3 text-zinc-400">
+                <li className="flex items-start gap-2"><span className="text-green-500">✓</span> Defeitos na peça substituída</li>
+                <li className="flex items-start gap-2"><span className="text-green-500">✓</span> Falhas na mão de obra executada</li>
+                <li className="flex items-start gap-2"><span className="text-green-500">✓</span> Suporte para dúvidas relacionadas</li>
+             </ul>
+             <div className="mt-8 pt-6 border-t border-zinc-800">
+                <p className="text-sm text-zinc-500">Consulte os termos completos no momento da contratação.</p>
+             </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function BlockTestimonials() {
+  return (
+    <section className="py-20 bg-black text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-blue-900/5"></div>
+        <div className="container mx-auto px-4 relative z-10">
+            <h2 className="text-3xl md:text-5xl font-black text-center mb-16">O QUE DIZEM NOSSOS CLIENTES</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {[
+                    { name: "Ricardo Silva", role: "Empresário", text: "Salvaram meu notebook com todos os dados da empresa. Atendimento rápido e muito profissional.", stars: 5 },
+                    { name: "Ana Paula", role: "Designer", text: "Meu MacBook ficou novo! A troca da tela foi perfeita e o preço muito justo comparado à autorizada.", stars: 5 },
+                    { name: "Carlos Eduardo", role: "Gamer", text: "Limpeza e troca de pasta térmica no meu PC Gamer. A temperatura baixou 15 graus! Recomendo demais.", stars: 5 }
+                ].map((t, i) => (
+                    <div key={i} className="bg-zinc-900 p-8 rounded-3xl border border-zinc-800 hover:border-blue-500 transition-colors">
+                        <div className="flex gap-1 text-yellow-500 mb-4">
+                            {[...Array(t.stars)].map((_, j) => <Star key={j} className="w-5 h-5 fill-current" />)}
+                        </div>
+                        <p className="text-zinc-300 mb-6 italic">"{t.text}"</p>
+                        <div>
+                            <div className="font-bold text-white">{t.name}</div>
+                            <div className="text-sm text-blue-500">{t.role}</div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+  )
+}
+
+function BlockNational() {
+    return (
+        <section className="py-20 bg-blue-600 text-white relative overflow-hidden">
+            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+            <div className="container mx-auto px-4 relative z-10 text-center">
+                <Truck className="w-20 h-20 mx-auto mb-6 text-white/80" />
+                <h2 className="text-3xl md:text-5xl font-black mb-6">ATENDIMENTO NACIONAL</h2>
+                <p className="text-xl text-blue-100 max-w-2xl mx-auto mb-8">
+                    Não é de Campinas? Não tem problema! Recebemos equipamentos de todo o Brasil via Correios ou Transportadora.
+                </p>
+                <div className="flex flex-wrap justify-center gap-4">
+                    <div className="bg-white/10 backdrop-blur px-6 py-4 rounded-xl border border-white/20">
+                        <span className="block text-2xl font-bold">01</span>
+                        <span className="text-sm">Entre em contato</span>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur px-6 py-4 rounded-xl border border-white/20">
+                        <span className="block text-2xl font-bold">02</span>
+                        <span className="text-sm">Envie o equipamento</span>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur px-6 py-4 rounded-xl border border-white/20">
+                        <span className="block text-2xl font-bold">03</span>
+                        <span className="text-sm">Receba reparado</span>
+                    </div>
+                </div>
+                <div className="mt-12">
+                    <Link 
+                        href="https://wa.me/5519993916723?text=Quero%20enviar%20meu%20equipamento%20pelos%20Correios"
+                        target="_blank"
+                        className="bg-white text-blue-900 px-8 py-4 rounded-full font-bold hover:scale-105 transition-transform inline-flex items-center gap-2"
+                    >
+                        Solicitar Etiqueta de Envio <MessageCircle className="w-5 h-5" />
+                    </Link>
+                </div>
+            </div>
+        </section>
+    )
+}
 
 function BlockHero() {
   const breadcrumbItems = [
@@ -364,15 +494,91 @@ export default async function ManutencaoPage() {
                </div>
             </section>
 
-            <BlockDivider text="PERFORMANCE" subtext="Otimização Máxima" />
+            {/* BLOCK STEPS - PROCESSO */}
+            <section className="py-20 bg-zinc-900 text-white relative overflow-hidden">
+                <div className="container mx-auto px-4">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl md:text-5xl font-black mb-4">COMO FUNCIONA</h2>
+                        <p className="text-zinc-400 max-w-2xl mx-auto">Processo transparente e seguro do início ao fim.</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                        {[
+                            { step: "01", title: "Entrada", desc: "Check-in do equipamento e relato do problema." },
+                            { step: "02", title: "Diagnóstico", desc: "Análise técnica detalhada em até 24h." },
+                            { step: "03", title: "Reparo", desc: "Execução aprovada com peças originais." },
+                            { step: "04", title: "Testes", desc: "Stress test e validação de qualidade." }
+                        ].map((item, i) => (
+                            <div key={i} className="bg-zinc-800/50 p-8 rounded-3xl border border-zinc-700 hover:border-blue-500 transition-colors relative group">
+                                <div className="text-6xl font-black text-zinc-800 group-hover:text-blue-900/50 absolute top-4 right-4 transition-colors">{item.step}</div>
+                                <div className="relative z-10">
+                                    <h3 className="text-2xl font-bold mb-2 text-blue-400">{item.title}</h3>
+                                    <p className="text-zinc-400">{item.desc}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
 
+            <Block
             <BlockCategory category={SERVICE_CATEGORIES[3]} isDark={true} /> {/* Performance */}
             
             <BlockCategory category={SERVICE_CATEGORIES[2]} isDark={false} reverse={true} /> {/* Redes (Light) */}
 
+            <BlockTestimonials />
+
+            {/* BLOCK FAQ */}
+            <section className="py-20 bg-slate-50 text-slate-900">
+                <div className="container mx-auto px-4 max-w-4xl">
+                    <h2 className="text-3xl md:text-5xl font-black text-center mb-12">DÚVIDAS FREQUENTES</h2>
+                    <div className="space-y-4">
+                        {[
+                            { q: "Quanto tempo leva o diagnóstico?", a: "Para a maioria dos casos, o diagnóstico é feito em até 24 horas úteis." },
+                            { q: "Tem garantia?", a: "Sim, oferecemos 90 dias de garantia legal sobre o serviço realizado e peças substituídas." },
+                            { q: "Vocês buscam o equipamento?", a: "Sim, temos serviço de leva e traz para Campinas e região (consulte taxas)." },
+                            { q: "Perco meus arquivos?", a: "Sempre tentamos preservar seus dados. Caso seja necessária formatação, oferecemos backup como serviço adicional." }
+                        ].map((faq, i) => (
+                            <details key={i} className="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 cursor-pointer">
+                                <summary className="flex justify-between items-center font-bold text-lg list-none">
+                                    {faq.q}
+                                    <ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180 text-blue-500" />
+                                </summary>
+                                <p className="mt-4 text-slate-600 leading-relaxed">{faq.a}</p>
+                            </details>
+                        ))}
+                    </div>
+                ction>
+
+            <Blo<kNa/dival />
+            </section>
+
             <BlockDivider text="CORPORATIVO" subtext="Contratos de Manutenção" />
 
             <BlockCategory category={SERVICE_CATEGORIES[4]} isDark={true} /> {/* Corporativo */}
+            
+            {/* BLOCK WHY US */}
+            <section className="py-20 bg-blue-900 text-white relative overflow-hidden">
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10"></div>
+                <div className="container mx-auto px-4 relative z-10">
+                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                        <div className="p-6">
+                            <ShieldCheck className="w-16 h-16 mx-auto mb-6 text-blue-300" />
+                            <h3 className="text-2xl font-bold mb-4">Segurança de Dados</h3>
+                            <p className="text-blue-100">Protocolos rígidos para garantir a confidencialidade das suas informações.</p>
+                        </div>
+                        <div className="p-6">
+                            <Award className="w-16 h-16 mx-auto mb-6 text-yellow-400" />
+                            <h3 className="text-2xl font-bold mb-4">Técnicos Certificados</h3>
+                            <p className="text-blue-100">Equipe constantemente treinada nas novas tecnologias do mercado.</p>
+                        </div>
+                        <div className="p-6">
+                            <MapPin className="w-16 h-16 mx-auto mb-6 text-red-400" />
+                            <h3 className="text-2xl font-bold mb-4">Laboratório Próprio</h3>
+                            <p className="text-blue-100">Infraestrutura completa em Campinas para reparos complexos.</p>
+                        </div>
+                     </div>
+                </div>
+            </section>
         </div>
 
         <BlockUrgency />

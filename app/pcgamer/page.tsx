@@ -313,6 +313,89 @@ function CheckCircle2({ className }: { className?: string }) {
    )
 }
 
+function BlockWhyUs() {
+  return (
+    <section className="py-20 bg-zinc-900 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10"></div>
+        <div className="container mx-auto px-4 relative z-10">
+             <div className="text-center mb-16">
+                <h2 className="text-3xl md:text-5xl font-black mb-4">POR QUE A BALÃO?</h2>
+                <p className="text-zinc-400 max-w-2xl mx-auto">Mais que uma loja, somos especialistas apaixonados por hardware.</p>
+             </div>
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div className="p-6 bg-zinc-800/50 rounded-3xl border border-zinc-700 hover:border-violet-500 transition-colors">
+                    <ShieldCheck className="w-16 h-16 mx-auto mb-6 text-violet-500" />
+                    <h3 className="text-2xl font-bold mb-4">Garantia Local</h3>
+                    <p className="text-zinc-400">Qualquer problema é resolvido diretamente em nossa loja em Campinas. Sem dor de cabeça.</p>
+                </div>
+                <div className="p-6 bg-zinc-800/50 rounded-3xl border border-zinc-700 hover:border-violet-500 transition-colors">
+                    <Wrench className="w-16 h-16 mx-auto mb-6 text-violet-500" />
+                    <h3 className="text-2xl font-bold mb-4">Suporte Técnico</h3>
+                    <p className="text-zinc-400">Equipe especializada pronta para tirar dúvidas e ajudar na configuração do seu setup.</p>
+                </div>
+                <div className="p-6 bg-zinc-800/50 rounded-3xl border border-zinc-700 hover:border-violet-500 transition-colors">
+                    <Truck className="w-16 h-16 mx-auto mb-6 text-violet-500" />
+                    <h3 className="text-2xl font-bold mb-4">Entrega Expressa</h3>
+                    <p className="text-zinc-400">Receba seu PC Gamer montado e pronto para jogar no mesmo dia em Campinas e região.</p>
+                </div>
+             </div>
+        </div>
+    </section>
+  )
+}
+
+function BlockFAQ() {
+  return (
+    <section className="py-20 bg-slate-50 text-slate-900">
+        <div className="container mx-auto px-4 max-w-4xl">
+            <h2 className="text-3xl md:text-5xl font-black text-center mb-12">DÚVIDAS FREQUENTES</h2>
+            <div className="space-y-4">
+                {[
+                    { q: "O PC já vem montado?", a: "Sim! Enviamos o computador 100% montado, configurado, com Windows instalado e drivers atualizados. É só ligar e jogar." },
+                    { q: "As peças são novas?", a: "Absolutamente. Trabalhamos apenas com componentes novos, originais e com garantia de fábrica." },
+                    { q: "Posso alterar a configuração?", a: "Com certeza! Entre em contato via WhatsApp para personalizar qualquer detalhe do seu setup." },
+                    { q: "Como funciona a garantia?", a: "Oferecemos garantia legal de 90 dias + garantia contratual de cada componente, tudo tratado diretamente conosco." }
+                ].map((faq, i) => (
+                    <details key={i} className="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 cursor-pointer">
+                        <summary className="flex justify-between items-center font-bold text-lg list-none">
+                            {faq.q}
+                            <span className="text-violet-500 font-bold text-xl">+</span>
+                        </summary>
+                        <p className="mt-4 text-slate-600 leading-relaxed">{faq.a}</p>
+                    </details>
+                ))}
+            </div>
+        </div>
+    </section>
+  )
+}
+
+function BlockPayment() {
+    return (
+        <section className="py-12 bg-white border-t border-slate-100">
+            <div className="container mx-auto px-4 text-center">
+                <h2 className="text-2xl font-bold text-slate-900 mb-8">FORMAS DE PAGAMENTO</h2>
+                <div className="flex flex-wrap justify-center gap-8 items-center grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition-all">
+                    <div className="flex flex-col items-center">
+                        <span className="text-3xl font-black text-green-600">PIX</span>
+                        <span className="text-sm font-bold text-slate-500">10% OFF</span>
+                    </div>
+                    <div className="w-px h-12 bg-slate-200"></div>
+                    <div className="flex flex-col items-center">
+                        <span className="text-3xl font-black text-blue-600">12x</span>
+                        <span className="text-sm font-bold text-slate-500">Sem Juros</span>
+                    </div>
+                    <div className="w-px h-12 bg-slate-200"></div>
+                    <div className="flex flex-col items-center">
+                        <span className="text-3xl font-black text-slate-800">Boleto</span>
+                        <span className="text-sm font-bold text-slate-500">A Vista</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    )
+}
+
 export default async function PcGamerPage() {
   const [allProducts, categories] = await Promise.all([
     getProducts(),
@@ -443,6 +526,13 @@ export default async function PcGamerPage() {
               </p>
            </div>
         </section>
+
+        {/* NOVOS BLOCOS */}
+        <BlockWhyUs />
+        <BlockTestimonials />
+        <BlockTrust />
+        <BlockFAQ />
+        <BlockPayment />
 
         {/* BLOCO 8: CTA FINAL */}
         <BlockUrgency />

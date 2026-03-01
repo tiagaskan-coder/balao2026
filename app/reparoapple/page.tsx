@@ -11,7 +11,12 @@ import {
   CheckCircle2,
   MapPin,
   Phone,
-  ArrowRight
+  ArrowRight,
+  AlertTriangle,
+  Star,
+  Zap,
+  ThumbsUp,
+  Truck
 } from 'lucide-react'
 import Link from 'next/link'
 import ProductCarousel from '@/components/ProductCarousel'
@@ -32,6 +37,176 @@ export const metadata: Metadata = {
     'loja apple campinas',
     'manutenção iphone'
   ]
+}
+
+// Novos Blocos
+function BlockUrgencyBanner() {
+  return (
+    <div className="bg-red-600 text-white py-3 overflow-hidden">
+      <div className="container mx-auto px-4 flex items-center justify-center gap-4 text-sm md:text-base font-black uppercase tracking-wide animate-pulse text-center">
+         <AlertTriangle className="w-5 h-5" />
+         <span>SEU IPHONE CAIU NA ÁGUA? NÃO LIGUE! TRAGA IMEDIATAMENTE PARA O BANHO QUÍMICO.</span>
+         <AlertTriangle className="w-5 h-5" />
+      </div>
+    </div>
+  )
+}
+
+function BlockSymptoms() {
+  return (
+    <section className="py-12 bg-zinc-950 border-y border-zinc-900">
+       <div className="container mx-auto px-4">
+          <h2 className="text-2xl font-bold text-center mb-8 text-zinc-100">Sintomas Comuns que Resolvemos</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+             {[
+               "Tela piscando ou manchada",
+               "Bateria descarrega em 2h",
+               "Não carrega (cabo solto)",
+               "Face ID parou de funcionar",
+               "Sem sinal de operadora",
+               "Câmera tremendo ou preta",
+               "Som baixo ou chiando",
+               "Travado na maçã (loop)"
+             ].map((s, i) => (
+               <div key={i} className="bg-zinc-900 p-4 rounded-lg border border-zinc-800 flex items-center gap-3">
+                  <div className="w-2 h-2 bg-red-500 rounded-full shrink-0 animate-pulse"></div>
+                  <span className="text-sm font-medium text-zinc-300">{s}</span>
+               </div>
+             ))}
+          </div>
+       </div>
+    </section>
+  )
+}
+
+function BlockComparison() {
+  return (
+    <section className="py-20 bg-black">
+       <div className="container mx-auto px-4 max-w-4xl">
+          <h2 className="text-3xl font-bold text-center mb-12">Qualidade da Tela: Você Escolhe</h2>
+          <div className="overflow-x-auto">
+             <table className="w-full text-left border-collapse">
+                <thead>
+                   <tr className="border-b border-zinc-800 text-zinc-400">
+                      <th className="p-4">Característica</th>
+                      <th className="p-4 text-green-500 font-bold">Original Recondicionada</th>
+                      <th className="p-4 text-blue-400 font-bold">Premium (OLED Soft)</th>
+                      <th className="p-4 text-zinc-500">Incell (Básica)</th>
+                   </tr>
+                </thead>
+                <tbody className="text-zinc-300">
+                   <tr className="border-b border-zinc-900">
+                      <td className="p-4 font-bold">Brilho e Cores</td>
+                      <td className="p-4">100% Idêntico (Original)</td>
+                      <td className="p-4">95-98% Similar</td>
+                      <td className="p-4 text-zinc-500">80% (Mais lavada)</td>
+                   </tr>
+                   <tr className="border-b border-zinc-900">
+                      <td className="p-4 font-bold">Touch 3D/Haptic</td>
+                      <td className="p-4">Perfeito</td>
+                      <td className="p-4">Excelente</td>
+                      <td className="p-4 text-zinc-500">Regular</td>
+                   </tr>
+                   <tr className="border-b border-zinc-900">
+                      <td className="p-4 font-bold">Consumo Bateria</td>
+                      <td className="p-4">Normal</td>
+                      <td className="p-4">Normal</td>
+                      <td className="p-4 text-zinc-500">Alto Consumo</td>
+                   </tr>
+                   <tr className="border-b border-zinc-900">
+                      <td className="p-4 font-bold">Garantia</td>
+                      <td className="p-4 text-green-500 font-bold">1 Ano</td>
+                      <td className="p-4 text-blue-400 font-bold">6 Meses</td>
+                      <td className="p-4 text-zinc-500">3 Meses</td>
+                   </tr>
+                </tbody>
+             </table>
+          </div>
+          <p className="text-center text-zinc-500 text-sm mt-6">* Recomendamos sempre telas Originais ou Premium para manter a experiência Apple.</p>
+       </div>
+    </section>
+  )
+}
+
+function BlockStats() {
+  return (
+    <section className="py-12 bg-zinc-900 border-y border-zinc-800">
+       <div className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div>
+             <div className="text-4xl font-black text-white mb-2">+15.000</div>
+             <div className="text-zinc-500 text-sm uppercase tracking-wider">iPhones Reparados</div>
+          </div>
+          <div>
+             <div className="text-4xl font-black text-white mb-2">98%</div>
+             <div className="text-zinc-500 text-sm uppercase tracking-wider">Taxa de Sucesso</div>
+          </div>
+          <div>
+             <div className="text-4xl font-black text-white mb-2">45min</div>
+             <div className="text-zinc-500 text-sm uppercase tracking-wider">Troca de Tela</div>
+          </div>
+          <div>
+             <div className="text-4xl font-black text-white mb-2">4.9/5</div>
+             <div className="text-zinc-500 text-sm uppercase tracking-wider">Avaliação Google</div>
+          </div>
+       </div>
+    </section>
+  )
+}
+
+function BlockAccessories() {
+  return (
+    <section className="py-20 bg-zinc-950">
+       <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold mb-12">Proteja seu Investimento</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+             <div className="p-6 bg-black rounded-2xl border border-zinc-800 hover:border-purple-500 transition-colors">
+                <ShieldCheck className="w-12 h-12 mx-auto text-purple-500 mb-4" />
+                <h3 className="text-xl font-bold mb-2">Película 3D/Privacidade</h3>
+                <p className="text-zinc-400">Aplicação perfeita sem bolhas. Proteção contra riscos e quedas.</p>
+             </div>
+             <div className="p-6 bg-black rounded-2xl border border-zinc-800 hover:border-purple-500 transition-colors">
+                <Battery className="w-12 h-12 mx-auto text-green-500 mb-4" />
+                <h3 className="text-xl font-bold mb-2">Carregador Turbo 20W</h3>
+                <p className="text-zinc-400">Homologado Anatel. Carregue 50% em 30 minutos sem viciar a bateria.</p>
+             </div>
+             <div className="p-6 bg-black rounded-2xl border border-zinc-800 hover:border-purple-500 transition-colors">
+                <Smartphone className="w-12 h-12 mx-auto text-blue-500 mb-4" />
+                <h3 className="text-xl font-bold mb-2">Capas Anti-Impacto</h3>
+                <p className="text-zinc-400">Proteção militar para quinas e fundo de vidro. Transparente ou Colorida.</p>
+             </div>
+          </div>
+       </div>
+    </section>
+  )
+}
+
+function BlockReviews() {
+  return (
+    <section className="py-20 bg-zinc-900 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-purple-900/5"></div>
+        <div className="container mx-auto px-4 relative z-10">
+            <h2 className="text-3xl font-black text-center mb-12">CLIENTES APPLE FELIZES</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {[
+                    { name: "Juliana M.", device: "iPhone 13 Pro", text: "Achei que tinha perdido meu iPhone no mar. Eles recuperaram a placa e as fotos. Incrível!" },
+                    { name: "Pedro H.", device: "iPad Air 4", text: "Troca de vidro perfeita, nem parece que foi mexido. O Apple Pencil continua funcionando 100%." },
+                    { name: "Larissa C.", device: "iPhone 11", text: "Bateria trocada em 40 minutos. Atendimento nota 10 e cafézinho top enquanto espera." }
+                ].map((t, i) => (
+                    <div key={i} className="bg-black p-8 rounded-3xl border border-zinc-800 relative">
+                        <div className="flex items-center gap-1 text-yellow-500 mb-4">
+                            {[1,2,3,4,5].map(s => <Star key={s} className="w-4 h-4 fill-current" />)}
+                        </div>
+                        <p className="text-zinc-300 mb-6 italic">"{t.text}"</p>
+                        <div>
+                            <div className="font-bold text-white">{t.name}</div>
+                            <div className="text-xs text-purple-500 font-bold uppercase tracking-wider">{t.device}</div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+  )
 }
 
 export default async function ReparoApplePage() {
@@ -182,6 +357,8 @@ export default async function ReparoApplePage() {
           </div>
         </section>
 
+        <BlockAccessories />
+
         {/* Bloco 5: Diferenciais do Laboratório */}
         <section className="py-20 bg-black">
            <div className="container mx-auto px-4">
@@ -221,6 +398,8 @@ export default async function ReparoApplePage() {
              </div>
            </div>
         </section>
+
+        <BlockReviews />
 
         {/* Bloco 6: Como Funciona */}
         <section className="py-20 bg-zinc-900/50">

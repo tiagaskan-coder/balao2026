@@ -21,8 +21,212 @@ import {
   Clock, 
   Star,
   ArrowRight,
-  AlertTriangle
+  AlertTriangle,
+  Flame,
+  Plug,
+  Laptop,
+  Smartphone
 } from "lucide-react";
+
+function BlockUrgencyBanner() {
+  return (
+    <div className="bg-red-600 text-white py-2 text-center text-sm md:text-base font-bold animate-pulse">
+      🚨 Bateria acabando? Entregamos seu carregador em até 60 minutos! Peça agora. 🚨
+    </div>
+  )
+}
+
+function BlockStats() {
+  return (
+    <section className="py-12 bg-blue-600 text-white">
+      <div className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        {[
+          { label: "Carregadores em Estoque", value: "+1000" },
+          { label: "Modelos Compatíveis", value: "99%" },
+          { label: "Tempo Médio Entrega", value: "45min" },
+          { label: "Garantia (Meses)", value: "12" }
+        ].map((stat, i) => (
+          <div key={i}>
+            <div className="text-4xl font-black mb-2">{stat.value}</div>
+            <div className="text-blue-200 text-sm uppercase tracking-wider">{stat.label}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function BlockSymptoms() {
+  return (
+    <section className="py-20 bg-zinc-50">
+       <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-black text-center mb-12 text-zinc-900">SINAIS QUE SEU CARREGADOR VAI PARAR</h2>
+          <div className="grid md:grid-cols-4 gap-6">
+             {[
+               { icon: Zap, title: "Mau Contato", desc: "Só carrega se ficar mexendo no cabo ou na ponta." },
+               { icon: Flame, title: "Superaquecimento", desc: "A fonte esquenta muito, chegando a queimar a mão." },
+               { icon: Battery, title: "Carga Lenta", desc: "Demora horas para subir 10% de bateria." },
+               { icon: AlertTriangle, title: "Ruídos Estranhos", desc: "Barulho de chiado ou zumbido vindo da fonte." }
+             ].map((item, i) => (
+               <div key={i} className="bg-white p-6 rounded-xl border border-zinc-200 shadow-sm hover:shadow-md transition-shadow">
+                  <item.icon className="w-10 h-10 text-red-500 mb-4" />
+                  <h3 className="font-bold text-lg mb-2">{item.title}</h3>
+                  <p className="text-zinc-600 text-sm">{item.desc}</p>
+               </div>
+             ))}
+          </div>
+       </div>
+    </section>
+  )
+}
+
+function BlockProcess() {
+   return (
+      <section className="py-20 bg-white text-center">
+         <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-black mb-12 text-slate-900">COMO COMPRAR O MODELO CERTO</h2>
+            <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+               <div className="relative p-8 rounded-3xl bg-blue-50 border-2 border-blue-100">
+                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-xl">1</div>
+                  <h3 className="text-xl font-bold mt-4 mb-4">Verifique a Etiqueta</h3>
+                  <p className="text-slate-600">Olhe embaixo do notebook ou na fonte antiga a voltagem (ex: 19V) e amperagem (ex: 3.42A).</p>
+               </div>
+               <div className="relative p-8 rounded-3xl bg-blue-50 border-2 border-blue-100">
+                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-xl">2</div>
+                  <h3 className="text-xl font-bold mt-4 mb-4">Confira o Pino</h3>
+                  <p className="text-slate-600">Veja se a ponta é fina, grossa, retangular (USB) ou tipo C. Se tiver dúvida, tire uma foto!</p>
+               </div>
+               <div className="relative p-8 rounded-3xl bg-blue-50 border-2 border-blue-100">
+                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-xl">3</div>
+                  <h3 className="text-xl font-bold mt-4 mb-4">Chame no WhatsApp</h3>
+                  <p className="text-slate-600">Mande a foto da etiqueta e do pino para nosso especialista confirmar o modelo exato.</p>
+               </div>
+            </div>
+            <div className="mt-12">
+               <a href="https://wa.me/5519987510267?text=Tenho%20dúvida%20no%20modelo%20do%20carregador" className="inline-flex items-center gap-2 bg-green-500 text-white px-8 py-4 rounded-full font-bold hover:bg-green-600 transition-colors">
+                  <MessageCircle /> Enviar foto agora
+               </a>
+            </div>
+         </div>
+      </section>
+   )
+}
+
+function BlockConnectorTypes() {
+   return (
+      <section className="py-20 bg-slate-900 text-white">
+         <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-black text-center mb-12">TEMOS TODOS OS TIPOS DE CONECTORES</h2>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+               {[
+                  "Ponta Agulha (Dell/HP)",
+                  "Ponta Amarela (Lenovo/Asus)",
+                  "Ponta Azul (HP)",
+                  "USB-C (Modernos)",
+                  "Magsafe (MacBook)",
+                  "Retangular (Lenovo)",
+                  "Ponta Fina (Acer/Samsung)",
+                  "Ponta Grossa (Toshiba)",
+                  "Bullet (LG)",
+                  "Surface (Microsoft)"
+               ].map((type, i) => (
+                  <div key={i} className="bg-white/5 border border-white/10 p-4 rounded-lg flex items-center justify-center text-center h-24 hover:bg-white/10 transition-colors">
+                     <span className="font-bold text-blue-300">{type}</span>
+                  </div>
+               ))}
+            </div>
+         </div>
+      </section>
+   )
+}
+
+function BlockSafety() {
+   return (
+      <section className="py-20 bg-red-50 border-y border-red-100">
+         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center gap-12">
+            <div className="flex-1">
+               <AlertTriangle className="w-16 h-16 text-red-600 mb-6" />
+               <h2 className="text-3xl font-black text-red-900 mb-6">O PERIGO DOS CARREGADORES BARATOS</h2>
+               <p className="text-lg text-red-800 mb-6">
+                  Carregadores genéricos de baixa qualidade não possuem filtros de linha e proteção contra surtos. O resultado?
+               </p>
+               <ul className="space-y-3">
+                  {[
+                     "Queima da placa mãe do notebook",
+                     "Vício da bateria (perda de autonomia)",
+                     "Risco de incêndio e curto-circuito",
+                     "Interferência no trackpad e mouse"
+                  ].map((item, i) => (
+                     <li key={i} className="flex items-center gap-3 text-red-700 font-medium">
+                        <Flame className="w-5 h-5" /> {item}
+                     </li>
+                  ))}
+               </ul>
+            </div>
+            <div className="flex-1 bg-white p-8 rounded-2xl shadow-lg border-l-4 border-red-500">
+               <h3 className="text-xl font-bold mb-4 text-slate-900">Na Balão da Informática é diferente:</h3>
+               <ul className="space-y-4">
+                  <li className="flex items-start gap-3">
+                     <CheckCircle2 className="w-6 h-6 text-green-500 shrink-0" />
+                     <span className="text-slate-600">Componentes de alta qualidade que protegem seu notebook.</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                     <CheckCircle2 className="w-6 h-6 text-green-500 shrink-0" />
+                     <span className="text-slate-600">Voltagem estável que aumenta a vida útil da bateria.</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                     <CheckCircle2 className="w-6 h-6 text-green-500 shrink-0" />
+                     <span className="text-slate-600">Certificações de segurança INMETRO/CE.</span>
+                  </li>
+               </ul>
+            </div>
+         </div>
+      </section>
+   )
+}
+
+function BlockBrands() {
+   return (
+      <section className="py-16 bg-white">
+         <div className="container mx-auto px-4 text-center">
+            <p className="text-slate-500 font-bold mb-8 uppercase tracking-widest">Compatível com as principais marcas</p>
+            <div className="flex flex-wrap justify-center gap-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+               {["DELL", "HP", "LENOVO", "ACER", "SAMSUNG", "ASUS", "APPLE", "LG", "SONY", "POSITIVO"].map((brand, i) => (
+                  <span key={i} className="text-2xl md:text-4xl font-black text-slate-300 hover:text-blue-600 cursor-default select-none">{brand}</span>
+               ))}
+            </div>
+         </div>
+      </section>
+   )
+}
+
+function BlockWarrantyDetails() {
+   return (
+      <section className="py-20 bg-slate-50">
+         <div className="container mx-auto px-4 text-center">
+            <ShieldCheck className="w-16 h-16 text-blue-600 mx-auto mb-6" />
+            <h2 className="text-3xl font-black text-slate-900 mb-6">GARANTIA SEM BUROCRACIA</h2>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto mb-12">
+               Sabemos que você não pode ficar sem trabalhar. Por isso, nossa garantia é diferenciada.
+            </p>
+            <div className="grid md:grid-cols-3 gap-8">
+               <div className="bg-white p-6 rounded-xl border border-slate-200">
+                  <h3 className="font-bold text-lg mb-2">Troca Imediata</h3>
+                  <p className="text-sm text-slate-500">Se der defeito, trocamos na hora na loja. Sem esperar análise de fábrica.</p>
+               </div>
+               <div className="bg-white p-6 rounded-xl border border-slate-200">
+                  <h3 className="font-bold text-lg mb-2">12 Meses</h3>
+                  <p className="text-sm text-slate-500">Um ano inteiro de tranquilidade para você usar seu equipamento.</p>
+               </div>
+               <div className="bg-white p-6 rounded-xl border border-slate-200">
+                  <h3 className="font-bold text-lg mb-2">Suporte Técnico</h3>
+                  <p className="text-sm text-slate-500">Dúvidas sobre o funcionamento? Nossa equipe ajuda você.</p>
+               </div>
+            </div>
+         </div>
+      </section>
+   )
+}
 
 export const metadata: Metadata = {
   title: "Carregadores de Notebook em Campinas | Entrega em 60 Minutos | Balão da Informática",
@@ -256,8 +460,12 @@ export default async function CarregadoresPage() {
 
   return (
     <main className="min-h-screen bg-white">
+      <BlockUrgencyBanner />
       <Header />
       <BlockHero />
+      <BlockStats />
+      <BlockSymptoms />
+      <BlockProcess />
       
       <div id="ofertas" className="py-16 container mx-auto px-4">
         <ProductCarousel 
@@ -275,9 +483,13 @@ export default async function CarregadoresPage() {
         </div>
       </div>
 
+      <BlockConnectorTypes />
       <BlockBenefits />
+      <BlockSafety />
+      <BlockBrands />
       <BlockComparison />
       <BlockTestimonials />
+      <BlockWarrantyDetails />
       <BlockFAQ />
       <BlockContact />
     </main>

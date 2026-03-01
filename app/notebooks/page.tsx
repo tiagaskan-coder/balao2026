@@ -287,6 +287,91 @@ function CheckCircle2({ className }: { className?: string }) {
    )
 }
 
+function BlockWhyUs() {
+  return (
+    <section className="py-20 bg-slate-50 text-slate-900 border-t border-slate-200">
+        <div className="container mx-auto px-4">
+             <div className="text-center mb-16">
+                <h2 className="text-3xl md:text-5xl font-black mb-4">POR QUE ESCOLHER A BALÃO?</h2>
+                <p className="text-slate-600 max-w-2xl mx-auto">Confiança de quem está há mais de 15 anos no mercado de Campinas.</p>
+             </div>
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div className="p-6 bg-white rounded-3xl shadow-lg border border-slate-100 hover:border-blue-500 transition-colors group">
+                    <ShieldCheck className="w-16 h-16 mx-auto mb-6 text-blue-600 group-hover:scale-110 transition-transform" />
+                    <h3 className="text-2xl font-bold mb-4">Procedência Garantida</h3>
+                    <p className="text-slate-600">Todos os equipamentos com Nota Fiscal e garantia real. Sem surpresas.</p>
+                </div>
+                <div className="p-6 bg-white rounded-3xl shadow-lg border border-slate-100 hover:border-blue-500 transition-colors group">
+                    <Wrench className="w-16 h-16 mx-auto mb-6 text-blue-600 group-hover:scale-110 transition-transform" />
+                    <h3 className="text-2xl font-bold mb-4">Laboratório Próprio</h3>
+                    <p className="text-slate-600">Precisou de suporte? Resolvemos aqui mesmo em Campinas com técnicos certificados.</p>
+                </div>
+                <div className="p-6 bg-white rounded-3xl shadow-lg border border-slate-100 hover:border-blue-500 transition-colors group">
+                    <Truck className="w-16 h-16 mx-auto mb-6 text-blue-600 group-hover:scale-110 transition-transform" />
+                    <h3 className="text-2xl font-bold mb-4">Entrega Imediata</h3>
+                    <p className="text-slate-600">Comprou, levou. Ou receba no conforto da sua casa em até 24h na região.</p>
+                </div>
+             </div>
+        </div>
+    </section>
+  )
+}
+
+function BlockTestimonials() {
+  return (
+    <section className="py-20 bg-blue-900 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10"></div>
+        <div className="container mx-auto px-4 relative z-10">
+            <h2 className="text-3xl md:text-5xl font-black text-center mb-12">CLIENTES SATISFEITOS</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {[
+                    { name: "Mariana C.", role: "Designer", quote: "Precisava de um notebook potente para renderizar. O atendimento me indicou o modelo perfeito. Super rápido!" },
+                    { name: "Carlos E.", role: "Estudante", quote: "Comprei um seminovo com cara de novo. Bateria durando muito e preço justo. Recomendo." },
+                    { name: "Empresa X", role: "Parceiro B2B", quote: "Trocamos todo o parque de máquinas da empresa com a Balão. Suporte impecável e negociação transparente." }
+                ].map((t, i) => (
+                    <div key={i} className="bg-blue-800/50 p-8 rounded-3xl border border-blue-700">
+                        <div className="flex items-center gap-2 mb-4 text-yellow-400">
+                            {[1,2,3,4,5].map(s => <span key={s}>★</span>)}
+                        </div>
+                        <p className="text-blue-100 mb-6 italic">"{t.quote}"</p>
+                        <div>
+                            <div className="font-bold text-white">{t.name}</div>
+                            <div className="text-sm text-blue-300">{t.role}</div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+  )
+}
+
+function BlockPayment() {
+    return (
+        <section className="py-12 bg-white border-t border-slate-100">
+            <div className="container mx-auto px-4 text-center">
+                <h2 className="text-2xl font-bold text-slate-900 mb-8">FACILIDADE NO PAGAMENTO</h2>
+                <div className="flex flex-wrap justify-center gap-8 items-center grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition-all">
+                    <div className="flex flex-col items-center">
+                        <span className="text-3xl font-black text-green-600">PIX</span>
+                        <span className="text-sm font-bold text-slate-500">10% OFF</span>
+                    </div>
+                    <div className="w-px h-12 bg-slate-200"></div>
+                    <div className="flex flex-col items-center">
+                        <span className="text-3xl font-black text-blue-600">12x</span>
+                        <span className="text-sm font-bold text-slate-500">Sem Juros</span>
+                    </div>
+                    <div className="w-px h-12 bg-slate-200"></div>
+                    <div className="flex flex-col items-center">
+                        <span className="text-3xl font-black text-slate-800">Troca</span>
+                        <span className="text-sm font-bold text-slate-500">Aceitamos Usado</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    )
+}
+
 export default async function NotebooksPage() {
   const [allProducts, categories] = await Promise.all([
     getProducts(),
@@ -327,6 +412,31 @@ export default async function NotebooksPage() {
         {/* BLOCO 1: HERO */}
         <BlockHero />
 
+        {/* BLOCK USAGE - GUIA DE ESCOLHA */}
+        <section className="py-12 bg-white border-b border-slate-200">
+            <div className="container mx-auto px-4">
+                <h2 className="text-center text-2xl font-bold text-slate-900 mb-8">QUAL SEU OBJETIVO?</h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <a href="#ofertas" className="flex flex-col items-center gap-3 p-6 rounded-2xl bg-slate-50 hover:bg-blue-50 hover:scale-105 transition-all border border-slate-100">
+                        <Briefcase className="w-10 h-10 text-slate-700" />
+                        <span className="font-bold text-slate-900">Trabalho</span>
+                    </a>
+                    <a href="#ofertas" className="flex flex-col items-center gap-3 p-6 rounded-2xl bg-slate-50 hover:bg-blue-50 hover:scale-105 transition-all border border-slate-100">
+                        <GraduationCap className="w-10 h-10 text-slate-700" />
+                        <span className="font-bold text-slate-900">Estudos</span>
+                    </a>
+                    <a href="#ofertas" className="flex flex-col items-center gap-3 p-6 rounded-2xl bg-slate-50 hover:bg-blue-50 hover:scale-105 transition-all border border-slate-100">
+                        <Zap className="w-10 h-10 text-slate-700" />
+                        <span className="font-bold text-slate-900">Gamer</span>
+                    </a>
+                    <a href="#ofertas" className="flex flex-col items-center gap-3 p-6 rounded-2xl bg-slate-50 hover:bg-blue-50 hover:scale-105 transition-all border border-slate-100">
+                        <Cpu className="w-10 h-10 text-slate-700" />
+                        <span className="font-bold text-slate-900">Edição</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
         {/* PRODUTOS - GRID 1 */}
         <section id="ofertas" className="py-12 md:py-20 bg-zinc-50 min-h-[50vh]">
           <div className="container mx-auto px-4">
@@ -346,14 +456,114 @@ export default async function NotebooksPage() {
           </div>
         </section>
 
+        {/* BLOCK TRADE IN */}
+        <section className="py-16 bg-gradient-to-r from-blue-900 to-slate-900 text-white relative overflow-hidden">
+             <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10"></div>
+             <div className="container mx-auto px-4 relative z-10 flex flex-col md:flex-row items-center gap-8 md:gap-16">
+                 <div className="flex-1 text-center md:text-left">
+                     <div className="inline-block bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full mb-4">ECONOMIA INTELIGENTE</div>
+                     <h2 className="text-3xl md:text-5xl font-black mb-4">ACEITAMOS SEU USADO</h2>
+                     <p className="text-lg text-slate-300 mb-6">Seu notebook antigo vale desconto na compra de um novo. Avaliação justa e na hora.</p>
+                     <a href="https://wa.me/5519987510267" target="_blank" className="inline-flex items-center gap-2 bg-white text-blue-900 font-bold px-6 py-3 rounded-full hover:scale-105 transition-transform">
+                        <MessageCircle className="w-5 h-5" />
+                        Avaliar Meu Notebook
+                     </a>
+                 </div>
+                 <div className="flex-1 grid grid-cols-2 gap-4">
+                     <div className="bg-white/10 p-4 rounded-xl text-center backdrop-blur">
+                         <div className="text-2xl font-bold text-green-400 mb-1">Na Hora</div>
+                         <div className="text-sm text-slate-300">Avaliação Presencial</div>
+                     </div>
+                     <div className="bg-white/10 p-4 rounded-xl text-center backdrop-blur">
+                         <div className="text-2xl font-bold text-green-400 mb-1">Qualquer Marca</div>
+                         <div className="text-sm text-slate-300">Funcionando ou não</div>
+                     </div>
+                 </div>
+             </div>
+        </section>
+
         {/* BLOCO 2: FEATURES */}
         <BlockFeatures />
+
+        {/* BLOCK BRANDS */}
+        <section className="py-12 bg-white border-y border-slate-200">
+             <div className="container mx-auto px-4 text-center">
+                 <h3 className="text-slate-500 font-bold uppercase tracking-widest mb-8 text-sm">Trabalhamos com as Melhores Marcas</h3>
+                 <div className="flex flex-wrap justify-center gap-8 md:gap-16 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+                     {/* Placeholder text for logos since we don't have SVGs handy, using text styling */}
+                     <span className="text-2xl font-black text-slate-800">DELL</span>
+                     <span className="text-2xl font-black text-slate-800">LENOVO</span>
+                     <span className="text-2xl font-black text-slate-800">ACER</span>
+                     <span className="text-2xl font-black text-slate-800">ASUS</span>
+                     <span className="text-2xl font-black text-slate-800">APPLE</span>
+                     <span className="text-2xl font-black text-slate-800">SAMSUNG</span>
+                 </div>
+             </div>
+        </section>
 
         {/* BLOCO 3: UPGRADE */}
         <BlockUpgrade />
 
+        {/* BLOCK SUPPORT */}
+        <section className="py-20 bg-zinc-50">
+            <div className="container mx-auto px-4">
+                <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-xl p-8 md:p-12 border border-slate-100 flex flex-col md:flex-row items-center gap-8">
+                    <div className="flex-1">
+                        <h2 className="text-3xl font-black text-slate-900 mb-4">SUPORTE PÓS-VENDA</h2>
+                        <p className="text-slate-600 mb-6">Não te abandonamos após a compra. Nossa equipe está pronta para ajudar com drivers, configuração e garantia.</p>
+                        <div className="flex gap-4">
+                            <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
+                                <CheckCircle className="w-5 h-5 text-green-500" /> Drivers
+                            </div>
+                            <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
+                                <CheckCircle className="w-5 h-5 text-green-500" /> Windows
+                            </div>
+                            <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
+                                <CheckCircle className="w-5 h-5 text-green-500" /> Office
+                            </div>
+                        </div>
+                    </div>
+                    <div className="shrink-0">
+                         <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+                             <MessageCircle className="w-12 h-12" />
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         {/* BLOCO 4: QUALITY */}
         <BlockQuality />
+
+        {/* BLOCK FAQ */}
+        <section className="py-20 bg-white">
+            <div className="container mx-auto px-4 max-w-3xl">
+                <h2 className="text-3xl font-black text-center mb-12">PERGUNTAS FREQUENTES</h2>
+                <div className="space-y-4">
+                    <details className="group border border-slate-200 rounded-2xl p-6 cursor-pointer open:bg-slate-50 transition-colors">
+                        <summary className="font-bold text-lg list-none flex justify-between items-center">
+                            Os notebooks têm garantia?
+                            <ChevronDown className="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform" />
+                        </summary>
+                        <p className="mt-4 text-slate-600">Sim! Equipamentos novos possuem 1 ano de garantia (fabricante + loja). Seminovos possuem 3 a 6 meses de garantia direta conosco.</p>
+                    </details>
+                    <details className="group border border-slate-200 rounded-2xl p-6 cursor-pointer open:bg-slate-50 transition-colors">
+                        <summary className="font-bold text-lg list-none flex justify-between items-center">
+                            Vocês fazem upgrade na hora?
+                            <ChevronDown className="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform" />
+                        </summary>
+                        <p className="mt-4 text-slate-600">Com certeza. Você pode escolher o notebook e já solicitar aumento de memória RAM ou troca por SSD maior. O serviço é feito na hora.</p>
+                    </details>
+                    <details className="group border border-slate-200 rounded-2xl p-6 cursor-pointer open:bg-slate-50 transition-colors">
+                        <summary className="font-bold text-lg list-none flex justify-between items-center">
+                            Aceitam notebook usado na troca?
+                            <ChevronDown className="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform" />
+                        </summary>
+                        <p className="mt-4 text-slate-600">Sim, aceitamos seu notebook usado como parte do pagamento. A avaliação é feita presencialmente em nossa loja em Campinas.</p>
+                    </details>
+                </div>
+            </div>
+        </section>
 
         {/* BLOCO 5: ENTREGA */}
         <section className="min-h-[50vh] flex items-center bg-slate-900 text-white py-12 md:py-20">
@@ -378,6 +588,11 @@ export default async function NotebooksPage() {
                </div>
             </div>
         </section>
+
+        {/* NOVOS BLOCOS */}
+        <BlockWhyUs />
+        <BlockTestimonials />
+        <BlockPayment />
 
         {/* BLOCO 6: CTA FINAL */}
         <BlockUrgency />

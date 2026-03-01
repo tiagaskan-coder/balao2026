@@ -163,6 +163,143 @@ function BlockFeature({ title, description, icon: Icon, isDark = true }: { title
   )
 }
 
+function BlockSteps() {
+  return (
+    <section className="py-20 bg-zinc-50 text-slate-900 border-y border-zinc-200">
+        <div className="container mx-auto px-4">
+             <div className="text-center mb-16">
+                <h2 className="text-3xl md:text-5xl font-black mb-4">COMO COMPRAR</h2>
+                <p className="text-slate-600 max-w-2xl mx-auto">É simples, rápido e seguro garantir sua oferta.</p>
+             </div>
+             <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
+                {[
+                    { step: "01", title: "Escolha", desc: "Navegue pelas ofertas e escolha seu produto." },
+                    { step: "02", title: "Chame", desc: "Clique no botão do WhatsApp para falar com vendedor." },
+                    { step: "03", title: "Pague", desc: "Confirme a disponibilidade e faça o pagamento (PIX/Cartão)." },
+                    { step: "04", title: "Receba", desc: "Retire na loja na hora ou receba em casa." }
+                ].map((s, i) => (
+                    <div key={i} className="text-center relative z-10">
+                        <div className="w-16 h-16 bg-purple-600 text-white rounded-2xl flex items-center justify-center text-2xl font-black mx-auto mb-6 shadow-lg shadow-purple-600/30">
+                            {s.step}
+                        </div>
+                        <h3 className="text-xl font-bold mb-2">{s.title}</h3>
+                        <p className="text-slate-600 text-sm">{s.desc}</p>
+                    </div>
+                ))}
+             </div>
+        </div>
+    </section>
+  )
+}
+
+function BlockBrands() {
+  return (
+    <section className="py-12 bg-white border-y border-slate-100">
+      <div className="container mx-auto px-4">
+        <p className="text-center text-slate-400 font-bold text-sm uppercase tracking-widest mb-8">As melhores marcas do mundo</p>
+        <div className="flex flex-wrap justify-center gap-8 md:gap-16 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+           {/* Logos simplificados com texto para evitar imagens externas quebradas */}
+           {['NVIDIA', 'AMD', 'INTEL', 'ASUS', 'LOGITECH', 'CORSAIR', 'HYPERX', 'SAMSUNG', 'LG', 'ACER'].map((brand) => (
+             <div key={brand} className="text-2xl md:text-3xl font-black text-slate-800 flex items-center gap-2">
+               <span className="w-2 h-2 bg-purple-600 rounded-full"></span>
+               {brand}
+             </div>
+           ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function BlockNewsletter() {
+  return (
+    <section className="py-20 bg-zinc-900 text-white relative overflow-hidden">
+      <div className="absolute inset-0 bg-purple-900/20"></div>
+      <div className="container mx-auto px-4 relative z-10 text-center max-w-2xl">
+         <div className="inline-block p-3 rounded-full bg-purple-500/20 mb-6">
+            <MessageCircle className="w-8 h-8 text-purple-400" />
+         </div>
+         <h2 className="text-3xl md:text-4xl font-black mb-4">OFERTAS SECRETAS?</h2>
+         <p className="text-zinc-400 mb-8 text-lg">Entre para nossa lista VIP no WhatsApp e receba cupons exclusivos antes de todo mundo.</p>
+         <form className="flex flex-col sm:flex-row gap-4">
+            <input 
+              type="text" 
+              placeholder="Seu WhatsApp (DDD + Número)" 
+              className="flex-1 bg-zinc-800 border-zinc-700 rounded-xl px-6 py-4 text-white placeholder:text-zinc-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+            />
+            <button className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-8 py-4 rounded-xl transition-all hover:scale-105 shadow-lg shadow-purple-600/20">
+               QUERO ENTRAR
+            </button>
+         </form>
+         <p className="text-xs text-zinc-500 mt-4">Sem spam. Apenas promoções reais.</p>
+      </div>
+    </section>
+  )
+}
+
+function BlockUrgencyBanner() {
+  return (
+    <div className="bg-yellow-400 text-yellow-900 py-3 overflow-hidden">
+      <div className="container mx-auto px-4 flex items-center justify-center gap-4 text-sm md:text-base font-black uppercase tracking-wide animate-pulse">
+         <Timer className="w-5 h-5" />
+         <span>Corra! As ofertas mudam em: 04h 12m 33s</span>
+         <Timer className="w-5 h-5" />
+      </div>
+    </div>
+  )
+}
+
+function BlockPriceGuarantee() {
+  return (
+    <section className="py-12 bg-purple-50 border-y border-purple-100">
+       <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-center gap-6 text-center md:text-left">
+          <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center shrink-0">
+             <Percent className="w-8 h-8 text-purple-600" />
+          </div>
+          <div>
+             <h3 className="text-xl font-bold text-purple-900">GARANTIA DE MENOR PREÇO</h3>
+             <p className="text-purple-700/80">Achou mais barato em Campinas? Nós cobrimos a oferta da concorrência na hora!</p>
+          </div>
+          <Link 
+             href="https://wa.me/5519993916723?text=Achei%20mais%20barato%20e%20quero%20negociar!"
+             target="_blank"
+             className="px-6 py-2 bg-purple-600 text-white rounded-lg font-bold text-sm hover:bg-purple-700 transition-colors"
+          >
+             NEGOCIAR AGORA
+          </Link>
+       </div>
+    </section>
+  )
+}
+
+function BlockTestimonials() {
+  return (
+    <section className="py-20 bg-white text-slate-900">
+        <div className="container mx-auto px-4 relative z-10">
+            <h2 className="text-3xl md:text-5xl font-black text-center mb-12">QUEM APROVEITOU</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {[
+                    { name: "Felipe G.", item: "RTX 4060", text: "Preço imbatível. Cheguei na loja, fui super bem atendido e já saí com a placa." },
+                    { name: "Mariana L.", item: "PC Gamer", text: "Montei meu PC completo com eles. A consultoria pelo Whats ajudou muito a escolher as peças certas." },
+                    { name: "João V.", item: "Monitor 144hz", text: "Entrega super rápida em Valinhos. O monitor chegou perfeito e bem embalado." }
+                ].map((t, i) => (
+                    <div key={i} className="bg-slate-50 p-8 rounded-3xl border border-slate-100 hover:border-purple-500 transition-colors">
+                        <div className="flex items-center gap-1 text-yellow-500 mb-4">
+                            {[1,2,3,4,5].map(s => <Star key={s} className="w-4 h-4 fill-current" />)}
+                        </div>
+                        <p className="text-slate-600 mb-6 italic">"{t.text}"</p>
+                        <div>
+                            <div className="font-bold text-slate-900">{t.name}</div>
+                            <div className="text-xs text-purple-600 font-bold uppercase tracking-wider">Comprou {t.item}</div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+  )
+}
+
 export default async function PromocaoPage() {
   const allProducts = await getProducts()
   
@@ -196,6 +333,26 @@ export default async function PromocaoPage() {
                     icon={Cpu}
                  />
               </div>
+              
+              {/* BLOCK PAYMENT */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-20 bg-zinc-900/50 p-8 rounded-3xl border border-zinc-800">
+                  <div className="text-center">
+                      <div className="text-3xl font-bold text-green-500 mb-1">10% OFF</div>
+                      <div className="text-zinc-400 text-sm">no PIX</div>
+                  </div>
+                  <div className="text-center">
+                      <div className="text-3xl font-bold text-blue-500 mb-1">12x</div>
+                      <div className="text-zinc-400 text-sm">Sem Juros</div>
+                  </div>
+                  <div className="text-center">
+                      <div className="text-3xl font-bold text-purple-500 mb-1">Express</div>
+                      <div className="text-zinc-400 text-sm">Entrega Rápida</div>
+                  </div>
+                  <div className="text-center">
+                      <div className="text-3xl font-bold text-yellow-500 mb-1">Garantia</div>
+                      <div className="text-zinc-400 text-sm">Com Nota Fiscal</div>
+                  </div>
+              </div>
 
               <ProductCarousel 
                  title="Hardware em Oferta" 
@@ -212,7 +369,40 @@ export default async function PromocaoPage() {
                  title="Periféricos Gamer" 
                  products={peripheralProducts} 
               />
+              
+              {/* BLOCK CATEGORIES - NAV RAPIDA */}
+              <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {['Teclados', 'Mouses', 'Headsets', 'Monitores', 'Cadeiras', 'Mousepads', 'Controles', 'Streaming'].map((cat, i) => (
+                      <div key={i} className="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow text-center font-bold text-slate-700 border border-slate-200 cursor-pointer hover:border-purple-500 hover:text-purple-600">
+                          {cat}
+                      </div>
+                  ))}
+              </div>
            </div>
+        </section>
+
+        {/* BLOCK TRUST */}
+        <section className="py-20 bg-zinc-900 text-white border-y border-zinc-800">
+            <div className="container mx-auto px-4 text-center">
+                <h2 className="text-3xl font-black mb-12">POR QUE COMPRAR CONOSCO?</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="p-6 bg-black/40 rounded-3xl border border-zinc-800">
+                        <MapPin className="w-12 h-12 text-purple-500 mx-auto mb-4" />
+                        <h3 className="text-xl font-bold mb-2">Loja Física em Campinas</h3>
+                        <p className="text-zinc-400">Você sabe onde nos encontrar. Garantia real e suporte presencial.</p>
+                    </div>
+                    <div className="p-6 bg-black/40 rounded-3xl border border-zinc-800">
+                        <ShieldCheck className="w-12 h-12 text-green-500 mx-auto mb-4" />
+                        <h3 className="text-xl font-bold mb-2">Procedência Garantida</h3>
+                        <p className="text-zinc-400">Produtos originais, lacrados e com nota fiscal. Revenda autorizada das grandes marcas.</p>
+                    </div>
+                    <div className="p-6 bg-black/40 rounded-3xl border border-zinc-800">
+                        <MessageCircle className="w-12 h-12 text-blue-500 mx-auto mb-4" />
+                        <h3 className="text-xl font-bold mb-2">Suporte Especializado</h3>
+                        <p className="text-zinc-400">Dúvidas na instalação? Nossa equipe técnica te ajuda após a compra.</p>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <BlockDivider text="COMPUTADORES" subtext="PC Gamer e Notebooks" />
@@ -224,6 +414,33 @@ export default async function PromocaoPage() {
                  products={pcProducts} 
               />
            </div>
+        </section>
+
+        <BlockNewsletter />
+
+        <BlockSteps />
+        
+        <BlockTestimonials />
+        
+        {/* BLOCK FAQ */}
+        <section className="py-20 bg-slate-100 text-slate-900">
+            <div className="container mx-auto px-4 max-w-4xl">
+                <h2 className="text-3xl font-black text-center mb-12">DÚVIDAS SOBRE AS PROMOÇÕES</h2>
+                <div className="space-y-4">
+                    <details className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                        <summary className="font-bold text-lg cursor-pointer list-none flex justify-between">Os produtos são novos? <ChevronDown className="w-5 h-5"/></summary>
+                        <p className="mt-4 text-slate-600">Sim, todos os produtos da seção Promoção são novos, lacrados e com garantia total, salvo se explicitamente marcado como "Open Box" ou "Seminovo".</p>
+                    </details>
+                    <details className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                        <summary className="font-bold text-lg cursor-pointer list-none flex justify-between">Posso retirar na hora? <ChevronDown className="w-5 h-5"/></summary>
+                        <p className="mt-4 text-slate-600">Sim! Se o produto estiver marcado como "Disponível na Loja", você pode comprar pelo site e retirar imediatamente em nossa unidade de Campinas.</p>
+                    </details>
+                    <details className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                        <summary className="font-bold text-lg cursor-pointer list-none flex justify-between">Parcela no cartão? <ChevronDown className="w-5 h-5"/></summary>
+                        <p className="mt-4 text-slate-600">Parcelamos em até 12x no cartão de crédito. O desconto de 10% é exclusivo para pagamento à vista no PIX.</p>
+                    </details>
+                </div>
+            </div>
         </section>
 
         {/* CTA FINAL */}

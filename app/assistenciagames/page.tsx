@@ -20,7 +20,13 @@ import {
   HelpCircle,
   ShieldCheck,
   Search,
-  Settings
+  Settings,
+  Ghost,
+  Timer,
+  ThumbsUp,
+  Star,
+  Shield,
+  AlertTriangle
 } from 'lucide-react'
 
 export const metadata: Metadata = {
@@ -345,7 +351,82 @@ export default async function AssistenciaGamesPage() {
         
         <BlockHero />
 
+        {/* NEW BLOCK: Stats */}
+        <section className="py-12 bg-zinc-900 border-b border-zinc-800">
+           <div className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+              {[
+                 { num: "15k+", label: "Consoles Reparados", icon: Gamepad2 },
+                 { num: "98%", label: "Taxa de Sucesso", icon: Trophy },
+                 { num: "24h", label: "Orçamento Médio", icon: Timer },
+                 { num: "12x", label: "Parcelamento", icon: ThumbsUp }
+              ].map((s, i) => (
+                 <div key={i} className="group hover:bg-zinc-800/50 p-4 rounded-2xl transition-colors">
+                    <div className="flex justify-center mb-4 text-purple-500 group-hover:scale-110 transition-transform">
+                       <s.icon className="w-8 h-8" />
+                    </div>
+                    <div className="text-3xl md:text-4xl font-black text-white mb-2">{s.num}</div>
+                    <div className="text-sm text-zinc-500 uppercase tracking-wider font-bold">{s.label}</div>
+                 </div>
+              ))}
+           </div>
+        </section>
+
         <BlockServices />
+
+        {/* NEW BLOCK: Process */}
+        <section className="py-20 bg-zinc-950 text-white relative overflow-hidden border-t border-zinc-900">
+            <div className="container mx-auto px-4">
+                <div className="text-center mb-16">
+                    <h2 className="text-3xl md:text-5xl font-black mb-4">COMO FUNCIONA</h2>
+                    <p className="text-zinc-400 max-w-2xl mx-auto">Seu game novo de novo em 4 passos simples.</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    {[
+                        { step: "01", title: "Entrada", desc: "Traga seu console ou envie pelos Correios." },
+                        { step: "02", title: "Análise", desc: "Diagnóstico preciso em laboratório próprio." },
+                        { step: "03", title: "Aprovação", desc: "Orçamento detalhado via WhatsApp." },
+                        { step: "04", title: "Diversão", desc: "Retire seu game pronto para jogar." }
+                    ].map((item, i) => (
+                        <div key={i} className="relative group">
+                            <div className="text-6xl font-black text-zinc-800 absolute -top-8 left-1/2 -translate-x-1/2 z-0 group-hover:text-purple-900/20 transition-colors">
+                                {item.step}
+                            </div>
+                            <div className="relative z-10 bg-zinc-900 p-8 rounded-3xl border border-zinc-800 hover:border-purple-500 transition-colors text-center">
+                                <h3 className="text-xl font-bold mb-2 text-purple-400">{item.title}</h3>
+                                <p className="text-zinc-400 text-sm">{item.desc}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+
+        {/* NEW BLOCK: Common Problems */}
+        <section className="py-20 bg-black text-white">
+           <div className="container mx-auto px-4">
+              <h2 className="text-3xl md:text-5xl font-black text-center mb-16">DEFEITOS COMUNS</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                 {[
+                    { title: "Luz Azul da Morte", desc: "O terror do PS4/PS5. Resolvemos com Reballing profissional.", icon: Ghost },
+                    { title: "Drift no Analógico", desc: "Seu personagem anda sozinho? Trocamos o mecanismo 3D.", icon: Gamepad2 },
+                    { title: "Superaquecimento", desc: "Barulho alto e desligamentos. Limpeza e pasta térmica resolvem.", icon: ThermometerSun },
+                    { title: "Não Lê Disco", desc: "Drive óptico travado ou lente suja. Recuperamos seu leitor.", icon: Disc },
+                    { title: "HDMI Quebrado", desc: "Mal contato ou porta danificada. Troca do conector na hora.", icon: Cable },
+                    { title: "Não Liga", desc: "Fonte queimada ou curto na placa. Diagnóstico eletrônico avançado.", icon: Zap }
+                 ].map((prob, i) => (
+                    <div key={i} className="flex items-start gap-4 p-6 rounded-2xl bg-zinc-900/50 border border-zinc-800 hover:bg-zinc-800 transition-colors">
+                       <div className="p-3 bg-red-500/10 rounded-xl text-red-500 shrink-0">
+                          <prob.icon className="w-6 h-6" />
+                       </div>
+                       <div>
+                          <h3 className="font-bold text-lg mb-1">{prob.title}</h3>
+                          <p className="text-sm text-zinc-400 leading-relaxed">{prob.desc}</p>
+                       </div>
+                    </div>
+                 ))}
+              </div>
+           </div>
+        </section>
 
         {/* PRODUTOS EM DESTAQUE */}
         <section className="bg-zinc-900 py-16 border-y border-zinc-800">
@@ -357,9 +438,93 @@ export default async function AssistenciaGamesPage() {
            </div>
         </section>
 
+        {/* NEW BLOCK: Warranty */}
+        <section className="py-20 bg-zinc-900 text-white border-y border-zinc-800">
+           <div className="container mx-auto px-4 flex flex-col md:flex-row items-center gap-12">
+              <div className="flex-1">
+                 <ShieldCheck className="w-20 h-20 text-green-500 mb-6" />
+                 <h2 className="text-4xl font-black mb-6">GARANTIA DE VERDADE</h2>
+                 <p className="text-xl text-zinc-300 mb-8 leading-relaxed">
+                    Não brincamos em serviço. Todos os reparos possuem garantia legal de 90 dias, cobrindo peças e mão de obra.
+                    Se o problema voltar, nós resolvemos sem custo adicional.
+                 </p>
+                 <ul className="space-y-4">
+                    <li className="flex items-center gap-3 text-lg">
+                       <CheckCircle className="w-6 h-6 text-green-500" /> Peças 100% Originais
+                    </li>
+                    <li className="flex items-center gap-3 text-lg">
+                       <CheckCircle className="w-6 h-6 text-green-500" /> Nota Fiscal de Serviço
+                    </li>
+                    <li className="flex items-center gap-3 text-lg">
+                       <CheckCircle className="w-6 h-6 text-green-500" /> Suporte Pós-Venda
+                    </li>
+                 </ul>
+              </div>
+              <div className="flex-1 bg-black p-8 rounded-3xl border border-zinc-800 relative overflow-hidden">
+                 <div className="absolute top-0 right-0 p-4 bg-green-600 text-black font-black text-xs uppercase tracking-widest rounded-bl-2xl">
+                    Aprovado
+                 </div>
+                 <div className="space-y-6">
+                    <div className="flex items-center gap-4">
+                       <div className="w-12 h-12 bg-zinc-800 rounded-full flex items-center justify-center font-bold">VS</div>
+                       <div>
+                          <h3 className="font-bold text-green-500">Balão Games</h3>
+                          <p className="text-xs text-zinc-500">Laboratório Profissional</p>
+                       </div>
+                    </div>
+                    <div className="h-px bg-zinc-800"></div>
+                    <div className="space-y-2 text-sm text-zinc-300">
+                       <p className="flex justify-between"><span>Técnicos Certificados</span> <CheckCircle className="w-4 h-4 text-green-500" /></p>
+                       <p className="flex justify-between"><span>Ferramentas de Precisão</span> <CheckCircle className="w-4 h-4 text-green-500" /></p>
+                       <p className="flex justify-between"><span>Ambiente ESD (Anti-estático)</span> <CheckCircle className="w-4 h-4 text-green-500" /></p>
+                       <p className="flex justify-between"><span>Controle de Qualidade</span> <CheckCircle className="w-4 h-4 text-green-500" /></p>
+                    </div>
+                 </div>
+              </div>
+           </div>
+        </section>
+
         <BlockNational />
 
         <BlockFAQ />
+
+        <BlockFAQ />
+
+        {/* NEW BLOCK: Testimonials */}
+        <section className="py-20 bg-zinc-950 text-white border-t border-zinc-900">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-black mb-12 text-center">GAMERS APROVAM</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+               {[
+                  { name: "Lucas M.", game: "PS5", text: "Achei que meu PS5 tinha morrido com o raio. Recuperaram a fonte e ainda limparam. Top!" },
+                  { name: "Amanda K.", game: "Switch", text: "Trocaram o analógico do meu Joycon em 1 hora. O drift sumiu completamente." },
+                  { name: "Roberto J.", game: "Xbox Series S", text: "Enviei de Minas Gerais pelos correios. Chegou perfeito e muito bem embalado. Recomendo." }
+               ].map((t, i) => (
+                  <div key={i} className="bg-zinc-900 p-8 rounded-2xl border border-zinc-800">
+                     <div className="flex gap-1 text-yellow-500 mb-4">
+                        {[1,2,3,4,5].map(s => <Star key={s} className="w-4 h-4 fill-current" />)}
+                     </div>
+                     <p className="text-zinc-300 italic mb-6">"{t.text}"</p>
+                     <div>
+                        <div className="font-bold">{t.name}</div>
+                        <div className="text-xs text-purple-500 font-bold uppercase">{t.game}</div>
+                     </div>
+                  </div>
+               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* NEW BLOCK: Newsletter/Tips */}
+        <section className="py-20 bg-purple-600 text-white text-center">
+           <div className="container mx-auto px-4 max-w-2xl">
+              <h2 className="text-3xl font-bold mb-4">Dicas de Mestre?</h2>
+              <p className="mb-8 text-purple-100">Entre no nosso grupo e receba dicas de como cuidar do seu console e promoções de jogos.</p>
+              <Link href="https://wa.me/5519993916723?text=Quero%20dicas%20para%20meu%20game" target="_blank" className="bg-white text-purple-600 px-8 py-4 rounded-full font-bold hover:bg-purple-50 transition-colors inline-flex items-center gap-2">
+                 Entrar na Comunidade <Gamepad2 className="w-5 h-5" />
+              </Link>
+           </div>
+        </section>
 
         <section className="py-20 bg-gradient-to-br from-purple-900 to-indigo-900 text-white text-center">
            <div className="container mx-auto px-4">

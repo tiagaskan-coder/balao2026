@@ -28,8 +28,276 @@ import {
   Camera,
   Users,
   Handshake,
-  Smartphone
+  Smartphone,
+  XCircle,
+  AlertTriangle,
+  Monitor,
+  HardDrive
 } from 'lucide-react'
+
+function BlockStats() {
+  return (
+    <section className="py-12 bg-zinc-900 border-b border-zinc-800">
+      <div className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
+        {[
+          { label: "Equipamentos Vendidos", value: "+2.500" },
+          { label: "Tempo Médio de Venda", value: "7 Dias" },
+          { label: "Avaliação de Clientes", value: "4.9/5" },
+          { label: "Anos de Mercado", value: "15" }
+        ].map((stat, i) => (
+          <div key={i}>
+            <div className="text-4xl font-black mb-2 text-green-500">{stat.value}</div>
+            <div className="text-zinc-400 text-sm uppercase tracking-wider">{stat.label}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function BlockComparison() {
+  return (
+    <section className="py-20 bg-black text-white">
+      <div className="container mx-auto px-4">
+        <h2 className="text-3xl md:text-5xl font-black text-center mb-16">
+          POR QUE VENDER COM A <span className="text-green-500">BALÃO?</span>
+        </h2>
+        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+           {/* Vender Sozinho */}
+           <div className="bg-zinc-900/50 p-8 rounded-3xl border border-red-900/30 relative overflow-hidden">
+              <div className="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">RISCO ALTO</div>
+              <h3 className="text-2xl font-bold mb-6 text-red-400">Vender Sozinho (OLX/Face)</h3>
+              <ul className="space-y-4">
+                 <li className="flex items-start gap-3 text-zinc-400">
+                    <XCircle className="w-6 h-6 text-red-500 shrink-0" />
+                    <span>Golpes de pagamento e comprovantes falsos.</span>
+                 </li>
+                 <li className="flex items-start gap-3 text-zinc-400">
+                    <XCircle className="w-6 h-6 text-red-500 shrink-0" />
+                    <span>Estranhos visitando sua casa para "testar".</span>
+                 </li>
+                 <li className="flex items-start gap-3 text-zinc-400">
+                    <XCircle className="w-6 h-6 text-red-500 shrink-0" />
+                    <span>Mensagens de curiosos o dia todo.</span>
+                 </li>
+                 <li className="flex items-start gap-3 text-zinc-400">
+                    <XCircle className="w-6 h-6 text-red-500 shrink-0" />
+                    <span>Sem garantia para quem compra (desvaloriza o produto).</span>
+                 </li>
+              </ul>
+           </div>
+
+           {/* Vender na Balão */}
+           <div className="bg-zinc-900 p-8 rounded-3xl border border-green-500/50 relative overflow-hidden shadow-[0_0_30px_rgba(34,197,94,0.1)]">
+              <div className="absolute top-0 right-0 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">RECOMENDADO</div>
+              <h3 className="text-2xl font-bold mb-6 text-green-400">Vender na Balão</h3>
+              <ul className="space-y-4">
+                 <li className="flex items-start gap-3 text-white">
+                    <CheckCircle className="w-6 h-6 text-green-500 shrink-0" />
+                    <span>Pagamento garantido e seguro.</span>
+                 </li>
+                 <li className="flex items-start gap-3 text-white">
+                    <CheckCircle className="w-6 h-6 text-green-500 shrink-0" />
+                    <span>Loja física no centro (segurança total).</span>
+                 </li>
+                 <li className="flex items-start gap-3 text-white">
+                    <CheckCircle className="w-6 h-6 text-green-500 shrink-0" />
+                    <span>Nós atendemos os interessados.</span>
+                 </li>
+                 <li className="flex items-start gap-3 text-white">
+                    <CheckCircle className="w-6 h-6 text-green-500 shrink-0" />
+                    <span>Oferecemos garantia e parcelamento (vende mais rápido).</span>
+                 </li>
+              </ul>
+           </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function BlockWhatWeAccept() {
+   return (
+      <section className="py-20 bg-zinc-950 text-white">
+         <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-black text-center mb-12">O QUE COMPRAMOS</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+               <div className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 hover:border-green-500 transition-colors text-center group">
+                  <Smartphone className="w-12 h-12 mx-auto mb-4 text-zinc-500 group-hover:text-green-500 transition-colors" />
+                  <h3 className="font-bold text-lg">Celulares</h3>
+                  <p className="text-sm text-zinc-500 mt-2">iPhones e Androids topo de linha (Samsung S, Xiaomi).</p>
+               </div>
+               <div className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 hover:border-green-500 transition-colors text-center group">
+                  <Laptop className="w-12 h-12 mx-auto mb-4 text-zinc-500 group-hover:text-green-500 transition-colors" />
+                  <h3 className="font-bold text-lg">Notebooks</h3>
+                  <p className="text-sm text-zinc-500 mt-2">Dell, Lenovo, Acer, Macbooks. Core i5 ou superior.</p>
+               </div>
+               <div className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 hover:border-green-500 transition-colors text-center group">
+                  <Cpu className="w-12 h-12 mx-auto mb-4 text-zinc-500 group-hover:text-green-500 transition-colors" />
+                  <h3 className="font-bold text-lg">PC Gamer</h3>
+                  <p className="text-sm text-zinc-500 mt-2">Computadores montados com placa de vídeo dedicada.</p>
+               </div>
+               <div className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 hover:border-green-500 transition-colors text-center group">
+                  <Monitor className="w-12 h-12 mx-auto mb-4 text-zinc-500 group-hover:text-green-500 transition-colors" />
+                  <h3 className="font-bold text-lg">Periféricos</h3>
+                  <p className="text-sm text-zinc-500 mt-2">Monitores, Placas de Vídeo e peças high-end.</p>
+               </div>
+            </div>
+         </div>
+      </section>
+   )
+}
+
+function BlockWhatWeDontAccept() {
+   return (
+      <section className="py-12 bg-zinc-900 border-y border-zinc-800 text-white">
+         <div className="container mx-auto px-4 max-w-4xl text-center">
+            <h3 className="text-xl font-bold mb-8 text-zinc-400 flex items-center justify-center gap-2">
+               <XCircle className="text-red-500" />
+               O que NÃO aceitamos no momento
+            </h3>
+            <div className="flex flex-wrap justify-center gap-4">
+               {["Impressoras", "Monitores de Tubo (CRT)", "Peças Quebradas", "Notebooks muito antigos (DDR2)", "Celulares Bloqueados", "Tablets Genéricos"].map((item, i) => (
+                  <span key={i} className="bg-zinc-800 px-4 py-2 rounded-full text-zinc-400 text-sm border border-zinc-700">
+                     {item}
+                  </span>
+               ))}
+            </div>
+         </div>
+      </section>
+   )
+}
+
+function BlockSafety() {
+   return (
+      <section className="py-20 bg-black text-white">
+         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center gap-12">
+            <div className="flex-1 space-y-8">
+               <h2 className="text-3xl font-black mb-6">SEGURANÇA DE DADOS</h2>
+               <div className="flex gap-4">
+                  <div className="bg-green-900/20 p-4 rounded-xl h-fit">
+                     <Lock className="w-8 h-8 text-green-500" />
+                  </div>
+                  <div>
+                     <h3 className="text-xl font-bold mb-2">Formatação Segura (Wipe)</h3>
+                     <p className="text-zinc-400">Antes de colocar à venda, realizamos uma formatação de baixo nível que impede a recuperação dos seus arquivos pessoais, fotos e senhas.</p>
+                  </div>
+               </div>
+               <div className="flex gap-4">
+                  <div className="bg-green-900/20 p-4 rounded-xl h-fit">
+                     <ShieldCheck className="w-8 h-8 text-green-500" />
+                  </div>
+                  <div>
+                     <h3 className="text-xl font-bold mb-2">Contrato de Consignação</h3>
+                     <p className="text-zinc-400">Tudo documentado. Você recebe um contrato com a descrição do item, valor combinado e prazos. Transparência total.</p>
+                  </div>
+               </div>
+            </div>
+            <div className="flex-1 bg-zinc-900 p-8 rounded-2xl border border-zinc-800">
+               <h3 className="font-bold text-center mb-6 text-zinc-300">NOSSO COMPROMISSO</h3>
+               <ul className="space-y-4">
+                  <li className="flex items-center justify-between p-4 bg-black rounded-lg border border-zinc-800">
+                     <span>Privacidade</span>
+                     <CheckCircle className="text-green-500" />
+                  </li>
+                  <li className="flex items-center justify-between p-4 bg-black rounded-lg border border-zinc-800">
+                     <span>Honestidade na Avaliação</span>
+                     <CheckCircle className="text-green-500" />
+                  </li>
+                  <li className="flex items-center justify-between p-4 bg-black rounded-lg border border-zinc-800">
+                     <span>Pagamento Pontual</span>
+                     <CheckCircle className="text-green-500" />
+                  </li>
+               </ul>
+            </div>
+         </div>
+      </section>
+   )
+}
+
+function BlockTestimonials() {
+   return (
+      <section className="py-20 bg-zinc-950 text-white">
+         <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl font-black mb-12">QUEM VENDEU, RECOMENDA</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+               <div className="bg-zinc-900 p-8 rounded-2xl border border-zinc-800 relative">
+                  <div className="flex justify-center gap-1 text-green-500 mb-4">
+                     <Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" />
+                  </div>
+                  <p className="italic mb-6 text-zinc-300">"Tinha um PC Gamer parado há meses. Levei na Balão, avaliaram na hora e venderam em 1 semana. O PIX caiu na hora."</p>
+                  <p className="font-bold">- Felipe J., Programador</p>
+               </div>
+               <div className="bg-zinc-900 p-8 rounded-2xl border border-zinc-800 relative">
+                  <div className="flex justify-center gap-1 text-green-500 mb-4">
+                     <Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" />
+                  </div>
+                  <p className="italic mb-6 text-zinc-300">"Melhor que vender no Facebook. Não tive dor de cabeça com ninguém me chamando. Recomendo muito."</p>
+                  <p className="font-bold">- Amanda S., Arquiteta</p>
+               </div>
+               <div className="bg-zinc-900 p-8 rounded-2xl border border-zinc-800 relative">
+                  <div className="flex justify-center gap-1 text-green-500 mb-4">
+                     <Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" />
+                  </div>
+                  <p className="italic mb-6 text-zinc-300">"Vendi meu MacBook antigo para dar entrada em um novo com eles. Avaliação justa e processo transparente."</p>
+                  <p className="font-bold">- Roberto M., Fotógrafo</p>
+               </div>
+            </div>
+         </div>
+      </section>
+   )
+}
+
+function BlockFAQ() {
+   return (
+      <section className="py-20 bg-black text-white">
+         <div className="container mx-auto px-4 max-w-3xl">
+            <h2 className="text-3xl font-black text-center mb-12">DÚVIDAS FREQUENTES</h2>
+            <div className="space-y-6">
+               <div className="border border-zinc-800 rounded-xl p-6 bg-zinc-900/50">
+                  <h3 className="text-xl font-bold mb-2 flex items-center gap-2 text-green-400">
+                     <DollarSign className="w-5 h-5" />
+                     Quanto vocês cobram?
+                  </h3>
+                  <p className="text-zinc-400">Trabalhamos com uma porcentagem sobre a venda ou valor líquido combinado. Isso é definido na avaliação, sem surpresas.</p>
+               </div>
+               <div className="border border-zinc-800 rounded-xl p-6 bg-zinc-900/50">
+                  <h3 className="text-xl font-bold mb-2 text-green-400">Preciso deixar o equipamento na loja?</h3>
+                  <p className="text-zinc-400">Sim. Para vender rápido, o produto precisa estar disponível para os clientes verem e testarem em nossa vitrine física.</p>
+               </div>
+               <div className="border border-zinc-800 rounded-xl p-6 bg-zinc-900/50">
+                  <h3 className="text-xl font-bold mb-2 text-green-400">Quanto tempo demora?</h3>
+                  <p className="text-zinc-400">A média é de 7 a 15 dias para itens com preço de mercado. Itens muito específicos podem levar mais tempo.</p>
+               </div>
+               <div className="border border-zinc-800 rounded-xl p-6 bg-zinc-900/50">
+                  <h3 className="text-xl font-bold mb-2 text-green-400">Vocês compram à vista?</h3>
+                  <p className="text-zinc-400">Em alguns casos específicos de alta liquidez (como iPhones recentes ou MacBooks), podemos fazer uma oferta de compra imediata com valor diferenciado.</p>
+               </div>
+            </div>
+         </div>
+      </section>
+   )
+}
+
+function BlockLocation() {
+   return (
+      <section className="py-16 bg-zinc-900 text-white border-t border-zinc-800">
+         <div className="container mx-auto px-4 text-center">
+            <MapPin className="w-12 h-12 text-green-500 mx-auto mb-6" />
+            <h2 className="text-3xl font-black mb-4">TRAGA SEU EQUIPAMENTO</h2>
+            <p className="text-xl text-zinc-400 mb-8">Av. Brasil, 1234 - Guanabara, Campinas - SP</p>
+            <div className="flex flex-col md:flex-row gap-4 justify-center">
+               <a href="https://wa.me/5519993916723" className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-full font-bold flex items-center justify-center gap-2 transition-colors">
+                  <MessageCircle /> Agendar Avaliação
+               </a>
+               <a href="https://goo.gl/maps/XYZ" target="_blank" className="bg-zinc-800 hover:bg-zinc-700 text-white px-8 py-4 rounded-full font-bold flex items-center justify-center gap-2 transition-colors">
+                  <MapPin /> Ver no Google Maps
+               </a>
+            </div>
+         </div>
+      </section>
+   )
+}
 
 export const metadata: Metadata = {
   title: 'Venda seu PC Usado em Consignação Campinas | Avaliação Justa',
@@ -242,8 +510,11 @@ export default async function ConsignacaoPage() {
       <main className="flex-1">
         
         <BlockHero />
-
+        <BlockStats />
         <BlockSteps />
+        <BlockComparison />
+        <BlockWhatWeAccept />
+        <BlockWhatWeDontAccept />
 
         <BlockDivider text="O QUE ACEITAMOS" subtext="Equipamentos com Alta Procura" />
 
@@ -260,6 +531,11 @@ export default async function ConsignacaoPage() {
            </div>
         </section>
 
+        <BlockSafety />
+        <BlockTestimonials />
+        <BlockFAQ />
+        <BlockLocation />
+        
         {/* CTA FINAL */}
         <BlockUrgency />
 

@@ -20,7 +20,12 @@ import {
   Lock, 
   Star,
   ArrowRight,
-  HelpCircle
+  HelpCircle,
+  Building2,
+  Clock,
+  Wifi,
+  FileText,
+  Layout
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -46,6 +51,172 @@ export const metadata: Metadata = {
 };
 
 export const dynamic = "force-dynamic";
+
+function BlockStats() {
+  return (
+    <section className="py-12 bg-blue-600 text-white">
+      <div className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        {[
+          { label: "Licenças Vendidas", value: "+50k" },
+          { label: "Clientes Felizes", value: "99%" },
+          { label: "Anos de Mercado", value: "15" },
+          { label: "Suporte Técnico", value: "24/7" }
+        ].map((stat, i) => (
+          <div key={i}>
+            <div className="text-4xl font-black mb-2">{stat.value}</div>
+            <div className="text-blue-200 text-sm uppercase tracking-wider">{stat.label}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function BlockWindowsFeatures() {
+  return (
+    <section className="py-20 bg-white">
+       <div className="container mx-auto px-4 flex flex-col md:flex-row items-center gap-12">
+          <div className="flex-1">
+             <h2 className="text-3xl font-black text-slate-900 mb-6">Windows 11: O Futuro Chegou</h2>
+             <p className="text-lg text-slate-600 mb-6">Design renovado, widgets úteis e o melhor desempenho para jogos. Atualize agora para a versão mais moderna do sistema operacional.</p>
+             <ul className="space-y-3">
+                {["Menu Iniciar Centralizado", "Layouts de Encaixe (Snap)", "DirectStorage para Games", "Integração com Teams"].map((f, i) => (
+                   <li key={i} className="flex items-center gap-3 text-slate-700">
+                      <CheckCircle2 className="w-5 h-5 text-blue-600" /> {f}
+                   </li>
+                ))}
+             </ul>
+          </div>
+          <div className="flex-1 bg-slate-100 p-8 rounded-2xl border border-slate-200">
+             <Layout className="w-24 h-24 text-blue-500 mx-auto mb-4" />
+             <p className="text-center font-bold text-slate-500">Interface Moderna e Fluida</p>
+          </div>
+       </div>
+    </section>
+  )
+}
+
+function BlockOfficeFeatures() {
+  return (
+    <section className="py-20 bg-slate-50 border-y border-slate-200">
+       <div className="container mx-auto px-4 flex flex-col md:flex-row-reverse items-center gap-12">
+          <div className="flex-1">
+             <h2 className="text-3xl font-black text-slate-900 mb-6">Office 365 vs Vitalício</h2>
+             <p className="text-lg text-slate-600 mb-6">Escolha a melhor opção para sua produtividade. Word, Excel, PowerPoint e muito mais.</p>
+             <ul className="space-y-3">
+                {["1TB de Nuvem (OneDrive) no 365", "Licença Única no Office 2021", "Apps Sempre Atualizados", "Colaboração em Tempo Real"].map((f, i) => (
+                   <li key={i} className="flex items-center gap-3 text-slate-700">
+                      <CheckCircle2 className="w-5 h-5 text-orange-600" /> {f}
+                   </li>
+                ))}
+             </ul>
+          </div>
+          <div className="flex-1 bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+             <div className="grid grid-cols-2 gap-4">
+                <div className="bg-blue-100 p-4 rounded-xl text-blue-700 font-bold text-center">Word</div>
+                <div className="bg-green-100 p-4 rounded-xl text-green-700 font-bold text-center">Excel</div>
+                <div className="bg-orange-100 p-4 rounded-xl text-orange-700 font-bold text-center">PowerPoint</div>
+                <div className="bg-blue-50 p-4 rounded-xl text-blue-500 font-bold text-center">Outlook</div>
+             </div>
+          </div>
+       </div>
+    </section>
+  )
+}
+
+function BlockProcess() {
+   return (
+      <section className="py-20 bg-blue-900 text-white text-center">
+         <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-black mb-12">COMO FUNCIONA A COMPRA</h2>
+            <div className="grid md:grid-cols-4 gap-8">
+               {[
+                  { step: "01", title: "Escolha", desc: "Selecione a versão do Windows ou Office." },
+                  { step: "02", title: "Pagamento", desc: "Pague via PIX ou Cartão com segurança." },
+                  { step: "03", title: "Recebimento", desc: "Chave enviada em 5 min no seu e-mail." },
+                  { step: "04", title: "Ativação", desc: "Insira a chave e ative seu produto original." }
+               ].map((s, i) => (
+                  <div key={i} className="bg-blue-800/50 p-6 rounded-2xl border border-blue-700 relative">
+                     <span className="absolute -top-4 -left-4 w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center font-bold border-4 border-blue-900">{s.step}</span>
+                     <h3 className="text-xl font-bold mb-2">{s.title}</h3>
+                     <p className="text-blue-200 text-sm">{s.desc}</p>
+                  </div>
+               ))}
+            </div>
+         </div>
+      </section>
+   )
+}
+
+function BlockBusiness() {
+   return (
+      <section className="py-20 bg-slate-900 text-white relative overflow-hidden">
+         <div className="absolute inset-0 bg-blue-600/10"></div>
+         <div className="container mx-auto px-4 text-center relative z-10">
+            <h2 className="text-3xl font-black mb-6">PARA EMPRESAS</h2>
+            <p className="text-xl text-slate-300 max-w-2xl mx-auto mb-8">Precisa regularizar seu parque de máquinas? Temos condições especiais para volume.</p>
+            <div className="flex justify-center gap-4">
+               <a href="https://wa.me/5519987510267" className="bg-white text-slate-900 px-8 py-3 rounded-full font-bold hover:bg-slate-200 transition-colors">
+                  Solicitar Cotação PJ
+               </a>
+            </div>
+         </div>
+      </section>
+   )
+}
+
+function BlockSecurity() {
+   return (
+      <section className="py-20 bg-red-50 border-y border-red-100">
+         <div className="container mx-auto px-4 text-center max-w-3xl">
+            <ShieldCheck className="w-16 h-16 text-red-500 mx-auto mb-6" />
+            <h2 className="text-3xl font-black text-red-900 mb-6">DIGA NÃO À PIRATARIA</h2>
+            <p className="text-lg text-red-800 mb-8">
+               Ativadores "gratuitos" (KMS, Crack) abrem portas para hackers roubarem seus dados bancários e senhas. 
+               Não arrisque sua segurança por uma economia que custa caro.
+            </p>
+            <div className="inline-block bg-white px-6 py-3 rounded-lg border border-red-200 text-red-600 font-bold shadow-sm">
+               Proteja seus dados agora
+            </div>
+         </div>
+      </section>
+   )
+}
+
+function BlockUrgency() {
+   return (
+      <div className="bg-yellow-400 text-yellow-900 py-3 font-bold text-center text-sm md:text-base animate-pulse">
+         ⚡ OFERTA RELÂMPAGO: Windows 10 Pro com 50% OFF - Só hoje! ⚡
+      </div>
+   )
+}
+
+function BlockSupport() {
+   return (
+      <section className="py-20 bg-slate-50">
+         <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl font-black mb-12">SUPORTE ESPECIALIZADO</h2>
+            <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                  <Monitor className="w-10 h-10 text-blue-500 mx-auto mb-4" />
+                  <h3 className="font-bold mb-2">Acesso Remoto</h3>
+                  <p className="text-sm text-slate-500">Configuramos tudo para você via AnyDesk ou TeamViewer.</p>
+               </div>
+               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                  <MessageCircle className="w-10 h-10 text-green-500 mx-auto mb-4" />
+                  <h3 className="font-bold mb-2">WhatsApp</h3>
+                  <p className="text-sm text-slate-500">Tire dúvidas em tempo real com nossos técnicos.</p>
+               </div>
+               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                  <CheckCircle2 className="w-10 h-10 text-purple-500 mx-auto mb-4" />
+                  <h3 className="font-bold mb-2">Garantia</h3>
+                  <p className="text-sm text-slate-500">Se a chave não funcionar, devolvemos seu dinheiro.</p>
+               </div>
+            </div>
+         </div>
+      </section>
+   )
+}
 
 function BlockHero() {
   return (
@@ -270,9 +441,12 @@ export default async function MicrosoftPage() {
 
   return (
     <main className="min-h-screen bg-white">
+      <BlockUrgency />
       <Header />
       <BlockHero />
+      <BlockStats />
       <BlockBenefits />
+      <BlockWindowsFeatures />
       
       <div id="ofertas" className="py-16 container mx-auto px-4">
         <ProductCarousel 
@@ -281,8 +455,13 @@ export default async function MicrosoftPage() {
         />
       </div>
 
+      <BlockOfficeFeatures />
+      <BlockProcess />
+      <BlockSecurity />
       <BlockComparison />
+      <BlockBusiness />
       <BlockTestimonials />
+      <BlockSupport />
       <BlockFAQ />
       <BlockContact />
     </main>
