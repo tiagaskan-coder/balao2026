@@ -8,18 +8,89 @@ import Image from "next/image";
 import HeroCTA from "@/components/HeroCTA";
 import PcGamerSearchGrid from "@/components/PcGamerSearchGrid";
 import { 
-  Gamepad2, 
-  Cpu, 
-  Zap, 
-  Wrench, 
-  MonitorPlay, 
-  Flame, 
-  Truck, 
-  ShieldCheck, 
-  MessageCircle, 
+  Gamepad2,
+  Cpu,
+  Zap,
+  Wrench,
+  MonitorPlay,
+  Flame,
+  Truck,
+  ShieldCheck,
+  MessageCircle,
   PackageCheck,
-  ThermometerSun
+  ThermometerSun,
+  Star,
+  User,
+  Quote,
+  Building2,
+  ThumbsUp,
+  CreditCard
 } from "lucide-react";
+
+function BlockTestimonials() {
+  return (
+    <section className="py-20 bg-zinc-950 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10"></div>
+        <div className="container mx-auto px-4 relative z-10">
+             <div className="text-center mb-16">
+                <h2 className="text-3xl md:text-5xl font-black mb-4">QUEM JOGA, APROVA</h2>
+                <p className="text-zinc-400 max-w-2xl mx-auto">Confira o que nossos clientes estão falando.</p>
+             </div>
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {[
+                    { name: "Lucas M.", role: "Gamer", text: "O PC chegou perfeito! A montagem ficou impecável, cable management nota 10. Recomendo demais!", game: "Valorant" },
+                    { name: "Beatriz S.", role: "Streamer", text: "Atendimento sensacional. Me ajudaram a escolher cada peça para minha live rodar liso. Obrigada Balão!", game: "League of Legends" },
+                    { name: "Rafael K.", role: "Editor", text: "Precisava de uma máquina potente para renderização e jogos. A consultoria foi essencial. Entregaram no prazo.", game: "Cyberpunk 2077" }
+                ].map((testimonial, idx) => (
+                    <div key={idx} className="bg-zinc-900 p-8 rounded-3xl border border-zinc-800 relative group hover:border-violet-500 transition-colors">
+                        <Quote className="absolute top-8 right-8 w-12 h-12 text-zinc-800 group-hover:text-violet-900 transition-colors" />
+                        <div className="flex items-center gap-2 mb-4 text-yellow-400">
+                            {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 fill-current" />)}
+                        </div>
+                        <p className="text-zinc-300 mb-6 relative z-10">"{testimonial.text}"</p>
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-zinc-800 rounded-full flex items-center justify-center border border-zinc-700">
+                                <User className="w-6 h-6 text-zinc-500" />
+                            </div>
+                            <div>
+                                <div className="font-bold">{testimonial.name}</div>
+                                <div className="text-xs text-zinc-500">{testimonial.role} • {testimonial.game}</div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+             </div>
+        </div>
+    </section>
+  )
+}
+
+function BlockTrust() {
+  return (
+    <section className="py-20 bg-zinc-900 text-white border-y border-zinc-800">
+        <div className="container mx-auto px-4">
+             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+                <div className="flex items-center justify-center gap-3">
+                    <Building2 className="w-12 h-12" />
+                    <span className="font-black text-xl">INTEL</span>
+                </div>
+                <div className="flex items-center justify-center gap-3">
+                    <Cpu className="w-12 h-12" />
+                    <span className="font-black text-xl">AMD</span>
+                </div>
+                <div className="flex items-center justify-center gap-3">
+                    <Zap className="w-12 h-12" />
+                    <span className="font-black text-xl">NVIDIA</span>
+                </div>
+                <div className="flex items-center justify-center gap-3">
+                    <ThumbsUp className="w-12 h-12" />
+                    <span className="font-black text-xl">ASUS</span>
+                </div>
+             </div>
+        </div>
+    </section>
+  )
+}
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/components/JsonLd";
 
 export const metadata: Metadata = {

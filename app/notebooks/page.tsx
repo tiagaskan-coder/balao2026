@@ -21,7 +21,9 @@ import {
   Truck,
   Award,
   Cpu,
-  HardDrive
+  HardDrive,
+  Wrench,
+  ChevronDown
 } from "lucide-react";
 
 export const metadata: Metadata = {

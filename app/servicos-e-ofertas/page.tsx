@@ -24,8 +24,45 @@ import {
   MousePointer2,
   Settings,
   Lock,
-  Printer
+  Printer,
+  FileText
 } from 'lucide-react'
+
+function BlockProcess() {
+    return (
+      <section className="py-20 bg-slate-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <span className="text-blue-600 font-bold tracking-wider text-sm uppercase">Como Funciona</span>
+            <h2 className="text-3xl md:text-4xl font-bold mt-2 mb-4">Processo de Atendimento</h2>
+            <p className="text-slate-600">Transparência total do início ao fim. Acompanhe cada etapa do reparo do seu equipamento.</p>
+          </div>
+  
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {[
+              { icon: MessageCircle, title: "1. Contato", desc: "Fale conosco via WhatsApp ou traga seu equipamento na loja." },
+              { icon: Search, title: "2. Diagnóstico", desc: "Análise técnica detalhada e orçamento sem compromisso." },
+              { icon: Wrench, title: "3. Reparo", desc: "Execução do serviço com peças de qualidade e testes rigorosos." },
+              { icon: CheckCircle, title: "4. Entrega", desc: "Seu equipamento pronto, testado e com garantia." }
+            ].map((step, idx) => (
+              <div key={idx} className="relative group">
+                <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow text-center relative z-10">
+                  <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-600 transition-colors">
+                    <step.icon className="w-8 h-8 text-blue-600 group-hover:text-white transition-colors" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-3">{step.title}</h3>
+                  <p className="text-slate-600 text-sm">{step.desc}</p>
+                </div>
+                {idx < 3 && (
+                  <div className="hidden md:block absolute top-1/2 left-1/2 w-full h-0.5 bg-slate-200 -translate-y-1/2 z-0"></div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
 import { Product } from '@/lib/utils'
 
 export const metadata: Metadata = {
