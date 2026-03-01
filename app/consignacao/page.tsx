@@ -32,7 +32,8 @@ import {
   XCircle,
   AlertTriangle,
   Monitor,
-  HardDrive
+  HardDrive,
+  Laptop
 } from 'lucide-react'
 
 function BlockStats() {
