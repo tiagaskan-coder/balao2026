@@ -326,13 +326,14 @@ const FullWidthBanner = ({ title, subtitle, bgImage, theme = "dark" }: { title: 
 )
 
 export default async function Page() {
-  const [redeRaw, hardwareRaw, licencaRaw, perifericosRaw, computadoresRaw, monitoresRaw] = await Promise.all([
+  const [redeRaw, hardwareRaw, licencaRaw, perifericosRaw, computadoresRaw, monitoresRaw, microsoftRaw] = await Promise.all([
     getProductsByCategory('rede'),
     getProductsByCategory('hardware'),
     getProductsByCategory('licen'),
     getProductsByCategory('perif'),
     getProductsByCategory('comput'),
-    getProductsByCategory('monitor')
+    getProductsByCategory('monitor'),
+    getProductsByCategory('microsoft')
   ])
 
   const process = (list: any[]) => list
@@ -347,6 +348,7 @@ export default async function Page() {
   const perifericosProducts = process(perifericosRaw);
   const computadoresProducts = process(computadoresRaw);
   const monitoresProducts = process(monitoresRaw);
+  const microsoftProducts = process(microsoftRaw);
 
   const servicesBlock1 = FEATURED_SERVICES.slice(0, 3);
   const servicesBlock2 = FEATURED_SERVICES.slice(3, 6);
@@ -381,109 +383,54 @@ export default async function Page() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-zinc-950">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-red-900/20 via-zinc-950 to-black" />
-        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+      <section className="relative min-h-[85vh] flex items-center justify-center bg-black text-white overflow-hidden">
+        {/* Background Effects */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-red-900/40 via-black to-black"></div>
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-red-600/20 rounded-full blur-[120px] animate-pulse"></div>
+
+        <div className="container relative z-10 px-4 text-center space-y-6 md:space-y-8">
+          <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-red-500/10 border border-red-500/30 text-red-300 text-xs md:text-sm font-bold uppercase tracking-widest animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <Wrench className="w-4 h-4 animate-bounce" />
+            Assistência Técnica Especializada
+          </div>
+          
+          <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[9rem] font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-red-200 to-red-900 drop-shadow-[0_0_30px_rgba(220,38,38,0.5)] animate-in fade-in zoom-in-50 duration-1000 leading-none">
+            SERVIÇOS<br />
+            <span className="text-stroke-white text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400">& OFERTAS</span>
+          </h1>
+          
+          <p className="text-lg md:text-3xl text-slate-300 max-w-4xl mx-auto font-light leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
+            Soluções completas para sua empresa e residência. <strong className="text-red-400 font-bold">Manutenção, Redes e Vendas</strong>.
+          </p>
+
+          <div className="pt-8 flex justify-center animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300 gap-4">
+            <Link 
+               href={`https://wa.me/${SITE_CONFIG.whatsapp.number}`}
+               className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-full font-bold text-lg transition-all shadow-lg shadow-red-600/30 hover:scale-105 flex items-center gap-2"
+            >
+               <MessageCircle className="w-5 h-5" />
+               Falar com Técnico
+            </Link>
+            <Link 
+               href="#ofertas"
+               className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-8 py-4 rounded-full font-bold text-lg transition-all backdrop-blur-sm flex items-center gap-2"
+            >
+               Ver Ofertas
+            </Link>
+          </div>
+        </div>
         
-        {/* Elementos decorativos de fundo */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-red-600/10 rounded-full blur-[128px] animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-600/5 rounded-full blur-[128px]" />
-
-        <div className="container mx-auto px-4 relative z-10 py-20">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="text-left space-y-8">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-red-400 text-xs font-bold uppercase tracking-widest backdrop-blur-md">
-                <Award className="w-4 h-4" />
-                Excelência em Tecnologia desde 2003
-              </div>
-              
-              <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-[0.9]">
-                TECNOLOGIA <br/>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-500 to-orange-500">DE PONTA</span><br/>
-                AO SEU ALCANCE
-              </h1>
-              
-              <p className="text-lg md:text-xl text-zinc-400 max-w-xl font-light leading-relaxed border-l-4 border-red-600 pl-6">
-                Especialistas em <strong className="text-white">High-End PC Gamer</strong>, soluções corporativas e assistência técnica Apple.
-                A maior estrutura de Campinas e região.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Link 
-                  href={`https://wa.me/${SITE_CONFIG.whatsapp.number}`} 
-                  className="inline-flex items-center justify-center gap-3 bg-red-600 hover:bg-red-500 text-white text-lg font-bold py-4 px-8 rounded-xl shadow-lg shadow-red-900/20 transition-all hover:-translate-y-1 hover:shadow-red-600/40 group"
-                >
-                  <MessageCircle className="w-5 h-5 group-hover:animate-bounce" />
-                  Falar com Especialista
-                </Link>
-                <Link 
-                  href="#ofertas" 
-                  className="inline-flex items-center justify-center gap-3 bg-white/5 hover:bg-white/10 text-white border border-white/10 backdrop-blur-md text-lg font-bold py-4 px-8 rounded-xl transition-all hover:-translate-y-1"
-                >
-                  Ver Ofertas
-                  <ArrowRight className="w-5 h-5" />
-                </Link>
-              </div>
-
-              <div className="flex items-center gap-8 pt-8 border-t border-white/5">
-                <div className="flex flex-col">
-                  <span className="text-3xl font-black text-white">20+</span>
-                  <span className="text-xs text-zinc-500 uppercase tracking-wider">Anos de Mercado</span>
-                </div>
-                <div className="w-px h-12 bg-white/10" />
-                <div className="flex flex-col">
-                  <span className="text-3xl font-black text-white">50k+</span>
-                  <span className="text-xs text-zinc-500 uppercase tracking-wider">Clientes Atendidos</span>
-                </div>
-                <div className="w-px h-12 bg-white/10" />
-                <div className="flex flex-col">
-                  <span className="text-3xl font-black text-white">4.9</span>
-                  <span className="text-xs text-zinc-500 uppercase tracking-wider">Avaliação Google</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative hidden lg:block">
-              <div className="relative w-full h-[600px] animate-float">
-                {/* Círculo decorativo atrás da imagem */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] border border-white/5 rounded-full animate-[spin_60s_linear_infinite]" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] border border-red-600/20 rounded-full animate-[spin_40s_linear_infinite_reverse]" />
-                
-                {/* Imagem Principal */}
-                <Image
-                  src="/images/prizes/pc.png"
-                  alt="PC Gamer High End"
-                  fill
-                  className="object-contain drop-shadow-2xl z-10"
-                  priority
-                />
-                
-                {/* Cards Flutuantes */}
-                <div className="absolute top-20 right-0 bg-zinc-900/90 backdrop-blur border border-white/10 p-4 rounded-2xl shadow-xl animate-float-delayed z-20">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-green-500/20 rounded-lg text-green-400">
-                      <ShieldCheck className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-zinc-400 uppercase font-bold">Garantia</p>
-                      <p className="text-sm font-bold text-white">Estendida</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="absolute bottom-20 left-0 bg-zinc-900/90 backdrop-blur border border-white/10 p-4 rounded-2xl shadow-xl animate-float z-20">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-500/20 rounded-lg text-blue-400">
-                      <Zap className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-zinc-400 uppercase font-bold">Entrega</p>
-                      <p className="text-sm font-bold text-white">Imediata</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+        {/* Marquee Services */}
+        <div className="absolute bottom-0 w-full bg-white/5 border-t border-white/10 py-4 md:py-6 backdrop-blur-sm overflow-hidden">
+          <div className="container mx-auto px-4 flex flex-wrap justify-center gap-6 md:gap-16 opacity-60 text-red-200 font-bold tracking-widest text-xs md:text-xl">
+             <span>NOTEBOOKS</span>
+             <span>PC GAMER</span>
+             <span>APPLE</span>
+             <span>REDES</span>
+             <span>SERVIDORES</span>
+             <span>RECUPERAÇÃO DE DADOS</span>
+             <span>IMPRESSORAS</span>
           </div>
         </div>
       </section>
@@ -615,6 +562,7 @@ export default async function Page() {
       {/* Carrossel 6: Licenças */}
       <div id="licencas" className="scroll-mt-24">
         <ProductCarousel title="Softwares Originais" products={licencaProducts} icon={ShieldCheck} bgClass="bg-zinc-50" />
+        <ProductCarousel title="Soluções Microsoft" products={microsoftProducts} icon={ShieldCheck} bgClass="bg-zinc-50" />
       </div>
 
       {/* Outros Serviços Listagem */}
