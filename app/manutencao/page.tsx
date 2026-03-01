@@ -520,7 +520,6 @@ export default async function ManutencaoPage() {
                 </div>
             </section>
 
-            <Block
             <BlockCategory category={SERVICE_CATEGORIES[3]} isDark={true} /> {/* Performance */}
             
             <BlockCategory category={SERVICE_CATEGORIES[2]} isDark={false} reverse={true} /> {/* Redes (Light) */}
