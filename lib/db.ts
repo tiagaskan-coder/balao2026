@@ -43,6 +43,25 @@ export async function getProducts(): Promise<Product[]> {
   }
 }
 
+export async function getProductsByCategory(categorySlug: string): Promise<Product[]> {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .ilike('category', `%${categorySlug}%`);
+
+    if (error) {
+      console.error(`Error fetching products for category ${categorySlug}:`, error);
+      return [];
+    }
+
+    return data as Product[];
+  } catch (error) {
+    console.error(`Error fetching products for category ${categorySlug}:`, error);
+    return [];
+  }
+}
+
 export async function getProductById(id: string): Promise<Product | null> {
   try {
     // Try admin client first (more reliable on server)
@@ -504,7 +523,7 @@ export async function deleteCategory(id: string) {
 export interface OrderItem {
     id: string;
     order_id: string;
-    product_id?: string;
+    product_id: string;
     product_name: string;
     product_image: string;
     quantity: number;
@@ -524,10 +543,6 @@ export interface Order {
     items?: OrderItem[];
     coupon_code?: string;
     discount_value?: number;
-    seller_id?: string;
-    origin?: 'site' | 'pdv';
-    payment_method?: string;
-    cpf_cnpj?: string;
 }
 
 export async function createOrder(orderData: Omit<Order, 'id' | 'created_at' | 'updated_at'>, items: Omit<OrderItem, 'id' | 'order_id'>[]) {
@@ -552,57 +567,6 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'created_at' | '
             .insert(itemsWithOrderId);
 
         if (itemsError) throw itemsError;
-
-        // 3. If it's a PDV sale with a seller, register in Arena
-        if (orderData.origin === 'pdv' && orderData.seller_id) {
-            console.log(`[createOrder] Registering Arena sale for seller ${orderData.seller_id}, total ${orderData.total}`);
-            try {
-                // Update seller total
-                const { data: seller, error: sellerError } = await supabaseAdmin
-                    .from('arena_vendedores')
-                    .select('vendas_atual')
-                    .eq('id', orderData.seller_id)
-                    .single();
-
-                if (sellerError) {
-                    console.error("[createOrder] Error fetching seller:", sellerError);
-                    throw sellerError;
-                }
-
-                if (seller) {
-                    const newTotal = (seller.vendas_atual || 0) + orderData.total;
-                    
-                    const { error: updateError } = await supabaseAdmin
-                        .from('arena_vendedores')
-                        .update({ vendas_atual: newTotal })
-                        .eq('id', orderData.seller_id);
-                    
-                    if (updateError) {
-                         console.error("[createOrder] Error updating seller total:", updateError);
-                         throw updateError;
-                    }
-
-                    // Register sale in history
-                    const { error: insertError } = await supabaseAdmin
-                        .from('arena_vendas')
-                        .insert({
-                            vendedor_id: orderData.seller_id,
-                            valor: orderData.total,
-                            order_id: order.id
-                        });
-                        
-                    if (insertError) {
-                        console.error("[createOrder] Error inserting arena_vendas:", insertError);
-                        throw insertError;
-                    }
-                    
-                    console.log("[createOrder] Arena sale registered successfully");
-                }
-            } catch (arenaError) {
-                console.error("[createOrder] Critical error registering Arena sale:", arenaError);
-                // Don't fail the order creation if Arena update fails, but log it clearly
-            }
-        }
 
         return order;
     } catch (error) {
@@ -656,79 +620,8 @@ export async function getOrders(): Promise<Order[]> {
     }
 }
 
-// Helper para estornar vendas na Arena
-async function processArenaReversal(orderId: string) {
-    try {
-        // 1. Buscar registros em arena_vendas vinculados a este pedido
-        const { data: arenaSales, error: searchError } = await supabaseAdmin
-            .from('arena_vendas')
-            .select('*')
-            .eq('order_id', orderId);
-        
-        if (searchError) {
-            console.error("[processArenaReversal] Erro ao buscar vendas na arena:", searchError);
-            return;
-        }
-
-        if (!arenaSales || arenaSales.length === 0) return;
-
-        console.log(`[processArenaReversal] Revertendo ${arenaSales.length} registros de venda para o pedido ${orderId}`);
-
-        for (const sale of arenaSales) {
-            if (!sale.vendedor_id) continue;
-
-            // Buscar vendedor para atualizar total
-            const { data: seller, error: sellerError } = await supabaseAdmin
-                .from('arena_vendedores')
-                .select('vendas_atual')
-                .eq('id', sale.vendedor_id)
-                .single();
-            
-            if (sellerError) {
-                 console.error(`[processArenaReversal] Erro ao buscar vendedor ${sale.vendedor_id}:`, sellerError);
-                 continue;
-            }
-
-            if (seller) {
-                const currentTotal = seller.vendas_atual || 0;
-                const saleValue = sale.valor || 0;
-                const newTotal = currentTotal - saleValue;
-                
-                console.log(`[processArenaReversal] Vendedor ${sale.vendedor_id}: ${currentTotal} - ${saleValue} = ${newTotal}`);
-
-                const { error: updateError } = await supabaseAdmin
-                    .from('arena_vendedores')
-                    .update({ vendas_atual: newTotal })
-                    .eq('id', sale.vendedor_id);
-                
-                if (updateError) {
-                    console.error(`[processArenaReversal] Erro ao atualizar total do vendedor ${sale.vendedor_id}:`, updateError);
-                }
-            }
-        }
-
-        // Remover registros de arena_vendas
-        const { error: deleteError } = await supabaseAdmin
-            .from('arena_vendas')
-            .delete()
-            .eq('order_id', orderId);
-            
-        if (deleteError) {
-            console.error("[processArenaReversal] Erro ao deletar registros em arena_vendas:", deleteError);
-        }
-
-    } catch (error) {
-        console.error("[processArenaReversal] Erro crítico:", error);
-    }
-}
-
 export async function updateOrderStatus(id: string, status: string) {
     try {
-        // Se estiver cancelando, estornar da Arena
-        if (status === 'cancelled') {
-            await processArenaReversal(id);
-        }
-
         const { error } = await supabaseAdmin
             .from('orders')
             .update({ status })
@@ -743,9 +636,6 @@ export async function updateOrderStatus(id: string, status: string) {
 
 export async function deleteOrder(id: string) {
     try {
-        // Antes de excluir, estornar da Arena (se houver registros)
-        await processArenaReversal(id);
-
         const { error } = await supabaseAdmin
             .from('orders')
             .delete()
