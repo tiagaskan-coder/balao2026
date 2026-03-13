@@ -1,7 +1,6 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '@/app/api/checkout/route';
-import { NextResponse } from 'next/server';
 
 // Mocks
 vi.mock('@/lib/db', () => ({
@@ -50,6 +49,8 @@ describe('Checkout API with Coupons', () => {
           { name: 'Produto 1', price: 100, quantity: 1 }
         ],
         total: 90, // 100 - 10 discount
+        shippingCost: 0,
+        shippingOption: { name: 'PAC', days: '4 a 5 dias úteis', cost: 0 },
         couponCode: 'TEST10',
         discountValue: 10
       })
@@ -80,6 +81,8 @@ describe('Checkout API with Coupons', () => {
           { name: 'Produto 1', price: 100, quantity: 1 }
         ],
         total: 100, // Sending 100 instead of 90 (simulating the bug)
+        shippingCost: 0,
+        shippingOption: { name: 'PAC', days: '4 a 5 dias úteis', cost: 0 },
         couponCode: 'TEST10',
         discountValue: 10
       })

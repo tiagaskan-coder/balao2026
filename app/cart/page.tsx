@@ -2,18 +2,24 @@
 
 import Header from "@/components/Header";
 import { useCart } from "@/context/CartContext";
-import { Trash2, Minus, Plus, ArrowRight, ShoppingBag, Truck, CreditCard, User, Check, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
+import { Trash2, ArrowRight, ShoppingBag, Truck, CreditCard, User, Check, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import ApplyCoupon from "@/components/ApplyCoupon";
 
+type ShippingOption = {
+  name: string;
+  days: string;
+  cost: number;
+};
+
 export default function CartPage() {
-  const { items, removeFromCart, updateQuantity, cartTotal, clearCart } = useCart();
+  const { items, removeFromCart, cartTotal, clearCart } = useCart();
   const router = useRouter();
   
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState<number>(1);
   const [loading, setLoading] = useState(false);
   const [cepLoading, setCepLoading] = useState(false);
 
@@ -21,6 +27,9 @@ export default function CartPage() {
   const [appliedCouponCode, setAppliedCouponCode] = useState("");
 
   const finalTotal = Math.max(0, cartTotal - couponDiscount);
+  const [shippingOptions, setShippingOptions] = useState<ShippingOption[] | null>(null);
+  const [shippingSelected, setShippingSelected] = useState<ShippingOption | null>(null);
+  const totalWithShipping = Math.max(0, finalTotal + (shippingSelected?.cost ?? 0));
 
   const handleApplyCoupon = (discount: number, code: string) => {
       setCouponDiscount(discount);
@@ -65,6 +74,10 @@ export default function CartPage() {
             formatted = `${numbers.slice(0, 5)}-${numbers.slice(5, 8)}`;
         }
         setFormData(prev => ({ ...prev, [name]: formatted }));
+        if (numbers.length !== 8) {
+            setShippingOptions(null);
+            setShippingSelected(null);
+        }
         
         // Auto-fetch address when CEP is full
         if (numbers.length === 8) {
@@ -89,6 +102,41 @@ export default function CartPage() {
                   state: data.uf,
                   // Keep number and complement if already typed, or clear if needed
               }));
+
+              const isCampinas = data.localidade === "Campinas" && data.uf === "SP";
+              const isSP = data.uf === "SP";
+              const isSoutheast = ["RJ", "MG", "ES", "PR", "SC", "RS"].includes(data.uf);
+
+              let options: ShippingOption[] = [];
+              if (isCampinas) {
+                options = [
+                  {
+                    name: "Entrega Flash",
+                    days: "24 horas (podendo ser entregue no mesmo dia)",
+                    cost: 0,
+                  },
+                ];
+              } else if (isSP) {
+                options = [
+                  { name: "SEDEX", days: "1 a 2 dias úteis", cost: 18.9 },
+                  { name: "PAC", days: "4 a 5 dias úteis", cost: 12.5 },
+                ];
+              } else if (isSoutheast) {
+                options = [
+                  { name: "SEDEX", days: "2 a 4 dias úteis", cost: 28.9 },
+                  { name: "PAC", days: "6 a 8 dias úteis", cost: 19.5 },
+                ];
+              } else {
+                options = [
+                  { name: "SEDEX", days: "3 a 6 dias úteis", cost: 45.9 },
+                  { name: "PAC", days: "8 a 15 dias úteis", cost: 29.9 },
+                ];
+              }
+
+              setShippingOptions(options);
+              const cheapestOption = options.reduce((acc, current) => (current.cost < acc.cost ? current : acc), options[0]);
+              setShippingSelected(cheapestOption);
+
               // Optional: Focus on number field
               document.getElementById("number-input")?.focus();
           } else {
@@ -105,14 +153,18 @@ export default function CartPage() {
   const nextStep = () => {
       // Basic validation
       if (step === 1) {
-          if (!formData.name || !formData.phone || !formData.email) {
-              alert("Por favor, preencha todos os campos obrigatórios.");
+          if (!formData.cep || !formData.address || !formData.number || !formData.city || !formData.state) {
+              alert("Por favor, preencha o endereço completo.");
+              return;
+          }
+          if (!shippingSelected) {
+              alert("Por favor, calcule e selecione o frete.");
               return;
           }
       }
       if (step === 2) {
-          if (!formData.cep || !formData.address || !formData.number || !formData.city || !formData.state) {
-              alert("Por favor, preencha o endereço completo.");
+          if (!formData.name || !formData.phone || !formData.email) {
+              alert("Por favor, preencha todos os campos obrigatórios.");
               return;
           }
       }
@@ -127,6 +179,11 @@ export default function CartPage() {
     setLoading(true);
 
     try {
+        if (!shippingSelected) {
+            alert("Calcule e selecione o frete antes de finalizar.");
+            setLoading(false);
+            return;
+        }
         const orderData = {
             customer: {
                 ...formData
@@ -135,13 +192,16 @@ export default function CartPage() {
                  const priceStr = item.price.replace("R$", "").replace(/\./g, "").replace(",", ".");
                  const price = parseFloat(priceStr) || 0;
                  return {
+                    product_id: item.id,
                     name: item.name,
                     image: item.image,
                     quantity: item.quantity,
                     price: price
                  };
             }),
-            total: finalTotal,
+            total: totalWithShipping,
+            shippingCost: shippingSelected.cost,
+            shippingOption: shippingSelected,
             couponCode: appliedCouponCode,
             discountValue: couponDiscount
         };
@@ -157,7 +217,8 @@ export default function CartPage() {
         if (response.ok && result.success) {
             clearCart();
             // Pass orderId, total and customer name for Pix generation
-            router.push(`/thank-you?orderId=${result.orderId}&total=${finalTotal}&name=${encodeURIComponent(formData.name)}`);
+            const totalToPix = typeof result.total === "number" ? result.total : totalWithShipping;
+            router.push(`/thank-you?orderId=${result.orderId}&total=${totalToPix}&name=${encodeURIComponent(formData.name)}`);
         } else {
             console.error("Order failed details:", result);
             alert(`Ocorreu um erro ao processar seu pedido: ${result.error || "Erro desconhecido"}`);
@@ -204,12 +265,12 @@ export default function CartPage() {
                 <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm mb-4">
                     <div className={`flex items-center gap-2 ${step >= 1 ? 'text-[#E60012] font-bold' : 'text-gray-400'}`}>
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step >= 1 ? 'border-[#E60012] bg-red-50' : 'border-gray-300'}`}>1</div>
-                        <span className="hidden sm:inline">Identificação</span>
+                        <span className="hidden sm:inline">Entrega (CEP)</span>
                     </div>
                     <div className={`h-1 flex-1 mx-4 ${step >= 2 ? 'bg-[#E60012]' : 'bg-gray-200'}`}></div>
                     <div className={`flex items-center gap-2 ${step >= 2 ? 'text-[#E60012] font-bold' : 'text-gray-400'}`}>
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step >= 2 ? 'border-[#E60012] bg-red-50' : 'border-gray-300'}`}>2</div>
-                        <span className="hidden sm:inline">Entrega</span>
+                        <span className="hidden sm:inline">Identificação</span>
                     </div>
                     <div className={`h-1 flex-1 mx-4 ${step >= 3 ? 'bg-[#E60012]' : 'bg-gray-200'}`}></div>
                     <div className={`flex items-center gap-2 ${step >= 3 ? 'text-[#E60012] font-bold' : 'text-gray-400'}`}>
@@ -218,7 +279,7 @@ export default function CartPage() {
                     </div>
                 </div>
 
-                {step === 1 && (
+                {step === 2 && (
                     <div className="bg-white rounded-lg shadow-sm p-6 animate-in fade-in slide-in-from-right-4 duration-300">
                         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2 border-b pb-2">
                             <User className="text-[#E60012]" size={20} />
@@ -265,8 +326,15 @@ export default function CartPage() {
                                 </div>
                             </div>
                         </div>
-                        <div className="mt-8 flex justify-end">
-                            <button 
+                        <div className="mt-8 flex justify-between">
+                            <button
+                                onClick={prevStep}
+                                className="text-gray-600 px-6 py-3 rounded-md font-medium hover:bg-gray-100 transition-colors flex items-center gap-2"
+                            >
+                                <ChevronLeft size={18} />
+                                Voltar
+                            </button>
+                            <button
                                 onClick={nextStep}
                                 className="bg-[#E60012] text-white px-8 py-3 rounded-md font-bold hover:bg-red-700 transition-colors flex items-center gap-2"
                             >
@@ -277,7 +345,7 @@ export default function CartPage() {
                     </div>
                 )}
 
-                {step === 2 && (
+                {step === 1 && (
                     <div className="bg-white rounded-lg shadow-sm p-6 animate-in fade-in slide-in-from-right-4 duration-300">
                         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2 border-b pb-2">
                             <MapPin className="text-[#E60012]" size={20} />
@@ -374,16 +442,55 @@ export default function CartPage() {
                                     />
                                 </div>
                             </div>
+                            <div className="border-t pt-4">
+                                <div className="flex items-center gap-2 mb-2 text-gray-800 font-bold">
+                                    <Truck className="text-[#E60012]" size={18} />
+                                    <span>Frete e Prazo</span>
+                                </div>
+
+                                {!shippingOptions ? (
+                                    <div className="text-sm text-gray-500 bg-gray-50 p-3 rounded">
+                                        Digite o CEP para calcular o frete.
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {shippingOptions.map((opt) => {
+                                            const isSelected = shippingSelected?.name === opt.name && shippingSelected?.days === opt.days;
+                                            const priceLabel = opt.cost === 0
+                                                ? "Grátis"
+                                                : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(opt.cost);
+
+                                            return (
+                                                <label
+                                                    key={`${opt.name}-${opt.days}`}
+                                                    className={`flex items-start justify-between gap-4 p-4 rounded-md border cursor-pointer transition-colors ${isSelected ? 'border-[#E60012] bg-red-50' : 'border-gray-200 hover:bg-gray-50'}`}
+                                                >
+                                                    <div className="flex items-start gap-3">
+                                                        <input
+                                                            type="radio"
+                                                            name="shipping-option"
+                                                            className="mt-1"
+                                                            checked={isSelected}
+                                                            onChange={() => setShippingSelected(opt)}
+                                                        />
+                                                        <div>
+                                                            <div className="font-bold text-gray-900">{opt.name}</div>
+                                                            <div className="text-sm text-gray-600 mt-1">Prazo: {opt.days}</div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="font-bold text-gray-900 whitespace-nowrap">{priceLabel}</div>
+                                                </label>
+                                            );
+                                        })}
+                                        <div className="text-xs text-gray-400 text-center">
+                                            * Prazos estimados a partir de Campinas/SP (13070-000)
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                        <div className="mt-8 flex justify-between">
-                            <button 
-                                onClick={prevStep}
-                                className="text-gray-600 px-6 py-3 rounded-md font-medium hover:bg-gray-100 transition-colors flex items-center gap-2"
-                            >
-                                <ChevronLeft size={18} />
-                                Voltar
-                            </button>
-                            <button 
+                        <div className="mt-8 flex justify-end">
+                            <button
                                 onClick={nextStep}
                                 className="bg-[#E60012] text-white px-8 py-3 rounded-md font-bold hover:bg-red-700 transition-colors flex items-center gap-2"
                             >
@@ -393,6 +500,7 @@ export default function CartPage() {
                         </div>
                     </div>
                 )}
+
 
                 {step === 3 && (
                     <div className="bg-white rounded-lg shadow-sm p-6 animate-in fade-in slide-in-from-right-4 duration-300">
@@ -422,13 +530,20 @@ export default function CartPage() {
 
                         {/* Customer Info Summary */}
                         <div className="bg-gray-50 p-4 rounded-md mb-6 text-sm text-gray-700">
-                            <h3 className="font-bold mb-2">Dados de Entrega:</h3>
+                            <h3 className="font-bold mb-2">Dados do Cliente:</h3>
                             <p>{formData.name}</p>
                             <p>{formData.phone} | {formData.email}</p>
                             <p className="mt-2">
                                 {formData.address}, {formData.number} {formData.complement && `- ${formData.complement}`}
                             </p>
                             <p>{formData.city} - {formData.state}, {formData.cep}</p>
+                            {shippingSelected && (
+                                <p className="mt-2 font-medium text-gray-800">
+                                    Frete: {shippingSelected.name} ({shippingSelected.days}) — {shippingSelected.cost === 0
+                                        ? "Grátis"
+                                        : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(shippingSelected.cost)}
+                                </p>
+                            )}
                         </div>
 
                         <div className="mt-8 flex justify-between items-center">
@@ -512,18 +627,24 @@ export default function CartPage() {
 
                         <div className="flex justify-between text-gray-600">
                             <span>Frete</span>
-                            <span className="text-green-600">Grátis</span>
+                            <span className={shippingSelected && shippingSelected.cost === 0 ? "text-green-600" : "text-gray-900 font-medium"}>
+                                {shippingSelected
+                                    ? (shippingSelected.cost === 0
+                                        ? "Grátis"
+                                        : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(shippingSelected.cost))
+                                    : "Calcular"}
+                            </span>
                         </div>
                         <div className="border-t pt-3 flex justify-between font-bold text-lg text-gray-900">
                             <span>Total</span>
-                            <span>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(finalTotal)}</span>
+                            <span>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalWithShipping)}</span>
                         </div>
                     </div>
 
                     {step === 3 ? (
                         <button 
                             onClick={handleFinalizeOrder}
-                            disabled={loading}
+                            disabled={loading || !shippingSelected}
                             className="w-full bg-[#E60012] text-white py-3 rounded-md font-bold hover:bg-red-700 transition-colors flex items-center justify-center gap-2 mb-3 disabled:opacity-70 disabled:cursor-not-allowed"
                         >
                             {loading ? 'Processando...' : 'Finalizar Pedido'}

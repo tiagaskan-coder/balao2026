@@ -4,13 +4,58 @@ import { sendEmail, sendSystemNotification } from "@/lib/mail";
 import { getOrderConfirmationTemplate } from "@/lib/mail-templates";
 import { validateCoupon } from "@/lib/coupons";
 
+type CheckoutCustomerInput = {
+  name?: unknown;
+  email?: unknown;
+  phone?: unknown;
+  address?: unknown;
+  cep?: unknown;
+  city?: unknown;
+  state?: unknown;
+  number?: unknown;
+  complement?: unknown;
+};
+
+type CheckoutItemInput = {
+  id?: unknown;
+  product_id?: unknown;
+  name?: unknown;
+  image?: unknown;
+  quantity?: unknown;
+  price?: unknown;
+};
+
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { customer, items, total, couponCode, discountValue } = body;
+    const body = (await req.json()) as {
+      customer?: CheckoutCustomerInput;
+      items?: CheckoutItemInput[];
+      total?: unknown;
+      couponCode?: unknown;
+      discountValue?: unknown;
+      shippingCost?: unknown;
+      shippingOption?: { name?: unknown; days?: unknown };
+    };
+
+    const customer = body.customer;
+    const items = body.items;
+    const total = body.total;
+    const couponCode = typeof body.couponCode === "string" ? body.couponCode : undefined;
+    const discountValue = typeof body.discountValue === "number" ? body.discountValue : 0;
+    const shippingCost = body.shippingCost;
+    const shippingOption = body.shippingOption;
 
     if (!customer || !items || items.length === 0) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    if (typeof customer.email !== "string") {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    const parsedShippingCost = Number(shippingCost);
+    if (!Number.isFinite(parsedShippingCost) || parsedShippingCost < 0) {
+      return NextResponse.json({ error: "Missing or invalid shippingCost" }, { status: 400 });
     }
 
     console.log(`[Checkout] Processing order for ${customer.email}`);
@@ -18,13 +63,18 @@ export async function POST(req: Request) {
 
     // --- Backend Validation Start ---
     let calculatedTotalItems = 0;
-    const cleanItems = items.map((item: any) => {
+    const cleanItems = items.map((item) => {
+        const productId = typeof item.product_id === "string"
+          ? item.product_id
+          : (typeof item.id === "string" ? item.id : "");
+        const quantity = typeof item.quantity === "number" ? item.quantity : Number(item.quantity) || 1;
         let price = item.price;
-        if (typeof price === 'string') {
+        if (typeof price === "string") {
              price = parseFloat(price.replace("R$", "").replace(/\./g, "").replace(",", ".")) || 0;
         }
-        calculatedTotalItems += price * (item.quantity || 1);
-        return { ...item, price }; // Ensure price is number for validation
+        const parsedPrice = typeof price === "number" ? price : Number(price) || 0;
+        calculatedTotalItems += parsedPrice * quantity;
+        return { ...item, product_id: productId, quantity, price: parsedPrice };
     });
 
     let calculatedDiscount = 0;
@@ -41,39 +91,43 @@ export async function POST(req: Request) {
         }
     }
 
-    const expectedTotal = Math.max(0, calculatedTotalItems - calculatedDiscount);
+    const expectedTotal = Math.max(0, calculatedTotalItems - calculatedDiscount + parsedShippingCost);
     
     // Check for discrepancy (> 0.10 to allow minor rounding diffs)
     if (Math.abs(expectedTotal - Number(total)) > 0.1) {
-        console.warn(`[Checkout] CRITICAL: Price mismatch! Received: ${total}, Calculated: ${expectedTotal}. Using received value but flagging discrepancy.`);
-        // In a strict system, we would overwrite total with expectedTotal or reject the order.
-        // For now, we log.
+        console.warn(`[Checkout] CRITICAL: Price mismatch! Received: ${total}, Calculated: ${expectedTotal}. Using calculated value.`);
     } else {
         console.log(`[Checkout] Price validation passed. Calculated: ${expectedTotal}`);
     }
     // --- Backend Validation End ---
 
     const orderData = {
-      customer_name: customer.name,
+      customer_name: String(customer.name ?? ""),
       customer_email: customer.email,
-      customer_whatsapp: customer.phone,
+      customer_whatsapp: String(customer.phone ?? ""),
       address: {
-        street: customer.address,
-        cep: customer.cep,
-        city: customer.city,
-        state: customer.state,
-        number: customer.number,
-        complement: customer.complement
+        street: String(customer.address ?? ""),
+        cep: String(customer.cep ?? ""),
+        city: String(customer.city ?? ""),
+        state: String(customer.state ?? ""),
+        number: String(customer.number ?? ""),
+        complement: String(customer.complement ?? ""),
+        shipping: {
+          name: typeof shippingOption?.name === "string" ? shippingOption.name : null,
+          days: typeof shippingOption?.days === "string" ? shippingOption.days : null,
+          cost: parsedShippingCost
+        }
       },
-      total: total,
+      total: expectedTotal,
       status: 'pending' as const,
-      coupon_code: couponCode || null,
-      discount_value: discountValue || 0
+      coupon_code: couponCode,
+      discount_value: discountValue
     };
 
-    const orderItems = items.map((item: any) => ({
-      product_name: item.name,
-      product_image: item.image,
+    const orderItems = cleanItems.map((item) => ({
+      product_id: item.product_id,
+      product_name: String(item.name ?? ""),
+      product_image: typeof item.image === "string" ? item.image : "",
       quantity: item.quantity,
       price: item.price
     }));
@@ -98,18 +152,18 @@ export async function POST(req: Request) {
     await sendSystemNotification('Novo Pedido Realizado', {
         orderId: order.id,
         customer: customer.name,
-        total: total,
+        total: expectedTotal,
         email: customer.email
     });
 
-    return NextResponse.json({ success: true, orderId: order.id });
+    return NextResponse.json({ success: true, orderId: order.id, total: expectedTotal });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Checkout error:", error);
     return NextResponse.json(
         { 
             error: "Failed to process order", 
-            details: error.message || JSON.stringify(error),
+            details: error instanceof Error ? error.message : JSON.stringify(error),
             hint: "Verifique se as tabelas 'orders' e 'order_items' existem no Supabase e se a chave de serviço (SERVICE_ROLE_KEY) está configurada."
         }, 
         { status: 500 }
