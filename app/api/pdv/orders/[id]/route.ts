@@ -1,17 +1,18 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-// Initialize Supabase Admin Client
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+import { supabaseAdmin, hasAdmin } from '@/lib/supabase-admin';
 
 export async function GET(
   request: Request,
   props: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!hasAdmin) {
+      return NextResponse.json(
+        { error: 'Supabase admin não configurado' },
+        { status: 500 }
+      );
+    }
+
     const params = await props.params;
     const id = params.id;
 

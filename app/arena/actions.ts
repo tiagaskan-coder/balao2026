@@ -1,17 +1,18 @@
 'use server';
 
-import { createClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
 import { Vendedor, ArenaConfig, EventoMidia, Venda } from './types';
+import { supabaseAdmin as supabaseAdminClient, hasAdmin } from '@/lib/supabase-admin';
 
-// Inicializa o cliente Supabase Admin
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+function getAdmin() {
+  if (!hasAdmin) throw new Error('Supabase admin não configurado');
+  return supabaseAdminClient;
+}
 
 // --- Vendas (Histórico) ---
 
 export async function getVendasRecentes(limit = 50): Promise<Venda[]> {
+  const supabaseAdmin = getAdmin();
   const { data, error } = await supabaseAdmin
     .from('arena_vendas')
     .select('*, vendedor:arena_vendedores(*)')
@@ -31,6 +32,7 @@ export async function getVendasRecentes(limit = 50): Promise<Venda[]> {
 }
 
 export async function removerVenda(vendaId: string) {
+  const supabaseAdmin = getAdmin();
   // 1. Busca a venda para saber o valor e o vendedor
   const { data: venda, error: fetchError } = await supabaseAdmin
     .from('arena_vendas')
@@ -89,6 +91,7 @@ export async function removerVenda(vendaId: string) {
 // --- Vendedores ---
 
 export async function getVendedores(): Promise<Vendedor[]> {
+  const supabaseAdmin = getAdmin();
   const { data, error } = await supabaseAdmin
     .from('arena_vendedores')
     .select('*')
@@ -103,6 +106,7 @@ export async function getVendedores(): Promise<Vendedor[]> {
 }
 
 export async function criarVendedor(formData: FormData) {
+  const supabaseAdmin = getAdmin();
   const nome = formData.get('nome') as string;
   const avatar_url = formData.get('avatar_url') as string;
   const veiculo_emoji = formData.get('veiculo_emoji') as string;
@@ -128,6 +132,7 @@ export async function criarVendedor(formData: FormData) {
 }
 
 export async function atualizarVendedor(id: string, formData: FormData) {
+  const supabaseAdmin = getAdmin();
   const nome = formData.get('nome') as string;
   const avatar_url = formData.get('avatar_url') as string;
   const veiculo_emoji = formData.get('veiculo_emoji') as string;
@@ -151,6 +156,7 @@ export async function atualizarVendedor(id: string, formData: FormData) {
 }
 
 export async function removerVendedor(id: string) {
+  const supabaseAdmin = getAdmin();
   const { error } = await supabaseAdmin
     .from('arena_vendedores')
     .delete()
@@ -162,6 +168,7 @@ export async function removerVendedor(id: string) {
 }
 
 export async function adicionarVenda(id: string, valor: number) {
+  const supabaseAdmin = getAdmin();
   // Busca vendedor atual para somar
   const { data: vendedor, error: fetchError } = await supabaseAdmin
     .from('arena_vendedores')
@@ -194,6 +201,7 @@ export async function adicionarVenda(id: string, valor: number) {
 }
 
 export async function resetarVendas() {
+  const supabaseAdmin = getAdmin();
   // 1. Limpa histórico
   await supabaseAdmin
     .from('arena_vendas')
@@ -214,6 +222,7 @@ export async function resetarVendas() {
 // --- Configuração ---
 
 export async function getConfig(): Promise<ArenaConfig | null> {
+  const supabaseAdmin = getAdmin();
   const { data, error } = await supabaseAdmin
     .from('arena_config')
     .select('*')
@@ -229,6 +238,7 @@ export async function getConfig(): Promise<ArenaConfig | null> {
 }
 
 export async function atualizarConfig(formData: FormData) {
+  const supabaseAdmin = getAdmin();
   const titulo = formData.get('titulo') as string;
   const ativo = formData.get('ativo') === 'true';
 
@@ -257,6 +267,7 @@ export async function atualizarConfig(formData: FormData) {
 // --- Eventos de Mídia ---
 
 export async function getEventosMidia(): Promise<EventoMidia[]> {
+  const supabaseAdmin = getAdmin();
   const { data, error } = await supabaseAdmin
     .from('arena_eventos_midia')
     .select('*')
@@ -271,6 +282,7 @@ export async function getEventosMidia(): Promise<EventoMidia[]> {
 }
 
 export async function criarEventoMidia(formData: FormData) {
+  const supabaseAdmin = getAdmin();
   const evento_tipo = formData.get('evento_tipo') as string;
   const gif_url = formData.get('gif_url') as string;
   const titulo = formData.get('titulo') as string;
@@ -292,6 +304,7 @@ export async function criarEventoMidia(formData: FormData) {
 }
 
 export async function atualizarEventoMidia(id: string, formData: FormData) {
+  const supabaseAdmin = getAdmin();
   const evento_tipo = formData.get('evento_tipo') as string;
   const gif_url = formData.get('gif_url') as string;
   const titulo = formData.get('titulo') as string;
@@ -315,6 +328,7 @@ export async function atualizarEventoMidia(id: string, formData: FormData) {
 }
 
 export async function removerEventoMidia(id: string) {
+  const supabaseAdmin = getAdmin();
   const { error } = await supabaseAdmin
     .from('arena_eventos_midia')
     .delete()
