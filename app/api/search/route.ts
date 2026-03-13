@@ -1,5 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { parsePriceToNumber } from '@/lib/utils';
+
+type ProductRow = { price?: unknown };
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -32,11 +35,20 @@ export async function GET(request: Request) {
       });
 
       const { data: fallbackData } = await queryBuilder.limit(10);
-      
-      return NextResponse.json(fallbackData || []);
+
+      const fallback = (fallbackData || []) as ProductRow[];
+      const sorted = fallback
+        .slice()
+        .sort((a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price));
+
+      return NextResponse.json(sorted);
     }
 
-    return NextResponse.json(products);
+    return NextResponse.json(
+      ((products || []) as ProductRow[])
+        .slice()
+        .sort((a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price))
+    );
   } catch (err) {
     console.error('Search API Error:', err);
     return NextResponse.json([], { status: 500 });

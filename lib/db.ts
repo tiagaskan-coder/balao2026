@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 import { supabaseAdmin } from './supabase-admin';
-import { Product, CarouselImage, Category, HomeBlock, UsedNotebook } from './utils';
+import { Product, CarouselImage, Category, HomeBlock, UsedNotebook, parsePriceToNumber } from './utils';
  
  
 
@@ -36,7 +36,7 @@ export async function getProducts(): Promise<Product[]> {
       if (chunk.length < pageSize) break;
       from += pageSize;
     }
-    return all;
+    return all.sort((a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price));
   } catch (error) {
     console.error("Error fetching products:", error);
     return [];
@@ -55,7 +55,7 @@ export async function getProductsByCategory(categorySlug: string): Promise<Produ
       return [];
     }
 
-    return data as Product[];
+    return (data as Product[]).sort((a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price));
   } catch (error) {
     console.error(`Error fetching products for category ${categorySlug}:`, error);
     return [];

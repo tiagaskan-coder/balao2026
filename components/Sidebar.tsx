@@ -385,9 +385,9 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
          
          {/* Mobile Footer (Account/Help) */}
          <div className="p-4 border-t border-gray-100 bg-gray-50">
-             <Link href="/conta" className="flex items-center gap-3 text-gray-700 hover:text-[#E60012]" onClick={closeSidebar}>
+             <Link href="/fale-conosco" className="flex items-center gap-3 text-gray-700 hover:text-[#E60012]" onClick={closeSidebar}>
                  <User size={20} />
-                 <span className="font-medium">Minha Conta</span>
+                 <span className="font-medium">Fale Conosco</span>
              </Link>
          </div>
       </aside>

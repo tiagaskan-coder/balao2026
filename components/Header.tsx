@@ -7,7 +7,6 @@ import { Search, ShoppingCart, User, Menu, X, Loader2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
-import { useAuth } from "@/context/AuthContext";
 import { useSidebar } from "@/context/SidebarContext";
 import { Product } from "@/lib/utils";
 import SearchPreview from "@/components/SearchPreview";
@@ -18,7 +17,6 @@ export default function Header() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { cartCount } = useCart();
-  const { user } = useAuth();
   const { toggleSidebar } = useSidebar();
   const [logoClicks, setLogoClicks] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -215,16 +213,14 @@ export default function Header() {
         {/* Actions */}
         <div className="flex items-center gap-3 md:gap-8 text-gray-700">
 
-          <Link href={user ? "/conta" : "/login"} className="flex items-center gap-3 group active:scale-95 transition-transform">
+          <Link href="/fale-conosco" className="flex items-center gap-3 group active:scale-95 transition-transform">
             <div className="p-2 bg-gray-100 rounded-full text-gray-600 group-hover:bg-[#E60012] group-hover:text-white transition-colors shadow-sm">
                 <User size={20} className="md:w-5 md:h-5" strokeWidth={2.5} />
             </div>
             <div className="hidden lg:flex flex-col text-sm leading-tight">
-                <span className="text-gray-500">
-                  {user ? "Olá, " + (user.email?.split('@')[0] || "Visitante") : "Bem-vindo,"}
-                </span>
+                <span className="text-gray-500">Atendimento</span>
                 <span className="font-bold text-gray-800 group-hover:text-[#E60012] transition-colors">
-                  {user ? "Minha Conta" : "Entrar"}
+                  Fale Conosco
                 </span>
             </div>
           </Link>

@@ -10,7 +10,6 @@ const bangers = Bangers({
 });
 import { CartProvider } from "@/context/CartContext";
 import { ToastProvider } from "@/context/ToastContext";
-import { AuthProvider } from "@/context/AuthContext";
 import LayoutWrapper from "@/components/LayoutWrapper";
 import VisitorTracker from "@/components/VisitorTracker";
 
@@ -164,17 +163,15 @@ export default async function RootLayout({
         className={`${bangers.variable} antialiased flex flex-col min-h-screen overflow-x-hidden`}
       >
         <VisitorTracker />
-        <AuthProvider>
-          <CartProvider>
-            <ToastProvider>
-              <Suspense>
-                <LayoutWrapper categories={categories}>
-                  {children}
-                </LayoutWrapper>
-              </Suspense>
-            </ToastProvider>
-          </CartProvider>
-        </AuthProvider>
+        <CartProvider>
+          <ToastProvider>
+            <Suspense>
+              <LayoutWrapper categories={categories}>
+                {children}
+              </LayoutWrapper>
+            </Suspense>
+          </ToastProvider>
+        </CartProvider>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

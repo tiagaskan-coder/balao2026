@@ -5,7 +5,7 @@ import FilterSyncer from "@/components/FilterSyncer";
 import { getProducts, getCategories } from "@/lib/db";
 import { searchProducts } from "@/lib/searchUtils";
 import { extractTags, filterProductsByTags } from "@/lib/product-filters";
-import type { Category } from "@/lib/utils";
+import { parsePriceToNumber, type Category } from "@/lib/utils";
 import { Metadata } from "next";
 import JsonLd, { generateBreadcrumbSchema, generateOrganizationSchema, generateItemListSchema } from "@/components/JsonLd";
  
@@ -107,6 +107,7 @@ export default async function CategoriaPage({
 
   // Apply tag filter
   filteredProducts = filterProductsByTags(filteredProducts, selectedTags);
+  filteredProducts = filteredProducts.sort((a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price));
 
   // Schema Markup
   const breadcrumbItems = [

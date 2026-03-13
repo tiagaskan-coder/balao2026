@@ -9,7 +9,7 @@ import JsonLd, { generateOrganizationSchema } from "@/components/JsonLd";
 // import InstagramFeed from "@/components/InstagramFeed";
 import { getProducts, getCarouselImages, getCategories, getHomeBlocks } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
-import { Product } from "@/lib/utils";
+import { parsePriceToNumber, Product } from "@/lib/utils";
 
 export const dynamic = 'force-dynamic';
 
@@ -54,10 +54,14 @@ export default async function Home(props: {
               });
 
               const { data: fallbackData } = await queryBuilder.limit(50);
-              return (fallbackData as Product[]) || [];
+              return ((fallbackData as Product[]) || []).sort(
+                (a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price)
+              );
           }
           
-          return (data as Product[]) || [];
+          return ((data as Product[]) || []).sort(
+            (a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price)
+          );
       })();
   } else {
       // Otherwise fetch all products (for category browsing and home blocks)

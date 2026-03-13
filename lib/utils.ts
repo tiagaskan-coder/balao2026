@@ -13,6 +13,36 @@ export interface Product {
   created_at?: string;
 }
 
+export function parsePriceToNumber(price: unknown): number {
+  if (typeof price === "number") {
+    return Number.isFinite(price) ? price : Number.POSITIVE_INFINITY;
+  }
+
+  if (typeof price !== "string") return Number.POSITIVE_INFINITY;
+
+  const cleaned = price
+    .trim()
+    .replace(/\s/g, "")
+    .replace(/^R\$\s*/i, "")
+    .replace(/[^\d.,-]/g, "");
+
+  if (!cleaned) return Number.POSITIVE_INFINITY;
+
+  const hasComma = cleaned.includes(",");
+  const hasDot = cleaned.includes(".");
+
+  let normalized = cleaned;
+  if (hasComma && hasDot) {
+    normalized = cleaned.replace(/\./g, "").replace(",", ".");
+  } else if (hasComma && !hasDot) {
+    normalized = cleaned.replace(",", ".");
+  }
+
+  const value = Number(normalized);
+  if (!Number.isFinite(value)) return Number.POSITIVE_INFINITY;
+  return value;
+}
+
 export interface UsedNotebook {
   id: string;
   name: string;
