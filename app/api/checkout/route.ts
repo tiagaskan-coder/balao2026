@@ -3,6 +3,7 @@ import { createOrder } from "@/lib/db";
 import { sendEmail, sendSystemNotification } from "@/lib/mail";
 import { getOrderConfirmationTemplate } from "@/lib/mail-templates";
 import { validateCoupon } from "@/lib/coupons";
+import { hasAdmin } from "@/lib/supabase-admin";
 
 type CheckoutCustomerInput = {
   name?: unknown;
@@ -27,6 +28,16 @@ type CheckoutItemInput = {
 
 export async function POST(req: Request) {
   try {
+    if (!hasAdmin) {
+      return NextResponse.json(
+        {
+          error: "Supabase admin não configurado",
+          details: "Defina NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY (ou SERVICE_ROLE_KEY).",
+        },
+        { status: 500 }
+      );
+    }
+
     const body = (await req.json()) as {
       customer?: CheckoutCustomerInput;
       items?: CheckoutItemInput[];

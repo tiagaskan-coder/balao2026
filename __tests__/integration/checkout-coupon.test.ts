@@ -7,6 +7,10 @@ vi.mock('@/lib/db', () => ({
   createOrder: vi.fn().mockResolvedValue({ id: '12345' }),
 }));
 
+vi.mock('@/lib/supabase-admin', () => ({
+  hasAdmin: true
+}));
+
 vi.mock('@/lib/mail', () => ({
   sendEmail: vi.fn().mockResolvedValue(true),
   sendSystemNotification: vi.fn().mockResolvedValue(true),
