@@ -837,7 +837,7 @@ export default function WeeklyClosing() {
                           </tr>
                           
                           {/* Expanded Details Row */}
-                      <tr className={`${isExpanded ? 'table-row' : 'hidden'} bg-slate-50 print:bg-white`}>
+                      <tr className={`${isExpanded ? 'table-row' : 'hidden print:table-row'} bg-slate-50 print:bg-white`}>
                             <td colSpan={6} className="p-0">
                               <div className="px-4 py-2 print:px-0">
                                 <table className="w-full text-xs border-l-2 border-blue-500 print:border-none mb-2 print:text-[10px]">
