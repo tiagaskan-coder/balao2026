@@ -221,7 +221,7 @@ function Hero() {
 
           <div className="lg:col-span-6">
             <Reveal delay={0.12}>
-              <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-transparent">
+              <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-transparent scale-[1.33] origin-center">
                 <iframe
                   title="PC Gamer 3D"
                   src={`https://sketchfab.com/models/${MODEL_ID}/embed?ui_theme=dark&transparent=1&autostart=1&ui_infos=0&ui_watermark=0&ui_controls=0&ui_general_controls=0&ui_fullscreen=0&ui_help=0&ui_hint=0&ui_vr=0&ui_settings=0&ui_annotations=0&ui_stop=0&camera=0&dnt=1`}
