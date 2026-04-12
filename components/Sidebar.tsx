@@ -271,6 +271,7 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
           <CustomLink href="/assistenciagames" icon={Gamepad2} label="Assistência Games" />
           <CustomLink href="/tonner" icon={Printer} label="Toners" />
           <CustomLink href="/reparoapple" icon={Smartphone} label="Reparo Apple" />
+          <CustomLink href="/telaiphone" icon={Zap} label="Troca de Tela & Bateria" />
 
           {availableTags && availableTags.length > 0 && (
             <div className="mt-4 pt-4 border-t border-gray-100 mx-4">
@@ -350,6 +351,7 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
             <CustomLink href="/assistenciagames" icon={Gamepad2} label="Assistência Games" />
             <CustomLink href="/tonner" icon={Printer} label="Toners" />
             <CustomLink href="/reparoapple" icon={Smartphone} label="Reparo Apple" />
+            <CustomLink href="/telaiphone" icon={Zap} label="Troca de Tela & Bateria" />
 
             {/* Mobile Filters */}
             {availableTags && availableTags.length > 0 && (
