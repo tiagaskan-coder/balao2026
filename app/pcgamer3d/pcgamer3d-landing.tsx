@@ -43,7 +43,7 @@ const GALLERY = [
     alt: "Interior de gabinete com LEDs e acabamento gamer",
   },
   {
-    src: "/api/image-proxy?url=https%3A%2F%2Finside-tech.co.uk%2Fwp-content%2Fuploads%2F2024%2F11%2Fpre-built-gaming-pcs.jpg",
+    src: "https://wsrv.nl/?url=inside-tech.co.uk/wp-content/uploads/2024/11/pre-built-gaming-pcs.jpg",
     alt: "PCs gamers montados e prontos para uso",
   },
   {
