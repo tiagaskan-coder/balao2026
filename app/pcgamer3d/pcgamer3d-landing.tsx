@@ -221,31 +221,16 @@ function Hero() {
 
           <div className="lg:col-span-6">
             <Reveal delay={0.12}>
-              <GlassCard className="p-3 md:p-4">
-                <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-black/50 border border-white/10">
-                  <iframe
-                    title="PC Gamer 3D"
-                    src={`https://sketchfab.com/models/${MODEL_ID}/embed?ui_theme=dark&autostart=0&camera=0&dnt=1`}
-                    className="absolute inset-0 h-full w-full"
-                    allow="autoplay; fullscreen; xr-spatial-tracking"
-                    allowFullScreen
-                    loading="lazy"
-                  />
-                </div>
-                <div className="px-2 md:px-3 pt-4 pb-2 flex items-center justify-between gap-4">
-                  <div className="text-sm text-white/60">
-                    Visualize o setup em 3D e peça a configuração ideal.
-                  </div>
-                  <Link
-                    href={WHATSAPP_LINK}
-                    target="_blank"
-                    onClick={() => pushEvent("pcgamer3d_whatsapp_click", { location: "viewer" })}
-                    className="inline-flex items-center gap-2 text-white font-black text-sm md:text-base border-b-2 border-violet-400/70 pb-1 hover:text-violet-300 transition-colors"
-                  >
-                    Orçar agora <ChevronRight className="h-4 w-4" />
-                  </Link>
-                </div>
-              </GlassCard>
+              <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-black/40">
+                <iframe
+                  title="PC Gamer 3D"
+                  src={`https://sketchfab.com/models/${MODEL_ID}/embed?ui_theme=dark&autostart=1&ui_infos=0&ui_watermark=0&ui_controls=1&ui_help=0&ui_hint=0&ui_vr=0&camera=0&dnt=1`}
+                  className="absolute inset-0 h-full w-full"
+                  allow="autoplay; fullscreen; xr-spatial-tracking"
+                  allowFullScreen
+                  loading="eager"
+                />
+              </div>
             </Reveal>
           </div>
         </div>
