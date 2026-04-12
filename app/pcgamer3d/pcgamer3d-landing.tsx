@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import {
@@ -28,33 +27,6 @@ const WHATSAPP_LINK =
   "https://wa.me/5519987510267?text=Ol%C3%A1!%20Quero%20montar%20um%20PC%20Gamer%20High-End%20Custom%20Build.%20Pode%20me%20passar%20uma%20proposta%20com%20prazo%20e%20formas%20de%20pagamento%3F";
 
 const MODEL_ID = "44833fc6db3a43ce88be66609c1fe619";
-
-const GALLERY = [
-  {
-    src: "https://www.srcomputador.com.br/blog/wp-content/uploads/2016/08/pc-gamer-vai-jogar-o-que.jpg",
-    alt: "PC gamer para jogos e alta performance",
-  },
-  {
-    src: "https://i.redd.it/heres-one-inside-my-gaming-pc-v0-2zl3bmtwonaa1.jpg?width=3024&format=pjpg&auto=webp&s=1c1954a8bc29bc4f2ddd2eb1aaf61a83a134b811",
-    alt: "Interior de PC gamer com iluminação e componentes",
-  },
-  {
-    src: "https://static0.howtogeekimages.com/wordpress/wp-content/uploads/2020/08/inside-pc-case-with-leds.jpg?w=1200&h=628&fit=crop",
-    alt: "Interior de gabinete com LEDs e acabamento gamer",
-  },
-  {
-    src: "https://wsrv.nl/?url=inside-tech.co.uk/wp-content/uploads/2024/11/pre-built-gaming-pcs.jpg",
-    alt: "PCs gamers montados e prontos para uso",
-  },
-  {
-    src: "https://www.newegg.com/insider/wp-content/uploads/2020/06/abs_10-1024x576.jpg",
-    alt: "PC gamer com iluminação RGB e gabinete premium",
-  },
-  {
-    src: "/api/image-proxy?url=https%3A%2F%2Fglobal.aorus.com%2Fupload%2FAdmin%2Fimages%2FCable-Management.jpg",
-    alt: "Cable management em PC gamer com organização de cabos",
-  },
-];
 
 function formatTime(ms: number) {
   const total = Math.max(0, Math.floor(ms / 1000));
@@ -313,40 +285,6 @@ function Specs() {
   );
 }
 
-function Gallery() {
-  return (
-    <section className="py-20 border-t border-white/5" id="galeria">
-      <div className="container mx-auto px-4">
-        <Reveal>
-          <div className="max-w-4xl mx-auto text-center mb-14">
-            <h2 className="text-3xl md:text-5xl font-black uppercase">Galeria</h2>
-            <p className="text-white/60 mt-4 text-lg md:text-xl">
-              Detalhes internos, iluminação e acabamento premium.
-            </p>
-          </div>
-        </Reveal>
-
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-6xl mx-auto">
-          {GALLERY.map((img, idx) => (
-            <Reveal key={img.src} delay={idx * 0.03}>
-              <div className="relative aspect-square overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04]">
-                <Image
-                  src={img.src}
-                  alt={img.alt}
-                  fill
-                  sizes="(max-width: 768px) 50vw, 33vw"
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function Checkout() {
   const price = 12999;
   const [payment, setPayment] = useState<"pix" | "card">("pix");
@@ -561,7 +499,6 @@ export default function Pcgamer3dLanding() {
     <>
       <Hero />
       <Specs />
-      <Gallery />
       <Checkout />
       <Footer />
     </>
