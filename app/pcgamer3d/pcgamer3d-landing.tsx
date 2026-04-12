@@ -31,28 +31,28 @@ const MODEL_ID = "44833fc6db3a43ce88be66609c1fe619";
 
 const GALLERY = [
   {
-    src: "https://images.pexels.com/photos/1714205/pexels-photo-1714205.jpeg?auto=compress&cs=tinysrgb&w=1600",
-    alt: "Gabinete de PC gamer com iluminação RGB",
+    src: "https://www.srcomputador.com.br/blog/wp-content/uploads/2016/08/pc-gamer-vai-jogar-o-que.jpg",
+    alt: "PC gamer para jogos e alta performance",
   },
   {
-    src: "https://images.pexels.com/photos/2582932/pexels-photo-2582932.jpeg?auto=compress&cs=tinysrgb&w=1600",
-    alt: "Interior de PC gamer com componentes premium",
+    src: "https://i.redd.it/heres-one-inside-my-gaming-pc-v0-2zl3bmtwonaa1.jpg?width=3024&format=pjpg&auto=webp&s=1c1954a8bc29bc4f2ddd2eb1aaf61a83a134b811",
+    alt: "Interior de PC gamer com iluminação e componentes",
   },
   {
-    src: "https://images.pexels.com/photos/2047905/pexels-photo-2047905.jpeg?auto=compress&cs=tinysrgb&w=1600",
-    alt: "Setup gamer com desktop de alta performance",
+    src: "https://static0.howtogeekimages.com/wordpress/wp-content/uploads/2020/08/inside-pc-case-with-leds.jpg?w=1200&h=628&fit=crop",
+    alt: "Interior de gabinete com LEDs e acabamento gamer",
   },
   {
-    src: "https://images.pexels.com/photos/4009599/pexels-photo-4009599.jpeg?auto=compress&cs=tinysrgb&w=1600",
-    alt: "Placa de vídeo e componentes em gabinete com vidro temperado",
+    src: "/api/image-proxy?url=https%3A%2F%2Finside-tech.co.uk%2Fwp-content%2Fuploads%2F2024%2F11%2Fpre-built-gaming-pcs.jpg",
+    alt: "PCs gamers montados e prontos para uso",
   },
   {
-    src: "https://images.pexels.com/photos/325229/pexels-photo-325229.jpeg?auto=compress&cs=tinysrgb&w=1600",
-    alt: "Teclado e iluminação com estética gamer",
+    src: "https://www.newegg.com/insider/wp-content/uploads/2020/06/abs_10-1024x576.jpg",
+    alt: "PC gamer com iluminação RGB e gabinete premium",
   },
   {
-    src: "https://images.pexels.com/photos/5496464/pexels-photo-5496464.jpeg?auto=compress&cs=tinysrgb&w=1600",
-    alt: "Cabos organizados e airflow interno do PC",
+    src: "/api/image-proxy?url=https%3A%2F%2Fglobal.aorus.com%2Fupload%2FAdmin%2Fimages%2FCable-Management.jpg",
+    alt: "Cable management em PC gamer com organização de cabos",
   },
 ];
 
