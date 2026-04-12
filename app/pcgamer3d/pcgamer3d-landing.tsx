@@ -224,7 +224,7 @@ function Hero() {
               <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-transparent">
                 <iframe
                   title="PC Gamer 3D"
-                  src={`https://sketchfab.com/models/${MODEL_ID}/embed?ui_theme=dark&transparent=1&autostart=1&ui_infos=0&ui_watermark=0&ui_controls=1&ui_help=0&ui_hint=0&ui_vr=0&camera=0&dnt=1`}
+                  src={`https://sketchfab.com/models/${MODEL_ID}/embed?ui_theme=dark&transparent=1&autostart=1&ui_infos=0&ui_watermark=0&ui_controls=0&ui_general_controls=0&ui_fullscreen=0&ui_help=0&ui_hint=0&ui_vr=0&ui_settings=0&ui_annotations=0&ui_stop=0&camera=0&dnt=1`}
                   className="absolute inset-0 h-full w-full bg-transparent"
                   allow="autoplay; fullscreen; xr-spatial-tracking"
                   allowFullScreen
