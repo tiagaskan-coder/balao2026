@@ -1,4 +1,5 @@
 import { Product } from '@/lib/utils';
+import { SITE_CONFIG } from '@/lib/config';
 
 type JsonLdProps = {
   data: Record<string, any> | Record<string, any>[];
@@ -21,23 +22,22 @@ export function generateOrganizationSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'ComputerStore',
-    name: 'Balão da Informática Campinas',
-    image: 'https://www.balao.info/logo.png', // Ajustar se tiver URL melhor
+    name: SITE_CONFIG.name,
+    image: 'https://www.balao.info/logo.png',
     '@id': 'https://www.balao.info',
     url: 'https://www.balao.info',
-    telephone: '+5519993916723',
+    telephone: `+${SITE_CONFIG.phone.number}`,
     priceRange: '$$',
     address: {
       '@type': 'PostalAddress',
-      streetAddress: 'Av. Brasil, 1234', // Preciso confirmar o endereço real se possível
+      streetAddress: SITE_CONFIG.address,
       addressLocality: 'Campinas',
       addressRegion: 'SP',
-      postalCode: '13000-000', // Confirmar
       addressCountry: 'BR'
     },
     geo: {
       '@type': 'GeoCoordinates',
-      latitude: -22.9099, // Exemplo Campinas
+      latitude: -22.9099,
       longitude: -47.0626
     },
     openingHoursSpecification: {
@@ -53,8 +53,8 @@ export function generateOrganizationSchema() {
       closes: '18:00'
     },
     sameAs: [
-      'https://www.instagram.com/balao_informatica_campinas',
-      'https://www.facebook.com/balaodainformaticacampinas'
+      SITE_CONFIG.social.instagram,
+      SITE_CONFIG.social.facebook
     ]
   };
 }
@@ -68,7 +68,7 @@ export function generateProductSchema(product: Product) {
     description: `Comprar ${product.name} em Campinas. ${product.category}`,
     brand: {
       '@type': 'Brand',
-      name: 'Genérico' // Ajustar se tiver marca no produto
+      name: SITE_CONFIG.name
     },
     offers: {
       '@type': 'Offer',
