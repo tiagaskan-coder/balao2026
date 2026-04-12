@@ -13,6 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/recuperacaodados',
     '/montagempc',
     '/sistemas',
+    '/pcgamer3d',
     '/consignacao',
     '/pcgamer',
     '/notebooks',
