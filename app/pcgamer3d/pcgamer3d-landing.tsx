@@ -222,10 +222,12 @@ function Hero() {
           <div className="lg:col-span-6">
             <Reveal delay={0.12}>
               <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-transparent">
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-20 z-10 bg-gradient-to-b from-[#0a0a0a] via-[#0a0a0a]/95 to-transparent" />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 z-10 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/95 to-transparent" />
                 <iframe
                   title="PC Gamer 3D"
                   src={`https://sketchfab.com/models/${MODEL_ID}/embed?ui_theme=dark&transparent=1&autostart=1&ui_infos=0&ui_watermark=0&ui_controls=0&ui_general_controls=0&ui_fullscreen=0&ui_help=0&ui_hint=0&ui_vr=0&ui_settings=0&ui_annotations=0&ui_stop=0&camera=0&dnt=1`}
-                  className="absolute bg-transparent pointer-events-none"
+                  className="absolute bg-transparent"
                   style={{
                     top: -70,
                     left: -30,
