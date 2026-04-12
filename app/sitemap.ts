@@ -11,6 +11,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/promocao',
     '/manutencao',
     '/recuperacaodados',
+    '/montagempc',
     '/consignacao',
     '/pcgamer',
     '/notebooks',
