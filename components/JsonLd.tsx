@@ -28,6 +28,7 @@ export function generateOrganizationSchema() {
     image: "https://www.balao.info/logo.png",
     telephone: `+${SITE_CONFIG.phone.number}`,
     email: SITE_CONFIG.email,
+    priceRange: "$$",
     address: {
       "@type": "PostalAddress",
       streetAddress: SITE_CONFIG.address,
