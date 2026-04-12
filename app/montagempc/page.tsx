@@ -134,14 +134,18 @@ const BUILD_GALLERY = [
     caption: "Entrega pronta para jogar",
   },
   {
-    src: "https://images.pexels.com/photos/5589562/pexels-photo-5589562.jpeg?auto=compress&cs=tinysrgb&w=1600",
-    alt: "Close de placa-mãe com CPU e componentes",
+    src: "https://img.freepik.com/fotos-premium/detalhe-do-interior-do-gabinete-do-pc-gamer-placa-mae-cpu-water-cooling-memory-placa-grafica-e-fans-rgb_176814-1716.jpg",
+    alt: "Interior de gabinete de PC gamer com placa-mãe, watercooler e fans RGB",
     caption: "Rotas limpas + fixação segura",
+    unoptimized: true,
+    referrerPolicy: "no-referrer" as const,
   },
   {
-    src: "https://images.pexels.com/photos/5589564/pexels-photo-5589564.jpeg?auto=compress&cs=tinysrgb&w=1600",
-    alt: "Close de placa-mãe com RAM e CPU instalados",
+    src: "https://i.redd.it/8oei2fd3j8p71.jpg",
+    alt: "PC gamer moderno com iluminação e airflow otimizado",
     caption: "Airflow otimizado e temperaturas menores",
+    unoptimized: true,
+    referrerPolicy: "no-referrer" as const,
   },
 ];
 
@@ -260,6 +264,8 @@ function BlockGallery() {
                   alt={img.alt}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  unoptimized={img.unoptimized}
+                  referrerPolicy={img.referrerPolicy}
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
