@@ -274,6 +274,7 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
           <CustomLink href="/telaiphone" icon={Zap} label="Troca de Tela & Bateria" />
           <CustomLink href="/recuperacaodados" icon={HardDrive} label="Recuperação de Dados" />
           <CustomLink href="/montagempc" icon={Cpu} label="Montagem PC Gamer" />
+          <CustomLink href="/sistemas" icon={CircuitBoard} label="Sites & Sistemas" />
 
           {availableTags && availableTags.length > 0 && (
             <div className="mt-4 pt-4 border-t border-gray-100 mx-4">
@@ -356,6 +357,7 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
             <CustomLink href="/telaiphone" icon={Zap} label="Troca de Tela & Bateria" />
             <CustomLink href="/recuperacaodados" icon={HardDrive} label="Recuperação de Dados" />
             <CustomLink href="/montagempc" icon={Cpu} label="Montagem PC Gamer" />
+            <CustomLink href="/sistemas" icon={CircuitBoard} label="Sites & Sistemas" />
 
             {/* Mobile Filters */}
             {availableTags && availableTags.length > 0 && (
