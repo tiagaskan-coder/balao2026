@@ -101,6 +101,8 @@ export const metadata: Metadata = {
 const WHATSAPP_LINK =
   "https://wa.me/5519987510267?text=Olá!%20Preciso%20de%20recuperação%20de%20dados.%20Meu%20dispositivo%20(HD/SSD/pendrive/cartão)%20está%20com%20problema%20e%20quero%20um%20orçamento%20sem%20compromisso.";
 
+const SSD_MODEL_ID = "ad215e54c381456895e21db5062f8714";
+
 const FAQS = [
   {
     question: "O que devo fazer imediatamente após perder meus dados?",
@@ -176,56 +178,79 @@ function BlockHero() {
       <div className="absolute top-1/2 left-1/2 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-600/10 blur-[120px]" />
 
       <div className="container mx-auto px-4 relative z-10 py-14 md:py-20">
-        <div className="max-w-4xl">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/5 px-4 py-2 text-xs md:text-sm font-bold uppercase tracking-widest border border-white/10 mb-8">
-            <ShieldCheck className="h-4 w-4 text-green-400" />
-            Atendimento nacional + sigilo total
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          <div className="lg:col-span-7">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/5 px-4 py-2 text-xs md:text-sm font-bold uppercase tracking-widest border border-white/10 mb-8">
+              <ShieldCheck className="h-4 w-4 text-green-400" />
+              Atendimento nacional + sigilo total
+            </div>
+
+            <h1 className="text-4xl md:text-7xl font-black tracking-tighter leading-[0.95] uppercase">
+              Recuperação de Dados no{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
+                Brasil
+              </span>
+            </h1>
+
+            <p className="mt-6 text-lg md:text-2xl text-zinc-300 max-w-3xl leading-relaxed">
+              Perdeu fotos, documentos ou arquivos da empresa? Recuperamos dados de{" "}
+              <strong className="text-white">HD, SSD/NVMe, pendrive e cartão</strong>{" "}
+              com processo seguro, transparente e sem compromisso — em Campinas/SP e por envio para todo o país.
+            </p>
+
+            <div className="mt-10 flex flex-col sm:flex-row gap-4">
+              <Link
+                href={WHATSAPP_LINK}
+                target="_blank"
+                className="bg-[#25D366] hover:bg-[#128C7E] text-white px-8 py-4 rounded-full font-black text-lg md:text-xl transition-all shadow-xl hover:scale-105 inline-flex items-center justify-center gap-3"
+              >
+                <MessageCircle className="h-6 w-6" />
+                Falar com Especialista
+                <ArrowRight className="h-6 w-6" />
+              </Link>
+              <Link
+                href="#como-funciona"
+                className="bg-white/10 hover:bg-white/20 border border-white/15 text-white px-8 py-4 rounded-full font-black text-lg md:text-xl transition-all hover:scale-105 inline-flex items-center justify-center gap-3"
+              >
+                <Clock className="h-6 w-6" />
+                Como funciona
+              </Link>
+            </div>
+
+            <div className="mt-10 flex flex-wrap gap-6 text-sm md:text-base text-white/70 font-bold uppercase tracking-wider">
+              <div className="inline-flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-green-400" />
+                Orçamento sem compromisso
+              </div>
+              <div className="inline-flex items-center gap-2">
+                <Lock className="h-5 w-5 text-blue-300" />
+                Confidencialidade
+              </div>
+              <div className="inline-flex items-center gap-2">
+                <Clock className="h-5 w-5 text-orange-300" />
+                Análise rápida
+              </div>
+            </div>
           </div>
 
-          <h1 className="text-4xl md:text-7xl font-black tracking-tighter leading-[0.95] uppercase">
-            Recuperação de Dados no{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
-              Brasil
-            </span>
-          </h1>
-
-          <p className="mt-6 text-lg md:text-2xl text-zinc-300 max-w-3xl leading-relaxed">
-            Perdeu fotos, documentos ou arquivos da empresa? Recuperamos dados de{" "}
-            <strong className="text-white">HD, SSD/NVMe, pendrive e cartão</strong>{" "}
-            com processo seguro, transparente e sem compromisso — em Campinas/SP e por envio para todo o país.
-          </p>
-
-          <div className="mt-10 flex flex-col sm:flex-row gap-4">
-            <Link
-              href={WHATSAPP_LINK}
-              target="_blank"
-              className="bg-[#25D366] hover:bg-[#128C7E] text-white px-8 py-4 rounded-full font-black text-lg md:text-xl transition-all shadow-xl hover:scale-105 inline-flex items-center justify-center gap-3"
-            >
-              <MessageCircle className="h-6 w-6" />
-              Falar com Especialista
-              <ArrowRight className="h-6 w-6" />
-            </Link>
-            <Link
-              href="#como-funciona"
-              className="bg-white/10 hover:bg-white/20 border border-white/15 text-white px-8 py-4 rounded-full font-black text-lg md:text-xl transition-all hover:scale-105 inline-flex items-center justify-center gap-3"
-            >
-              <Clock className="h-6 w-6" />
-              Como funciona
-            </Link>
-          </div>
-
-          <div className="mt-10 flex flex-wrap gap-6 text-sm md:text-base text-white/70 font-bold uppercase tracking-wider">
-            <div className="inline-flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-green-400" />
-              Orçamento sem compromisso
-            </div>
-            <div className="inline-flex items-center gap-2">
-              <Lock className="h-5 w-5 text-blue-300" />
-              Confidencialidade
-            </div>
-            <div className="inline-flex items-center gap-2">
-              <Clock className="h-5 w-5 text-orange-300" />
-              Análise rápida
+          <div className="lg:col-span-5">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-transparent pointer-events-auto">
+              <iframe
+                title="SSD Solid State Drive 3D"
+                src={`https://sketchfab.com/models/${SSD_MODEL_ID}/embed?ui_theme=dark&transparent=1&autostart=1&ui_infos=0&ui_watermark=0&ui_controls=0&ui_general_controls=0&ui_fullscreen=0&ui_help=0&ui_hint=0&ui_vr=0&ui_settings=0&ui_annotations=0&ui_stop=0&camera=0&dnt=1`}
+                className="absolute bg-transparent"
+                style={{
+                  top: -200,
+                  left: -70,
+                  width: "calc(100% + 140px)",
+                  height: "calc(100% + 400px)",
+                  transform: "scale(1.25)",
+                  transformOrigin: "center",
+                }}
+                allow="autoplay; fullscreen; xr-spatial-tracking"
+                allowFullScreen
+                loading="eager"
+              />
             </div>
           </div>
         </div>
