@@ -138,11 +138,12 @@ function BlockHero() {
                 src="https://sketchfab.com/models/708eaa5d195544918e5f70b69eedcdfa/embed?ui_theme=dark&transparent=1&autostart=1&ui_infos=0&ui_watermark=0&ui_controls=0&ui_general_controls=0&ui_fullscreen=0&ui_help=0&ui_hint=0&ui_vr=0&ui_settings=0&ui_annotations=0&ui_stop=0&camera=0&dnt=1"
                 className="absolute bg-transparent"
                 style={{
-                  top: -160,
-                  left: -55,
-                  width: "calc(100% + 110px)",
+                  top: -120,
+                  left: -90,
+                  width: "calc(100% + 160px)",
                   height: "calc(100% + 320px)",
                   transform: "scale(1.33)",
+                  transformOrigin: "center",
                 }}
                 allow="autoplay; fullscreen; xr-spatial-tracking"
                 allowFullScreen

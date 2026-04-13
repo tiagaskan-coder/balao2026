@@ -240,10 +240,10 @@ function BlockHero() {
                 src={`https://sketchfab.com/models/${SSD_MODEL_ID}/embed?ui_theme=dark&transparent=1&autostart=1&ui_infos=0&ui_watermark=0&ui_controls=0&ui_general_controls=0&ui_fullscreen=0&ui_help=0&ui_hint=0&ui_vr=0&ui_settings=0&ui_annotations=0&ui_stop=0&camera=0&dnt=1`}
                 className="absolute bg-transparent"
                 style={{
-                  top: -200,
-                  left: -70,
-                  width: "calc(100% + 140px)",
-                  height: "calc(100% + 400px)",
+                  top: -140,
+                  left: -110,
+                  width: "calc(100% + 220px)",
+                  height: "calc(100% + 360px)",
                   transform: "scale(1.25)",
                   transformOrigin: "center",
                 }}
