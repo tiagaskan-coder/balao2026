@@ -88,45 +88,66 @@ function BlockHero() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-red-600/10 rounded-full blur-[120px] animate-pulse"></div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-4xl">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-xs md:text-sm font-bold uppercase tracking-widest mb-8">
-            <Zap className="w-4 h-4 fill-current" />
-            Serviço Expresso: Pronto em até 3 horas
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          <div className="lg:col-span-7">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-xs md:text-sm font-bold uppercase tracking-widest mb-8">
+              <Zap className="w-4 h-4 fill-current" />
+              Serviço Expresso: Pronto em até 3 horas
+            </div>
+            
+            <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-[0.9] mb-8 uppercase">
+              CONSERTO DE <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500">IPHONE</span> EM CAMPINAS
+            </h1>
+            
+            <p className="text-xl md:text-2xl text-zinc-400 max-w-2xl mb-10 font-light leading-relaxed">
+              Sua tela quebrou ou a bateria viciou? Somos a <strong className="text-white">Assistência Técnica Apple</strong> número 1 no Cambuí. Reparos rápidos, peças Premium e <strong className="text-white">Garantia de 1 Ano</strong>.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link 
+                href={WHATSAPP_LINK}
+                target="_blank"
+                className="bg-red-600 hover:bg-red-700 text-white px-10 py-5 rounded-full font-black text-xl transition-all shadow-xl shadow-red-600/20 hover:scale-105 flex items-center justify-center gap-3 group"
+              >
+                <MessageCircle className="w-6 h-6 fill-current" />
+                ORÇAMENTO GRÁTIS AGORA
+                <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+
+            <div className="mt-12 flex flex-wrap gap-8 opacity-60">
+               <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-green-500" />
+                  <span className="text-sm font-bold uppercase tracking-wider">Garantia de 1 Ano</span>
+               </div>
+               <div className="flex items-center gap-2">
+                  <CreditCard className="w-5 h-5 text-blue-500" />
+                  <span className="text-sm font-bold uppercase tracking-wider">12x sem juros</span>
+               </div>
+               <div className="flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-orange-500" />
+                  <span className="text-sm font-bold uppercase tracking-wider">Até 3 Horas</span>
+               </div>
+            </div>
           </div>
           
-          <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-[0.9] mb-8 uppercase">
-            CONSERTO DE <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500">IPHONE</span> EM CAMPINAS
-          </h1>
-          
-          <p className="text-xl md:text-3xl text-zinc-400 max-w-2xl mb-10 font-light leading-relaxed">
-            Sua tela quebrou ou a bateria viciou? Somos a <strong className="text-white">Assistência Técnica Apple</strong> número 1 no Cambuí. Reparos rápidos, peças Premium e <strong className="text-white">Garantia de 1 Ano</strong>.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Link 
-              href={WHATSAPP_LINK}
-              target="_blank"
-              className="bg-red-600 hover:bg-red-700 text-white px-10 py-5 rounded-full font-black text-xl transition-all shadow-xl shadow-red-600/20 hover:scale-105 flex items-center justify-center gap-3 group"
-            >
-              <MessageCircle className="w-6 h-6 fill-current" />
-              ORÇAMENTO GRÁTIS AGORA
-              <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-
-          <div className="mt-12 flex flex-wrap gap-8 opacity-60">
-             <div className="flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-green-500" />
-                <span className="text-sm font-bold uppercase tracking-wider">Garantia de 1 Ano</span>
-             </div>
-             <div className="flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-blue-500" />
-                <span className="text-sm font-bold uppercase tracking-wider">12x sem juros</span>
-             </div>
-             <div className="flex items-center gap-2">
-                <Clock className="w-5 h-5 text-orange-500" />
-                <span className="text-sm font-bold uppercase tracking-wider">Até 3 Horas</span>
-             </div>
+          <div className="lg:col-span-5">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-transparent pointer-events-auto">
+              <iframe
+                title="iPhone 17 Pro Max 3D"
+                src="https://sketchfab.com/models/87fc1df741384124a8ce0226d2b2058d/embed?ui_theme=dark&transparent=1&autostart=1&ui_infos=0&ui_watermark=0&ui_controls=0&ui_general_controls=0&ui_fullscreen=0&ui_help=0&ui_hint=0&ui_vr=0&ui_settings=0&ui_annotations=0&ui_stop=0&camera=0&dnt=1"
+                className="absolute bg-transparent"
+                style={{
+                  top: -160,
+                  left: -55,
+                  width: "calc(100% + 110px)",
+                  height: "calc(100% + 320px)",
+                }}
+                allow="autoplay; fullscreen; xr-spatial-tracking"
+                allowFullScreen
+                loading="eager"
+              />
+            </div>
           </div>
         </div>
       </div>
