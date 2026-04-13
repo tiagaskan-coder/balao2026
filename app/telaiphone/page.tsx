@@ -142,6 +142,7 @@ function BlockHero() {
                   left: -55,
                   width: "calc(100% + 110px)",
                   height: "calc(100% + 320px)",
+                  transform: "scale(1.33)",
                 }}
                 allow="autoplay; fullscreen; xr-spatial-tracking"
                 allowFullScreen
