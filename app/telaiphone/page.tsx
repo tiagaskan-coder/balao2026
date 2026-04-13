@@ -134,8 +134,8 @@ function BlockHero() {
           <div className="lg:col-span-5">
             <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-transparent pointer-events-auto">
               <iframe
-                title="iPhone 17 Pro Max 3D"
-                src="https://sketchfab.com/models/87fc1df741384124a8ce0226d2b2058d/embed?ui_theme=dark&transparent=1&autostart=1&ui_infos=0&ui_watermark=0&ui_controls=0&ui_general_controls=0&ui_fullscreen=0&ui_help=0&ui_hint=0&ui_vr=0&ui_settings=0&ui_annotations=0&ui_stop=0&camera=0&dnt=1"
+                title="iPhone 12 Teardown 3D"
+                src="https://sketchfab.com/models/708eaa5d195544918e5f70b69eedcdfa/embed?ui_theme=dark&transparent=1&autostart=1&ui_infos=0&ui_watermark=0&ui_controls=0&ui_general_controls=0&ui_fullscreen=0&ui_help=0&ui_hint=0&ui_vr=0&ui_settings=0&ui_annotations=0&ui_stop=0&camera=0&dnt=1"
                 className="absolute bg-transparent"
                 style={{
                   top: -160,
