@@ -136,16 +136,8 @@ function BlockHero() {
             <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-transparent pointer-events-auto sketchfab-embed-wrapper">
               <Model3DViewer
                 title="iPhone 12 Teardown"
-                // @ts-ignore
-                frameBorder="0"
                 allowFullScreen
-                mozallowfullscreen="true"
-                webkitallowfullscreen="true"
                 allow="autoplay; fullscreen; xr-spatial-tracking"
-                xr-spatial-tracking="true"
-                execution-while-out-of-viewport="true"
-                execution-while-not-rendered="true"
-                web-share="true"
                 src="https://sketchfab.com/models/708eaa5d195544918e5f70b69eedcdfa/embed?autospin=1&autostart=1&preload=1&transparent=1&ui_hint=0&ui_theme=dark&ui_infos=0&ui_watermark=0&ui_controls=0&ui_general_controls=0"
                 className="absolute bg-transparent"
                 style={{
