@@ -24,6 +24,7 @@ import {
   Map
 } from 'lucide-react'
 import Link from 'next/link'
+import Model3DViewer from "@/components/Model3DViewer"
 
 export const metadata: Metadata = {
   title: 'Conserto de iPhone Campinas | Troca de Tela e Bateria em 3 Horas',
@@ -132,22 +133,29 @@ function BlockHero() {
           </div>
           
           <div className="lg:col-span-5">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-transparent pointer-events-auto">
-              <iframe
-                title="iPhone 12 Teardown 3D"
-                src="https://sketchfab.com/models/708eaa5d195544918e5f70b69eedcdfa/embed?ui_theme=dark&transparent=1&autostart=1&ui_infos=0&ui_watermark=0&ui_controls=0&ui_general_controls=0&ui_fullscreen=0&ui_help=0&ui_hint=0&ui_vr=0&ui_settings=0&ui_annotations=0&ui_stop=0&camera=0&dnt=1"
+            <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-transparent pointer-events-auto sketchfab-embed-wrapper">
+              <Model3DViewer
+                title="iPhone 12 Teardown"
+                // @ts-ignore
+                frameBorder="0"
+                allowFullScreen
+                mozallowfullscreen="true"
+                webkitallowfullscreen="true"
+                allow="autoplay; fullscreen; xr-spatial-tracking"
+                xr-spatial-tracking="true"
+                execution-while-out-of-viewport="true"
+                execution-while-not-rendered="true"
+                web-share="true"
+                src="https://sketchfab.com/models/708eaa5d195544918e5f70b69eedcdfa/embed?autospin=1&autostart=1&preload=1&transparent=1&ui_hint=0&ui_theme=dark&ui_infos=0&ui_watermark=0&ui_controls=0&ui_general_controls=0"
                 className="absolute bg-transparent"
                 style={{
-                  top: -120,
-                  left: -90,
-                  width: "calc(100% + 160px)",
-                  height: "calc(100% + 320px)",
-                  transform: "scale(1.33)",
+                  top: -260,
+                  left: -100,
+                  width: "calc(100% + 200px)",
+                  height: "calc(100% + 520px)",
+                  transform: "scale(0.55)",
                   transformOrigin: "center",
                 }}
-                allow="autoplay; fullscreen; xr-spatial-tracking"
-                allowFullScreen
-                loading="eager"
               />
             </div>
           </div>
@@ -503,4 +511,3 @@ export default function TelaIphonePage() {
     </div>
   )
 }
-

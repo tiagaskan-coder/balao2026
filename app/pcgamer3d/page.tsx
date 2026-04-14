@@ -3,20 +3,23 @@ import Header from "@/components/Header";
 import Pcgamer3dLanding from "./pcgamer3d-landing";
 
 export const metadata: Metadata = {
-  title: "PC Gamer High-End Custom Build | 3D + RGB + Vidro Temperado",
+  title: "Montagem de PC Gamer | Técnicas avançadas, cable management e FPS",
   description:
-    "Monte um PC Gamer high-end sob medida com montagem profissional, garantia de 12 meses, testes de benchmark e entrega segura. Veja o setup em 3D e peça seu orçamento.",
+    "Guia técnico de montagem de alto nível: sequência correta, pasta térmica, airflow, cable management, BIOS tuning e validação por benchmarks para maximizar FPS.",
   keywords: [
-    "pc gamer high end",
-    "pc gamer custom build",
     "montagem pc gamer profissional",
-    "pc gamer rgb",
-    "pc gamer vidro temperado",
-    "pc gamer water cooler 360mm",
-    "pc gamer rtx 3 fans",
-    "pc gamer nvme gen4",
-    "pc gamer nvme gen5",
-    "pc gamer ddr5 rgb",
+    "montagem pc gamer avançada",
+    "cable management pc gamer",
+    "organização de cabos pc gamer",
+    "airflow pc gamer",
+    "curva de fans pc gamer",
+    "pasta térmica aplicação correta",
+    "BIOS tuning performance",
+    "overclock seguro pc gamer",
+    "undervolt cpu gpu",
+    "otimização de FPS",
+    "frametime estável",
+    "benchmarks estabilidade pc gamer",
   ],
   alternates: {
     canonical: "https://www.balao.info/pcgamer3d",
@@ -29,15 +32,15 @@ export const metadata: Metadata = {
     type: "website",
     locale: "pt_BR",
     url: "https://www.balao.info/pcgamer3d",
-    title: "PC Gamer High-End Custom Build | 3D + RGB",
+    title: "Montagem de PC Gamer | Técnicas avançadas e maximização de FPS",
     description:
-      "Landing premium para montar seu setup: 3D, specs high-end, garantia de 12 meses e entrega segura.",
+      "Conteúdo técnico: montagem profissional, cable management, airflow, BIOS tuning e validação por benchmarks.",
     images: ["/logo.png"],
   },
   twitter: {
     card: "summary_large_image",
-    title: "PC Gamer High-End Custom Build | 3D + RGB",
-    description: "Monte seu setup premium com garantia e benchmark.",
+    title: "Montagem de PC Gamer | Técnicas avançadas e maximização de FPS",
+    description: "Guia técnico: montagem profissional, cable management, airflow, BIOS tuning e benchmarks.",
     images: ["/logo.png"],
   },
 };
